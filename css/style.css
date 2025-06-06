@@ -1,0 +1,624 @@
+/* Global Resets and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #0a0a0a;
+    color: #ffffff;
+    line-height: 1.6;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+a {
+    color: #00ff88;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: #00cc6a;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 1rem;
+    color: #e0e0e0; /* General heading color */
+}
+
+h1 { font-size: 2.5rem; margin-bottom: 1.5rem; } /* index.html general h1 */
+
+.blog-intro h1, .blog-article h1 { /* Specific for blog page titles */
+    font-size: 2.2rem;
+    margin-bottom: 1.2rem;
+    line-height: 1.3;
+    color: #00ff88; /* Blog titles are highlighted */
+}
+
+h2 { font-size: 2rem; margin-bottom: 1.2rem; } /* index.html general h2 */
+
+.blog-intro h2, .blog-article h2 { /* Specific for blog page subtitles */
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+    line-height: 1.3;
+    color: #00ff88; /* Blog subtitles are highlighted */
+}
+
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+
+p {
+    font-size: 1.05rem;
+    margin-bottom: 1.2rem;
+    line-height: 1.7;
+    color: rgba(255,255,255,0.85);
+}
+
+strong {
+    color: #00dd77; /* Highlight color for strong text */
+    font-weight: 600;
+}
+
+/* Utility Classes & Containers */
+.container { /* Generic container from index.html for sections */
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex; /* For side-by-side content and image */
+    align-items: stretch;
+    gap: 5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.blog-container { /* Specific container for blog page main content area */
+    max-width: 900px; /* More focused reading width */
+    margin: 0 auto; /* Centered */
+    padding: 2rem;
+    /* background-color: rgba(26, 26, 26, 0.8); */ /* Removed, body bg is dark */
+    /* border-radius: 15px; */
+    /* box-shadow: 0 10px 30px rgba(0,0,0,0.7); */
+}
+
+/* Header & Navigation */
+header {
+    background-color: #1a1a1a;
+    padding: 1rem 0;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+    transition: background-color 0.3s ease, padding 0.3s ease;
+}
+
+header.scrolled {
+    background-color: rgba(10, 10, 10, 0.8);
+    backdrop-filter: blur(10px);
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(0, 255, 136, 0.1);
+}
+
+nav {
+    max-width: 1550px; /* Wider for nav items */
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 80px; /* Default nav height from index */
+    transition: min-height 0.3s ease;
+}
+
+header.scrolled nav {
+    min-height: 60px; /* Reduced height on scroll */
+}
+
+.logo {
+    display: flex;
+    align-items: baseline;
+    gap: 1.2rem;
+    flex-shrink: 0;
+}
+
+.logo-name {
+    font-size: 2.2rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: -0.01em;
+}
+
+.logo-tagline {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 1.5rem;
+    margin:0; padding:0;
+}
+
+.nav-menu a {
+    color: #ffffff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    font-weight: 500; /* Consistent font weight for nav links */
+}
+
+.nav-menu a:hover, .nav-menu a.active {
+    color: #00ff88; /* Highlight for hover and active page */
+}
+
+/* Hamburger Menu (for mobile) */
+.hamburger-menu {
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 30px;
+    height: 21px;
+    cursor: pointer;
+    z-index: 1001; /* Above nav-menu when closed */
+}
+
+.bar1, .bar2, .bar3 {
+    width: 100%;
+    height: 3px;
+    background-color: #ffffff;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.hamburger-active .bar1 {
+    transform: rotate(-45deg) translate(-5px, 6px);
+    background-color: #00ff88;
+}
+
+.hamburger-active .bar2 {
+    opacity: 0;
+}
+
+.hamburger-active .bar3 {
+    transform: rotate(45deg) translate(-5px, -6px);
+    background-color: #00ff88;
+}
+
+/* Main Content Area */
+main {
+    padding-top: calc(80px + 2rem); /* Altezza nav (80px) + padding header (1rem sup + 1rem inf) = 112px se 1rem=16px */
+    /* margin-top from sono-simone.html (80px) is now covered by padding-top */
+}
+
+/* Section Styling (from index.html) */
+.section {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    padding: 4rem 0; /* Vertical padding for sections */
+    position: relative; /* For pseudo-elements */
+}
+
+/* Specific override for page header sections (like podcast-storia.html title) */
+.page-header-section {
+    min-height: auto !important;
+    padding: 1rem 0 !important;
+}
+
+.section:nth-child(odd) {
+    background: linear-gradient(135deg, #0d2818 0%, #0a1a0f 100%);
+}
+
+.section:nth-child(even) {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 100%);
+}
+
+.section::before { /* Subtle background pattern for sections */
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.05) 0%, transparent 70%);
+    pointer-events: none;
+}
+
+.content { /* Text content part of a section in index.html */
+    flex: 1;
+}
+
+.image-placeholder { /* Image part of a section in index.html */
+    flex: 0 0 350px;
+    height: auto;
+    min-height: 100%;
+    background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #888;
+    font-size: 1.2rem;
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.image-placeholder img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 20px;
+}
+.section:nth-child(2) .image-placeholder img { /* Specific for podcast image */
+    object-position: right center;
+}
+
+.image-placeholder::before { /* Hover effect for image placeholders */
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(45deg, transparent 30%, rgba(0, 255, 136, 0.1) 50%, transparent 70%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.image-placeholder:hover::before {
+    opacity: 1;
+}
+
+.image-placeholder:hover {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 30px 60px rgba(0, 255, 136, 0.2);
+}
+
+.reverse { /* To reverse content and image order in sections */
+    flex-direction: row-reverse;
+}
+
+/* Call to Action Button (from index.html) */
+.cta-button {
+    background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+    color: #0a0a0a;
+    padding: 0.8rem 2rem;
+    text-decoration: none;
+    border-radius: 50px;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    display: inline-block;
+    margin-top: 1.5rem;
+    border: none;
+    cursor: pointer;
+}
+
+.cta-button:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 10px 20px rgba(0, 255, 136, 0.3);
+}
+
+/* Text inside CTA Button - for layering */
+.cta-button-text {
+    position: relative;
+    z-index: 1; /* Assicura che il testo sia sopra lo shimmer */
+    display: inline-block; 
+}
+
+/* Shimmer effect for .cta-button */
+.cta-button {
+    position: relative; /* Necessario per posizionare lo pseudo-elemento */
+    overflow: hidden;   /* Per contenere lo shimmer all'interno del pulsante */
+}
+
+.cta-button::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: linear-gradient(
+        to right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0) 40%,
+        rgba(255, 255, 255, 0.3) 50%, /* Striscia luminosa */
+        rgba(255, 255, 255, 0) 60%,
+        rgba(255, 255, 255, 0) 100%
+    );
+    transform: rotate(25deg);
+    opacity: 0;
+    transition: opacity 0.1s ease-in-out; /* Transizione rapida per l'opacità */
+    pointer-events: none; /* Lo shimmer non deve interferire con i click */
+    z-index: 0; /* Assicura che lo shimmer sia sotto il testo */
+}
+
+.cta-button:hover::after {
+    opacity: 1;
+    animation: shimmer 0.8s forwards; /* Durata animazione shimmer */
+}
+
+@keyframes shimmer {
+    0% {
+        transform: rotate(25deg) translateX(-200%);
+    }
+    100% {
+        transform: rotate(25deg) translateX(100%);
+    }
+}
+
+/* Blog Page Specific Styles (from sono-simone.html) */
+.blog-intro, .blog-article {
+    margin-bottom: 3rem; /* Space between intro and article, and article and footer */
+    padding: 1.5rem;
+    background-color: rgba(30,30,30,0.5); /* Slightly lighter than body for definition */
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
+.article-image { /* For the image in the blog article */
+    width: 100%;
+    height: auto;
+    max-height: 400px; /* Adjusted from 350px */
+    object-fit: cover;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+}
+
+/* Accordion Styles (common for intro and article on blog page) */
+.accordion-button, .accordion-button-reduce {
+    /* Stili ereditati da .cta-button: background, color, text-decoration, 
+       border-radius, border, cursor, display: inline-block, 
+       transition (all 0.3s ease), position, overflow, shimmer effect.
+       Anche font-weight: 700 e margin-top: 1.5rem sarebbero ereditati 
+       se non sovrascritti qui sotto. */
+
+    /* Stili specifici che sovrascrivono .cta-button per gli accordion */
+    padding: 0.8rem 1.5rem; /* Manteniamo padding specifico */
+    font-weight: 600;       /* Manteniamo font-weight specifico */
+    margin-top: 1rem;       /* Manteniamo margin-top specifico */
+    /* La transizione 'opacity 0.3s ease' è stata rimossa per ora, 
+       se serve specificamente per la logica accordion, andrà rivista. */
+}
+
+/* HOVER RULE FOR ACCORDION BUTTONS REMOVED TO ALLOW CTA-BUTTON HOVER TO DOMINATE */
+/* Previous content was:
+.accordion-button:hover, .accordion-button-reduce:hover {
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 10px 20px rgba(0, 255, 136, 0.2);
+}
+*/
+
+.accordion-button-reduce {
+    display: none; /* Initially hidden, JS will manage visibility */
+    margin-bottom: 1rem;
+}
+
+.collapsible-content {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.5s ease-out;
+    /* margin-top: 1rem; */ /* Optional: adds space when expanded, consider if needed */
+}
+
+/* Footer Styles (common for both pages) */
+footer {
+    background-color: #1a1a1a;
+    padding: 3rem 0 1rem;
+    text-align: center;
+    border-top: 1px solid rgba(0,255,136,0.2); /* Added from sono-simone's original footer */
+    color: rgba(255,255,255,0.7); /* Added from sono-simone's original footer */
+    margin-top: 2rem; /* Ensure space above footer */
+}
+
+.footer-content { /* Container within footer */
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.social-links {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.social-links a {
+    color: #ffffff;
+    text-decoration: none;
+    font-size: 1.1rem;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+}
+
+.social-links a:hover {
+    color: #00ff88;
+    background: rgba(0, 255, 136, 0.2);
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 255, 136, 0.3);
+}
+
+.social-links svg {
+    width: 24px;
+    height: 24px;
+    fill: currentColor;
+}
+
+.copyright {
+    color: #888;
+    font-size: 0.9rem;
+    border-top: 1px solid #333;
+    padding-top: 1rem;
+}
+
+/* Responsive Design - Media Queries */
+@media (max-width: 992px) { /* Tablet */
+    .container {
+        flex-direction: column; /* Stack content and image on tablets */
+        gap: 3rem;
+    }
+    .image-placeholder {
+        flex: 0 0 300px; /* Adjust height for stacked layout */
+        min-height: 300px;
+    }
+    main {
+        padding-top: 1.5rem;
+    }
+    .blog-container {
+        padding: 1.5rem;
+        margin: 1.5rem auto;
+    }
+}
+
+@media (max-width: 768px) { /* Mobile */
+    /* nav { } era qui, ma è stato rimosso perché gli stili per la navigazione mobile sono gestiti da .hamburger-menu e .nav-menu.active */
+    .logo {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.3rem;
+    }
+    .logo-name { font-size: 1.8rem; }
+    .logo-tagline { font-size: 0.7rem; }
+
+    .hamburger-menu { display: flex; }
+    .nav-menu {
+        position: fixed;
+        flex-direction: column;
+        background: linear-gradient(135deg, #0d2818 0%, #0a1a0f 100%);
+        top: 0;
+        right: -100%; /* Start off-screen */
+        width: 250px;
+        height: 100vh;
+        padding-top: 100px;
+        text-align: center;
+        transition: right 0.3s ease;
+        z-index: 1000; /* Below hamburger icon but above content */
+        box-shadow: -5px 0 15px rgba(0,0,0,0.5);
+        gap: 2rem;
+    }
+    .nav-menu.active {
+        right: 0; /* Slide in */
+    }
+    .nav-menu li {
+        margin: 0.5rem 0;
+    }
+    .nav-menu a {
+        font-size: 1.2rem;
+        display: block;
+        padding: 0.5rem 1rem;
+    }
+
+    main {
+        margin-top: 80px; /* Adjusted for fixed header */
+        padding: 1rem;
+    }
+    .blog-container {
+        padding: 1rem;
+        margin: 1rem auto;
+    }
+    .article-title {
+        font-size: 1.6rem;
+    }
+    /* Smaller H1 on mobile blog - Spostato commento e stili seguenti all'interno della media query */
+    .blog-intro h2, .blog-article h2 { font-size: 1.6rem; } /* Smaller H2 on mobile blog */
+
+    .section {
+        padding: 3rem 0; /* Less vertical padding for sections on mobile */
+    }
+    .container {
+        padding: 0 1rem; /* Less horizontal padding for containers on mobile */
+    }
+    h1 { font-size: 2rem; } /* Smaller general H1 on mobile */
+    h2 { font-size: 1.7rem; } /* Smaller general H2 on mobile */
+}
+
+/* Timeline Section Specific Styles */
+.timeline-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr); /* 4 colonne di uguale larghezza */
+    gap: 1.5rem; /* Spazio tra i box */
+    width: 100%;
+    margin-top: 1rem; /* Leggero spazio dopo il titolo "Le Tappe Fondamentali" */
+}
+
+.timeline-box {
+    background-color: rgba(20, 20, 20, 0.5); /* Sfondo per i box, leggermente trasparente */
+    padding: 1.5rem;
+    border-radius: 15px;
+    border: 1px solid rgba(0, 255, 136, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Centra il contenuto */
+    text-align: center;
+}
+
+.timeline-year {
+    font-size: 1rem;
+    color: #00ff88;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.timeline-title {
+    font-size: 1.15rem;
+    color: #ffffff;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+    min-height: 3.5em; /* Aiuta ad allineare i box se i titoli hanno lunghezze diverse */
+}
+
+.timeline-image-placeholder.square-placeholder {
+    /* Gli stili inline (width, height, background, etc.) dovrebbero funzionare.
+       Il margine è gestito qui per coerenza. */
+    margin: 0 auto 1rem auto; /* Centra il placeholder e aggiunge spazio sotto */
+}
+
+.timeline-text {
+    font-size: 0.95rem;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.6;
+    margin-bottom: 0;
+}
+
+/* Media Queries per rendere la timeline grid responsive */
+@media (max-width: 1024px) {
+    .timeline-grid {
+        grid-template-columns: repeat(2, 1fr); /* 2 colonne su tablet */
+    }
+}
+
+@media (max-width: 768px) {
+    .timeline-grid {
+        grid-template-columns: 1fr; /* 1 colonna su mobile */
+    }
+    .timeline-title {
+        min-height: auto; /* Rimuove l'altezza minima su mobile se non necessaria */
+    }
+}

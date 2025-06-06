@@ -1,0 +1,21 @@
+# Robots.txt per simonepizzi.runtimeradio.it
+# Ottimizzato per SEO - Gennaio 2025
+
+# Consenti a tutti i bot di indicizzare tutto il sito
+User-agent: *
+Allow: /
+
+# Blocca l'accesso ai file di log e configurazione
+Disallow: /logs/
+Disallow: /*.log
+Disallow: /.*
+
+# Consenti esplicitamente le immagini per Google Images
+User-agent: Googlebot-Image
+Allow: /image/
+
+# Sitemap location
+Sitemap: https://simonepizzi.runtimeradio.it/sitemap.xml
+
+# Crawl-delay per essere gentili con i server
+Crawl-delay: 1 

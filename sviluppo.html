@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sviluppo & AI - Progetti Sperimentali | Simone Pizzi</title>
+    <meta name="description" content="Progetti di sviluppo sperimentale di Simone Pizzi con Large Language Models. Esplora The Safe Place e altri esperimenti di narrativa interattiva e AI.">
+    <meta name="keywords" content="Simone Pizzi sviluppo, AI development, LLM progetti, The Safe Place, narrativa interattiva, giochi testuali, sviluppo sperimentale">
+    <meta name="author" content="Simone Pizzi">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Italian">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://simonepizzi.runtimeradio.it/sviluppo.html">
+    <meta property="og:title" content="Sviluppo & AI - Progetti Sperimentali | Simone Pizzi">
+    <meta property="og:description" content="Progetti di sviluppo sperimentale di Simone Pizzi con Large Language Models. Esplora The Safe Place e altri esperimenti di narrativa interattiva e AI.">
+    <meta property="og:image" content="https://simonepizzi.runtimeradio.it/image/thesafeplace_immagine.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="it_IT">
+    <meta property="og:site_name" content="Simone Pizzi">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://simonepizzi.runtimeradio.it/sviluppo.html">
+    <meta property="twitter:title" content="Sviluppo & AI - Progetti Sperimentali | Simone Pizzi">
+    <meta property="twitter:description" content="Progetti di sviluppo sperimentale di Simone Pizzi con Large Language Models. Esplora The Safe Place e altri esperimenti di narrativa interattiva e AI.">
+    <meta property="twitter:image" content="https://simonepizzi.runtimeradio.it/image/thesafeplace_immagine.jpg">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://simonepizzi.runtimeradio.it/sviluppo.html">
+
+    <!-- Favicon -->
+    <!-- <link rel="icon" type="image/x-icon" href="/favicon.ico"> -->
+    <!-- <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"> -->
+    <!-- <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"> -->
+    <!-- <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"> -->
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Structured Data JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "CollectionPage",
+        "mainEntity": {
+            "@type": "ItemList",
+            "name": "Progetti di Sviluppo Sperimentale con AI",
+            "itemListElement": [
+                {
+                    "@type": "ListItem",
+                    "position": 1,
+                    "item": {
+                        "@type": "SoftwareApplication",
+                        "name": "The Safe Place",
+                        "description": "Gioco di ruolo testuale post apocalittico in rigoroso stile anni 80",
+                        "applicationCategory": "Game",
+                        "author": {
+                            "@type": "Person",
+                            "name": "Simone Pizzi"
+                        },
+                        "url": "https://simonepizzi.runtimeradio.it/the-safe-place.html"
+                    }
+                }
+            ]
+        },
+        "author": {
+            "@type": "Person",
+            "name": "Simone Pizzi",
+            "url": "https://simonepizzi.runtimeradio.it/"
+        },
+        "datePublished": "2025-05-29",
+        "dateModified": "2025-05-29"
+    }
+    </script>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Stili specifici per la pagina sviluppo */
+        .sviluppo-intro {
+            max-width: 900px;
+            margin: 0 auto 4rem;
+            text-align: center;
+        }
+
+        .sviluppo-intro h1 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        .sviluppo-intro p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 1.5rem;
+        }
+
+        .progetti-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 4rem;
+        }
+
+        .progetto-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .progetto-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 255, 136, 0.3);
+            border-color: #00ff88;
+        }
+
+        .progetto-image {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .progetto-card:hover .progetto-image {
+            transform: scale(1.05);
+        }
+
+        .progetto-content {
+            padding: 2rem;
+        }
+
+        .progetto-content h2 {
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+            color: #00ff88;
+            font-weight: 700;
+        }
+
+        .progetto-content p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .progetto-placeholder {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.3);
+            font-size: 1.2rem;
+            text-align: center;
+            padding: 2rem;
+        }
+
+        .page-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .sviluppo-intro h1 {
+                font-size: 2.2rem;
+            }
+            
+            .progetti-grid {
+                grid-template-columns: 1fr;
+                gap: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <div class="logo-name">Simone Pizzi</div>
+                <div class="logo-tagline">Idee, Storie e Sperimentazione</div>
+            </div>
+            <div class="hamburger-menu">
+                <div class="bar1"></div>
+                <div class="bar2"></div>
+                <div class="bar3"></div>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html#home">Home</a></li>
+                <li><a href="sono-simone.html">Sono Simone (Blog)</a></li>
+                <li><a href="index.html#podcast">Podcast & Web Radio</a></li>
+                <li><a href="index.html#storie">Storie & Racconti</a></li>
+                <li><a href="sviluppo.html" class="active">Sviluppo & AI</a></li>
+                <li><a href="index.html#esperimenti">Esperimenti</a></li>
+                <li><a href="index.html#contatti">Contatti</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div class="page-container">
+            <section class="sviluppo-intro">
+                <h1>Gli LLM sono un'interfaccia</h1>
+                <p>Nel panorama dello sviluppo contemporaneo, i Large Language Models hanno aperto una strada inedita per chi, come me, si avvicina alla programmazione da una prospettiva non convenzionale. Non sono uno sviluppatore di professione, ma porto con me l'esperienza di un programmatore degli anni '80 - un bagaglio che mi offre quella consapevolezza concettuale necessaria per comprendere cosa si cela dietro le quinte del codice.</p>
+                
+                <p>Il mio approccio a questi strumenti è deliberatamente privo di entusiasmi acritici o proclami rivoluzionari. Considero gli LLM semplicemente per quello che sono: nuove interfacce attraverso le quali alcuni creativi possono trovare un linguaggio per esprimere le proprie idee, trasformando concetti in applicazioni senza dover necessariamente padroneggiare ogni sfumatura della sintassi moderna.</p>
+                
+                <p>Tutti i miei progetti di sviluppo, compreso questo stesso sito che state visitando, nascono da un intento sperimentale ben preciso: documentare con onestà intellettuale i limiti oggettivi di questi strumenti e, parallelmente, i limiti dell'uomo che li utilizza. Ogni linea di codice generata, ogni funzionalità implementata, ogni errore incontrato diventa un tassello in questo mosaico di comprensione critica.</p>
+                
+                <p>Non cerco la perfezione tecnica, ma la sincerità dell'esperimento. Attraverso questi progetti esploro dove finisce la capacità della macchina e dove inizia l'insostituibile intuizione umana, mappando quel territorio di confine dove creatività e algoritmo si incontrano, a volte collaborando, a volte scontrandosi.</p>
+            </section>
+
+            <section class="progetti-section">
+                <div class="progetti-grid">
+                    <!-- The Safe Place Card -->
+                    <a href="the-safe-place.html" class="progetto-card">
+                        <img src="image/thesafeplace_immagine.jpg" alt="The Safe Place - Gioco di ruolo testuale post apocalittico" class="progetto-image" loading="lazy">
+                        <div class="progetto-content">
+                            <h2>The Safe Place</h2>
+                            <p>Gioco di ruolo testuale post apocalittico in rigoroso stile anni '80. Un'avventura narrativa che omaggia i classici del genere, dove ogni scelta conta e la sopravvivenza dipende dalla tua astuzia.</p>
+                        </div>
+                    </a>
+
+                    <!-- Placeholder per progetti futuri -->
+                    <div class="progetto-placeholder">
+                        <p>Nuovo progetto in arrivo...</p>
+                    </div>
+
+                    <div class="progetto-placeholder">
+                        <p>Nuovo progetto in arrivo...</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="social-links">
+                <a href="https://www.facebook.com/simonepizzi72/" aria-label="Facebook">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                </a>
+                <a href="https://github.com/Pitz72" aria-label="GitHub">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+                <a href="https://www.instagram.com/pizzisimone1972/" aria-label="Instagram">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                </a>
+                <a href="https://www.spreaker.com/user/runtime-radio--8395974" aria-label="Podcast">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 3c-3.866 0-7 3.134-7 7s3.134 7 7 7 7-3.134 7-7-3.134-7-7-7zm0 2c2.761 0 5 2.239 5 5s-2.239 5-5 5-5-2.239-5-5 2.239-5 5-5zm0 2c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 1.5c.828 0 1.5.672 1.5 1.5s-.672 1.5-1.5 1.5-1.5-.672-1.5-1.5.672-1.5 1.5-1.5z"/>
+                    </svg>
+                </a>
+                <a href="https://www.youtube.com/@ArcheologiaInformatica" aria-label="YouTube">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                </a>
+            </div>
+            <div class="copyright">
+                <p>&copy; <span id="currentYear"></span> Simone Pizzi - simonepizzi.runtimeradio.it</p>
+            </div>
+        </div>
+    </footer>
+    <script src="js/main.js" defer></script>
+</body>
+</html> 

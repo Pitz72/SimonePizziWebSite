@@ -1,0 +1,255 @@
+// Funzione per rivelare le email (deve essere globale se chiamata da onclick in HTML)
+function revealEmail(elementId, user, domain) {
+    const element = document.getElementById(elementId);
+    if (element) { // Controlla se l'elemento esiste
+        const email = user + '@' + domain;
+        element.innerHTML = '<a href="mailto:' + email + '" style="color: #00ff88; text-decoration: none;">' + email + '</a>';
+        element.style.cursor = 'default';
+        element.onclick = null; // Rimuove l'handler onclick per prevenire riattivazioni
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    // Accordion 1 (Introduction - specifico per sono-simone.html)
+    const introAccordionButton = document.querySelector('.blog-intro .accordion-intro-estendi');
+    const introCollapsibleContent = document.querySelector('.blog-intro .collapsible-intro');
+    const introReduceButton = document.querySelector('.blog-intro .accordion-intro-riduci');
+
+    function openIntroAccordion() {
+        if (introAccordionButton && introCollapsibleContent && introReduceButton) {
+            introAccordionButton.style.display = 'none';
+            introReduceButton.style.display = 'block';
+            introCollapsibleContent.classList.add('open');
+            introCollapsibleContent.style.maxHeight = introCollapsibleContent.scrollHeight + "px";
+        }
+    }
+
+    function closeIntroAccordion() {
+        if (introAccordionButton && introCollapsibleContent && introReduceButton) {
+            introCollapsibleContent.style.maxHeight = null;
+            introCollapsibleContent.classList.remove('open');
+            introReduceButton.style.display = 'none';
+            introAccordionButton.style.display = 'inline-block';
+        }
+    }
+
+    if (introAccordionButton) {
+        introAccordionButton.addEventListener('click', openIntroAccordion);
+    }
+    if (introReduceButton) {
+        introReduceButton.addEventListener('click', closeIntroAccordion);
+    }
+
+    // Accordion 2 (Article - specifico per sono-simone.html)
+    const articleAccordionButton = document.querySelector('.blog-article .accordion-article-estendi');
+    const articleCollapsibleContent = document.querySelector('.blog-article .collapsible-article');
+    const articleReduceButton = document.querySelector('.blog-article .accordion-article-riduci');
+
+    function openArticleAccordion() {
+        if (articleAccordionButton && articleCollapsibleContent && articleReduceButton) {
+            articleAccordionButton.style.display = 'none';
+            articleReduceButton.style.display = 'block';
+            articleCollapsibleContent.classList.add('open');
+            articleCollapsibleContent.style.maxHeight = articleCollapsibleContent.scrollHeight + "px";
+        }
+    }
+
+    function closeArticleAccordion() {
+        if (articleAccordionButton && articleCollapsibleContent && articleReduceButton) {
+            articleCollapsibleContent.style.maxHeight = null;
+            articleCollapsibleContent.classList.remove('open');
+            articleReduceButton.style.display = 'none';
+            articleAccordionButton.style.display = 'inline-block';
+        }
+    }
+
+    if (articleAccordionButton) {
+        articleAccordionButton.addEventListener('click', openArticleAccordion);
+    }
+    if (articleReduceButton) {
+        articleReduceButton.addEventListener('click', closeArticleAccordion);
+    }
+
+    // Hamburger menu toggle (Comune)
+    const hamburger = document.querySelector('.hamburger-menu');
+    const navMenu = document.querySelector('.nav-menu');
+
+    if (hamburger && navMenu) {
+        hamburger.addEventListener('click', function() {
+            this.classList.toggle('hamburger-active');
+            navMenu.classList.toggle('active');
+            document.body.classList.toggle('menu-open');
+        });
+
+        document.querySelectorAll('.nav-menu a').forEach(link => {
+            link.addEventListener('click', function() {
+                if (navMenu.classList.contains('active')) {
+                    hamburger.classList.remove('hamburger-active');
+                    navMenu.classList.remove('active');
+                    document.body.classList.remove('menu-open');
+                }
+            });
+        });
+
+        document.addEventListener('click', function(event) {
+            if (navMenu.classList.contains('active') &&
+                !hamburger.contains(event.target) &&
+                !navMenu.contains(event.target)) {
+                hamburger.classList.remove('hamburger-active');
+                navMenu.classList.remove('active');
+                document.body.classList.remove('menu-open');
+            }
+        });
+    }
+
+    // Header scroll effect (Comune)
+    const header = document.querySelector('header');
+    if (header) {
+        window.addEventListener('scroll', function() {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+    }
+
+    // Set current year in footer (Comune)
+    const currentYearElement = document.getElementById('currentYear');
+    if (currentYearElement) {
+        currentYearElement.textContent = new Date().getFullYear();
+    }
+
+    // --- Script specifici per index.html ---
+
+    // Scroll reveal animation
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const scrollObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+                // scrollObserver.unobserve(entry.target); // Opzionale: de-osserva dopo la rivelazione
+            }
+        });
+    }, observerOptions);
+
+    const sectionsToObserve = document.querySelectorAll('.section:not(.visible)');
+    if (sectionsToObserve.length > 0) {
+        sectionsToObserve.forEach(section => {
+            scrollObserver.observe(section);
+        });
+    }
+
+    // Smooth scrolling per i link di navigazione
+    const navLinks = document.querySelectorAll('a[href^="#"]');
+    if (navLinks.length > 0) {
+        navLinks.forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                const href = this.getAttribute('href');
+                if (href && href.length > 1 && href.startsWith('#')) { // Check if href is not just "#"
+                    const targetElement = document.querySelector(href);
+                    if (targetElement) {
+                        e.preventDefault();
+                        targetElement.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                }
+            });
+        });
+    }
+
+    // Effetto hover migliorato per le immagini
+    const imagePlaceholders = document.querySelectorAll('.image-placeholder');
+    if (imagePlaceholders.length > 0) {
+        imagePlaceholders.forEach(element => {
+            element.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-5px) scale(1.02)';
+            });
+            element.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+    }
+
+    // Gestione form di contatto
+    const contactForm = document.getElementById('contactForm');
+    if (contactForm) {
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const nameInput = document.getElementById('name');
+            const emailInput = document.getElementById('email');
+            const subjectInput = document.getElementById('subject');
+            const messageInput = document.getElementById('message');
+            const privacyCheckbox = document.getElementById('privacy');
+
+            // Basic check for element existence
+            if (!nameInput || !emailInput || !subjectInput || !messageInput || !privacyCheckbox) {
+                console.error('Uno o più campi del form di contatto sono mancanti nel DOM.');
+                alert('Errore nel form. Si prega di ricaricare la pagina o contattare il supporto.');
+                return;
+            }
+
+            const name = nameInput.value;
+            const email = emailInput.value;
+            const subject = subjectInput.value || 'Messaggio dal sito web'; // Default subject
+            const message = messageInput.value;
+            const privacy = privacyCheckbox.checked;
+
+            // Validazione base
+            if (!name || !email || !message) {
+                alert('Per favore compila tutti i campi obbligatori.');
+                return;
+            }
+
+            // Validazione email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Per favore inserisci un indirizzo email valido.');
+                return;
+            }
+
+            // Validazione consenso GDPR
+            if (!privacy) {
+                alert('È necessario accettare il trattamento dei dati personali per procedere.');
+                return;
+            }
+
+            // Crea il corpo dell'email
+            const emailBody = `Nome: ${name}%0D%0AEmail: ${email}%0D%0AOggetto: ${subject}%0D%0A%0D%0AMessaggio:%0D%0A${encodeURIComponent(message)}%0D%0A%0D%0A[Consenso GDPR: Accettato]`;
+
+            // Apri client email predefinito
+            window.location.href = `mailto:pizzisimone1972@gmail.com?subject=${encodeURIComponent(subject)}&body=${emailBody}`;
+
+            // Feedback all'utente e reset form (con un piccolo delay per permettere l'apertura del client mail)
+            setTimeout(() => {
+                alert('Il tuo client email si aprirà per inviare il messaggio. Grazie per avermi contattato!');
+                if (typeof this.reset === 'function') { // Assicura che reset sia una funzione
+                    this.reset();
+                }
+            }, 100); // 100ms delay
+        });
+
+        // Stili focus per i campi del form
+        const formFields = contactForm.querySelectorAll('input, textarea');
+        if (formFields.length > 0) {
+            formFields.forEach(field => {
+                field.addEventListener('focus', function() {
+                    this.style.borderColor = '#00ff88';
+                    this.style.boxShadow = '0 0 10px rgba(0, 255, 136, 0.3)';
+                });
+                field.addEventListener('blur', function() {
+                    this.style.borderColor = 'rgba(0, 255, 136, 0.3)';
+                    this.style.boxShadow = 'none';
+                });
+            });
+        }
+    }
+}); // Fine DOMContentLoaded
