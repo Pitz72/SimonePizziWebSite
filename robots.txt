@@ -5,8 +5,10 @@
 User-agent: *
 Allow: /
 
-# Blocca l'accesso ai file di log e configurazione
+# Disallow logs and internal docs
 Disallow: /logs/
+Disallow: /log/
+Disallow: /docs/
 Disallow: /*.log
 Disallow: /.*
 
