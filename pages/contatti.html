@@ -21,23 +21,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
     <!-- ========= HEADER ========= -->
     <header class="main-header">
         <nav class="container">
-            <a href="index.html" class="logo">
+            <a href="../index.html" class="logo">
                 <span class="logo-name">Simone Pizzi</span>
                 <span class="logo-tagline">Idee, Storie e Sperimentazione</span>
             </a>
             <ul class="nav-menu">
-                <li><a href="index.html">Home</a></li>
-                <li><a href="sono-simone.html">Chi Sono</a></li>
-                <li><a href="podcast.html">Podcast</a></li>
-                <li><a href="libri.html">Libri</a></li>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Chi Sono</a></li>
+                <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Podcast</a></li>
+                <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Libri</a></li>
                 <li><a href="software.html">Software</a></li>
-                <li><a href="videogiochi.html">Videogiochi</a></li>
+                <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Videogiochi</a></li>
                 <li><a href="contatti.html" class="active">Contattami</a></li>
             </ul>
         </nav>
@@ -86,7 +86,7 @@
                 <!-- Right Column: Form -->
                 <div class="contact-form-wrapper" id="contact">
                      <h2>Modulo di Contatto Rapido</h2>
-                    <form action="https://formspree.io/f/mqkrvvzb" method="POST">
+                    <form id="contactForm" class="contact-form">
                         <div class="form-group">
                             <label for="name">Nome</label>
                             <input type="text" id="name" name="name" required>
@@ -96,11 +96,40 @@
                             <input type="email" id="email" name="email" required>
                         </div>
                         <div class="form-group">
+                            <label for="subject">Oggetto</label>
+                            <select id="subject" name="subject" required>
+                                <option value="">Seleziona l'argomento</option>
+                                <option value="Collaborazione Podcast">Collaborazione Podcast</option>
+                                <option value="Progetto Sviluppo Software">Progetto Sviluppo Software</option>
+                                <option value="Proposta Editoriale">Proposta Editoriale</option>
+                                <option value="Richiesta Intervista">Richiesta Intervista</option>
+                                <option value="Consulenza Tecnica">Consulenza Tecnica</option>
+                                <option value="Altro">Altro</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
                             <label for="message">Messaggio</label>
                             <textarea id="message" name="message" rows="6" required></textarea>
                         </div>
-                        <button type="submit" class="button primary full-width">Invia Messaggio</button>
+                        
+                        <!-- Honeypot field (anti-bot) - Campo nascosto -->
+                        <div style="position: absolute; left: -9999px; visibility: hidden;">
+                            <label for="website">Sito web (non compilare):</label>
+                            <input type="text" id="website" name="website" autocomplete="off" tabindex="-1">
+                        </div>
+                        <div class="form-group" style="flex-direction: row; align-items: flex-start;">
+                            <input type="checkbox" id="privacy" name="privacy" required>
+                            <label for="privacy" style="margin-left: 0.5rem; font-size: 0.9rem; line-height: 1.4; margin-top: 0;">
+                                Acconsento al trattamento dei miei dati personali secondo quanto previsto dal 
+                                Regolamento UE 2016/679 (GDPR). I dati saranno utilizzati esclusivamente per 
+                                rispondere alla tua richiesta e non saranno condivisi con terzi.
+                            </label>
+                        </div>
+                        <button type="submit" class="button primary full-width">
+                            <span class="cta-button-text">Invia Messaggio</span>
+                        </button>
                     </form>
+                    <div id="formStatus" class="form-status" style="display: none;"></div>
                 </div>
             </div>
         </section>
@@ -150,5 +179,7 @@
             <p class="copyright">&copy; 2025 Simone Pizzi. Tutti i diritti riservati.</p>
         </div>
     </footer>
+
+    <script src="../js/main.js"></script>
 </body>
 </html> 

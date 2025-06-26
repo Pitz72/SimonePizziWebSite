@@ -10,6 +10,7 @@ function revealEmail(elementId, user, domain) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('DOM loaded, initializing JavaScript...');
 
     // Accordion 1 (Introduction - specifico per sono-simone.html)
     const introAccordionButton = document.querySelector('.blog-intro .accordion-intro-estendi');
@@ -121,6 +122,18 @@ document.addEventListener('DOMContentLoaded', () => {
         currentYearElement.textContent = new Date().getFullYear();
     }
 
+    // Gestione link disabilitati (Comune)
+    const disabledLinks = document.querySelectorAll('.disabled-link, .disabled-nav-link');
+    if (disabledLinks.length > 0) {
+        disabledLinks.forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                return false;
+            });
+        });
+    }
+
     // --- Script specifici per index.html ---
 
     // Scroll reveal animation
@@ -181,61 +194,115 @@ document.addEventListener('DOMContentLoaded', () => {
     // Gestione form di contatto
     const contactForm = document.getElementById('contactForm');
     if (contactForm) {
-        contactForm.addEventListener('submit', function(e) {
+        console.log('Form di contatto trovato, aggiungendo event listener');
+        contactForm.addEventListener('submit', async function(e) {
             e.preventDefault();
+            e.stopPropagation();
+            console.log('Form submit intercettato');
 
             const nameInput = document.getElementById('name');
             const emailInput = document.getElementById('email');
             const subjectInput = document.getElementById('subject');
             const messageInput = document.getElementById('message');
             const privacyCheckbox = document.getElementById('privacy');
+            const formStatus = document.getElementById('formStatus');
+
+            // Mostra loading
+            if (formStatus) {
+                formStatus.style.display = 'block';
+                formStatus.className = 'form-status';
+                formStatus.textContent = 'Invio in corso...';
+            }
 
             // Basic check for element existence
             if (!nameInput || !emailInput || !subjectInput || !messageInput || !privacyCheckbox) {
                 console.error('Uno o più campi del form di contatto sono mancanti nel DOM.');
-                alert('Errore nel form. Si prega di ricaricare la pagina o contattare il supporto.');
+                showFormStatus('error', 'Errore nel form. Si prega di ricaricare la pagina.');
                 return;
             }
 
-            const name = nameInput.value;
-            const email = emailInput.value;
-            const subject = subjectInput.value || 'Messaggio dal sito web'; // Default subject
-            const message = messageInput.value;
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim();
+            const subject = subjectInput.value;
+            const message = messageInput.value.trim();
             const privacy = privacyCheckbox.checked;
 
             // Validazione base
-            if (!name || !email || !message) {
-                alert('Per favore compila tutti i campi obbligatori.');
+            if (!name || !email || !subject || !message) {
+                showFormStatus('error', 'Per favore compila tutti i campi obbligatori.');
+                return;
+            }
+
+            // Validazione consenso GDPR
+            if (!privacy) {
+                showFormStatus('error', 'È necessario accettare il trattamento dei dati personali per procedere.');
                 return;
             }
 
             // Validazione email
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             if (!emailRegex.test(email)) {
-                alert('Per favore inserisci un indirizzo email valido.');
+                showFormStatus('error', 'Per favore inserisci un indirizzo email valido.');
                 return;
             }
 
-            // Validazione consenso GDPR
-            if (!privacy) {
-                alert('È necessario accettare il trattamento dei dati personali per procedere.');
-                return;
-            }
+            try {
+                // Invio usando il nostro backend Flask interno
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        subject: subject,
+                        message: message,
+                        privacy: privacy,
+                        website: document.getElementById('website') ? document.getElementById('website').value : ''
+                    })
+                });
 
-            // Crea il corpo dell'email
-            const emailBody = `Nome: ${name}%0D%0AEmail: ${email}%0D%0AOggetto: ${subject}%0D%0A%0D%0AMessaggio:%0D%0A${encodeURIComponent(message)}%0D%0A%0D%0A[Consenso GDPR: Accettato]`;
-
-            // Apri client email predefinito
-            window.location.href = `mailto:pizzisimone1972@gmail.com?subject=${encodeURIComponent(subject)}&body=${emailBody}`;
-
-            // Feedback all'utente e reset form (con un piccolo delay per permettere l'apertura del client mail)
-            setTimeout(() => {
-                alert('Il tuo client email si aprirà per inviare il messaggio. Grazie per avermi contattato!');
-                if (typeof this.reset === 'function') { // Assicura che reset sia una funzione
-                    this.reset();
+                const data = await response.json();
+                
+                if (data.success) {
+                    showFormStatus('success', data.message);
+                    contactForm.reset();
+                } else {
+                    showFormStatus('error', data.message || 'Errore durante l\'invio. Riprova tra qualche minuto.');
                 }
-            }, 100); // 100ms delay
+            } catch (error) {
+                console.error('Errore invio form:', error);
+                showFormStatus('error', 'Errore di connessione. Verifica la tua connessione e riprova.');
+            }
         });
+
+        function showFormStatus(type, message) {
+            console.log('Mostrando messaggio:', type, message);
+            const formStatus = document.getElementById('formStatus');
+            if (formStatus) {
+                formStatus.style.display = 'block';
+                formStatus.className = `form-status ${type}`;
+                formStatus.textContent = message;
+                
+                // Animazione di entrata
+                formStatus.style.transform = 'translateX(100%)';
+                setTimeout(() => {
+                    formStatus.style.transform = 'translateX(0)';
+                }, 100);
+                
+                // Nascondi il messaggio dopo 5 secondi
+                setTimeout(() => {
+                    formStatus.style.transform = 'translateX(100%)';
+                    setTimeout(() => {
+                        formStatus.style.display = 'none';
+                    }, 300);
+                }, 5000);
+            } else {
+                console.log('Elemento formStatus non trovato');
+            }
+        }
 
         // Stili focus per i campi del form
         const formFields = contactForm.querySelectorAll('input, textarea');
@@ -253,3 +320,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 }); // Fine DOMContentLoaded
+
+// Funzioni per il modal della storia (devono essere globali per onclick)
+function openStoryModal() {
+    const modal = document.getElementById('storyModal');
+    if (modal) {
+        modal.style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Previene lo scroll della pagina
+    }
+}
+
+function closeStoryModal() {
+    const modal = document.getElementById('storyModal');
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Ripristina lo scroll della pagina
+    }
+}
+
+// Chiude il modal se si clicca fuori dal contenuto
+window.addEventListener('click', function(event) {
+    const modal = document.getElementById('storyModal');
+    if (event.target === modal) {
+        closeStoryModal();
+    }
+});
+
+// Chiude il modal con il tasto ESC
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        const modal = document.getElementById('storyModal');
+        if (modal && modal.style.display === 'block') {
+            closeStoryModal();
+        }
+    }
+});
