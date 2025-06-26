@@ -68,7 +68,7 @@
     <meta name="imagetoolbar" content="no">
     <meta name="mssmarttagspreventparsing" content="true">
     <meta name="format-detection" content="telephone=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Simone Pizzi">
     <meta name="application-name" content="Simone Pizzi Portfolio">
@@ -78,7 +78,6 @@
     
     <!-- Security Headers -->
     <meta http-equiv="X-Content-Type-Options" content="nosniff">
-    <meta http-equiv="X-Frame-Options" content="DENY">
     <meta http-equiv="X-XSS-Protection" content="1; mode=block">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     
@@ -98,6 +97,9 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer">
     
     <!-- Structured Data JSON-LD -->
     <script type="application/ld+json">
@@ -378,16 +380,25 @@
         </section>
         
         <!-- ========= FOOTER ========= -->
-        <footer class="main-footer">
-            <div class="container">
-                <div class="social-links">
-                    <a href="https://github.com/Pitz72" target="_blank">GitHub</a>
-                    <a href="https://www.instagram.com/pizzisimone1972/" target="_blank">Instagram</a>
-                    <a href="https://www.spreaker.com/user/runtime-radio--8395974" target="_blank">Spreaker</a>
-                </div>
-                <p class="copyright">&copy; 2025 Simone Pizzi. Tutti i diritti riservati.</p>
+            <footer class="main-footer">
+        <div class="container">
+            <div class="social-links">
+                <a href="https://github.com/Pitz72" target="_blank" aria-label="GitHub di Simone Pizzi">
+                    <i class="fab fa-github"></i>
+                    <span>GitHub</span>
+                </a>
+                <a href="https://www.instagram.com/pizzisimone1972/" target="_blank" aria-label="Instagram di Simone Pizzi">
+                    <i class="fab fa-instagram"></i>
+                    <span>Instagram</span>
+                </a>
+                <a href="https://www.spreaker.com/user/runtime-radio--8395974" target="_blank" aria-label="Spreaker di Runtime Radio">
+                    <i class="fas fa-podcast"></i>
+                    <span>Spreaker</span>
+                </a>
             </div>
-        </footer>
+            <p class="copyright">&copy; 2025 Simone Pizzi. Tutti i diritti riservati.</p>
+        </div>
+    </footer>
     </main>
 
     <!-- ========= MODAL STORIA ========= -->

@@ -21,6 +21,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer">
+    
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
@@ -59,7 +62,7 @@
                     <!-- Software Card 1 -->
                     <div class="project-card">
                         <div class="card-image">
-                            <img src="image/gdm.png" alt="Icona Gestore Duplicati Musicali" loading="lazy">
+                            <img src="../image/gdm.png" alt="Icona Gestore Duplicati Musicali" loading="lazy">
                         </div>
                         <div class="card-content">
                             <h3>Gestore Duplicati Musicali</h3>
@@ -70,7 +73,7 @@
                     <!-- Software Card 2 -->
                     <div class="project-card">
                         <div class="card-image">
-                            <img src="image/advjingle.png" alt="Icona Advanced Jingle Machine" loading="lazy">
+                            <img src="../image/advjingle.png" alt="Icona Advanced Jingle Machine" loading="lazy">
                         </div>
                         <div class="card-content">
                             <h3>Advanced Jingle Machine v1.5</h3>
@@ -81,7 +84,7 @@
                     <!-- Software Card 3 -->
                     <div class="project-card">
                         <div class="card-image">
-                             <img src="image/audioconv.png" alt="Icona Audio & Metadata Converter" loading="lazy">
+                             <img src="../image/audioconv.png" alt="Icona Audio & Metadata Converter" loading="lazy">
                         </div>
                         <div class="card-content">
                             <h3>Audio & Metadata Converter</h3>
@@ -98,14 +101,23 @@
     <footer class="main-footer">
         <div class="container">
             <div class="social-links">
-                <a href="https://github.com/Pitz72" target="_blank">GitHub</a>
-                <a href="https://www.instagram.com/pizzisimone1972/" target="_blank">Instagram</a>
-                <a href="https://www.spreaker.com/user/runtime-radio--8395974" target="_blank">Spreaker</a>
+                <a href="https://github.com/Pitz72" target="_blank" aria-label="GitHub di Simone Pizzi">
+                    <i class="fab fa-github"></i>
+                    <span>GitHub</span>
+                </a>
+                <a href="https://www.instagram.com/pizzisimone1972/" target="_blank" aria-label="Instagram di Simone Pizzi">
+                    <i class="fab fa-instagram"></i>
+                    <span>Instagram</span>
+                </a>
+                <a href="https://www.spreaker.com/user/runtime-radio--8395974" target="_blank" aria-label="Spreaker di Runtime Radio">
+                    <i class="fas fa-podcast"></i>
+                    <span>Spreaker</span>
+                </a>
             </div>
             <p class="copyright">&copy; 2025 Simone Pizzi. Tutti i diritti riservati.</p>
         </div>
     </footer>
 
-    <script src="js/main.js"></script>
+    <script src="../js/main.js"></script>
 </body>
 </html> 

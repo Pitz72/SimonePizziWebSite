@@ -1,196 +1,203 @@
-# SimonePizziWebSite - Backend Flask
+# Backend Contact Form - Simone Pizzi Website
 
-Sistema backend completo per il sito web di Simone Pizzi con form di contatto sicuro e professionale.
+Backend Flask per gestire l'invio delle email dal form di contatto del sito simonepizzi.runtimeradio.it.
 
 ## 🚀 Avvio Rapido
 
+### 1. Installa le dipendenze
 ```bash
-# Installa dipendenze
 pip install -r requirements.txt
+```
 
-# Avvia il server
+### 2. Configura la password Gmail
+Modifica il file `app.py` alla riga con `SENDER_PASSWORD` e inserisci la password dell'app Gmail:
+
+```python
+SENDER_PASSWORD = 'la_tua_password_app_gmail_di_16_caratteri'
+```
+
+### 3. Avvia il server
+```bash
+python start_server.py
+```
+oppure
+```bash
 python app.py
 ```
 
-Il sito sarà disponibile su: **http://localhost:5000**
+## 🔧 Configurazione Gmail
 
-## ⚙️ Configurazione Email
+### Generare una Password App Gmail
 
-### SMTP Runtime Radio (Raccomandato)
-Per utilizzare il server SMTP di Runtime Radio, modifica in `app.py`:
+1. **Vai alle impostazioni del tuo account Google:**
+   - https://myaccount.google.com/security
 
-```python
-EMAIL_CONFIG = {
-    'smtp_server': 'mail.runtimeradio.it',
-    'smtp_port': 587,
-    'sender_email': 'noreply@runtimeradio.it',
-    'sender_password': 'your_hosting_password',  # ← Inserisci qui
-    'recipient_email': 'pizzisimone1972@gmail.com'
+2. **Abilita la verifica in due passaggi** (se non già attiva)
+
+3. **Genera una password app:**
+   - https://myaccount.google.com/apppasswords
+   - Seleziona "App" → "Altro (nome personalizzato)"
+   - Inserisci "Simone Pizzi Website"
+   - Copia la password di 16 caratteri generata
+
+4. **Configura il backend:**
+   - Apri `app.py`
+   - Trova la riga `SENDER_PASSWORD = 'INSERISCI_QUI_LA_PASSWORD_DELL_APP_GMAIL'`
+   - Sostituisci con la password generata: `SENDER_PASSWORD = 'abcd efgh ijkl mnop'`
+
+⚠️ **IMPORTANTE:** Non usare mai la password normale di Gmail! Usa solo la password app.
+
+## 🌐 Endpoints API
+
+### Health Check
+```
+GET /api/health
+```
+Risposta:
+```json
+{
+  "status": "ok",
+  "service": "Contact Form API",
+  "version": "1.0.0",
+  "timestamp": "2025-01-26T10:30:00.000Z"
 }
 ```
 
-### SMTP Generico (Alternativo)
-Per altri provider hosting:
+### Contact Form
+```
+POST /api/contact
+Content-Type: application/json
+```
 
-```python
-EMAIL_CONFIG = {
-    'smtp_server': 'mail.tuohosting.com',
-    'smtp_port': 587,
-    'sender_email': 'noreply@tuodominio.it',
-    'sender_password': 'your_hosting_password',
-    'recipient_email': 'pizzisimone1972@gmail.com'
+Payload:
+```json
+{
+  "name": "Mario Rossi",
+  "email": "mario@example.com",
+  "subject": "Collaborazione Podcast",
+  "message": "Ciao Simone, volevo contattarti per...",
+  "privacy": true
 }
 ```
 
-### Gmail (Solo per Test)
-Solo per ambiente di sviluppo:
-
-```python
-EMAIL_CONFIG = {
-    'smtp_server': 'smtp.gmail.com',
-    'smtp_port': 587,
-    'sender_email': 'tuo@gmail.com',
-    'sender_password': 'password_app_gmail',
-    'recipient_email': 'pizzisimone1972@gmail.com'
+Risposta di successo:
+```json
+{
+  "message": "Messaggio inviato con successo! Ti risponderò al più presto.",
+  "status": "success"
 }
 ```
 
-## 🛡️ Sicurezza Multi-Layer
-
-Il sistema implementa **6 livelli di sicurezza**:
-
-1. **Rate Limiting**: Max 3 messaggi ogni 5 minuti per IP
-2. **Honeypot Field**: Campo nascosto anti-bot
-3. **Pattern Recognition**: Rileva nomi sospetti
-4. **Duplicate Detection**: Previene spam con hash MD5
-5. **Input Validation**: Lunghezze e formati rigorosi
-6. **GDPR Compliance**: Privacy obbligatoria
-
-## 📊 Endpoints API
-
-- `POST /api/contact` - Invio form contatti
-- `GET /api/health` - Status del server
-- `GET /api/stats` - Statistiche messaggi
-
-## 📁 File di Dati
-
-- `data/contact_log.json` - Log completo messaggi
-- `data/rate_limit.json` - Rate limiting per IP
-- `data/contact_hashes.json` - Hash anti-duplicati
-
-## 🌐 Deploy Produzione
-
-### 1. Hosting con SMTP
-Carica i file e configura la password SMTP del tuo hosting:
-
-```python
-'sender_password': 'password_fornita_da_hosting'
+Risposta di errore:
+```json
+{
+  "error": "Campo email obbligatorio"
+}
 ```
 
-### 2. Server WSGI
-Per produzione, usa Gunicorn invece del server Flask dev:
+## 🛡️ Sicurezza e Rate Limiting
 
+### Protezioni Implementate
+
+- **Rate Limiting:** Max 5 richieste per ora per IP
+- **Anti-Duplicazione:** Blocca messaggi identici per 5 minuti
+- **Validazione Input:** Controlli su lunghezza e formato dei campi
+- **CORS:** Configurato per simonepizzi.runtimeradio.it e localhost:8080
+- **Logging:** Tutti i tentativi vengono registrati
+
+### File di Dati
+
+Il sistema crea automaticamente una cartella `data/` con:
+
+- `contact_log.json` - Log di tutti i messaggi
+- `rate_limit.json` - Tracciamento rate limiting per IP
+- `contact_hashes.json` - Hash per rilevare duplicati
+
+## 🔍 Monitoraggio
+
+### Log dei Messaggi
+Tutti i messaggi vengono registrati con:
+- Timestamp
+- IP del mittente
+- Dati del contatto (nome, email, oggetto)
+- Stato di successo/errore
+- Eventuali messaggi di errore
+
+### Rate Limiting
+Il sistema traccia automaticamente:
+- Richieste per IP nell'ultima ora
+- Blocco automatico dopo 5 richieste
+- Reset automatico dopo 1 ora
+
+## 🚨 Risoluzione Problemi
+
+### Il server non si avvia
 ```bash
-pip install gunicorn
-gunicorn -w 4 -b 0.0.0.0:8000 app:app
+# Verifica la versione Python (richiesto 3.8+)
+python --version
+
+# Reinstalla le dipendenze
+pip install -r requirements.txt --force-reinstall
 ```
 
-### 3. Variabili Ambiente
-In produzione, usa variabili ambiente invece di hardcoding:
+### Le email non vengono inviate
+1. Verifica che la password Gmail sia configurata correttamente
+2. Controlla che la verifica in due passaggi sia attiva su Gmail
+3. Controlla i log del server per errori SMTP
 
+### Errori 404 sui form
+- Il frontend deve puntare a `/api/contact`
+- Verifica che il server sia in ascolto sulla porta 5000
+- Controlla la configurazione CORS in `app.py`
+
+### Rate limiting troppo aggressivo
+Modifica i parametri in `app.py`:
 ```python
-import os
-EMAIL_CONFIG = {
-    'sender_password': os.environ.get('SMTP_PASSWORD', '')
-}
+# Aumenta il limite di richieste o la finestra temporale
+if is_rate_limited(client_ip, max_requests=10, time_window=7200):  # 10 req/2h
 ```
-
-## 📧 Template Email
-
-Il sistema invia email professionali con:
-- ✅ Design brand Simone Pizzi
-- ✅ HTML responsive
-- ✅ Metadati completi del contatto
-- ✅ Timestamp e dati tecnici
 
 ## 🔧 Personalizzazione
 
-### Modifica Sicurezza
-In `SECURITY_CONFIG`:
+### Modifica Template Email
+Modifica la funzione `send_email()` in `app.py` per personalizzare:
+- Oggetto dell'email
+- Template HTML
+- Formato del messaggio
 
-```python
-SECURITY_CONFIG = {
-    'rate_limit_messages': 3,    # Messaggi per finestra
-    'rate_limit_window': 300,    # Secondi (5 minuti)
-    'max_name_length': 100,      # Lunghezza massima nome
-    'max_message_length': 2000   # Lunghezza massima messaggio
-}
-```
+### Aggiunta Campi Form
+Per aggiungere nuovi campi al form:
+1. Aggiorna la validazione in `handle_contact()`
+2. Modifica il template email in `send_email()`
+3. Aggiorna il frontend JavaScript
 
-### Aggiungi Pattern Sospetti
-In `SUSPICIOUS_PATTERNS`:
+## 📊 Performance
 
-```python
-SUSPICIOUS_PATTERNS = [
-    'admin', 'test', 'bot', 'spam', 'fake', 'dummy',
-    'nuovo_pattern_sospetto'  # ← Aggiungi qui
-]
-```
+### Raccomandazioni per Produzione
 
-## 📈 Monitoraggio
+1. **Reverse Proxy:** Usa Nginx o Apache davanti a Flask
+2. **WSGI Server:** Usa Gunicorn invece del server Flask built-in
+3. **Database:** Sostituisci i file JSON con PostgreSQL/MySQL
+4. **Caching:** Implementa Redis per rate limiting
+5. **SSL/TLS:** Configura HTTPS per la sicurezza
 
-### Health Check
+### Esempio Configurazione Gunicorn
 ```bash
-curl http://localhost:5000/api/health
+pip install gunicorn
+gunicorn -w 4 -b 0.0.0.0:5000 app:app
 ```
 
-### Statistiche
-```bash
-curl http://localhost:5000/api/stats
-```
+## 📋 TODO Future Implementazioni
 
-Risposta esempio:
-```json
-{
-  "total_messages": 42,
-  "successful_messages": 38,
-  "failed_messages": 4,
-  "success_rate": 90.5,
-  "messages_last_7_days": 12,
-  "top_subjects": {
-    "Collaborazione": 15,
-    "Informazioni": 8,
-    "Altro": 5
-  }
-}
-```
-
-## 🚨 Troubleshooting
-
-### Email Non Inviate
-1. Verifica configurazione SMTP in `EMAIL_CONFIG`
-2. Controlla log server per errori
-3. Testa connessione SMTP manualmente
-
-### Errori Rate Limiting
-File `data/rate_limit.json` corrotto:
-```bash
-rm data/rate_limit.json  # Il sistema lo ricreerà
-```
-
-### Problemi CORS
-Il frontend deve chiamare `http://localhost:5000`, non aprire file HTML direttamente.
-
-## 📝 Note Tecniche
-
-- **Framework**: Flask + Flask-CORS
-- **Email**: smtplib con STARTTLS
-- **Logging**: JSON strutturato
-- **Storage**: File JSON (nessun database richiesto)
-- **Sicurezza**: Ispirato a Runtime Radio
-- **Compatibilità**: Python 3.7+
+- [ ] Integrazione database PostgreSQL
+- [ ] Dashboard amministrativa
+- [ ] Notifiche email multiple
+- [ ] API per statistiche messaggi
+- [ ] Backup automatico dei dati
+- [ ] Integrazione con servizi di monitoring
 
 ---
 
-**Simone Pizzi Website Backend v2.0**  
-*Sicurezza Enterprise, Semplicità di Configurazione* 
+**Autore:** Simone Pizzi  
+**Versione:** 1.0.0  
+**Ultimo aggiornamento:** Gennaio 2025 

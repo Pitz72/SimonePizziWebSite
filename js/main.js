@@ -247,44 +247,69 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             try {
-                // Invio usando il nostro backend Flask interno
-                const response = await fetch('/api/contact', {
+                // Tentativo di invio al backend locale
+                const formData = {
+                    name: name,
+                    email: email,
+                    subject: subject,
+                    message: message,
+                    privacy: privacy
+                };
+
+                // Determina l'URL corretto in base al contesto
+                let apiUrl;
+                if (window.location.protocol === 'file:') {
+                    // Se è file locale, usa direttamente il fallback
+                    throw new Error('Modalità file locale - usa fallback email');
+                } else if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                    // Se è localhost, prova il backend Flask
+                    apiUrl = 'http://localhost:5000/api/contact';
+                } else {
+                    // Se è produzione, usa endpoint relativo
+                    apiUrl = '/api/contact';
+                }
+
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
                     },
-                    body: JSON.stringify({
-                        name: name,
-                        email: email,
-                        subject: subject,
-                        message: message,
-                        privacy: privacy,
-                        website: document.getElementById('website') ? document.getElementById('website').value : ''
-                    })
+                    body: JSON.stringify(formData)
                 });
 
-                const data = await response.json();
-                
-                if (data.success) {
-                    showFormStatus('success', data.message);
+                if (response.ok) {
+                    const data = await response.json();
+                    showFormStatus('success', data.message || 'Messaggio inviato con successo! Ti risponderò al più presto.');
                     contactForm.reset();
                 } else {
-                    showFormStatus('error', data.message || 'Errore durante l\'invio. Riprova tra qualche minuto.');
+                    const data = await response.json();
+                    showFormStatus('error', data.error || 'Errore durante l\'invio. Riprova tra qualche minuto.');
                 }
             } catch (error) {
                 console.error('Errore invio form:', error);
-                showFormStatus('error', 'Errore di connessione. Verifica la tua connessione e riprova.');
+                // Fallback: apri client email come alternativa
+                const emailBody = `Nome: ${name}\nEmail: ${email}\nOggetto: ${subject}\n\nMessaggio:\n${message}`;
+                const mailtoLink = `mailto:pizzisimone1972@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(emailBody)}`;
+                
+                // Mostra messaggio con opzione di aprire il client email
+                showFormStatus('error', 'Il server non è disponibile. Clicca qui per aprire il tuo client email.', mailtoLink);
             }
         });
 
-        function showFormStatus(type, message) {
+        function showFormStatus(type, message, mailtoLink = null) {
             console.log('Mostrando messaggio:', type, message);
             const formStatus = document.getElementById('formStatus');
             if (formStatus) {
                 formStatus.style.display = 'block';
                 formStatus.className = `form-status ${type}`;
-                formStatus.textContent = message;
+                
+                if (mailtoLink) {
+                    // Crea un link cliccabile per aprire il client email
+                    formStatus.innerHTML = `<span style="cursor: pointer; text-decoration: underline;" onclick="window.location.href='${mailtoLink}'">${message}</span>`;
+                } else {
+                    formStatus.textContent = message;
+                }
                 
                 // Animazione di entrata
                 formStatus.style.transform = 'translateX(100%)';
@@ -292,13 +317,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     formStatus.style.transform = 'translateX(0)';
                 }, 100);
                 
-                // Nascondi il messaggio dopo 5 secondi
+                // Nascondi il messaggio dopo 8 secondi (più tempo per leggere il messaggio di fallback)
                 setTimeout(() => {
                     formStatus.style.transform = 'translateX(100%)';
                     setTimeout(() => {
                         formStatus.style.display = 'none';
+                        formStatus.innerHTML = ''; // Pulisci il contenuto HTML
                     }, 300);
-                }, 5000);
+                }, 8000);
             } else {
                 console.log('Elemento formStatus non trovato');
             }

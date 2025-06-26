@@ -1,457 +1,327 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Backend Flask per SimonePizziWebSite
-Gestisce l'invio email del form di contatto
+Backend Flask per gestione form di contatto
+Simone Pizzi Website - Contact Form Handler
+
+Questo script gestisce l'invio delle email dal form di contatto del sito.
+Utilizza SMTP Gmail per l'invio delle email.
 """
 
-from flask import Flask, request, jsonify, send_from_directory
-from flask_cors import CORS
-import smtplib
-from email.mime.text import MIMEText
-from email.mime.multipart import MIMEMultipart
-from email.utils import formataddr
 import os
-import logging
-from datetime import datetime, timedelta
-import re
 import json
+import smtplib
 import hashlib
-from pathlib import Path
+import time
+from datetime import datetime, timedelta
+from email.mime.text import MimeText
+from email.mime.multipart import MimeMultipart
+from flask import Flask, request, jsonify
+from flask_cors import CORS
+from werkzeug.middleware.proxy_fix import ProxyFix
 
-# Configurazione logging
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-
+# Configurazione Flask
 app = Flask(__name__)
-CORS(app)  # Abilita CORS per permettere richieste dal frontend
+app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+CORS(app, origins=['https://simonepizzi.runtimeradio.it', 'http://localhost:8080'])
 
-# Configurazione email SMTP Runtime Radio (modifica questi valori)
-EMAIL_CONFIG = {
-    'smtp_server': 'mail.runtimeradio.it',  # SMTP Server Runtime Radio
-    'smtp_port': 587,                       # Porta standard STARTTLS
-    'sender_email': 'noreply@runtimeradio.it',    # Email mittente del dominio
-    'sender_password': '',                  # Password hosting Runtime Radio
-    'recipient_email': 'pizzisimone1972@gmail.com'  # Dove ricevere i messaggi
-}
+# Configurazione email SMTP
+SMTP_SERVER = 'smtp.gmail.com'
+SMTP_PORT = 587
+SENDER_EMAIL = 'pizzisimone1972@gmail.com'
+SENDER_PASSWORD = 'INSERISCI_QUI_LA_PASSWORD_DELL_APP_GMAIL'  # Da configurare
+RECIPIENT_EMAIL = 'pizzisimone1972@gmail.com'
 
-# Configurazione sicurezza
-SECURITY_CONFIG = {
-    'rate_limit_messages': 3,
-    'rate_limit_window': 300,  # 5 minuti in secondi
-    'max_name_length': 100,
-    'min_name_length': 2,
-    'max_message_length': 2000,
-    'min_message_length': 10,
-    'log_file': 'data/contact_log.json',
-    'rate_limit_file': 'data/rate_limit.json',
-    'hash_file': 'data/contact_hashes.json'
-}
+# Directory per i file di dati
+DATA_DIR = 'data'
+if not os.path.exists(DATA_DIR):
+    os.makedirs(DATA_DIR)
 
-# Crea directory data se non esiste
-Path('data').mkdir(exist_ok=True)
-
-# Pattern sospetti per nomi (da Runtime Radio)
-SUSPICIOUS_PATTERNS = [
-    'admin', 'test', 'bot', 'spam', 'fake', 'dummy', 
-    'qwerty', 'asdf', 'xxx', 'null', 'undefined'
-]
-
-def validate_email(email):
-    """Valida formato email"""
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return re.match(pattern, email) is not None
+# File di log e rate limiting
+CONTACT_LOG_FILE = os.path.join(DATA_DIR, 'contact_log.json')
+RATE_LIMIT_FILE = os.path.join(DATA_DIR, 'rate_limit.json')
+CONTACT_HASHES_FILE = os.path.join(DATA_DIR, 'contact_hashes.json')
 
 def load_json_file(filepath, default=None):
-    """Carica file JSON con gestione errori"""
+    """Carica un file JSON, ritorna default se non esiste"""
+    if default is None:
+        default = {}
     try:
-        if Path(filepath).exists():
-            with open(filepath, 'r', encoding='utf-8') as f:
-                return json.load(f)
-    except Exception as e:
-        logger.warning(f"Errore caricamento {filepath}: {e}")
-    return default or {}
+        with open(filepath, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        return default
 
 def save_json_file(filepath, data):
-    """Salva file JSON con gestione errori"""
+    """Salva dati in un file JSON"""
     try:
         with open(filepath, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
         return True
     except Exception as e:
-        logger.error(f"Errore salvataggio {filepath}: {e}")
+        print(f"Errore nel salvare {filepath}: {e}")
         return False
 
-def check_rate_limit(ip_address):
-    """Rate limiting - max 3 messaggi ogni 5 minuti per IP"""
-    rate_data = load_json_file(SECURITY_CONFIG['rate_limit_file'], {})
-    current_time = datetime.now().isoformat()
+def get_client_ip():
+    """Ottiene l'IP del client considerando i proxy"""
+    if request.headers.get('X-Forwarded-For'):
+        return request.headers.get('X-Forwarded-For').split(',')[0].strip()
+    elif request.headers.get('X-Real-IP'):
+        return request.headers.get('X-Real-IP')
+    else:
+        return request.remote_addr
+
+def is_rate_limited(ip_address, max_requests=5, time_window=3600):
+    """Verifica se un IP ha superato il limite di richieste"""
+    rate_limits = load_json_file(RATE_LIMIT_FILE, {})
+    current_time = time.time()
     
-    # Pulizia vecchi record
-    cutoff_time = datetime.now() - timedelta(seconds=SECURITY_CONFIG['rate_limit_window'])
-    rate_data = {
-        ip: timestamps for ip, timestamps in rate_data.items()
-        if any(datetime.fromisoformat(ts) > cutoff_time for ts in timestamps)
-    }
+    if ip_address not in rate_limits:
+        rate_limits[ip_address] = []
     
-    # Controlla IP corrente
-    if ip_address not in rate_data:
-        rate_data[ip_address] = []
-    
-    # Filtra timestamp vecchi per questo IP
-    rate_data[ip_address] = [
-        ts for ts in rate_data[ip_address]
-        if datetime.fromisoformat(ts) > cutoff_time
+    # Rimuovi richieste vecchie fuori dalla finestra temporale
+    rate_limits[ip_address] = [
+        timestamp for timestamp in rate_limits[ip_address] 
+        if current_time - timestamp < time_window
     ]
     
-    # Controlla limite
-    if len(rate_data[ip_address]) >= SECURITY_CONFIG['rate_limit_messages']:
-        return False
+    # Verifica se ha superato il limite
+    if len(rate_limits[ip_address]) >= max_requests:
+        return True
     
-    # Aggiungi nuovo timestamp
-    rate_data[ip_address].append(current_time)
-    save_json_file(SECURITY_CONFIG['rate_limit_file'], rate_data)
-    return True
+    # Aggiungi la richiesta corrente
+    rate_limits[ip_address].append(current_time)
+    save_json_file(RATE_LIMIT_FILE, rate_limits)
+    return False
 
-def check_suspicious_name(name):
-    """Controlla pattern sospetti nel nome"""
-    name_lower = name.lower()
-    return any(pattern in name_lower for pattern in SUSPICIOUS_PATTERNS)
+def create_message_hash(name, email, message):
+    """Crea un hash del messaggio per rilevare duplicati"""
+    content = f"{name.lower()}{email.lower()}{message.lower()}"
+    return hashlib.md5(content.encode()).hexdigest()
 
-def check_duplicate_message(name, email, message):
-    """Previene messaggi duplicati usando hash MD5"""
-    message_content = f"{name.lower()}{email.lower()}{message.lower()}"
-    message_hash = hashlib.md5(message_content.encode()).hexdigest()
+def is_duplicate_message(message_hash, time_window=300):
+    """Verifica se il messaggio è un duplicato recente"""
+    hashes = load_json_file(CONTACT_HASHES_FILE, {})
+    current_time = time.time()
     
-    hash_data = load_json_file(SECURITY_CONFIG['hash_file'], {})
-    current_time = datetime.now().isoformat()
+    # Rimuovi hash vecchi
+    for hash_key in list(hashes.keys()):
+        if current_time - hashes[hash_key] > time_window:
+            del hashes[hash_key]
     
-    # Pulizia hash vecchi (oltre 1 ora)
-    cutoff_time = datetime.now() - timedelta(hours=1)
-    hash_data = {
-        h: timestamp for h, timestamp in hash_data.items()
-        if datetime.fromisoformat(timestamp) > cutoff_time
-    }
+    if message_hash in hashes:
+        return True
     
-    # Controlla se hash esiste
-    if message_hash in hash_data:
-        return False
-    
-    # Salva nuovo hash
-    hash_data[message_hash] = current_time
-    save_json_file(SECURITY_CONFIG['hash_file'], hash_data)
-    return True
+    hashes[message_hash] = current_time
+    save_json_file(CONTACT_HASHES_FILE, hashes)
+    return False
 
-def log_contact_message(data, ip_address, success=True, error_msg=None):
-    """Logging completo messaggi di contatto"""
-    log_data = load_json_file(SECURITY_CONFIG['log_file'], [])
-    
-    # Assicurati che log_data sia sempre una lista
-    if not isinstance(log_data, list):
-        log_data = []
+def validate_email(email):
+    """Validazione semplice dell'email"""
+    import re
+    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    return re.match(pattern, email) is not None
+
+def log_contact_attempt(ip_address, name, email, subject, success=True, error_msg=None):
+    """Registra il tentativo di contatto nel log"""
+    log_data = load_json_file(CONTACT_LOG_FILE, [])
     
     log_entry = {
         'timestamp': datetime.now().isoformat(),
         'ip_address': ip_address,
+        'name': name,
+        'email': email,
+        'subject': subject,
         'success': success,
-        'name': data.get('name', ''),
-        'email': data.get('email', ''),
-        'subject': data.get('subject', ''),
-        'privacy_accepted': data.get('privacy', False),
-        'message_length': len(data.get('message', '')),
-        'error_message': error_msg
+        'error': error_msg
     }
     
-    try:
-        log_data.append(log_entry)
-        
-        # Mantieni solo ultimi 1000 record
-        if len(log_data) > 1000:
-            log_data = log_data[-1000:]
-        
-        save_json_file(SECURITY_CONFIG['log_file'], log_data)
-    except Exception as e:
-        logger.error(f"Errore salvataggio log: {str(e)}")
-        # Continua l'esecuzione anche se il logging fallisce
+    log_data.append(log_entry)
+    
+    # Mantieni solo gli ultimi 1000 log per evitare file troppo grandi
+    if len(log_data) > 1000:
+        log_data = log_data[-1000:]
+    
+    save_json_file(CONTACT_LOG_FILE, log_data)
 
 def send_email(name, email, subject, message):
-    """Invia email tramite SMTP Runtime Radio"""
+    """Invia l'email tramite SMTP Gmail"""
     try:
-        # Crea messaggio
-        msg = MIMEMultipart()
-        msg['From'] = formataddr(('Sito Web Simone Pizzi', EMAIL_CONFIG['sender_email']))
-        msg['To'] = EMAIL_CONFIG['recipient_email']
-        msg['Subject'] = f"[SITO WEB] {subject}"
+        # Crea il messaggio email
+        msg = MimeMultipart('alternative')
+        msg['From'] = SENDER_EMAIL
+        msg['To'] = RECIPIENT_EMAIL
+        msg['Subject'] = f"[CONTATTO SITO] {subject}"
         
-        # Template email professionale (ispirato a Runtime Radio)
-        current_time = datetime.now()
+        # Template HTML dell'email
         html_body = f"""
         <!DOCTYPE html>
         <html>
         <head>
             <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Nuovo Contatto - Simone Pizzi</title>
+            <style>
+                body {{ font-family: 'Inter', Arial, sans-serif; line-height: 1.6; color: #333; }}
+                .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); color: white; padding: 20px; border-radius: 8px 8px 0 0; }}
+                .content {{ background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; }}
+                .highlight {{ color: #00ff88; font-weight: 600; }}
+                .info-box {{ background: white; padding: 15px; border-radius: 5px; margin: 10px 0; border-left: 4px solid #00ff88; }}
+                .footer {{ text-align: center; margin-top: 20px; color: #666; font-size: 12px; }}
+            </style>
         </head>
-        <body style="margin: 0; padding: 0; font-family: 'Inter', Arial, sans-serif; background-color: #0a0a0a; color: #ffffff;">
-            <div style="max-width: 600px; margin: 0 auto; background-color: #111111;">
-                
-                <!-- Header con brand -->
-                <div style="background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%); padding: 30px 20px; text-align: center;">
-                    <h1 style="margin: 0; font-size: 28px; font-weight: 800; color: #000000;">SIMONE PIZZI</h1>
-                    <p style="margin: 5px 0 0 0; font-size: 14px; color: #000000; opacity: 0.8;">Idee, Storie e Sperimentazione</p>
+        <body>
+            <div class="container">
+                <div class="header">
+                    <h2 style="margin: 0;">📧 Nuovo Messaggio dal Sito</h2>
+                    <p style="margin: 5px 0 0 0; opacity: 0.9;">simonepizzi.runtimeradio.it</p>
                 </div>
-                
-                <!-- Intestazione messaggio -->
-                <div style="padding: 30px 20px 20px 20px;">
-                    <h2 style="margin: 0 0 20px 0; font-size: 24px; color: #00ff88; text-align: center;">
-                        📧 Nuovo Messaggio dal Sito Web
-                    </h2>
-                </div>
-                
-                <!-- Dati contatto -->
-                <div style="margin: 0 20px 20px 20px; background-color: #1a1a1a; border-radius: 12px; padding: 25px; border-left: 4px solid #00ff88;">
-                    <h3 style="margin: 0 0 15px 0; color: #00ff88; font-size: 18px;">👤 Dettagli Contatto</h3>
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <tr>
-                            <td style="padding: 8px 0; font-weight: 600; color: #cccccc; width: 80px;">Nome:</td>
-                            <td style="padding: 8px 0; color: #ffffff;">{name}</td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px 0; font-weight: 600; color: #cccccc;">Email:</td>
-                            <td style="padding: 8px 0; color: #00ff88;"><a href="mailto:{email}" style="color: #00ff88; text-decoration: none;">{email}</a></td>
-                        </tr>
-                        <tr>
-                            <td style="padding: 8px 0; font-weight: 600; color: #cccccc;">Oggetto:</td>
-                            <td style="padding: 8px 0; color: #ffffff;">{subject}</td>
-                        </tr>
-                    </table>
-                </div>
-                
-                <!-- Messaggio -->
-                <div style="margin: 0 20px 30px 20px; background-color: #222222; border-radius: 12px; padding: 25px;">
-                    <h3 style="margin: 0 0 15px 0; color: #00ff88; font-size: 18px;">💬 Messaggio</h3>
-                    <div style="background-color: #111111; padding: 20px; border-radius: 8px; border-left: 3px solid #00ff88;">
-                        <p style="margin: 0; line-height: 1.6; color: #ffffff; white-space: pre-wrap;">{message}</p>
+                <div class="content">
+                    <div class="info-box">
+                        <strong>👤 Nome:</strong> <span class="highlight">{name}</span><br>
+                        <strong>📧 Email:</strong> <span class="highlight">{email}</span><br>
+                        <strong>📝 Oggetto:</strong> <span class="highlight">{subject}</span><br>
+                        <strong>🕒 Data:</strong> {datetime.now().strftime('%d/%m/%Y alle %H:%M')}
+                    </div>
+                    
+                    <h3 style="color: #1a1a1a; margin-top: 25px;">💬 Messaggio:</h3>
+                    <div style="background: white; padding: 20px; border-radius: 5px; border: 1px solid #ddd; white-space: pre-wrap;">{message}</div>
+                    
+                    <div class="footer">
+                        <p>📱 Messaggio ricevuto tramite il form di contatto del sito web<br>
+                        🔗 <a href="https://simonepizzi.runtimeradio.it" style="color: #00ff88;">simonepizzi.runtimeradio.it</a></p>
                     </div>
                 </div>
-                
-                <!-- Footer tecnico -->
-                <div style="background-color: #0a0a0a; padding: 20px; text-align: center; border-top: 1px solid #333333;">
-                    <p style="margin: 0; font-size: 12px; color: #666666;">
-                        🕐 Ricevuto il {current_time.strftime('%d/%m/%Y alle %H:%M')} <br>
-                        🌐 Da: simonepizzi.runtimeradio.it <br>
-                        🔒 Sistema Anti-Spam Attivo
-                    </p>
-                </div>
-                
-                <!-- Signature -->
-                <div style="background-color: #00ff88; padding: 15px 20px; text-align: center;">
-                    <p style="margin: 0; font-size: 14px; font-weight: 600; color: #000000;">
-                        Sistema di Contatti Automatico - Simone Pizzi
-                    </p>
-                </div>
-                
             </div>
         </body>
         </html>
         """
         
-        msg.attach(MIMEText(html_body, 'html'))
+        # Versione testo
+        text_body = f"""
+Nuovo messaggio dal sito simonepizzi.runtimeradio.it
+
+Nome: {name}
+Email: {email}
+Oggetto: {subject}
+Data: {datetime.now().strftime('%d/%m/%Y alle %H:%M')}
+
+Messaggio:
+{message}
+
+---
+Messaggio ricevuto tramite il form di contatto del sito web.
+        """
         
-        # Connessione SMTP
-        server = smtplib.SMTP(EMAIL_CONFIG['smtp_server'], EMAIL_CONFIG['smtp_port'])
-        server.starttls()
-        server.login(EMAIL_CONFIG['sender_email'], EMAIL_CONFIG['sender_password'])
-        server.send_message(msg)
-        server.quit()
+        # Aggiungi entrambe le versioni
+        msg.attach(MimeText(text_body, 'plain', 'utf-8'))
+        msg.attach(MimeText(html_body, 'html', 'utf-8'))
         
-        logger.info(f"Email inviata con successo da {email}")
-        return True
+        # Connessione SMTP e invio
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SENDER_EMAIL, SENDER_PASSWORD)
+            server.send_message(msg)
+        
+        return True, None
         
     except Exception as e:
-        logger.error(f"Errore invio email: {str(e)}")
-        return False
+        return False, str(e)
 
-@app.route('/')
-def serve_index():
-    """Serve la homepage"""
-    return send_from_directory('.', 'index.html')
-
-@app.route('/<path:filename>')
-def serve_static(filename):
-    """Serve file statici"""
-    return send_from_directory('.', filename)
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint"""
+    return jsonify({
+        'status': 'ok',
+        'service': 'Contact Form API',
+        'version': '1.0.0',
+        'timestamp': datetime.now().isoformat()
+    })
 
 @app.route('/api/contact', methods=['POST'])
 def handle_contact():
-    """Gestisce l'invio del form di contatto con sicurezza multi-layer"""
-    ip_address = request.environ.get('HTTP_X_FORWARDED_FOR', request.environ.get('REMOTE_ADDR', '127.0.0.1'))
+    """Gestisce l'invio del form di contatto"""
+    client_ip = get_client_ip()
     
     try:
         # Verifica Content-Type
         if not request.is_json:
-            error_msg = 'Content-Type deve essere application/json'
-            log_contact_message({}, ip_address, False, error_msg)
-            return jsonify({'success': False, 'message': error_msg}), 400
+            return jsonify({'error': 'Content-Type deve essere application/json'}), 400
         
         data = request.get_json()
         
-        # SICUREZZA 1: Rate Limiting (3 messaggi ogni 5 minuti)
-        if not check_rate_limit(ip_address):
-            error_msg = 'Troppi messaggi inviati. Riprova tra qualche minuto.'
-            log_contact_message(data, ip_address, False, error_msg)
-            return jsonify({'success': False, 'message': error_msg}), 429
+        # Validazione campi obbligatori
+        required_fields = ['name', 'email', 'subject', 'message', 'privacy']
+        for field in required_fields:
+            if not data.get(field):
+                return jsonify({'error': f'Campo {field} obbligatorio'}), 400
         
-        # SICUREZZA 2: Honeypot field (anti-bot)
-        if data.get('website'):  # Campo honeypot nascosto
-            error_msg = 'Rilevato comportamento bot'
-            log_contact_message(data, ip_address, False, error_msg)
-            return jsonify({'success': False, 'message': 'Errore di validazione'}), 400
-        
-        # Validazione campi richiesti
-        required_fields = ['name', 'email', 'subject', 'message']
-        missing_fields = [field for field in required_fields if not data.get(field)]
-        
-        if missing_fields:
-            error_msg = f'Campi mancanti: {", ".join(missing_fields)}'
-            log_contact_message(data, ip_address, False, error_msg)
-            return jsonify({'success': False, 'message': error_msg}), 400
-        
-        # Estrazione e pulizia dati
         name = data['name'].strip()
         email = data['email'].strip().lower()
-        subject = data['subject'].strip()
+        subject = data['subject']
         message = data['message'].strip()
-        privacy_accepted = data.get('privacy', False)
+        privacy = data['privacy']
         
-        # SICUREZZA 3: Validazioni lunghezza
-        if not (SECURITY_CONFIG['min_name_length'] <= len(name) <= SECURITY_CONFIG['max_name_length']):
-            error_msg = f'Il nome deve essere tra {SECURITY_CONFIG["min_name_length"]} e {SECURITY_CONFIG["max_name_length"]} caratteri'
-            log_contact_message(data, ip_address, False, error_msg)
-            return jsonify({'success': False, 'message': error_msg}), 400
+        # Validazioni
+        if len(name) < 2 or len(name) > 100:
+            return jsonify({'error': 'Il nome deve essere tra 2 e 100 caratteri'}), 400
         
-        if not (SECURITY_CONFIG['min_message_length'] <= len(message) <= SECURITY_CONFIG['max_message_length']):
-            error_msg = f'Il messaggio deve essere tra {SECURITY_CONFIG["min_message_length"]} e {SECURITY_CONFIG["max_message_length"]} caratteri'
-            log_contact_message(data, ip_address, False, error_msg)
-            return jsonify({'success': False, 'message': error_msg}), 400
-        
-        # SICUREZZA 4: Pattern sospetti
-        if check_suspicious_name(name):
-            error_msg = 'Nome contiene pattern sospetti'
-            log_contact_message(data, ip_address, False, error_msg)
-            return jsonify({'success': False, 'message': 'Formato nome non valido'}), 400
-        
-        # SICUREZZA 5: Validazione email
         if not validate_email(email):
-            error_msg = 'Formato email non valido'
-            log_contact_message(data, ip_address, False, error_msg)
-            return jsonify({'success': False, 'message': error_msg}), 400
+            return jsonify({'error': 'Indirizzo email non valido'}), 400
         
-        # SICUREZZA 6: Controllo duplicati
-        if not check_duplicate_message(name, email, message):
-            error_msg = 'Messaggio duplicato rilevato'
-            log_contact_message(data, ip_address, False, error_msg)
-            return jsonify({'success': False, 'message': 'Messaggio già inviato di recente'}), 400
+        if len(message) < 10 or len(message) > 2000:
+            return jsonify({'error': 'Il messaggio deve essere tra 10 e 2000 caratteri'}), 400
         
-        # Validazione GDPR
-        if not privacy_accepted:
-            error_msg = 'Privacy non accettata'
-            log_contact_message(data, ip_address, False, error_msg)
-            return jsonify({
-                'success': False,
-                'message': 'È necessario accettare il trattamento dei dati personali'
-            }), 400
+        if not privacy:
+            return jsonify({'error': 'È necessario accettare il trattamento dei dati personali'}), 400
         
-        # Controllo configurazione email
-        if not EMAIL_CONFIG['sender_password']:
-            error_msg = 'Password email non configurata'
-            log_contact_message(data, ip_address, False, error_msg)
-            logger.error("Password email non configurata")
-            return jsonify({
-                'success': False,
-                'message': 'Servizio email temporaneamente non disponibile'
-            }), 503
+        # Rate limiting
+        if is_rate_limited(client_ip):
+            log_contact_attempt(client_ip, name, email, subject, False, 'Rate limit exceeded')
+            return jsonify({'error': 'Troppe richieste. Riprova tra un\'ora.'}), 429
+        
+        # Controllo duplicati
+        message_hash = create_message_hash(name, email, message)
+        if is_duplicate_message(message_hash):
+            log_contact_attempt(client_ip, name, email, subject, False, 'Duplicate message')
+            return jsonify({'error': 'Messaggio duplicato. Attendere prima di inviare nuovamente.'}), 409
+        
+        # Controlla configurazione email
+        if SENDER_PASSWORD == 'INSERISCI_QUI_LA_PASSWORD_DELL_APP_GMAIL':
+            log_contact_attempt(client_ip, name, email, subject, False, 'Email not configured')
+            return jsonify({'error': 'Servizio email non configurato. Contatta direttamente pizzisimone1972@gmail.com'}), 503
         
         # Invio email
-        if send_email(name, email, subject, message):
-            log_contact_message(data, ip_address, True)
+        success, error_msg = send_email(name, email, subject, message)
+        
+        if success:
+            log_contact_attempt(client_ip, name, email, subject, True)
             return jsonify({
-                'success': True,
-                'message': 'Messaggio inviato con successo! Ti risponderò il prima possibile.'
+                'message': 'Messaggio inviato con successo! Ti risponderò al più presto.',
+                'status': 'success'
             })
         else:
-            error_msg = 'Errore SMTP durante invio'
-            log_contact_message(data, ip_address, False, error_msg)
-            return jsonify({
-                'success': False,
-                'message': 'Errore durante l\'invio. Riprova tra qualche minuto.'
-            }), 500
+            log_contact_attempt(client_ip, name, email, subject, False, error_msg)
+            return jsonify({'error': f'Errore nell\'invio dell\'email: {error_msg}'}), 500
             
     except Exception as e:
-        error_msg = f'Eccezione server: {str(e)}'
-        log_contact_message(data if 'data' in locals() else {}, ip_address, False, error_msg)
-        logger.error(f"Errore handler contact: {str(e)}")
-        return jsonify({
-            'success': False,
-            'message': 'Errore interno del server'
-        }), 500
-
-@app.route('/api/health', methods=['GET'])
-def health_check():
-    """Endpoint per verificare lo stato del server"""
-    return jsonify({
-        'status': 'ok',
-        'timestamp': datetime.now().isoformat(),
-        'email_configured': bool(EMAIL_CONFIG['sender_password'])
-    })
-
-@app.route('/api/stats', methods=['GET'])
-def get_stats():
-    """Endpoint per consultare statistiche messaggi (per admin)"""
-    try:
-        log_data = load_json_file(SECURITY_CONFIG['log_file'], [])
-        
-        # Assicurati che log_data sia sempre una lista
-        if not isinstance(log_data, list):
-            log_data = []
-        
-        # Calcola statistiche
-        total_messages = len(log_data)
-        successful_messages = len([msg for msg in log_data if msg.get('success', False)])
-        failed_messages = total_messages - successful_messages
-        
-        # Statistiche per soggetto
-        subjects = {}
-        for msg in log_data:
-            if msg.get('success', False):
-                subject = msg.get('subject', 'Altro')
-                subjects[subject] = subjects.get(subject, 0) + 1
-        
-        # Ultimi 7 giorni
-        cutoff_date = datetime.now() - timedelta(days=7)
-        recent_messages = [
-            msg for msg in log_data 
-            if datetime.fromisoformat(msg.get('timestamp', '1970-01-01')) > cutoff_date
-        ]
-        
-        return jsonify({
-            'total_messages': total_messages,
-            'successful_messages': successful_messages,
-            'failed_messages': failed_messages,
-            'success_rate': round((successful_messages / total_messages * 100) if total_messages > 0 else 0, 1),
-            'messages_last_7_days': len(recent_messages),
-            'top_subjects': dict(sorted(subjects.items(), key=lambda x: x[1], reverse=True)[:5]),
-            'last_updated': datetime.now().isoformat()
-        })
-    except Exception as e:
-        logger.error(f"Errore recupero statistiche: {str(e)}")
+        log_contact_attempt(client_ip, 'unknown', 'unknown', 'unknown', False, str(e))
         return jsonify({'error': 'Errore interno del server'}), 500
 
+@app.errorhandler(404)
+def not_found(error):
+    return jsonify({'error': 'Endpoint non trovato'}), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return jsonify({'error': 'Errore interno del server'}), 500
+
 if __name__ == '__main__':
-    print("🚀 Avvio server SimonePizziWebSite...")
-    print("📧 Per configurare SMTP Runtime Radio, modifica EMAIL_CONFIG['sender_password'] in app.py")
-    print("🌐 Sito disponibile su: http://localhost:5000")
-    print("📊 Health check: http://localhost:5000/api/health")
+    print("🚀 Avvio server Flask per Contact Form...")
+    print(f"📧 Email configurata: {SENDER_EMAIL}")
+    print(f"📁 Directory dati: {DATA_DIR}")
+    print("⚠️  IMPORTANTE: Configurare SENDER_PASSWORD nel file app.py")
+    print("🌐 Server disponibile su: http://localhost:5000")
+    print("🔗 Health check: http://localhost:5000/api/health")
+    print("📮 Endpoint contatti: http://localhost:5000/api/contact")
     
-    app.run(host='0.0.0.0', port=5000, debug=True) 
+    app.run(debug=True, host='0.0.0.0', port=5000) 

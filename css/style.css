@@ -249,6 +249,15 @@ img {
 .project-card .card-image {
     height: 200px;
     overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* SVG card icons for installation steps */
+.project-card .card-image svg {
+    transition: transform 0.3s ease;
+    filter: drop-shadow(0 4px 8px rgba(0, 255, 136, 0.2));
 }
 
 .project-card .card-image img {
@@ -260,6 +269,10 @@ img {
 
 .project-card:hover .card-image img {
     transform: scale(1.05);
+}
+
+.project-card:hover .card-image svg {
+    transform: scale(1.1) rotate(5deg);
 }
 
 .project-card .card-content {
@@ -336,11 +349,37 @@ img {
 .social-links a {
     color: var(--text-muted);
     text-decoration: none;
-    transition: color 0.3s ease;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    border-radius: 8px;
 }
 
 .social-links a:hover {
     color: var(--primary-green);
+    background-color: rgba(0, 255, 136, 0.1);
+    transform: translateY(-2px);
+}
+
+.social-links a i {
+    font-size: 1.2rem;
+    width: 20px;
+    text-align: center;
+}
+
+@media (max-width: 768px) {
+    .social-links a span {
+        display: none;
+    }
+    
+    .social-links a {
+        gap: 0;
+        min-width: 44px;
+        justify-content: center;
+    }
 }
 
 .copyright {
