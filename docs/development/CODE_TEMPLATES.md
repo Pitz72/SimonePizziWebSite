@@ -1,22 +1,31 @@
-# Template di Codice - Sito Personale Simone Pizzi
+# Template di Codice - SimonePizziWebSite
 
-**Versione Progetto:** 2.0.2 "Complete Portfolio Edition"
-**Versione Documento:** 1.2
-**Data Ultimo Aggiornamento:** 25 Gennaio 2025
+> **Versione**: v2.1.0 Final Production Edition  
+> **Ultimo Aggiornamento**: 27 Gennaio 2025  
+> **Status**: ENTERPRISE PRODUCTION READY
 
----
-
-## 1. Introduzione
-
-Questo documento fornisce template di codice pronti all'uso per aggiungere nuovi contenuti e pagine al sito, garantendo la piena coerenza con le direttive definite nella `STYLE_GUIDE.md` e nella `LAYOUT_GUIDE.md`.
-
-**Obiettivo:** Fornire una base di codice standard per l'LLM e gli sviluppatori per accelerare lo sviluppo e prevenire inconsistenze.
+## Regola Assoluta Template
+**RISPETTO RIGOROSO**: Tutti i template definiti in questo documento devono essere seguiti alla lettera. Non sono ammesse deviazioni creative senza approvazione esplicita dell'utente. La coerenza del progetto ha priorità assoluta.
 
 ---
 
-## 2. Template Pagina HTML Standard
+## 📋 Indice Template
 
-Utilizzare questo template come base per ogni **nuova pagina** del sito (es. `/storie.html`).
+1. [Template Project Card](#template-project-card)
+2. [Template Pagina Standard](#template-pagina-standard)
+3. [Template Form Contatti](#template-form-contatti)
+4. [Template Pagina Software](#template-pagina-software)
+5. [Template Pagina Videogiochi](#template-pagina-videogiochi) ⭐ **NUOVO**
+
+---
+
+## 🎮 Template Pagina Videogiochi
+
+> **Template Approvato**: v2.1.0 - 27 Gennaio 2025  
+> **Riferimento**: `pages/il-respiro-trattenuto-del-mondo.html`  
+> **Status**: TEMPLATE UFFICIALE - DA RISPETTARE RIGOROSAMENTE
+
+### Struttura HTML Base
 
 ```html
 <!DOCTYPE html>
@@ -24,404 +33,374 @@ Utilizzare questo template come base per ogni **nuova pagina** del sito (es. `/s
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[NOME_GIOCO] - Interactive Fiction | Simone Pizzi</title>
+    <meta name="description" content="[DESCRIZIONE_BREVE_GIOCO]">
+    <meta name="keywords" content="Simone Pizzi, [NOME_GIOCO], interactive fiction, [KEYWORDS_SPECIFICHE]">
+    <!-- Meta tag completi come template standard -->
     
-    <!-- !! SOSTITUIRE QUESTI META TAGS !! -->
-    <title>Titolo della Pagina | Simone Pizzi</title>
-    <meta name="description" content="Descrizione specifica per questa pagina.">
-    
-    <!-- Meta Tags Standard (NON MODIFICARE) -->
+    <!-- Font Awesome Icons OBBLIGATORIO -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+```
+
+### Layout Pagina Videogioco
+
+```html
+<main>
+    <!-- BREADCRUMB NAVIGATION (Obbligatorio) -->
+    <section class="page-hero">
+        <div class="container column-layout">
+            <div class="breadcrumb">
+                <a href="videogiochi.html">Videogiochi</a> / <span>[NOME_GIOCO]</span>
+            </div>
+            <h1>[NOME_GIOCO]</h1>
+            <p class="tagline">[SOTTOTITOLO_VERSIONE]</p>
+        </div>
+    </section>
+
+    <!-- GAME DETAILS LAYOUT (Grid 1:2) -->
+    <section class="section">
+        <div class="container">
+            <div class="detail-layout">
+                <!-- COLONNA IMMAGINE (Sticky) -->
+                <div class="detail-image">
+                    <img src="../image/[IMMAGINE_GIOCO]" alt="[ALT_TEXT]" loading="lazy">
+                </div>
+                
+                <!-- COLONNA CONTENUTO -->
+                <div class="detail-content">
+                    <!-- META INFORMAZIONI -->
+                    <div class="game-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-gamepad"></i>
+                            <span><strong>Genere:</strong> [GENERE]</span>
+                        </div>
+                        <!-- Altri meta-item... -->
+                    </div>
+
+                    <!-- DESCRIZIONE GIOCO -->
+                    <div class="game-description">
+                        <h2>Descrizione</h2>
+                        <!-- Contenuto descrizione -->
+                    </div>
+
+                    <!-- SEZIONE DOWNLOAD (Obbligatoria) -->
+                    <div class="download-section">
+                        <h2>📱 Download Gratuito</h2>
+                        <div class="download-buttons">
+                            <!-- Bottoni download per piattaforme -->
+                        </div>
+                        
+                        <!-- SUPPORTO PAYPAL (Obbligatorio dopo download) -->
+                        <div class="support-paypal">
+                            <h3>💖 Ti è piaciuto?</h3>
+                            <p>Se hai apprezzato questo gioco, puoi sostenere i miei progetti futuri!</p>
+                            <a href="https://www.paypal.com/paypalme/SimonePizzi" target="_blank" class="button primary" aria-label="Sostieni con donazione PayPal">
+                                <span class="cta-button-text">Offrimi un Caffè ☕</span>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- INFORMAZIONI TECNICHE -->
+                    <div class="technical-info">
+                        <!-- Grid tecnica -->
+                    </div>
+
+                    <!-- SUPPORTO (Generico) -->
+                    <div class="support-section">
+                        <h3>📞 Supporto</h3>
+                        <p>Per bug, suggerimenti o domande 
+                        <a href="../contatti.html" class="text-link">clicca qui per scrivermi</a></p>
+                        <p class="game-tagline"><strong>🎮 [TAGLINE_FINALE] 🎮</strong></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- BACK NAVIGATION (Obbligatoria) -->
+    <section class="section">
+        <div class="container">
+            <div class="back-navigation">
+                <a href="videogiochi.html" class="back-link">
+                    <i class="fas fa-arrow-left"></i>
+                    Torna ai Videogiochi
+                </a>
+            </div>
+        </div>
+    </section>
+</main>
+```
+
+### CSS Classes Specifiche Videogiochi
+
+**OBBLIGATORIE** per mantenere coerenza:
+
+```css
+/* Layout principale */
+.detail-layout
+.detail-image (sticky)
+.detail-content
+
+/* Meta informazioni */
+.game-meta
+.meta-item
+
+/* Sezioni contenuto */
+.game-description
+.download-section
+.download-buttons
+.download-btn (con hover effects)
+.support-paypal ⭐ NUOVO
+.technical-info
+.tech-grid
+.tech-item
+
+/* Navigazione */
+.breadcrumb
+.back-navigation
+.back-link
+
+/* Utilità */
+.text-link.inactive (per giochi "Presto Disponibili")
+```
+
+### Elementi Obbligatori Template Videogiochi
+
+1. **Breadcrumb Navigation**: `Videogiochi / [Nome Gioco]`
+2. **Layout Grid 1:2**: Immagine sticky + contenuto scorrevole
+3. **Game Meta**: Icone Font Awesome + info tecniche
+4. **Download Section**: Con bottoni animati
+5. **Supporto PayPal**: Subito dopo i download
+6. **Link Contatti Generico**: Non email diretta
+7. **Back Navigation**: Sempre presente
+8. **Responsive Design**: Grid collassa su mobile
+
+---
+
+## 🎯 Template Project Card
+
+```html
+<div class="project-card">
+    <div class="card-image">
+        <img src="[IMAGE_PATH]" alt="[ALT_TEXT]" loading="lazy">
+    </div>
+    <div class="card-content">
+        <h3>[PROJECT_TITLE]</h3>
+        <p>[PROJECT_DESCRIPTION]</p>
+        <a href="[PROJECT_LINK]" class="text-link">[CTA_TEXT] &rarr;</a>
+    </div>
+</div>
+```
+
+### Varianti Project Card
+
+**Card Standard (Attiva)**:
+```html
+<a href="[LINK]" class="text-link">[CTA] &rarr;</a>
+```
+
+**Card Disabilitata**:
+```html
+<span class="text-link inactive">Presto Disponibile</span>
+```
+
+---
+
+## 📄 Template Pagina Standard
+
+```html
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[PAGE_TITLE] | Simone Pizzi</title>
+    <meta name="description" content="[PAGE_DESCRIPTION]">
+    <meta name="keywords" content="Simone Pizzi, [KEYWORDS]">
     <meta name="author" content="Simone Pizzi">
     <meta name="robots" content="index, follow">
-    <link rel="canonical" href="https://simonepizzi.runtimeradio.it/nome-pagina.html">
-    
-    <!-- Stili e Font (NON MODIFICARE) -->
+
+    <!-- Open Graph & Twitter -->
+    <meta property="og:title" content="[PAGE_TITLE] | Simone Pizzi">
+    <meta property="og:description" content="[PAGE_DESCRIPTION]">
+    <meta property="og:image" content="[OG_IMAGE_URL]">
+    <meta property="og:url" content="[PAGE_URL]">
+    <meta property="twitter:card" content="summary_large_image">
+
+    <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
-
-    <!-- Favicon (NON MODIFICARE) -->
-    <!-- <link rel="icon" type="image/x-icon" href="/favicon.ico"> -->
-
+    
+    <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-    <header>
-        <!-- !! INCOLLARE QUI L'HEADER COMPLETO DA INDEX.HTML !! -->
-        <!-- Assicurarsi che i link di navigazione siano corretti -->
+    <!-- ========= HEADER ========= -->
+    <header class="main-header">
+        <nav class="container">
+            <a href="../index.html" class="logo">
+                <span class="logo-name">Simone Pizzi</span>
+                <span class="logo-tagline">Idee, Storie e Sperimentazione</span>
+            </a>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="sono-simone.html">Chi Sono</a></li>
+                <li><a href="podcast.html">Podcast</a></li>
+                <li><a href="libri.html">Libri</a></li>
+                <li><a href="software.html">Software</a></li>
+                <li><a href="videogiochi.html">Videogiochi</a></li>
+                <li><a href="contatti.html">Contattami</a></li>
+            </ul>
+        </nav>
     </header>
 
     <main>
-        <!-- Inizio Contenuto Pagina -->
-
-        <section class="section">
-            <div class="container">
-                <!-- Inserire qui il contenuto, usando i template di sezione -->
+        <!-- ========= Page Hero ========= -->
+        <section class="page-hero">
+            <div class="container column-layout">
+                <h1>[PAGE_TITLE]</h1>
+                <p class="tagline">[PAGE_TAGLINE]</p>
             </div>
         </section>
 
-        <!-- Fine Contenuto Pagina -->
+        <!-- Content sections here -->
     </main>
 
-    <footer>
-        <!-- !! INCOLLARE QUI IL FOOTER COMPLETO DA INDEX.HTML !! -->
+    <!-- ========= FOOTER ========= -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="social-links">
+                <a href="https://github.com/Pitz72" target="_blank">GitHub</a>
+                <a href="https://www.instagram.com/pizzisimone1972/" target="_blank">Instagram</a>
+                <a href="https://www.spreaker.com/user/runtime-radio--8395974" target="_blank">Spreaker</a>
+            </div>
+            <p class="copyright">&copy; 2025 Simone Pizzi. Tutti i diritti riservati.</p>
+        </div>
     </footer>
-
-    <script src="js/main.js"></script>
 </body>
 </html>
 ```
 
 ---
 
-## 3. Template Sezioni di Contenuto
-
-Usare questi template per aggiungere sezioni di contenuto all'interno di una pagina.
-
-### 3.1. Sezione Standard (Immagine a Sinistra)
+## 📨 Template Form Contatti
 
 ```html
-<section id="ID-UNIVOCO-SEZIONE" class="section">
-    <div class="container">
-        <div class="image-placeholder">
-            <img src="image/NOME_IMMAGINE.jpg" alt="DESCRIZIONE SEO DELL'IMMAGINE" loading="lazy">
-        </div>
-        <article class="content">
-            <h2>TITOLO DELLA SEZIONE</h2>
-            <p>
-                Testo della sezione. Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                Praesent vel ex sit amet turpis venenatis aliquet.
-            </p>
-            <p>
-                Aliquam erat volutpat. Integer eget elit vel magna euismod aliquam.
-            </p>
-            <a href="LINK_DESTINAZIONE" class="cta-button" aria-label="DESCRIZIONE ACCESSIBILE DELLO SCOPO DEL PULSANTE">
-                <span class="cta-button-text">TESTO DEL PULSANTE</span>
-            </a>
-        </article>
+<form id="contactForm" class="contact-form">
+    <div class="form-group">
+        <label for="name">Nome</label>
+        <input type="text" id="name" name="name" required>
     </div>
-</section>
-```
-
-### 3.2. Sezione Invertita (Immagine a Destra)
-
-```html
-<section id="ID-UNIVOCO-SEZIONE" class="section">
-    <div class="container reverse">
-        <div class="image-placeholder">
-            <img src="image/NOME_IMMAGINE.jpg" alt="DESCRIZIONE SEO DELL'IMMAGINE" loading="lazy">
-        </div>
-        <article class="content">
-            <h2>TITOLO DELLA SEZIONE</h2>
-            <p>
-                Testo della sezione. Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                Praesent vel ex sit amet turpis venenatis aliquet.
-            </p>
-            <a href="LINK_DESTINAZIONE" class="cta-button" aria-label="DESCRIZIONE ACCESSIBILE DELLO SCOPO DEL PULSANTE">
-                <span class="cta-button-text">TESTO DEL PULSANTE</span>
-            </a>
-        </article>
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="email" id="email" name="email" required>
     </div>
-</section>
-```
-
-### 3.3. Sezione Solo Testo (Centrata)
-
-Per sezioni senza immagine, come introduzioni o conclusioni.
-
-```html
-<section id="ID-UNIVOCO-SEZIONE" class="section">
-    <div class="container">
-        <article class="content" style="max-width: 800px; margin: 0 auto; text-align: center;">
-            <h2>TITOLO DELLA SEZIONE</h2>
-            <p>
-                Testo della sezione. Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
-                Praesent vel ex sit amet turpis venenatis aliquet.
-            </p>
-        </article>
+    <div class="form-group">
+        <label for="subject">Oggetto</label>
+        <select id="subject" name="subject" required>
+            <option value="">Seleziona l'argomento</option>
+            <option value="Collaborazione Podcast">Collaborazione Podcast</option>
+            <option value="Progetto Sviluppo Software">Progetto Sviluppo Software</option>
+            <option value="Proposta Editoriale">Proposta Editoriale</option>
+            <option value="Richiesta Intervista">Richiesta Intervista</option>
+            <option value="Consulenza Tecnica">Consulenza Tecnica</option>
+            <option value="Altro">Altro</option>
+        </select>
     </div>
-</section>
-```
----
-
-## 4. Template Componenti Individuali
-
-### 4.1. Pulsante CTA
-
-```html
-<a href="LINK_DESTINAZIONE" class="cta-button" aria-label="DESCRIZIONE ACCESSIBILE DELLO SCOPO DEL PULSANTE">
-    <span class="cta-button-text">TESTO DEL PULSANTE</span>
-</a>
-```
-
-### 4.2. Immagine con Placeholder
-
-```html
-<div class="image-placeholder">
-    <img src="image/NOME_IMMAGINE.jpg" alt="DESCRIZIONE SEO DELL'IMMAGINE" loading="lazy">
-</div>
+    <div class="form-group">
+        <label for="message">Messaggio</label>
+        <textarea id="message" name="message" rows="5" required></textarea>
+    </div>
+    
+    <!-- Honeypot field (anti-bot) -->
+    <div style="position: absolute; left: -9999px; visibility: hidden;">
+        <label for="website">Sito web (non compilare):</label>
+        <input type="text" id="website" name="website" autocomplete="off" tabindex="-1">
+    </div>
+    
+    <div class="form-group" style="flex-direction: row; align-items: flex-start;">
+        <input type="checkbox" id="privacy" name="privacy" required>
+        <label for="privacy" style="margin-left: 0.5rem; font-size: 0.9rem; line-height: 1.4; margin-top: 0;">
+            Acconsento al trattamento dei miei dati personali secondo quanto previsto dal 
+            Regolamento UE 2016/679 (GDPR). I dati saranno utilizzati esclusivamente per 
+            rispondere alla tua richiesta e non saranno condivisi con terzi.
+        </label>
+    </div>
+    
+    <button type="submit" class="button primary full-width">
+        <span class="cta-button-text">Invia Messaggio</span>
+    </button>
+</form>
+<div id="formStatus" class="form-status" style="display: none;"></div>
 ```
 
 ---
 
-## Template: Pagina Dettaglio Software
+## 💻 Template Pagina Software
 
-Questa è la struttura standard per una pagina dedicata a un singolo software.
+> **Riferimento**: `pages/software.html` e pagine specifiche software
 
-### Layout Generale
-La pagina deve utilizzare il layout `.project-details-layout` per affiancare l'immagine del software alle informazioni.
-
-### Sezione Meta-Informazioni (`.project-meta`)
-Questa sezione contiene i dati chiave del software.
-
-#### **Struttura per la Compatibilità**
-Utilizzare sempre testo semplice e chiaro per indicare i sistemi operativi supportati.
-
+### Struttura Base Software
 ```html
-<div class="meta-item">
-    <h4>Compatibilità</h4>
-    <p>Windows, macOS, Linux</p>
-</div>
-```
-
-**Note di Implementazione:**
-- **Evitare icone complesse:** Il testo "Windows, macOS, Linux" è più chiaro di icone SVG
-- **Ordine standard:** Mantenere sempre l'ordine Windows → macOS → Linux
-- **Chiarezza immediata:** Zero ambiguità per l'utente
-
-### Sezione Supporto/Donazioni Ottimizzata
-Posizionare il supporto PayPal subito dopo il pulsante download principale per massimizzare la conversione.
-
-```html
-<a href="downloads/percorso/file.zip" class="button primary large full-width" download aria-label="Descrizione download">
-    <span class="cta-button-text">Download Nome Software</span>
-</a>
-
-<!-- PayPal Support Button - Subito dopo il download -->
-<div style="text-align: center; margin-top: 2rem;">
-    <h3 style="color: var(--primary-green); margin-bottom: 0.5rem;">Offrimi un Caffè</h3>
-    <a href="https://www.paypal.com/paypalme/USERNAME" target="_blank" style="display: inline-block;">
-        <img src="https://www.paypalobjects.com/it_IT/IT/i/btn/btn_donateCC_LG.gif" alt="Fai una donazione con il pulsante PayPal">
-    </a>
-</div>
-```
-
-### Layout Immagine-Testo Ottimizzato
-
-Per pagine software con immagini prominenti, utilizzare questo layout con allineamento in alto:
-
-```html
-<section class="section">
-    <div class="container project-details-layout" style="align-items: start;">
-        <div class="project-image" style="display: flex; align-items: flex-start; justify-content: center;">
-            <img src="image/nome-software.png" alt="Screenshot Software" loading="lazy" style="max-width: 350px; height: auto;">
-        </div>
-        <div class="project-info">
-            <h2>Cos'è e Cosa Fa</h2>
-            <!-- Contenuto informazioni -->
-        </div>
+<!-- Project Details Layout -->
+<div class="project-details-layout">
+    <div class="project-image">
+        <img src="[SOFTWARE_IMAGE]" alt="[ALT_TEXT]" loading="lazy">
     </div>
-</section>
-```
-
-**Specifiche Tecniche:**
-- **Dimensione immagine ottimale:** 350px max-width per software screenshots
-- **Allineamento:** `align-items: start` per allineare immagine con inizio del testo
-- **Responsive:** L'immagine si adatta automaticamente su mobile
-
-### Sezione Narrativa Separata
-Utilizzare una sezione separata per il contenuto narrativo/emozionale:
-
-```html
-<section class="section alt-bg">
-    <div class="container column-layout text-center">
-        <h2>Un Progetto di Passione</h2>
-        <p>Testo che racconta la storia e motivazione dietro il software...</p>
-    </div>
-</section>
-```
-
-**Best Practices Implementate:**
-- **Separazione logica:** Download/Support nella sezione principale, narrativa in sezione separata
-- **UX ottimizzata:** PayPal immediatamente accessibile dopo il download
-- **Layout pulito:** Eliminazione di spazi eccessivi e frammentazione
-- **Compatibilità chiara:** Testo semplice invece di icone ambigue
-
----
-
-## 6. Aggiornamenti di Conformità - Gennaio 2025
-
-**Versione Aggiornamento:** 1.1
-**Data Implementazione:** 25 Gennaio 2025
-
-### 6.1. Nuove Classi CSS Implementate
-
-Le seguenti classi sono state aggiunte per completare la conformità ai template:
-
-#### **Sezioni con Sfondo Alternativo**
-```css
-.section.alt-bg {
-    background-color: var(--surface-dark);
-}
-```
-
-**Utilizzo:**
-```html
-<section class="section alt-bg">
-    <div class="container column-layout text-center">
-        <!-- Contenuto con sfondo scuro -->
-    </div>
-</section>
-```
-
-#### **Layout Invertito (Immagine a Destra)**
-```css
-.section .container.reverse {
-    flex-direction: row-reverse;
-}
-
-@media (max-width: 768px) {
-    .section .container.reverse {
-        flex-direction: column;
-    }
-}
-```
-
-**Utilizzo:**
-```html
-<section class="section">
-    <div class="container reverse">
-        <div class="image-placeholder">
-            <img src="image/esempio.jpg" alt="Descrizione" loading="lazy">
-        </div>
-        <article class="content">
-            <h2>Titolo</h2>
-            <p>Testo con immagine a destra su desktop</p>
-        </article>
-    </div>
-</section>
-```
-
-#### **Wrapper Interno CTA Button**
-```css
-.cta-button-text {
-    display: inline-block;
-}
-```
-
-**Utilizzo (Template Standard):**
-```html
-<a href="#destinazione" class="cta-button" aria-label="Descrizione accessibile">
-    <span class="cta-button-text">Testo del Pulsante</span>
-</a>
-```
-
-### 6.2. Unificazione Grid Systems
-
-La classe `.item-grid` è stata standardizzata per avere lo stesso comportamento di `.project-grid`:
-
-```css
-.item-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 2rem;
-    width: 100%;
-}
-
-@media (max-width: 768px) {
-    .item-grid {
-        grid-template-columns: 1fr;
-    }
-}
-```
-
-### 6.3. Miglioramenti Performance
-
-Tutti gli attributi `loading="lazy"` sono stati implementati sistematicamente su tutte le immagini del sito per ottimizzare i tempi di caricamento.
-
-### 6.4. Stili Button Estesi
-
-Aggiunti stili per pulsanti standard con varianti:
-
-```css
-.button.primary    /* Stile principale (verde) */
-.button.large      /* Dimensioni maggiorate */
-.button.full-width /* Larghezza completa del container */
-```
-
-### 6.5. Conformità Finale
-
-Con questi aggiornamenti, il progetto raggiunge una **conformità del 100%** rispetto ai template documentati nella **STYLE_GUIDE.md** e **LAYOUT_GUIDE.md**.
-
----
-
-## 7. Esempi Pratici di Implementazione
-
-### 7.1. Sezione Standard + Sezione Invertita
-```html
-<!-- Sezione normale -->
-<section class="section">
-    <div class="container">
-        <div class="image-placeholder">
-            <img src="image/esempio1.jpg" alt="Esempio 1" loading="lazy">
-        </div>
-        <article class="content">
-            <h2>Prima Sezione</h2>
-            <p>Immagine a sinistra, testo a destra.</p>
-        </article>
-    </div>
-</section>
-
-<!-- Sezione invertita -->
-<section class="section alt-bg">
-    <div class="container reverse">
-        <div class="image-placeholder">
-            <img src="image/esempio2.jpg" alt="Esempio 2" loading="lazy">
-        </div>
-        <article class="content">
-            <h2>Seconda Sezione</h2>
-            <p>Immagine a destra, testo a sinistra, sfondo scuro.</p>
-        </article>
-    </div>
-</section>
-```
-
-### 7.2. Grid di Progetti/Item
-```html
-<section class="section">
-    <div class="container column-layout">
-        <div class="item-grid">
-            <div class="project-card">
-                <div class="card-image">
-                    <img src="image/progetto1.jpg" alt="Progetto 1" loading="lazy">
-                </div>
-                <div class="card-content">
-                    <h3>Progetto 1</h3>
-                    <p>Descrizione del progetto.</p>
-                    <a href="dettaglio.html" class="text-link">Scopri di più &rarr;</a>
-                </div>
+    <div class="project-info">
+        <div class="project-meta">
+            <div class="meta-item">
+                <h4>Tecnologie</h4>
+                <p>[TECH_STACK]</p>
             </div>
-            <!-- Altri project-card... -->
+            <!-- Altri meta-item -->
         </div>
+        <!-- Resto del contenuto -->
     </div>
-</section>
+</div>
 ```
 
-### 7.3. Template Page Hero Corretto v2.0.1
+---
 
-**CORREZIONE CRITICA**: Standardizzato allineamento centrale per tutti i titoli hero.
+## 🔧 Linee Guida Generali
 
+### CSS Class Naming Convention
+- `.main-header` - Header principale
+- `.page-hero` - Sezione hero di pagina
+- `.section` - Contenitore sezione standard
+- `.container` - Wrapper contenuto centralizzato
+- `.column-layout` - Layout verticale centrato
+- `.project-card` - Card progetto standard
+- `.text-link` - Link testuale con freccia
+- `.button.primary` - Bottone principale
+- `.cta-button` - Call-to-action button
+
+### Icone Font Awesome
+**SEMPRE** utilizzare Font Awesome 6.5.0 via CDN:
 ```html
-<!-- Template CORRETTO per tutte le pagine principali -->
-<section class="page-hero">
-    <div class="container column-layout">
-        <h1>Titolo della Pagina</h1>
-        <p class="tagline">Descrizione della pagina o sezione.</p>
-    </div>
-</section>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 ```
 
-**Note Implementazione v2.0.1**:
-- ✅ **NO style inline**: La classe `.page-hero` gestisce automaticamente il centramento
-- ✅ **Centramento garantito**: CSS centralizzato `text-align: center`
-- ✅ **Coerenza totale**: Stesso comportamento visivo su tutte le pagine menu
-- ❌ **VIETATO**: `style="text-align: center;"` o altri allineamenti inline 
+### Responsive Breakpoints
+- **Desktop**: `min-width: 992px`
+- **Tablet**: `max-width: 768px` 
+- **Mobile**: `max-width: 480px`
+
+---
+
+## ⚠️ Anti-Regressione Template
+
+1. **MAI** modificare la struttura base dei template
+2. **SEMPRE** utilizzare le classi CSS specificate
+3. **SEMPRE** includere Font Awesome per le icone
+4. **SEMPRE** mantenere la navigazione breadcrumb nelle pagine dettaglio
+5. **SEMPRE** includere back navigation
+6. **MAI** inserire email dirette - utilizzare link generici ai contatti
+7. **SEMPRE** includere supporto PayPal dopo download nei videogiochi
+
+---
+
+> **Versione Template**: v2.1.0 Final Production Edition  
+> **Compliance**: ENTERPRISE READY ✅

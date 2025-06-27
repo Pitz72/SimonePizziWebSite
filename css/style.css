@@ -1252,6 +1252,30 @@ MODAL STYLES
     color: var(--primary-green);
 }
 
+/* Support PayPal Section */
+.support-paypal {
+    background: linear-gradient(135deg, rgba(0, 255, 136, 0.05), rgba(0, 255, 136, 0.1));
+    border: 1px solid rgba(0, 255, 136, 0.3);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.support-paypal h3 {
+    color: var(--primary-green);
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+}
+
+.support-paypal p {
+    margin-bottom: 1rem;
+}
+
+.support-paypal .button {
+    margin: 0;
+}
+
 /* Technical Info */
 .technical-info {
     background: var(--surface-dark);
