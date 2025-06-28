@@ -1,0 +1,45 @@
+{
+  "article_id": "[NUMERO_PROGRESSIVO]",
+  "title": "[TITOLO_COMPLETO_ARTICOLO]",
+  "title_short": "[TITOLO_BREVE_IDENTIFICATIVO]",
+  "date": {
+    "datetime": "YYYY-MM-DD",
+    "display": "GG Mese AAAA"
+  },
+  "meta": {
+    "description": "[DESCRIZIONE_META_SEO_MAX_160_CARATTERI]",
+    "reading_time": "[N] min",
+    "keywords": ["keyword1", "keyword2", "keyword3"]
+  },
+  "image": {
+    "filename": "[nome-file].[ext]",
+    "alt": "[ALT_TEXT_ACCESSIBILITA]",
+    "caption": "[CAPTION_DESCRITTIVA]"
+  },
+  "content": {
+    "lead_paragraph": "[PARAGRAFO_APERTURA_150_200_PAROLE_BOLD]",
+    "preview": "[ANTEPRIMA_120_150_CARATTERI_PER_CARD]",
+    "sections": [
+      {
+        "title": "[TITOLO_H2_SEZIONE]",
+        "content": "[CONTENUTO_SEZIONE_PARAGRAFO]",
+        "type": "text"
+      },
+      {
+        "title": "[TITOLO_H2_LISTA]",
+        "content": [
+          "Item lista 1",
+          "Item lista 2",
+          "Item lista 3"
+        ],
+        "type": "list"
+      }
+    ],
+    "special_note": "[NOTA_SPECIALE_OPZIONALE]"
+  },
+  "file_paths": {
+    "article": "pages/chi-sono/articoli/[nome-file-kebab-case].html",
+    "card_id": "[ID_CARD_HOMEPAGE_UNIVOCO]"
+  },
+  "status": "DA_CREARE"
+} 

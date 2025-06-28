@@ -381,3 +381,250 @@ document.addEventListener('keydown', function(event) {
         }
     }
 });
+
+// ===============================================
+// SISTEMA COMPONENTI CENTRALIZZATI (Header/Footer)
+// ===============================================
+
+class ComponentManager {
+    constructor() {
+        this.basePath = this.calculateBasePath();
+        this.currentPage = this.getCurrentPage();
+        console.log(`ComponentManager: basePath="${this.basePath}", currentPage="${this.currentPage}"`);
+    }
+
+    calculateBasePath() {
+        const path = window.location.pathname;
+        const depth = path.split('/').filter(p => p && p !== 'index.html').length - 1;
+        return depth > 0 ? '../'.repeat(depth) : './';
+    }
+
+    getCurrentPage() {
+        const path = window.location.pathname;
+        if (path.includes('/software/')) return 'software';
+        if (path.includes('/videogiochi/')) return 'videogiochi';
+        if (path.includes('/contatti')) return 'contatti';
+        if (path.includes('/libri/')) return 'libri';
+        if (path.includes('/podcast/')) return 'podcast';
+        if (path.includes('/chi-sono/')) return 'chi-sono';
+        return 'home';
+    }
+
+    async loadComponent(componentName, targetSelector) {
+        try {
+            const response = await fetch(`${this.basePath}components/${componentName}.html`);
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const html = await response.text();
+            const targetElement = document.querySelector(targetSelector);
+            
+            if (targetElement) {
+                targetElement.innerHTML = html;
+                this.updatePaths(targetElement);
+                this.setActiveNavigation();
+                return true;
+            }
+        } catch (error) {
+            console.warn(`Could not load ${componentName}:`, error);
+            return false;
+        }
+    }
+
+    updatePaths(container) {
+        // Sostituisci i placeholder BASEPATH_REPLACE con il basePath corretto
+        const links = container.querySelectorAll('a[href*="BASEPATH_REPLACE"]');
+        links.forEach(link => {
+            const href = link.getAttribute('href');
+            const newHref = href.replace('BASEPATH_REPLACE', this.basePath);
+            link.setAttribute('href', newHref);
+        });
+
+        // Aggiorna anche i link assoluti legacy
+        const absoluteLinks = container.querySelectorAll('a[href^="/"]');
+        absoluteLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href.startsWith('/')) {
+                link.setAttribute('href', `${this.basePath}${href.substring(1)}`);
+            }
+        });
+    }
+
+    setActiveNavigation() {
+        // Rimuovi tutte le classi active esistenti
+        const navLinks = document.querySelectorAll('.nav-menu a');
+        navLinks.forEach(link => link.classList.remove('active'));
+
+        // Aggiungi classe active al link corrispondente
+        const activeSelector = {
+            'home': '#nav-home',
+            'software': '#nav-software', 
+            'videogiochi': '#nav-videogiochi',
+            'contatti': '#nav-contatti',
+            'libri': '#nav-libri',
+            'podcast': '#nav-podcast',
+            'chi-sono': '#nav-chi-sono'
+        };
+
+        const targetLink = document.querySelector(activeSelector[this.currentPage]);
+        if (targetLink) {
+            targetLink.classList.add('active');
+        }
+    }
+
+    async initialize() {
+        console.log('ComponentManager: Initializing...');
+        
+        // Carica header se non è già presente
+        if (!document.querySelector('.main-header')) {
+            const headerLoaded = await this.loadHeader();
+            if (!headerLoaded) {
+                console.log('Fallback: Creating header directly');
+                this.createFallbackHeader();
+            }
+        }
+
+        // Carica footer se non è già presente  
+        if (!document.querySelector('.main-footer')) {
+            const footerLoaded = await this.loadFooter();
+            if (!footerLoaded) {
+                console.log('Fallback: Creating footer directly');
+                this.createFallbackFooter();
+            }
+        }
+    }
+
+    createFallbackHeader() {
+        const headerHtml = `
+        <header class="main-header">
+            <nav class="container">
+                <a href="${this.basePath}index.html" class="logo">
+                    <span class="logo-name">Simone Pizzi</span>
+                    <span class="logo-tagline">Idee, Storie e Sperimentazione</span>
+                </a>
+                <ul class="nav-menu">
+                    <li><a href="${this.basePath}index.html" id="nav-home">Home</a></li>
+                    <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Sono Simone (blog)</a></li>
+                    <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Podcast</a></li>
+                    <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Libri</a></li>
+                    <li><a href="${this.basePath}pages/software/" id="nav-software">Software</a></li>
+                    <li><a href="${this.basePath}pages/videogiochi/" id="nav-videogiochi">Videogiochi</a></li>
+                    <li><a href="${this.basePath}pages/contatti.html" id="nav-contatti">Contattami</a></li>
+                </ul>
+            </nav>
+        </header>`;
+        
+        document.body.insertAdjacentHTML('afterbegin', headerHtml);
+        this.setActiveNavigation();
+    }
+
+    createFallbackFooter() {
+        const footerHtml = `
+        <footer class="main-footer">
+            <div class="container">
+                <div class="social-links">
+                    <a href="mailto:pizzisimon1972@gmail.com" aria-label="Email di Simone Pizzi">
+                        <i class="fas fa-envelope"></i>
+                        <span>Email</span>
+                    </a>
+                    <a href="https://github.com/Pitz72" target="_blank" aria-label="GitHub di Simone Pizzi">
+                        <i class="fab fa-github"></i>
+                        <span>GitHub</span>
+                    </a>
+                    <a href="https://www.instagram.com/pizzisimone1972/" target="_blank" aria-label="Instagram di Simone Pizzi">
+                        <i class="fab fa-instagram"></i>
+                        <span>Instagram</span>
+                    </a>
+                    <a href="https://www.spreaker.com/user/runtime-radio--8395974" target="_blank" aria-label="Spreaker di Runtime Radio">
+                        <i class="fas fa-podcast"></i>
+                        <span>Spreaker</span>
+                    </a>
+                </div>
+                <p class="copyright">&copy; 2025 Simone Pizzi. Tutti i diritti riservati.</p>
+            </div>
+        </footer>`;
+        
+        document.body.insertAdjacentHTML('beforeend', footerHtml);
+    }
+
+    async loadHeader() {
+        try {
+            console.log(`Loading header from: ${this.basePath}components/header.html`);
+            
+            // Timeout di 3 secondi per il fetch
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            
+            const response = await fetch(`${this.basePath}components/header.html`, {
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const html = await response.text();
+            const body = document.body;
+            
+            // Inserisci header all'inizio del body
+            body.insertAdjacentHTML('afterbegin', html);
+            
+            const headerElement = document.querySelector('.main-header');
+            if (headerElement) {
+                this.updatePaths(headerElement);
+                this.setActiveNavigation();
+                console.log('Header loaded successfully');
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.warn(`Could not load header:`, error);
+            return false;
+        }
+    }
+
+    async loadFooter() {
+        try {
+            console.log(`Loading footer from: ${this.basePath}components/footer.html`);
+            
+            // Timeout di 3 secondi per il fetch
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            
+            const response = await fetch(`${this.basePath}components/footer.html`, {
+                signal: controller.signal
+            });
+            
+            clearTimeout(timeoutId);
+            
+            if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+            
+            const html = await response.text();
+            const body = document.body;
+            
+            // Inserisci footer alla fine del body
+            body.insertAdjacentHTML('beforeend', html);
+            
+            const footerElement = document.querySelector('.main-footer');
+            if (footerElement) {
+                this.updatePaths(footerElement);
+                console.log('Footer loaded successfully');
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.warn(`Could not load footer:`, error);
+            return false;
+        }
+    }
+}
+
+// Inizializza il sistema di componenti quando il DOM è pronto
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        const componentManager = new ComponentManager();
+        componentManager.initialize();
+    });
+} else {
+    const componentManager = new ComponentManager();
+    componentManager.initialize();
+}

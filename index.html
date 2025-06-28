@@ -7,7 +7,7 @@
     <!-- SEO Meta Tags -->
     <title>Simone Pizzi - Podcaster, Scrittore e Sviluppatore | Idee, Storie e Sperimentazione</title>
     <meta name="description" content="Simone Pizzi: podcaster dal 2010, scrittore di storie e racconti, sviluppatore sperimentale con AI. Fondatore Italian Podcast Network e Runtime Radio. Esplora podcast, narrativa interattiva e progetti innovativi.">
-    <meta name="keywords" content="Simone Pizzi, podcast, podcasting, Runtime Radio, Italian Podcast Network, scrittore, narrativa, interactive fiction, sviluppo AI, LLM, programmazione, storie, racconti, sperimentazione digitale">
+    <meta name="keywords" content="Simone Pizzi, sviluppatore software, podcaster, autore, scrittore, content creator, software, videogiochi, podcast, libri, romanzi, racconti, narrativa, sviluppo AI, LLM, programmazione, storie, racconti, sperimentazione digitale">
     <meta name="author" content="Simone Pizzi">
     <meta name="robots" content="index, follow">
     <meta name="language" content="Italian">
@@ -49,7 +49,7 @@
     <!-- Dublin Core Metadata -->
     <meta name="DC.Title" content="Simone Pizzi - Podcaster, Scrittore e Sviluppatore">
     <meta name="DC.Creator" content="Simone Pizzi">
-    <meta name="DC.Subject" content="Podcasting, Narrativa, Sviluppo Software, AI, Interactive Fiction">
+    <meta name="DC.Subject" content="Podcasting, Narrativa, Sviluppo Software, AI, Videogiochi">
     <meta name="DC.Description" content="Portfolio di Simone Pizzi: podcast, libri, software e videogiochi">
     <meta name="DC.Publisher" content="Runtime Radio">
     <meta name="DC.Contributor" content="Simone Pizzi">
@@ -223,24 +223,27 @@
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <!-- ========= HEADER ========= -->
-    <header class="main-header">
-        <nav class="container">
-            <a href="index.html" class="logo">
-                <span class="logo-name">Simone Pizzi</span>
-                <span class="logo-tagline">Idee, Storie e Sperimentazione</span>
-            </a>
-            <ul class="nav-menu">
-                <li><a href="index.html" class="active">Home</a></li>
-                <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Chi Sono</a></li>
-                <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Podcast</a></li>
-                <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Libri</a></li>
-                <li><a href="pages/software.html">Software</a></li>
-                <li><a href="pages/videogiochi.html">Videogiochi</a></li>
-                <li><a href="pages/contatti.html">Contattami</a></li>
-            </ul>
-        </nav>
-    </header>
+    <!-- Header sarà caricato automaticamente dal JavaScript -->
+    <noscript>
+        <!-- Fallback header per quando JavaScript è disabilitato -->
+        <header class="main-header">
+            <nav class="container">
+                <a href="index.html" class="logo">
+                    <span class="logo-name">Simone Pizzi</span>
+                    <span class="logo-tagline">Idee, Storie e Sperimentazione</span>
+                </a>
+                <ul class="nav-menu">
+                    <li><a href="index.html" class="active">Home</a></li>
+                    <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Sono Simone (blog)</a></li>
+                    <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Podcast</a></li>
+                    <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Libri</a></li>
+                    <li><a href="pages/software/">Software</a></li>
+                    <li><a href="pages/videogiochi/">Videogiochi</a></li>
+                    <li><a href="pages/contatti.html">Contattami</a></li>
+                </ul>
+            </nav>
+        </header>
+    </noscript>
 
     <main>
         <!-- ========= HERO SECTION ========= -->
@@ -264,7 +267,7 @@
                 <article class="content">
                     <h2>Un artigiano digitale</h2>
                     <p>Ciao, sono Simone. La mia carriera è un dialogo costante tra discipline diverse. Podcaster dal 2010, scrittore per passione e sviluppatore per curiosità, vedo ogni progetto come un'opportunità per imparare e sperimentare.</p>
-                    <a href="#" onclick="openStoryModal()" class="text-link">Leggi di più sulla mia storia &rarr;</a>
+                    <a href="#" onclick="openStoryModal()" class="text-link">Leggi approfondimenti e aggiornamenti &rarr;</a>
                 </article>
             </div>
         </section>
@@ -280,7 +283,7 @@
                     <!-- Card 1: Podcast -->
                     <div class="project-card">
                         <div class="card-image">
-                            <a href="#" class="disabled-link" data-tooltip="Sezione in arrivo presto"><img src="image/grandereset2.png" alt="Sezione Podcast" loading="lazy" style="object-position: center 35%;"></a>
+                            <a href="#" data-tooltip="Sezione in arrivo presto"><img src="image/grandereset2.png" alt="Sezione Podcast" loading="lazy"></a>
                         </div>
                         <div class="card-content">
                             <h3>I Miei Podcast</h3>
@@ -291,7 +294,7 @@
                     <!-- Card 2: Libri -->
                     <div class="project-card">
                         <div class="card-image">
-                            <a href="#" class="disabled-link" data-tooltip="Sezione in arrivo presto"><img src="image/albero.jpg" alt="Sezione Libri" loading="lazy" style="object-position: center 90%;"></a>
+                            <a href="#" data-tooltip="Sezione in arrivo presto"><img src="image/albero.jpg" alt="Sezione Libri" loading="lazy"></a>
                         </div>
                         <div class="card-content">
                             <h3>I Miei Libri</h3>
@@ -302,23 +305,23 @@
                     <!-- Card 3: Software -->
                     <div class="project-card">
                         <div class="card-image">
-                            <a href="pages/software.html"><img src="image/gdm.png" alt="Icona sezione Software" loading="lazy"></a>
+                            <a href="pages/software/"><img src="image/gdm.png" alt="Icona sezione Software" loading="lazy"></a>
                         </div>
                         <div class="card-content">
                             <h3>I Miei Software</h3>
                             <p>Applicazioni e strumenti nati dalla sperimentazione, con un focus su AI e automazione.</p>
-                            <a href="pages/software.html" class="text-link">Vedi i Software &rarr;</a>
+                            <a href="pages/software/" class="text-link">Vedi i Software &rarr;</a>
                         </div>
                     </div>
                     <!-- Card 4: Videogiochi -->
                     <div class="project-card">
                         <div class="card-image">
-                            <a href="pages/videogiochi.html"><img src="image/icona-respiro.jpg" alt="Sezione Videogiochi - Il Respiro Trattenuto del Mondo" loading="lazy"></a>
+                            <a href="pages/videogiochi/"><img src="image/icona-respiro.jpg" alt="Sezione Videogiochi - Il Respiro Trattenuto del Mondo" loading="lazy"></a>
                         </div>
                         <div class="card-content">
                             <h3>I Miei Videogiochi</h3>
                             <p>Avventure testuali ed esperimenti interattivi che fondono narrazione e gameplay.</p>
-                            <a href="pages/videogiochi.html" class="text-link">Esplora i Giochi &rarr;</a>
+                            <a href="pages/videogiochi/" class="text-link">Esplora i Giochi &rarr;</a>
                         </div>
                     </div>
                 </div>
@@ -329,76 +332,80 @@
         <section id="contact" class="section contact-section">
             <div class="container column-layout">
                 <div class="section-header">
-                    <h2>Contattami</h2>
-                    <p>Hai un'idea, una domanda o una proposta di collaborazione? Scrivimi. Per questioni più dettagliate o per scoprire altri modi per entrare in contatto, visita la <a href="pages/contatti.html" class="text-link">pagina dei contatti</a>.</p>
+                    <h2>Perché Contattarmi?</h2>
+                    <p>Ci sono diversi motivi per cui potresti voler entrare in contatto con me. Ecco alcune delle opportunità di collaborazione e interazione che mi interessano maggiormente:</p>
                 </div>
-                <form id="contactForm" class="contact-form">
-                    <div class="form-group">
-                        <label for="name">Nome</label>
-                        <input type="text" id="name" name="name" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="email">Email</label>
-                        <input type="email" id="email" name="email" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="subject">Oggetto</label>
-                        <select id="subject" name="subject" required>
-                            <option value="">Seleziona l'argomento</option>
-                            <option value="Collaborazione Podcast">Collaborazione Podcast</option>
-                            <option value="Progetto Sviluppo Software">Progetto Sviluppo Software</option>
-                            <option value="Proposta Editoriale">Proposta Editoriale</option>
-                            <option value="Richiesta Intervista">Richiesta Intervista</option>
-                            <option value="Consulenza Tecnica">Consulenza Tecnica</option>
-                            <option value="Altro">Altro</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="message">Messaggio</label>
-                        <textarea id="message" name="message" rows="5" required></textarea>
+                
+                <div class="contact-reasons">
+                    <div class="reason-grid">
+                        <div class="reason-item">
+                            <h3>Collaborazione Podcast</h3>
+                            <p>Sempre aperto a partecipare come ospite o a collaborare su progetti audio che riguardano tecnologia, narrativa e innovazione.</p>
+                        </div>
+                        
+                        <div class="reason-item">
+                            <h3>Progetto Sviluppo Software</h3>
+                            <p>Interessato a progetti che coinvolgono AI, automazione, tools creativi o applicazioni che uniscono tecnologia e storytelling.</p>
+                        </div>
+                        
+                        <div class="reason-item">
+                            <h3>Proposta Editoriale</h3>
+                            <p>Disponibile a valutare proposte di scrittura, recensioni, o progetti editoriali legati ai miei ambiti di competenza.</p>
+                        </div>
+                        
+                        <div class="reason-item">
+                            <h3>Richiesta Intervista</h3>
+                            <p>Felice di condividere la mia esperienza su podcasting, sviluppo indie, narrative design e uso creativo dell'intelligenza artificiale.</p>
+                        </div>
+                        
+                        <div class="reason-item">
+                            <h3>Consulenza Tecnica</h3>
+                            <p>Consulenze su progetti digitali, workflow di produzione audio, o implementazione creativa di strumenti AI.</p>
+                        </div>
+                        
+                        <div class="reason-item">
+                            <h3>Scambio di Idee</h3>
+                            <p>Sempre curioso di discutere nuove idee, feedback sui miei progetti, o semplicemente fare networking con altri creativi.</p>
+                        </div>
                     </div>
                     
-                    <!-- Honeypot field (anti-bot) - Campo nascosto -->
-                    <div style="position: absolute; left: -9999px; visibility: hidden;">
-                        <label for="website">Sito web (non compilare):</label>
-                        <input type="text" id="website" name="website" autocomplete="off" tabindex="-1">
+                    <div class="contact-cta">
+                        <p>Riconosci la tua situazione in una di queste categorie? Perfetto!</p>
+                        <a href="pages/contatti.html" class="cta-button" aria-label="Vai alla pagina contatti per scrivermi">
+                            <span class="cta-button-text">Contattami</span>
+                        </a>
                     </div>
-                    <div class="form-group" style="flex-direction: row; align-items: flex-start;">
-                        <input type="checkbox" id="privacy" name="privacy" required>
-                        <label for="privacy" style="margin-left: 0.5rem; font-size: 0.9rem; line-height: 1.4; margin-top: 0;">
-                            Acconsento al trattamento dei miei dati personali secondo quanto previsto dal 
-                            Regolamento UE 2016/679 (GDPR). I dati saranno utilizzati esclusivamente per 
-                            rispondere alla tua richiesta e non saranno condivisi con terzi.
-                        </label>
-                    </div>
-                    <button type="submit" class="cta-button">
-                        <span class="cta-button-text">Invia Messaggio</span>
-                    </button>
-                </form>
-                <div id="formStatus" class="form-status" style="display: none;"></div>
+                </div>
             </div>
         </section>
         
-        <!-- ========= FOOTER ========= -->
+        <!-- Footer sarà caricato automaticamente dal JavaScript -->
+        <noscript>
+            <!-- Fallback footer per quando JavaScript è disabilitato -->
             <footer class="main-footer">
-        <div class="container">
-            <div class="social-links">
-                <a href="https://github.com/Pitz72" target="_blank" aria-label="GitHub di Simone Pizzi">
-                    <i class="fab fa-github"></i>
-                    <span>GitHub</span>
-                </a>
-                <a href="https://www.instagram.com/pizzisimone1972/" target="_blank" aria-label="Instagram di Simone Pizzi">
-                    <i class="fab fa-instagram"></i>
-                    <span>Instagram</span>
-                </a>
-                <a href="https://www.spreaker.com/user/runtime-radio--8395974" target="_blank" aria-label="Spreaker di Runtime Radio">
-                    <i class="fas fa-podcast"></i>
-                    <span>Spreaker</span>
-                </a>
-            </div>
-            <p class="copyright">&copy; 2025 Simone Pizzi. Tutti i diritti riservati.</p>
-        </div>
-    </footer>
+                <div class="container">
+                    <div class="social-links">
+                        <a href="mailto:pizzisimon1972@gmail.com" aria-label="Email di Simone Pizzi">
+                            <i class="fas fa-envelope"></i>
+                            <span>Email</span>
+                        </a>
+                        <a href="https://github.com/Pitz72" target="_blank" aria-label="GitHub di Simone Pizzi">
+                            <i class="fab fa-github"></i>
+                            <span>GitHub</span>
+                        </a>
+                        <a href="https://www.instagram.com/pizzisimone1972/" target="_blank" aria-label="Instagram di Simone Pizzi">
+                            <i class="fab fa-instagram"></i>
+                            <span>Instagram</span>
+                        </a>
+                        <a href="https://www.spreaker.com/user/runtime-radio--8395974" target="_blank" aria-label="Spreaker di Runtime Radio">
+                            <i class="fas fa-podcast"></i>
+                            <span>Spreaker</span>
+                        </a>
+                    </div>
+                    <p class="copyright">&copy; 2025 Simone Pizzi. Tutti i diritti riservati.</p>
+                </div>
+            </footer>
+        </noscript>
     </main>
 
     <!-- ========= MODAL STORIA ========= -->

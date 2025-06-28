@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Il Respiro Trattenuto del Mondo - Interactive Fiction | Simone Pizzi</title>
-    <meta name="description" content="Una piccola avventura interattiva a scelte con grafica retro-computazionale a fosfori verdi. Ispirata al romanzo 'Echi Prima del Silenzio', prequel di The Safe Place. Download gratuito per Windows e Android.">
-    <meta name="keywords" content="Simone Pizzi, Il Respiro Trattenuto del Mondo, interactive fiction, avventura testuale, electron, retrocomputing, fosfori verdi, Echi Prima del Silenzio, The Safe Place">
+    <title>Il Respiro Trattenuto del Mondo - Videogioco | Simone Pizzi</title>
+    <meta name="description" content="Una piccola avventura interattiva a scelte con opzioni grafiche standard, CRT e alto contrasto per accessibilità. Ispirata al romanzo 'Echi Prima del Silenzio', prequel di The Safe Place. Download gratuito per Windows e Android.">
+    <meta name="keywords" content="Simone Pizzi, Il Respiro Trattenuto del Mondo, videogioco, avventura, Godot, accessibilità, alto contrasto, Echi Prima del Silenzio, The Safe Place">
     <meta name="author" content="Simone Pizzi">
     <meta name="robots" content="index, follow">
 
     <!-- Open Graph & Twitter -->
-    <meta property="og:title" content="Il Respiro Trattenuto del Mondo - Interactive Fiction | Simone Pizzi">
-    <meta property="og:description" content="Una piccola avventura interattiva a scelte con grafica retro-computazionale a fosfori verdi. Ispirata al romanzo 'Echi Prima del Silenzio'. Download gratuito.">
+    <meta property="og:title" content="Il Respiro Trattenuto del Mondo - Videogioco | Simone Pizzi">
+    <meta property="og:description" content="Una piccola avventura interattiva a scelte con opzioni grafiche standard, CRT e alto contrasto per accessibilità. Ispirata al romanzo 'Echi Prima del Silenzio'. Download gratuito.">
     <meta property="og:image" content="https://simonepizzi.runtimeradio.it/image/icona-respiro.jpg">
     <meta property="og:url" content="https://simonepizzi.runtimeradio.it/pages/il-respiro-trattenuto-del-mondo.html">
     <meta property="twitter:card" content="summary_large_image">
@@ -24,37 +24,20 @@
     <!-- Font Awesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer">
     
-    <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../../css/style.css">
 </head>
 <body>
-    <!-- ========= HEADER ========= -->
-    <header class="main-header">
-        <nav class="container">
-            <a href="../index.html" class="logo">
-                <span class="logo-name">Simone Pizzi</span>
-                <span class="logo-tagline">Idee, Storie e Sperimentazione</span>
-            </a>
-            <ul class="nav-menu">
-                <li><a href="../index.html">Home</a></li>
-                <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Chi Sono</a></li>
-                <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Podcast</a></li>
-                <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Libri</a></li>
-                <li><a href="software.html">Software</a></li>
-                <li><a href="videogiochi.html" class="active">Videogiochi</a></li>
-                <li><a href="contatti.html">Contattami</a></li>
-            </ul>
-        </nav>
-    </header>
+    <!-- Header sarà caricato automaticamente dal JavaScript -->
 
     <main>
         <!-- ========= Page Hero ========= -->
         <section class="page-hero">
             <div class="container column-layout">
                 <div class="breadcrumb">
-                    <a href="videogiochi.html">Videogiochi</a> / <span>Il Respiro Trattenuto del Mondo</span>
+                    <a href="index.html">Videogiochi</a> / <span>Il Respiro Trattenuto del Mondo</span>
                 </div>
                 <h1>Il Respiro Trattenuto del Mondo</h1>
-                <p class="tagline">Interactive Fiction Desktop - Versione 1.5</p>
+                <p class="tagline">Videogioco Desktop - Versione 1.5</p>
             </div>
         </section>
 
@@ -64,7 +47,7 @@
                 <div class="detail-layout">
                     <!-- Game Image -->
                     <div class="detail-image">
-                        <img src="../image/icona-respiro.jpg" alt="Il Respiro Trattenuto del Mondo - Interactive Fiction" loading="lazy">
+                        <img src="../../image/icona-respiro.jpg" alt="Il Respiro Trattenuto del Mondo - Videogioco" loading="lazy">
                     </div>
                     
                     <!-- Game Info -->
@@ -72,11 +55,11 @@
                         <div class="game-meta">
                             <div class="meta-item">
                                 <i class="fas fa-gamepad"></i>
-                                <span><strong>Genere:</strong> Interactive Fiction / Avventura Testuale</span>
+                                <span><strong>Genere:</strong> Avventura / Gioco a Scelte</span>
                             </div>
                             <div class="meta-item">
-                                <i class="fas fa-laptop"></i>
-                                <span><strong>Tecnologie:</strong> React + TypeScript + Electron</span>
+                                <i class="fas fa-cogs"></i>
+                                <span><strong>Engine:</strong> Godot (migrato da HTML/JS/PHP/MySQL)</span>
                             </div>
                             <div class="meta-item">
                                 <i class="fas fa-book-open"></i>
@@ -90,36 +73,38 @@
 
                         <div class="game-description">
                             <h2>Descrizione</h2>
-                            <p>Una <strong>piccolissima avventura a scelte</strong> con uno stile <strong>retrocomputazionale a fosfori verdi</strong> che ti riporterà ai tempi dei terminali degli anni '80. L'esperienza è ispirata dal romanzo breve <em>"Echi Prima del Silenzio"</em> di Simone Pizzi, che funge da prequel della storia che verrà raccontata nel videogioco di ruolo testuale <strong>The Safe Place</strong> di prossima pubblicazione.</p>
+                            <p>Una <strong>piccolissima avventura a scelte</strong> con <strong>opzioni grafiche multiple: standard, CRT e alto contrasto per accessibilità</strong>. L'esperienza è ispirata dal romanzo breve <em>"Echi Prima del Silenzio"</em> di Simone Pizzi, che funge da prequel della storia che verrà raccontata nel videogioco di ruolo testuale <strong>The Safe Place</strong> di prossima pubblicazione.</p>
                             
+                            <p>Questo progetto ha attraversato diverse evoluzioni tecniche: inizialmente sviluppato come mono-HTML, poi strutturato con HTML/JS/PHP/MySQL, e infine migrato a <strong>Godot</strong> per supportare una struttura di gioco più evoluta. Presto saranno disponibili documenti accurati sul diario di sviluppo.</p>
+
                             <p>In questo mondo post-apocalittico, seguirai <strong>Ultimo ed Elian</strong> attraverso <strong>7 Lezioni di Formazione</strong> divise tra Infanzia (4 lezioni) e Adolescenza (3 lezioni). Ogni scelta che farai influenzerà il finale e la progressione della storia, con oltre <strong>8 finali diversi</strong> da scoprire.</p>
 
                             <h3>🎯 Caratteristiche Principali</h3>
                             <ul>
                                 <li><strong>Completamente Offline</strong> - Non serve connessione internet</li>
-                                <li><strong>Standalone</strong> - Non richiede installazione</li>
+                                <li><strong>Accessibilità</strong> - Opzioni grafiche: standard, CRT e alto contrasto</li>
                                 <li><strong>Salvataggio Automatico</strong> - Il progresso viene salvato automaticamente</li>
                                 <li><strong>Multi-Ending</strong> - 8+ finali diversi basati sulle tue scelte</li>
                                 <li><strong>Sistema Oggetti</strong> - Meccaniche avanzate con carillon e chiavi</li>
-                                <li><strong>Tema Cyberpunk</strong> - Terminale fosforescente verde autentico</li>
+                                <li><strong>Gameplay a Tile</strong> - Design ottimizzato per la narrativa</li>
                             </ul>
 
                             <h3>📖 Gameplay</h3>
-                            <p>Affronta pericoli dagli <em>Angeli della Cenere</em> alle decisioni morali complesse. Colleziona oggetti speciali come i carillon che sbloccano contenuti segreti. Monitora età, stats, salute e inventario attraverso una Status Bar sempre visibile. L'interfaccia offre fino a 4 opzioni per ogni situazione, immergendoti in una narrativa coinvolgente e dettagliata.</p>
+                            <p>Il sistema di gioco è attualmente <strong>in progettazione</strong>. Monitora età, stats, salute e inventario attraverso una Status Bar sempre visibile. L'interfaccia offre fino a 4 opzioni per ogni situazione, immergendoti in una narrativa coinvolgente e dettagliata.</p>
                         </div>
 
                         <!-- Download Section -->
                         <div class="download-section">
                             <h2>📱 Download Gratuito</h2>
                             <div class="download-buttons">
-                                <a href="../downloads/videogame/respiro/IL-RESPIRO-TRATTENUTO-win.7z" class="download-btn windows" download>
+                                <a href="../../downloads/videogame/respiro/IL-RESPIRO-TRATTENUTO-DEL-MONDO-win.7z" class="download-btn windows" download>
                                     <i class="fab fa-windows"></i>
                                     <div>
                                         <strong>Windows</strong>
                                         <span>Versione Desktop .exe</span>
                                     </div>
                                 </a>
-                                <a href="../downloads/videogame/respiro/IL_RESPIRO_TRATTENUTO_DEL_MONDO_v1.0_android.7z" class="download-btn android" download>
+                                <a href="../../downloads/videogame/respiro/IL_RESPIRO_TRATTENUTO_DEL_MONDO_v1.0_android.7z" class="download-btn android" download>
                                     <i class="fab fa-android"></i>
                                     <div>
                                         <strong>Android</strong>
@@ -172,7 +157,7 @@
                         <!-- Support -->
                         <div class="support-section">
                             <h3>📞 Supporto</h3>
-                            <p>Per bug, suggerimenti o domande <a href="contatti.html" class="text-link">clicca qui per scrivermi</a></p>
+                            <p>Per bug, suggerimenti o domande <a href="../contatti.html" class="text-link">clicca qui per scrivermi</a></p>
                             <p class="game-tagline"><strong>🎮 Buona Avventura nel Mondo Post-Apocalittico! 🎮</strong></p>
                         </div>
                     </div>
@@ -184,7 +169,7 @@
         <section class="section">
             <div class="container">
                 <div class="back-navigation">
-                    <a href="videogiochi.html" class="back-link">
+                    <a href="index.html" class="back-link">
                         <i class="fas fa-arrow-left"></i>
                         Torna ai Videogiochi
                     </a>
@@ -193,22 +178,7 @@
         </section>
     </main>
 
-    <!-- ========= FOOTER ========= -->
-    <footer class="main-footer">
-        <div class="container">
-            <div class="social-links">
-                <a href="https://github.com/Pitz72" target="_blank" aria-label="GitHub">
-                    <i class="fab fa-github"></i>
-                </a>
-                <a href="https://www.instagram.com/pizzisimone1972/" target="_blank" aria-label="Instagram">
-                    <i class="fab fa-instagram"></i>
-                </a>
-                <a href="https://www.spreaker.com/user/runtime-radio--8395974" target="_blank" aria-label="Spreaker">
-                    <i class="fas fa-podcast"></i>
-                </a>
-            </div>
-            <p class="copyright">&copy; 2025 Simone Pizzi. Tutti i diritti riservati.</p>
-        </div>
-    </footer>
+    <!-- Header e Footer saranno caricati automaticamente dal JavaScript -->
+    <script src="../../js/main.js"></script>
 </body>
 </html> 

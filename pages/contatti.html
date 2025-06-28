@@ -24,24 +24,7 @@
     <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-    <!-- ========= HEADER ========= -->
-    <header class="main-header">
-        <nav class="container">
-            <a href="../index.html" class="logo">
-                <span class="logo-name">Simone Pizzi</span>
-                <span class="logo-tagline">Idee, Storie e Sperimentazione</span>
-            </a>
-            <ul class="nav-menu">
-                <li><a href="../index.html">Home</a></li>
-                <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Chi Sono</a></li>
-                <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Podcast</a></li>
-                <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Libri</a></li>
-                <li><a href="software.html">Software</a></li>
-                <li><a href="videogiochi.html">Videogiochi</a></li>
-                <li><a href="contatti.html" class="active">Contattami</a></li>
-            </ul>
-        </nav>
-    </header>
+    <!-- Header sarà caricato automaticamente dal JavaScript -->
 
     <main>
         <!-- ========= Page Hero ========= -->
@@ -62,7 +45,7 @@
                     <p>Scegli il canale che preferisci in base alle tue esigenze. Rispondo a tutti, ma scegliere il canale giusto mi aiuta a gestire meglio le richieste.</p>
 
                     <div class="contact-channel">
-                        <h3>✉️ Per Proposte & Collaborazioni</h3>
+                        <h3>Per Proposte & Collaborazioni</h3>
                         <p>Se hai un'idea per un progetto, una proposta editoriale o una collaborazione professionale, l'email è il canale migliore. Scrivi a:</p>
                         <a href="mailto:contatti@simonepizzi.com" class="text-link">contatti@simonepizzi.com</a>
                     </div>
@@ -83,53 +66,48 @@
                     </div>
                 </div>
 
-                <!-- Right Column: Form -->
+                <!-- Right Column: Contact Reasons -->
                 <div class="contact-form-wrapper" id="contact">
-                     <h2>Modulo di Contatto Rapido</h2>
-                    <form id="contactForm" class="contact-form">
-                        <div class="form-group">
-                            <label for="name">Nome</label>
-                            <input type="text" id="name" name="name" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="email">Email</label>
-                            <input type="email" id="email" name="email" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="subject">Oggetto</label>
-                            <select id="subject" name="subject" required>
-                                <option value="">Seleziona l'argomento</option>
-                                <option value="Collaborazione Podcast">Collaborazione Podcast</option>
-                                <option value="Progetto Sviluppo Software">Progetto Sviluppo Software</option>
-                                <option value="Proposta Editoriale">Proposta Editoriale</option>
-                                <option value="Richiesta Intervista">Richiesta Intervista</option>
-                                <option value="Consulenza Tecnica">Consulenza Tecnica</option>
-                                <option value="Altro">Altro</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="message">Messaggio</label>
-                            <textarea id="message" name="message" rows="6" required></textarea>
-                        </div>
+                     <h2>Motivi per Contattarmi</h2>
+                     <div class="contact-reasons-detailed">
+                                                 <div class="reason-card">
+                             <h3>Collaborazione Podcast</h3>
+                             <p>Sempre aperto a partecipare come ospite o a collaborare su progetti audio che riguardano tecnologia, narrativa e innovazione.</p>
+                         </div>
+                         
+                         <div class="reason-card">
+                             <h3>Progetto Sviluppo Software</h3>
+                             <p>Interessato a progetti che coinvolgono AI, automazione, tools creativi o applicazioni che uniscono tecnologia e storytelling.</p>
+                         </div>
+                         
+                         <div class="reason-card">
+                             <h3>Proposta Editoriale</h3>
+                             <p>Disponibile a valutare proposte di scrittura, recensioni, o progetti editoriali legati ai miei ambiti di competenza.</p>
+                         </div>
+                         
+                         <div class="reason-card">
+                             <h3>Richiesta Intervista</h3>
+                             <p>Felice di condividere la mia esperienza su podcasting, sviluppo indie, narrative design e uso creativo dell'intelligenza artificiale.</p>
+                         </div>
+                         
+                         <div class="reason-card">
+                             <h3>Consulenza Tecnica</h3>
+                             <p>Consulenze su progetti digitali, workflow di produzione audio, o implementazione creativa di strumenti AI.</p>
+                         </div>
+                         
+                         <div class="reason-card">
+                             <h3>Scambio di Idee</h3>
+                             <p>Sempre curioso di discutere nuove idee, feedback sui miei progetti, o semplicemente fare networking con altri creativi.</p>
+                         </div>
                         
-                        <!-- Honeypot field (anti-bot) - Campo nascosto -->
-                        <div style="position: absolute; left: -9999px; visibility: hidden;">
-                            <label for="website">Sito web (non compilare):</label>
-                            <input type="text" id="website" name="website" autocomplete="off" tabindex="-1">
+                        <div class="contact-final-cta">
+                            <p><strong>Ti riconosci in una di queste situazioni?</strong></p>
+                            <p>Clicca qui per scrivermi direttamente:</p>
+                                                         <a href="#" onclick="window.location.href='mailto:pizzisimon1972@gmail.com'" class="button primary large">
+                                 Contattami
+                             </a>
                         </div>
-                        <div class="form-group" style="flex-direction: row; align-items: flex-start;">
-                            <input type="checkbox" id="privacy" name="privacy" required>
-                            <label for="privacy" style="margin-left: 0.5rem; font-size: 0.9rem; line-height: 1.4; margin-top: 0;">
-                                Acconsento al trattamento dei miei dati personali secondo quanto previsto dal 
-                                Regolamento UE 2016/679 (GDPR). I dati saranno utilizzati esclusivamente per 
-                                rispondere alla tua richiesta e non saranno condivisi con terzi.
-                            </label>
-                        </div>
-                        <button type="submit" class="button primary full-width">
-                            <span class="cta-button-text">Invia Messaggio</span>
-                        </button>
-                    </form>
-                    <div id="formStatus" class="form-status" style="display: none;"></div>
+                    </div>
                 </div>
             </div>
         </section>
@@ -161,24 +139,14 @@
                 <h2>Sostieni i Miei Progetti</h2>
                 <p>Se apprezzi quello che faccio, dalla web radio ai progetti open source, puoi sostenere i costi di sviluppo e hosting offrendomi un caffè virtuale. Ogni contributo è un grande aiuto!</p>
                 <a href="https://www.paypal.com/paypalme/SimonePizzi" target="_blank" class="button primary large" aria-label="Sostieni i miei progetti con una donazione PayPal">
-                    <span class="cta-button-text">Offrimi un Caffè ☕</span>
+                    <span class="cta-button-text">Offrimi un Caffè</span>
                 </a>
             </div>
         </section>
 
     </main>
 
-    <!-- ========= FOOTER ========= -->
-    <footer class="main-footer">
-        <div class="container">
-            <div class="social-links">
-                <a href="https://github.com/Pitz72" target="_blank">GitHub</a>
-                <a href="https://www.instagram.com/pizzisimone1972/" target="_blank">Instagram</a>
-                <a href="https://www.spreaker.com/user/runtime-radio--8395974" target="_blank">Spreaker</a>
-            </div>
-            <p class="copyright">&copy; 2025 Simone Pizzi. Tutti i diritti riservati.</p>
-        </div>
-    </footer>
+    <!-- Footer sarà caricato automaticamente dal JavaScript -->
 
     <script src="../js/main.js"></script>
 </body>

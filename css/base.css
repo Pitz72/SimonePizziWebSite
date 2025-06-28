@@ -1,0 +1,177 @@
+/* ===============================================
+   BASE STYLES - Variabili, Reset, Layout
+================================================== */
+
+:root {
+  /* Palette Colori */
+  --primary-green: #00ff88;
+  --secondary-green: #00cc6a;
+  --background-dark: #0a0a0a;
+  --surface-dark: #1a1a1a;
+  --dark-green: #0d2818;
+  --text-light: #ffffff;
+  --text-muted: #b3b3b3;
+  --primary-color: #00ff88;
+  --background-color: #0a0a0a;
+  --background-light: #141414;
+  --background-dark-green: #002a15;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --border-color: #2a2a2a;
+
+  /* Spaziatura */
+  --spacing-section: 5rem;
+  --spacing-column-gap: 5rem;
+  --spacing-mobile-gap: 3rem;
+  --container-width: 1200px;
+  --nav-width: 1400px;
+}
+
+/* Reset e Base */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--background-dark);
+    color: var(--text-light);
+    line-height: 1.8;
+}
+
+/* Tipografia */
+h1, h2, h3 {
+    line-height: 1.2;
+}
+
+h1 {
+    font-size: 4rem;
+    font-weight: 800;
+    color: var(--text-light);
+}
+
+h2 {
+    font-size: 2.8rem;
+    font-weight: 700;
+    color: var(--primary-green);
+}
+
+h3 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: var(--text-light);
+}
+
+p {
+    font-size: 1.2rem;
+    font-weight: 400;
+}
+
+a {
+    color: var(--primary-green);
+    text-decoration: underline;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+/* Layout Generale */
+.section {
+    padding: var(--spacing-section) 0;
+}
+
+.section .container {
+    max-width: var(--container-width);
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-column-gap);
+}
+
+.section .container.column-layout {
+    flex-direction: column;
+}
+
+.section.alt-bg {
+    background-color: var(--surface-dark);
+}
+
+.section .container.reverse {
+    flex-direction: row-reverse;
+}
+
+.section .image-placeholder {
+    flex: 1;
+}
+
+.section .image-placeholder img {
+    border-radius: 20px;
+}
+
+.section .content {
+    flex: 1;
+}
+
+/* Page Hero */
+.page-hero {
+    padding: 4rem 0;
+    background-color: var(--background-dark-green);
+    border-bottom: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.page-hero .tagline {
+    font-size: 1.2rem;
+    color: var(--text-muted);
+    margin-top: 1rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Sezioni Header */
+.section-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+/* Utility Classes */
+.text-center {
+    text-align: center;
+}
+
+.text-center p {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-bottom: 1.5rem;
+}
+
+/* Responsive Design Base */
+@media (max-width: 768px) {
+    /* Tipografia Mobile */
+    h1 {
+        font-size: 2.8rem;
+    }
+    h2 {
+        font-size: 2.2rem;
+    }
+    p {
+        font-size: 1rem;
+    }
+
+    /* Layout Sezioni Mobile */
+    .section .container {
+        flex-direction: column;
+        gap: var(--spacing-mobile-gap);
+    }
+
+    .section .container.reverse {
+        flex-direction: column;
+    }
+} 

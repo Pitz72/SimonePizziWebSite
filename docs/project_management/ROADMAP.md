@@ -1,17 +1,51 @@
 # Roadmap di Sviluppo - Sito Personale Simone Pizzi
 
-**Versione Progetto:** 2.1.0 "Final Production Edition"  
-**Versione Documento:** 2.0 FINAL  
-**Data Ultimo Aggiornamento:** 27 Gennaio 2025
+**Versione Progetto:** 2.1.1 "Final Consolidated Edition Enhanced"  
+**Versione Documento:** 2.1 ENHANCED SYSTEMS  
+**Data Ultimo Aggiornamento:** 24 Gennaio 2025 - Sistema Centralizzato
 
 ---
 
-## 🎊 **PROGETTO COMPLETATO - ENTERPRISE PRODUCTION READY**
+## 🚨 **TASK TECNICI APERTI POST-COMPLETAMENTO**
 
-**Data Release v2.1.0:** 27 Gennaio 2025  
-**Versione FINALE:** 2.1.0 "Final Production Edition" ✅ **COMPLETATA**
+### ❌ PROBLEMA IRRISOLTO: Object-Position CSS Anomaly
+**Data Apertura**: 28/06/2025  
+**Priorità**: MEDIUM  
+**Status**: APERTO - In attesa investigazione esterna  
 
-Il sito ha raggiunto il **completamento definitivo** con la versione 2.1.0 "Final Production Edition". Questa versione rappresenta il **culmine di eccellenza tecnica enterprise** con tutte le funzionalità implementate, portfolio completo, sicurezza enterprise e esperienza utente ottimizzata.
+**Descrizione del problema**:
+- **Component**: `.project-card img` (homepage, sezioni Podcast/Libri)
+- **Issue**: Proprietà CSS `object-position` completamente ignorata
+- **Sintomi**: Qualsiasi valore object-position non produce effetto visibile
+- **Testing**: Selettori CSS confermati funzionanti, nessun conflitto trovato
+- **Comportamento**: Anti-scientifico e inspiegabile
+
+**Action Required**: 
+- Investigazione con altri LLM/tools/framework CSS
+- Ricerca in community sviluppatori per casi simili
+- Considerare workaround alternativi (background-image + background-position)
+- Possibile problema browser-specific o CSS engine
+
+**Impact**: Estetico (impossibile regolare posizione immagini nelle project-card)  
+**Note**: Non compromette funzionalità core del sito
+
+---
+
+## 🎊 **PROGETTO ELEVATO A ENTERPRISE-LEVEL - ARCHITECTURE ENHANCED**
+
+**Data Release v2.1.1 Enhanced:** 24 Gennaio 2025  
+**Versione ENHANCED:** 2.1.1 "Final Consolidated Edition Enhanced" ⚡ **COMPLETATA**
+
+Il sito ha **superato il completamento** con la versione 2.1.1 Enhanced che implementa **architettura enterprise centralizzata**. Mantenendo la dichiarazione di "progetto finito", ora presenta **sistema modulare professionale** per manutenibilità e scalabilità future.
+
+## ⚡ **REVOLUTION v2.1.1 - SISTEMA CENTRALIZZATO IMPLEMENTATO**
+
+### 🏗️ **MILESTONE ENTERPRISE ARCHITECTURE ACHIEVED**
+- ✅ **Componenti Centralizzati:** Header/Footer single source of truth
+- ✅ **CSS Modulare:** Sistema @import con file specifici per sezione  
+- ✅ **JavaScript Avanzato:** ComponentManager per gestione automatica
+- ✅ **Riorganizzazione Strutturale:** Sottocartelle logiche implementate
+- ✅ **Automazione Completa:** Path dinamici e gestione automatica componenti
 
 ---
 
@@ -69,6 +103,13 @@ Il sito ha raggiunto il **completamento definitivo** con la versione 2.1.0 "Fina
 - [x] SVG graphics concettuali
 - [x] CORS problem definitively solved
 - [x] Fallback systems intelligent
+
+### ✅ **MILESTONE 5: Enterprise Architecture (v2.1.1)** - COMPLETATA ⚡
+- [x] Sistema componenti centralizzati (header/footer)
+- [x] CSS modulare refactorizzato (@import system)
+- [x] JavaScript ComponentManager avanzato
+- [x] Riorganizzazione struttura cartelle
+- [x] Path dinamici e automazione completa
 
 ---
 

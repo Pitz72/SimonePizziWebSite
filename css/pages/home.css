@@ -1,0 +1,263 @@
+/* ===============================================
+   HOME PAGE - Effetto Aurora, Hero, Modal
+================================================== */
+
+/* ===== HERO SECTION CON EFFETTO AURORA ===== */
+.hero-section {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 80vh;
+    padding: var(--spacing-section) 2rem;
+    text-align: center;
+    overflow: hidden;
+}
+
+.hero-section::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150%;
+    padding-top: 150%;
+    border-radius: 50%;
+    background-image: radial-gradient(
+        circle,
+        var(--dark-green) 0%,
+        rgba(13, 40, 24, 0.5) 25%,
+        transparent 50%
+    );
+    transform: translate(-50%, -50%);
+    filter: blur(100px);
+    animation: aurora-effect 20s infinite linear;
+    z-index: 0;
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
+}
+
+.hero-content .tagline {
+    font-size: 1.5rem;
+    color: var(--text-muted);
+    margin-top: 1rem;
+}
+
+@keyframes aurora-effect {
+    0% {
+        transform: translate(-50%, -50%) rotate(0deg) scale(1);
+    }
+    50% {
+        transform: translate(-50%, -50%) rotate(180deg) scale(1.2);
+    }
+    100% {
+        transform: translate(-50%, -50%) rotate(360deg) scale(1);
+    }
+}
+
+/* ===== MODAL STORIA ===== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 10000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+.modal-content {
+    position: relative;
+    background-color: var(--surface-dark);
+    margin: 5% auto;
+    padding: 0;
+    border: 1px solid var(--primary-green);
+    border-radius: 20px;
+    width: 90%;
+    max-width: 800px;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 255, 136, 0.3);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, var(--primary-green) 0%, var(--secondary-green) 100%);
+    color: var(--background-dark);
+    padding: 1.5rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--background-dark);
+    font-size: 1.8rem;
+    font-weight: 700;
+}
+
+.close {
+    color: var(--background-dark);
+    float: right;
+    font-size: 2rem;
+    font-weight: bold;
+    cursor: pointer;
+    line-height: 1;
+    transition: opacity 0.3s ease;
+}
+
+.close:hover,
+.close:focus {
+    opacity: 0.7;
+}
+
+.modal-body {
+    padding: 2rem;
+    overflow-y: auto;
+    max-height: calc(80vh - 100px);
+}
+
+.modal-body .article-content {
+    max-width: none;
+}
+
+.modal-body .article-content h3 {
+    color: var(--primary-green);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.modal-body .article-content h3:first-child {
+    margin-top: 0;
+}
+
+.modal-body .article-content p {
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+}
+
+.modal-body .article-content figure {
+    margin: 2rem 0;
+    text-align: center;
+}
+
+.modal-body .article-content .article-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 12px;
+    margin-bottom: 0.5rem;
+}
+
+.modal-body .article-content figcaption {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.modal-body .article-content hr {
+    border: 0;
+    height: 1px;
+    background: linear-gradient(to right, transparent, rgba(0, 255, 136, 0.4), transparent);
+    margin: 2rem 0;
+}
+
+/* ===== ARTICLE CONTENT ===== */
+.article-container {
+    max-width: 800px;
+    margin: var(--spacing-section) auto;
+    padding: 0 2rem;
+}
+
+.article-content h2 {
+    margin-top: 3rem;
+    margin-bottom: 1.5rem;
+}
+
+.article-content p {
+    margin-bottom: 1.5rem;
+}
+
+.article-content strong {
+    color: var(--primary-green);
+    font-weight: 600;
+}
+
+.article-content hr {
+    border: 0;
+    height: 1px;
+    background-image: linear-gradient(to right, transparent, rgba(0, 255, 136, 0.4), transparent);
+    margin: 4rem 0;
+}
+
+.article-content figure {
+    margin: 2rem 0;
+}
+
+.article-content .article-image {
+    width: 100%;
+    border-radius: 20px;
+    margin-bottom: 1rem;
+}
+
+.article-content figcaption {
+    text-align: center;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* ===== POSIZIONAMENTO IMMAGINI PROJECT CARDS ===== */
+/* Fix per specificità CSS post-refactoring modulare */
+
+/* POSIZIONAMENTO IMMAGINI - PROBLEMA IRRISOLTO */
+/* NOTA: object-position non funziona su queste immagini per motivi inspiegabili */
+/* TODO: Investigazione approfondita necessaria */
+/* 
+.project-grid .project-card:nth-child(1) .card-image img {
+    object-position: center 15% !important;
+}
+
+.project-grid .project-card:nth-child(2) .card-image img {
+    object-position: center 90% !important;
+}
+*/
+
+/* ===== RESPONSIVE HOME ===== */
+@media (max-width: 768px) {
+    /* Hero Section Mobile */
+    .hero-section {
+        min-height: 60vh;
+    }
+    
+    .hero-content .tagline {
+        font-size: 1.2rem;
+    }
+
+    /* Modal responsive */
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+        max-height: 90vh;
+    }
+    
+    .modal-header {
+        padding: 1rem 1.5rem;
+    }
+    
+    .modal-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .modal-body {
+        padding: 1.5rem;
+        max-height: calc(90vh - 80px);
+    }
+    
+    .close {
+        font-size: 1.5rem;
+    }
+} 

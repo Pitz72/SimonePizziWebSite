@@ -1,31 +1,218 @@
 # Template di Codice - SimonePizziWebSite
 
-> **Versione**: v2.1.0 Final Production Edition  
-> **Ultimo Aggiornamento**: 27 Gennaio 2025  
-> **Status**: ENTERPRISE PRODUCTION READY
+> **Versione**: v2.1.1 Final Consolidated Edition Enhanced  
+> **Ultimo Aggiornamento**: 24 Gennaio 2025 - Sistema Centralizzato  
+> **Status**: ENTERPRISE PRODUCTION READY + CENTRALIZED ARCHITECTURE
 
 ## Regola Assoluta Template
 **RISPETTO RIGOROSO**: Tutti i template definiti in questo documento devono essere seguiti alla lettera. Non sono ammesse deviazioni creative senza approvazione esplicita dell'utente. La coerenza del progetto ha priorità assoluta.
+
+## 🚨 **PROBLEMI NOTI NEI TEMPLATE**
+
+### ❌ OBJECT-POSITION ANOMALY - Project Card (28/06/2025)
+
+**⚠️ PROBLEMA IRRISOLTO**: Il template Project Card ha un **grave malfunzionamento**
+
+- **Component**: `.project-card .card-image img`
+- **Property**: `object-position` **COMPLETAMENTE IGNORATA**
+- **Symptoms**: Qualsiasi valore (0% 0%, center 100%, 75% 25%) → **NESSUN EFFETTO VISIBILE**
+- **Tested**: Selettori funzionano (test bordi/rotazioni confermati)
+- **Status**: **IRRISOLTO** - Richiede investigazione esterna
+- **Workaround**: **NESSUNO DISPONIBILE**
+
+**🔧 Implicazioni per Template:**
+- NON usare `object-position` nei template Project Card
+- Posizione immagini nelle card NON può essere regolata via CSS
+- Template mantiene validità strutturale ma con limitazione estetica
+
+**📝 Documentato in:**
+- `TECHNICAL_FINAL_STATUS.md` 
+- `ANTI_REGRESSION_CHECKLIST.md`
+
+## ⚡ NOVITÀ v2.1.1: Sistema Centralizzato
+**ARCHITETTURA ENTERPRISE**: Il sistema ora utilizza componenti centralizzati e CSS modulare. Vedere [Template Sistema Centralizzato](#template-sistema-centralizzato) per i nuovi standard obbligatori.
 
 ---
 
 ## 📋 Indice Template
 
-1. [Template Project Card](#template-project-card)
-2. [Template Pagina Standard](#template-pagina-standard)
-3. [Template Form Contatti](#template-form-contatti)
-4. [Template Pagina Software](#template-pagina-software)
-5. [Template Pagina Videogiochi](#template-pagina-videogiochi) ⭐ **NUOVO**
+1. [Template Sistema Centralizzato](#template-sistema-centralizzato) ⚡ **NUOVO v2.1.1**
+2. [Template CSS Modulare](#template-css-modulare) ⚡ **NUOVO v2.1.1**
+3. [Template Project Card](#template-project-card)
+4. [Template Pagina Standard](#template-pagina-standard)
+5. [Template Form Contatti](#template-form-contatti)
+6. [Template Pagina Software](#template-pagina-software)
+7. [Template Pagina Videogiochi](#template-pagina-videogiochi) ⭐ **CONSOLIDATO**
 
 ---
 
-## 🎮 Template Pagina Videogiochi
+## ⚡ Template Sistema Centralizzato v2.1.1
 
-> **Template Approvato**: v2.1.0 - 27 Gennaio 2025  
-> **Riferimento**: `pages/il-respiro-trattenuto-del-mondo.html`  
-> **Status**: TEMPLATE UFFICIALE - DA RISPETTARE RIGOROSAMENTE
+> **Template Rivoluzionario**: v2.1.1 Enhanced - 24 Gennaio 2025  
+> **Architettura**: Enterprise-level con componenti centralizzati  
+> **Status**: OBBLIGATORIO per tutte le nuove pagine
 
-### Struttura HTML Base
+### Struttura Base Pagina con Sistema Centralizzato
+
+```html
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>[TITOLO_PAGINA] | Simone Pizzi</title>
+    <meta name="description" content="[DESCRIZIONE_PAGINA]">
+    <meta name="keywords" content="Simone Pizzi, [KEYWORDS_SPECIFICHE]">
+    <meta name="author" content="Simone Pizzi">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph & Twitter -->
+    <meta property="og:title" content="[TITOLO_PAGINA] | Simone Pizzi">
+    <meta property="og:description" content="[DESCRIZIONE_PAGINA]">
+    <meta property="og:image" content="https://simonepizzi.runtimeradio.it/image/[IMMAGINE_OG]">
+    <meta property="og:url" content="https://simonepizzi.runtimeradio.it/[PATH_PAGINA]">
+    <meta property="twitter:card" content="summary_large_image">
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- CSS MODULARE (Path dinamico in base a profondità) -->
+    <link rel="stylesheet" href="[PATH_DINAMICO]/css/style.css">
+</head>
+<body>
+    <!-- ⚠️ CRITICO: NO HEADER/FOOTER STATICI -->
+    <!-- Header sarà caricato automaticamente dal JavaScript -->
+
+    <main>
+        <!-- CONTENUTO PAGINA -->
+        [CONTENUTO_MAIN]
+    </main>
+
+    <!-- ⚠️ CRITICO: MAIN.JS OBBLIGATORIO -->
+    <!-- Header e Footer saranno caricati automaticamente dal JavaScript -->
+    <script src="[PATH_DINAMICO]/js/main.js"></script>
+</body>
+</html>
+```
+
+### Path Dinamici per Struttura Cartelle
+
+**Root Level** (`index.html`, `pages/contatti.html`):
+```html
+<link rel="stylesheet" href="css/style.css">
+<script src="js/main.js"></script>
+```
+
+**Sottocartelle Level 1** (`pages/*/index.html`):
+```html
+<link rel="stylesheet" href="../../css/style.css">
+<script src="../../js/main.js"></script>
+```
+
+### Componenti Centralizzati (NON toccare)
+
+**File: `components/header.html`**
+```html
+<header class="main-header">
+    <nav class="container">
+        <a href="index.html" class="logo">
+            <span class="logo-name">Simone Pizzi</span>
+            <span class="logo-tagline">Idee, Storie e Sperimentazione</span>
+        </a>
+        <ul class="nav-menu">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Chi Sono</a></li>
+            <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Podcast</a></li>
+            <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Libri</a></li>
+            <li><a href="pages/software/">Software</a></li>
+            <li><a href="pages/videogiochi/">Videogiochi</a></li>
+            <li><a href="pages/contatti.html">Contattami</a></li>
+        </ul>
+    </nav>
+</header>
+```
+
+**File: `components/footer.html`**
+```html
+<footer class="main-footer">
+    <div class="container">
+        <div class="social-links">
+            <a href="https://github.com/Pitz72" target="_blank">GitHub</a>
+            <a href="https://www.instagram.com/pizzisimone1972/" target="_blank">Instagram</a>
+            <a href="https://www.spreaker.com/user/runtime-radio--8395974" target="_blank">Spreaker</a>
+        </div>
+        <p class="copyright">&copy; 2025 Simone Pizzi. Tutti i diritti riservati.</p>
+    </div>
+</footer>
+```
+
+### Sistema JavaScript ComponentManager
+
+Il `js/main.js` gestisce automaticamente:
+- ✅ Caricamento header/footer da `components/`
+- ✅ Calcolo path relativi basato su profondità directory
+- ✅ Aggiornamento link nella navigazione
+- ✅ Impostazione classe `active` per pagina corrente
+- ✅ Gestione errori e fallback
+
+**NON MODIFICARE IL SISTEMA JAVASCRIPT SENZA APPROVAZIONE**
+
+---
+
+## 🎨 Template CSS Modulare v2.1.1
+
+### Struttura CSS Obbligatoria
+
+**File: `css/style.css` (Orchestratore)**
+```css
+/* Sistema CSS reorganizzato e ottimizzato */
+@import url('./base.css');      /* Variabili, Reset, Layout */
+@import url('./components.css'); /* Header, Footer, Cards, Buttons */
+@import url('./pages/home.css');       /* Specifico Homepage */
+@import url('./pages/videogiochi.css'); /* Specifico Videogiochi */
+@import url('./pages/contatti.css');   /* Specifico Contatti */
+
+/* Solo parti legacy non modularizzate */
+```
+
+### CSS Modulari Specifici
+
+**File: `css/base.css`**
+- Variabili CSS (:root)
+- Reset e normalizzazione
+- Layout base (container, grid, flexbox)
+- Tipografia e spacing
+
+**File: `css/components.css`**
+- Header e footer
+- Cards e project-card
+- Bottoni e link
+- Tooltip e disabled states
+
+**File: `css/pages/[SEZIONE].css`**
+- Stili specifici per ogni sezione
+- Es: `home.css` per effetto Aurora
+- Es: `videogiochi.css` per template consolidato
+- Es: `contatti.css` per form e FAQ
+
+### Regole CSS Modulare
+
+1. **NO DUPLICAZIONI**: Ogni stile in un solo file modulare
+2. **IMPORTAZIONE SPECIFICA**: Caricare solo CSS necessario per sezione
+3. **VARIABILI CENTRALI**: Tutte le variabili in `base.css`
+4. **RESPONSABILITÀ CHIARE**: Ogni file modulare ha scope ben definito
+
+---
+
+## 🎮 Template Pagina Videogiochi v2.1.1
+
+> **Template Consolidato**: v2.1.1 Enhanced - 24 Gennaio 2025  
+> **Riferimento**: `pages/videogiochi/il-respiro-trattenuto-del-mondo.html`  
+> **Status**: TEMPLATE RIGIDAMENTE CONSOLIDATO + SISTEMA CENTRALIZZATO
+
+### Struttura HTML Base (con Sistema Centralizzato)
 
 ```html
 <!DOCTYPE html>
@@ -40,8 +227,12 @@
     
     <!-- Font Awesome Icons OBBLIGATORIO -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/style.css">
+    <!-- CSS MODULARE: Path per sottocartella -->
+    <link rel="stylesheet" href="../../css/style.css">
 </head>
+<body>
+    <!-- ⚠️ CRITICO: NO HEADER STATICO - Caricato da JavaScript -->
+    <!-- Header sarà caricato automaticamente dal JavaScript -->
 ```
 
 ### Layout Pagina Videogioco
@@ -123,7 +314,7 @@
     <section class="section">
         <div class="container">
             <div class="back-navigation">
-                <a href="videogiochi.html" class="back-link">
+                <a href="index.html" class="back-link">
                     <i class="fas fa-arrow-left"></i>
                     Torna ai Videogiochi
                 </a>
@@ -131,6 +322,12 @@
         </div>
     </section>
 </main>
+
+    <!-- ⚠️ CRITICO: NO FOOTER STATICO - Caricato da JavaScript -->
+    <!-- Header e Footer saranno caricati automaticamente dal JavaScript -->
+    <script src="../../js/main.js"></script>
+</body>
+</html>
 ```
 
 ### CSS Classes Specifiche Videogiochi
