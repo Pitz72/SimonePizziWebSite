@@ -395,8 +395,23 @@ class ComponentManager {
 
     calculateBasePath() {
         const path = window.location.pathname;
-        const depth = path.split('/').filter(p => p && p !== 'index.html').length - 1;
-        return depth > 0 ? '../'.repeat(depth) : './';
+        console.log('Current path:', path);
+        
+        // Conta quante directory dobbiamo risalire per arrivare alla root
+        const segments = path.split('/').filter(p => p && p !== 'index.html');
+        console.log('Path segments:', segments);
+        
+        // Se siamo nella root (es: /index.html o /) non risaliamo
+        if (segments.length <= 1) {
+            console.log('At root, basePath: ./');
+            return './';
+        }
+        
+        // Altrimenti risaliamo di segments.length livelli  
+        const depth = segments.length;
+        const basePath = '../'.repeat(depth);
+        console.log('Depth:', depth, 'basePath:', basePath);
+        return basePath;
     }
 
     getCurrentPage() {

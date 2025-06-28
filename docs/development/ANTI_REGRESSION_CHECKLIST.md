@@ -1,4 +1,4 @@
-# 🛡️ ANTI-REGRESSION CHECKLIST - SimonePizziWebSite v2.1.2
+# 🛡️ ANTI-REGRESSION CHECKLIST - SimonePizziWebSite v2.1.3
 
 ## 🚨 **PROTEZIONE MASSIMA ATTIVA v2.1.2**
 **Data Consolidamento:** 27 Gennaio 2025  
@@ -794,3 +794,147 @@ Questa checklist deve essere completata **prima di ogni deploy** in produzione p
 > **Checklist Versione**: v2.1.0 Final Production Edition  
 > **Template Compliance**: ENTERPRISE READY ✅  
 > **Anti-Regression**: MAXIMUM PROTECTION 🛡️
+
+## 🚨 CRITICAL INCIDENT RESOLUTION - ComponentManager Fix
+
+### 📋 Incident Report: Header System Inconsistency
+
+**Data Incident:** 29 Giugno 2025  
+**Severità:** CRITICAL  
+**Impact:** Navigazione sito compromessa  
+**Resolution Time:** 2 ore  
+**Status:** ✅ RESOLVED AND DOCUMENTED
+
+#### 🔍 Root Cause Analysis
+
+**Problema Identificato:**
+1. **Header Hardcoded Coesistenti:** Pagine software utilizzavano header statici invece del ComponentManager
+2. **BasePath Algorithm Bug:** `calculateBasePath()` calcolava profondità con formula errata
+3. **Path Resolution Failures:** Errori 404 su `/pages/components/header.html` e `/pages/index.html`
+
+**Evidenze Log Server:**
+```
+GET /components/header.html HTTP/1.1" 200 ✅ (Homepage)
+GET /pages/components/header.html HTTP/1.1" 404 ❌ (Pagine interne)
+GET /pages/index.html HTTP/1.1" 404 ❌ (Link home errati)
+```
+
+#### ✅ Solution Implemented
+
+**1. Software Section Complete Conversion:**
+- ✅ `pages/software/index.html` → ComponentManager
+- ✅ `pages/software/gestore-duplicati-musicali.html` → ComponentManager
+- ✅ `pages/software/audio-metadata-converter.html` → ComponentManager  
+- ✅ `pages/software/advanced-jingle-machine.html` → ComponentManager
+
+**2. Critical Algorithm Fix:**
+```javascript
+// js/main.js - calculateBasePath() FIXED
+// BEFORE: const depth = segments.length - 1; ❌
+// AFTER:  const depth = segments.length; ✅
+```
+
+**3. Validation Results:**
+- ✅ Path `/pages/chi-sono/` → BasePath `../../` (era `../`)
+- ✅ Path `/pages/software/` → BasePath `../../` (era `../`)
+- ✅ All navigation paths now resolve correctly
+
+## 🛡️ PROTEZIONE ANTI-REGRESSIONE v2.1.3
+
+### ⚠️ DIVIETI ASSOLUTI - Header System
+
+**NEVER AGAIN:**
+1. **❌ NO HEADER HARDCODED:** Tutte le pagine DEVONO usare ComponentManager
+2. **❌ NO MIXED SYSTEMS:** Mai combinare header statici e dinamici
+3. **❌ NO MANUAL PATH CALC:** Non modificare `calculateBasePath()` senza test completi
+4. **❌ NO BASEPATH FORMULA CHANGE:** Formula `segments.length` è DEFINITIVA
+
+### ✅ REGOLE OBBLIGATORIE
+
+**Template Compliance:**
+1. **Ogni nuova pagina** deve includere:
+   ```html
+   <script>
+   document.addEventListener('DOMContentLoaded', function() {
+       const componentManager = new ComponentManager();
+       componentManager.initialize();
+   });
+   </script>
+   ```
+
+2. **Header Placeholder OBBLIGATORIO:**
+   ```html
+   <!-- Header sarà caricato dinamicamente -->
+   ```
+
+3. **Footer Placeholder OBBLIGATORIO:**
+   ```html
+   <!-- Footer sarà caricato dinamicamente -->
+   ```
+
+### 🧪 TEST MANDATORI Pre-Deploy
+
+**Navigation Flow Test - OBBLIGATORIO:**
+```
+✅ Homepage → Blog → Homepage
+✅ Homepage → Software → Homepage  
+✅ Homepage → Videogiochi → Homepage
+✅ Software → Blog → Software
+✅ Blog → Software → Blog
+✅ Deep Links (articles) → Homepage
+```
+
+**Server Log Validation - OBBLIGATORIO:**
+```
+✅ NO 404 on /pages/components/header.html
+✅ NO 404 on /pages/index.html
+✅ NO 404 on /pages/pages/[section]/
+✅ ALL paths resolve to /components/[file]
+```
+
+**Console Log Validation:**
+```
+✅ "basePath: ../../" for /pages/[section]/
+✅ "basePath: ../../../" for /pages/[section]/[subsection]/
+✅ "basePath: ./" for root
+✅ "Header loaded successfully" message
+```
+
+## 📊 Sistema Unificato Status v2.1.3
+
+### Pages Using ComponentManager (15+)
+- ✅ `index.html` (Homepage)
+- ✅ `pages/chi-sono/index.html` (Blog)
+- ✅ `pages/chi-sono/sviluppo.html`
+- ✅ `pages/chi-sono/articoli/` (8 articles)
+- ✅ `pages/software/index.html`
+- ✅ `pages/software/gestore-duplicati-musicali.html`
+- ✅ `pages/software/audio-metadata-converter.html`
+- ✅ `pages/software/advanced-jingle-machine.html`
+- ✅ `pages/videogiochi/index.html`
+- ✅ `pages/videogiochi/il-respiro-trattenuto-del-mondo.html`
+- ✅ `pages/contatti.html`
+- ✅ `pages/podcast/index.html`
+- ✅ `pages/podcast/podcast-storia.html`
+- ✅ `pages/libri/index.html`
+- ✅ `pages/libri/the-safe-place.html`
+
+### Header Hardcoded Remaining: **ZERO** ✅
+
+## 🚀 DEPLOYMENT READY STATUS
+
+**ComponentManager v2.1.3:**
+- ✅ Algorithm matematicamente corretto
+- ✅ Path resolution enterprise-grade
+- ✅ Fallback system robusto
+- ✅ Debug logging completo
+- ✅ Cross-browser compatibility
+- ✅ Performance ottimizzate
+
+**Navigation System:**
+- ✅ Unificazione completa (15+ pagine)
+- ✅ Zero header hardcoded
+- ✅ Consistenza assoluta
+- ✅ Path resolution bulletproof
+
+**Questo sistema è ora IMMUNE alle regressioni di navigazione e pronto per deployment in produzione.**

@@ -27,24 +27,7 @@
     <link rel="stylesheet" href="../../css/style.css">
 </head>
 <body>
-    <!-- ========= HEADER ========= -->
-    <header class="main-header">
-        <nav class="container">
-            <a href="../../index.html" class="logo">
-                <span class="logo-name">Simone Pizzi</span>
-                <span class="logo-tagline">Idee, Storie e Sperimentazione</span>
-            </a>
-            <ul class="nav-menu">
-                <li><a href="../../index.html">Home</a></li>
-                <li><a href="../chi-sono/">Sono Simone (blog)</a></li>
-                <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Podcast</a></li>
-                <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Libri</a></li>
-                <li><a href="../software/" class="active">Software</a></li>
-                <li><a href="../videogiochi/">Videogiochi</a></li>
-                <li><a href="../contatti.html">Contattami</a></li>
-            </ul>
-        </nav>
-    </header>
+    <!-- Header sarà caricato dinamicamente -->
 
     <main>
         <!-- ========= Page Hero ========= -->
@@ -258,5 +241,11 @@
     </footer>
 
     <script src="../../js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const componentManager = new ComponentManager();
+            componentManager.initialize();
+        });
+    </script>
 </body>
 </html> 
