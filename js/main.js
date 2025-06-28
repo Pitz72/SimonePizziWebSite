@@ -503,7 +503,7 @@ class ComponentManager {
                 </a>
                 <ul class="nav-menu">
                     <li><a href="${this.basePath}index.html" id="nav-home">Home</a></li>
-                    <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Sono Simone (blog)</a></li>
+                    <li><a href="${this.basePath}pages/chi-sono/" id="nav-chi-sono">Sono Simone (blog)</a></li>
                     <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Podcast</a></li>
                     <li><a href="#" class="disabled-nav-link" data-tooltip="Sezione in arrivo presto">Libri</a></li>
                     <li><a href="${this.basePath}pages/software/" id="nav-software">Software</a></li>
