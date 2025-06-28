@@ -474,13 +474,17 @@ class ComponentManager {
     async initialize() {
         console.log('ComponentManager: Initializing...');
         
-        // Carica header se non è già presente
-        if (!document.querySelector('.main-header')) {
-            const headerLoaded = await this.loadHeader();
-            if (!headerLoaded) {
-                console.log('Fallback: Creating header directly');
-                this.createFallbackHeader();
-            }
+        // Rimuovi header esistente (dalla homepage) per sostituirlo con quello dinamico
+        const existingHeader = document.querySelector('.main-header');
+        if (existingHeader) {
+            existingHeader.remove();
+        }
+        
+        // Carica header dinamico
+        const headerLoaded = await this.loadHeader();
+        if (!headerLoaded) {
+            console.log('Fallback: Creating header directly');
+            this.createFallbackHeader();
         }
 
         // Carica footer se non è già presente  
