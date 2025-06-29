@@ -40,6 +40,32 @@
   - `.breadcrumb` - Navigazione breadcrumb
   - `.back-navigation` - Link ritorno indietro
 
+### 🔗 Footer Social Icons Protection CRITICA v2.1.3
+- [ ] **Font Awesome Icons OBBLIGATORIE footer:**
+  - `fas fa-envelope` - Email (pizzisimon1972@gmail.com)
+  - `fab fa-github` - GitHub (https://github.com/Pitz72)
+  - `fab fa-instagram` - Instagram (@pizzisimone1972)
+  - `fas fa-microphone-alt` - Spreaker (Runtime Radio) - **AGGIORNATO 29/01/2025**
+  - **VIETATO ASSOLUTO:** `fas fa-podcast` (sostituito con fa-microphone-alt)
+- [ ] **ComponentManager AUTOMATICO:** Sistema centralizzato gestito automaticamente da `main.js`
+  - **VIETATO:** Aggiungere inizializzazioni manuali ComponentManager (causano duplicazioni)
+  - **CORRETTO:** Solo `<script src="path/js/main.js"></script>` necessario
+  - **ECCEZIONE:** `pages/libri/the-safe-place.html` (footer personalizzato SVG)
+- [ ] **Link Structure**: Tutti i link social devono mantenere target="_blank" e aria-label
+- [ ] **CSS Classes**: `.social-links` e `.social-links a` devono rimanere invariate
+- [ ] **Accessibilità**: Tutti i link devono avere aria-label descrittivi
+
+### 📱 Layout Responsive Protection CRITICA v2.1.3
+- [ ] **Blog Articles Grid PROTETTO:**
+  - Desktop Large (≥1200px): MAX 3 articoli per riga
+  - Desktop Medium (769px-1199px): MAX 2 articoli per riga  
+  - Mobile (≤768px): 1 articolo per riga
+  - **VIETATO:** Layout orizzontale unico con tutti gli articoli in una riga
+- [ ] **Contatti Layout PROTETTO:**
+  - "Come Contattarmi" SOPRA (primo)
+  - "Motivi per Contattarmi" SOTTO (secondo)
+  - **VIETATO:** Layout a due colonne affiancate
+
 ### 📁 Directory Structure Protection
 - [ ] **Pages Structure:** DEVE rimanere in subfolders
   - `pages/software/` - 4 files (index + 3 apps)
@@ -81,6 +107,12 @@
 3. **VIETATO:** Modificare storia tecnica del progetto (mono-HTML→HTML/JS/PHP/MySQL→Godot)
 4. **VIETATO:** Aggiungere "interactive fiction" in qualsiasi meta tag o contenuto
 
+### Footer Social Icons Protection
+1. **VIETATO:** Modificare icone Font Awesome del footer senza approvazione
+2. **VIETATO:** Rimuovere o cambiare link social esistenti
+3. **VIETATO:** Modificare `fas fa-microphone-alt` per Spreaker (aggiornato 28/01/2025)
+4. **VIETATO:** Eliminare aria-label accessibility dai link social
+
 ### Template Protection
 1. **VIETATO:** Modificare struttura template videogiochi senza approvazione esplicita
 2. **VIETATO:** Rimuovere sezione support-paypal (OBBLIGATORIA)
@@ -111,7 +143,7 @@
 - [ ] **CHANGELOG.md:** Entry completa per versione
 - [ ] **CODE_TEMPLATES.md:** Template esempi aggiornati se modificati
 
-## 🎯 **REGRESSION TESTING MATRIX v2.1.2**
+## 🎯 **REGRESSION TESTING MATRIX v2.1.3**
 
 | Component | Test Type | Expected Result | Status |
 |-----------|-----------|-----------------|---------|
@@ -121,8 +153,18 @@
 | Accessibility | Options | standard/CRT/alto contrasto | ✅ |
 | Header Navigation | Links | 8 pages identical structure | ✅ |
 | Component Loading | Dynamic | Header/footer auto-load | ✅ |
+| Footer Social Icons | Font Awesome | 4 icone corrette + microphone-alt | ✅ |
+| ComponentManager Auto | JavaScript | Sistema automatico main.js senza duplicazioni | ✅ |
+| Blog Grid Layout | Responsive | 3-2-1 articoli per riga (large-medium-mobile) | ✅ |
+| Contatti Layout | Vertical | Come Contattarmi sopra, Motivi sotto | ✅ |
 | Performance | Lighthouse | Score 95+ all pages | ✅ |
 | Mobile Responsive | Breakpoint | 768px clean collapse | ✅ |
+
+### ☐ Blog Automation Preference
+- [ ] **Modalità LLM/Cursor**: Documentata come modalità preferita per nuovi articoli
+- [ ] **Workflow**: Utente → LLM → Articolo completo (2-3 minuti)
+- [ ] **Template Compliance**: LLM deve rispettare tutti i template esistenti
+- [ ] **Database Update**: articles-metadata.json deve essere aggiornato automaticamente
 
 ## 🏆 **QUALITÀ ENTERPRISE GARANTITA v2.1.2**
 

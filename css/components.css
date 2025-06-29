@@ -313,9 +313,23 @@
 
 .articles-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
     gap: 2rem;
     margin-top: 2rem;
+}
+
+/* Desktop large - max 3 colonne */
+@media (min-width: 1200px) {
+    .articles-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Desktop medium - max 2 colonne */
+@media (max-width: 1199px) and (min-width: 769px) {
+    .articles-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }
 
 .article-card {

@@ -7,7 +7,41 @@
 
 ---
 
-## 📋 OVERVIEW SISTEMA
+## 🎯 **MODALITÀ PREFERITA UTENTE - LLM/CURSOR AUTOMATION**
+
+**Data Implementazione:** 29 Gennaio 2025  
+**Preferenza Documentata:** Simone Pizzi  
+**Status:** ✅ **ATTIVA E FUNZIONANTE**
+
+### ✅ **WORKFLOW PREFERITO NUOVO ARTICOLO**
+
+**Modalità LLM/Cursor** è la modalità preferita per aggiungere nuovi articoli al blog:
+
+1. **Input Utente**: "Voglio creare un nuovo articolo su [ARGOMENTO]"
+2. **LLM Genera**:
+   - Configurazione JSON automatica
+   - File HTML articolo completo
+   - Card homepage aggiornata
+   - Entry database articles-metadata.json
+3. **Risultato**: Articolo pronto in 2-3 minuti
+
+### 🚀 **VANTAGGI MODALITÀ LLM**
+- ✅ **Zero Setup**: Nessuna configurazione richiesta
+- ✅ **Automatismo Totale**: L'LLM gestisce tutto il workflow
+- ✅ **Template Compliance**: Rispetta automaticamente tutti i template
+- ✅ **Sistema Centralizzato**: ComponentManager auto-inizializzato
+- ✅ **Responsive Grid**: Articoli automaticamente integrati nella griglia 3-2-1
+- ✅ **Consistenza**: Mantiene struttura e stile uniformi
+- ✅ **Velocità**: 2-3 minuti vs 5+ minuti modalità offline
+
+### 📝 **DOCUMENTI AGGIORNATI**
+- ✅ Memoria persistente creata (ID: 3615536755017408348)
+- ✅ BLOG_AUTOMATION_TOOLS.md aggiornato
+- ✅ ANTI_REGRESSION_CHECKLIST.md da aggiornare
+
+---
+
+## �� OVERVIEW SISTEMA
 
 Il sistema di automazione blog è progettato per semplificare la creazione, aggiornamento e gestione degli articoli del blog "Chi Sono" utilizzando template standardizzati e procedure automatizzate.
 
