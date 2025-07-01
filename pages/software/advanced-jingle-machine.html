@@ -26,8 +26,9 @@
     
     <link rel="stylesheet" href="../../css/style.css">
 </head>
-<body>
-    <!-- Header sarà caricato dinamicamente -->
+<body id="page-software">
+    <!-- ========= HEADER SKELETON (Anti-FOUC) ========= -->
+    <div id="header-placeholder" class="skeleton-placeholder header-skeleton"></div>
 
     <main>
         <!-- ========= Page Hero ========= -->
@@ -231,8 +232,8 @@
 
     </main>
 
-    <!-- Footer sarà caricato automaticamente dal JavaScript -->
-
-    <script src="../../js/main.js"></script>
+    <!-- ========= FOOTER SKELETON (Anti-FOUC) ========= -->
+    <div id="footer-placeholder" class="skeleton-placeholder footer-skeleton"></div>
+    <script type="module" src="../../js/main.js"></script>
 </body>
 </html> 

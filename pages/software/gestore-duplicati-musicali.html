@@ -26,8 +26,9 @@
     
     <link rel="stylesheet" href="../../css/style.css">
 </head>
-<body>
-    <!-- Header sarà caricato dinamicamente -->
+<body id="page-software">
+    <!-- ========= HEADER SKELETON (Anti-FOUC) ========= -->
+    <div id="header-placeholder" class="skeleton-placeholder header-skeleton"></div>
 
     <main>
         <!-- ========= Page Hero ========= -->
@@ -42,7 +43,7 @@
         <section class="section">
             <div class="container project-details-layout" style="align-items: start;">
                 <div class="project-image" style="display: flex; align-items: flex-start; justify-content: center;">
-                    <img src="../image/gdm.png" alt="Screenshot Gestore Duplicati Musicali" loading="lazy" style="max-width: 350px; height: auto;">
+                    <img src="../../image/gdm.png" alt="Screenshot Gestore Duplicati Musicali" loading="lazy" style="max-width: 350px; height: auto;">
                 </div>
                 <div class="project-info">
                     <h2>Cos'è e Cosa Fa</h2>
@@ -219,8 +220,8 @@
 
     </main>
 
-    <!-- Footer sarà caricato automaticamente dal JavaScript -->
-
-    <script src="../../js/main.js"></script>
+    <!-- ========= FOOTER SKELETON (Anti-FOUC) ========= -->
+    <div id="footer-placeholder" class="skeleton-placeholder footer-skeleton"></div>
+    <script type="module" src="../../js/main.js"></script>
 </body>
 </html> 

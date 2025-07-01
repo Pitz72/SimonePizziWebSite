@@ -10,11 +10,10 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-Avb2QiuDEEvB4bZJYdft2mNjVShBftLdPG8FJ0V7irTLQ8Uo0qcPxh4Plq7G5tGm0rU+1SPhVotteLpBERwTkw==" crossorigin="anonymous" referrerpolicy="no-referrer">
     
     <link rel="stylesheet" href="../../../css/style.css">
-    <link rel="stylesheet" href="../../../css/base.css">
-    <link rel="stylesheet" href="../../../css/components.css">
 </head>
-<body>
-    <!-- Header sarà caricato automaticamente dal JavaScript -->
+<body id="page-chi-sono-articolo">
+    <!-- ========= HEADER SKELETON (Anti-FOUC) ========= -->
+    <div id="header-placeholder" class="skeleton-placeholder header-skeleton"></div>
 
     <main class="main-content">
         <div class="container">
@@ -107,7 +106,8 @@
         </div>
     </main>
 
-    <!-- Footer sarà caricato automaticamente dal JavaScript -->
-    <script src="../../../js/main.js"></script>
+    <!-- ========= FOOTER SKELETON (Anti-FOUC) ========= -->
+    <div id="footer-placeholder" class="skeleton-placeholder footer-skeleton"></div>
+    <script type="module" src="../../../js/main.js"></script>
 </body>
 </html> 

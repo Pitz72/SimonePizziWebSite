@@ -2,6 +2,75 @@
    COMPONENTS - Header, Footer, Cards, Buttons
 ================================================== */
 
+/* ===== SKELETON PLACEHOLDERS (Anti-FOUC) ===== */
+.skeleton-placeholder {
+    position: relative;
+    overflow: hidden;
+    background-color: #2d2d2d; /* Colore di base dello scheletro */
+    border-radius: 4px;
+    min-height: 100px; /* Altezza minima per header/footer */
+    transition: background-color 0.5s ease; /* Aggiungi una transizione fluida */
+}
+
+.skeleton-placeholder::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: rgba(255, 255, 255, 0.1);
+    font-size: 0.8rem;
+    font-weight: 300;
+    pointer-events: none;
+}
+
+/* NUOVA REGOLA: Stile per il placeholder una volta caricato */
+.skeleton-placeholder.loaded {
+    background-color: transparent !important; /* Rende lo sfondo trasparente */
+    animation: none !important; /* Ferma l'animazione shimmer */
+    min-height: auto !important; /* Permette al contenuto di dettare l'altezza */
+}
+
+/* NUOVA REGOLA CRITICA: Nasconde il testo di caricamento quando il componente è pronto. */
+.skeleton-placeholder.loaded::before {
+    display: none !important;
+    content: '' !important; /* Forza la rimozione del contenuto per massima compatibilità */
+}
+
+@keyframes shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* Header Skeleton - Altezza stimata: 80px */
+.header-skeleton {
+    min-height: 80px;
+    max-height: 80px;
+    width: 100%;
+    margin-bottom: 0;
+}
+
+/* Footer Skeleton - Altezza stimata: 130px */
+.footer-skeleton {
+    min-height: 120px;
+    max-height: 130px;
+    width: 100%;
+    margin-top: var(--spacing-section);
+}
+
+/* Responsive per Mobile */
+@media (max-width: 768px) {
+    .header-skeleton {
+        min-height: 70px;
+        max-height: 70px;
+    }
+    
+    .footer-skeleton {
+        min-height: 110px;
+        max-height: 110px;
+    }
+}
+
 /* ===== HEADER ===== */
 .main-header {
     padding: 1rem 0;
@@ -207,6 +276,11 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    /* Background-image solution for robust image positioning */
+    background-size: cover;
+    background-position: center 25%; /* Configurable positioning */
+    background-repeat: no-repeat;
+    transition: transform 0.4s ease;
 }
 
 .project-card .card-image svg {
@@ -214,11 +288,16 @@
     filter: drop-shadow(0 4px 8px rgba(0, 255, 136, 0.2));
 }
 
+/* Legacy img support for non-background cards */
 .project-card .card-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.4s ease;
+}
+
+.project-card:hover .card-image {
+    transform: scale(1.05);
 }
 
 .project-card:hover .card-image img {

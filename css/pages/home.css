@@ -211,20 +211,19 @@
 }
 
 /* ===== POSIZIONAMENTO IMMAGINI PROJECT CARDS ===== */
-/* Fix per specificità CSS post-refactoring modulare */
-
-/* POSIZIONAMENTO IMMAGINI - PROBLEMA IRRISOLTO */
-/* NOTA: object-position non funziona su queste immagini per motivi inspiegabili */
-/* TODO: Investigazione approfondita necessaria */
+/* SOLUZIONE IMPLEMENTATA: Background-image */
 /* 
-.project-grid .project-card:nth-child(1) .card-image img {
-    object-position: center 15% !important;
-}
-
-.project-grid .project-card:nth-child(2) .card-image img {
-    object-position: center 90% !important;
-}
-*/
+ * La precedente implementazione con object-position presentava problemi di compatibilità
+ * inspiegabili su alcune configurazioni browser/CSS. 
+ * 
+ * SOLUZIONE ADOTTATA:
+ * - Uso di background-image invece di tag <img> nelle .card-image
+ * - Controllo posizionamento tramite background-position (più robusto)
+ * - Implementazione in css/components.css con default center 25%
+ * - Posizionamento specifico tramite style inline per ogni card
+ * 
+ * Questa soluzione garantisce controllo cross-browser affidabile del ritaglio immagini.
+ */
 
 /* ===== RESPONSIVE HOME ===== */
 @media (max-width: 768px) {

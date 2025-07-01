@@ -687,6 +687,55 @@ if __name__ == "__main__":
         "article": "pages/chi-sono/articoli/corridor-2193-the-last-run.html"
       },
       "status": "PUBBLICATO"
+    },
+    {
+      "article_id": "6",
+      "title": "Come ho provato a far scrivere un videogioco a un'IA (e cosa ho imparato)",
+      "title_short": "Come ho provato a far scrivere un videogioco a un'IA",
+      "date": {
+        "datetime": "2025-07-01",
+        "display": "1 Luglio 2025"
+      },
+      "meta": {
+        "description": "Descrizione dell'esperienza di sviluppo di un videogioco con l'AI",
+        "reading_time": "15 min",
+        "keywords": ["videogioco", "AI", "sviluppo", "esperienza"]
+      },
+      "image": {
+        "filename": "ia-videogioco.jpg",
+        "alt": "IA che crea un videogioco",
+        "caption": "Un'IA che crea un videogioco"
+      },
+      "content": {
+        "lead_paragraph": "Descrizione dell'esperienza di sviluppo di un videogioco con l'AI",
+        "sections": [
+          {
+            "title": "Fasi di Sviluppo",
+            "content": ["Ideazione", "Progettazione", "Implementazione", "Test", "Rilascio"],
+            "type": "list"
+          },
+          {
+            "title": "Distribuzione degli Sforzi",
+            "content": ["Definizione obiettivi", "Pianificazione", "Divisione del lavoro", "Monitoraggio"],
+            "type": "list"
+          },
+          {
+            "title": "Anatomia delle sfide",
+            "content": ["Difficoltà nel definire i requisiti", "Problemi di compatibilità", "Limiti nella gestione delle risorse"],
+            "type": "list"
+          },
+          {
+            "title": "Evoluzione Architettonica",
+            "content": ["Miglioramento delle funzionalità", "Adattamento alle nuove tecnologie", "Rinforzo delle competenze"],
+            "type": "list"
+          }
+        ],
+        "special_note": "Tutti i dati percentuali sono convertiti da grafici Chart.js a liste HTML standard"
+      },
+      "file_paths": {
+        "article": "pages/chi-sono/articoli/sviluppo-videogioco-ia.html"
+      },
+      "status": "PUBBLICATO"
     }
   ]
 }
@@ -749,3 +798,25 @@ if __name__ == "__main__":
 - ✅ **Scalabilità** garantita per futuri sviluppi
 
 **Il sistema blog è ora completamente modularizzato e pronto per la produzione.** 
+
+## Log Pubblicazioni
+
+### Articolo ID 6 - "Come ho provato a far scrivere un videogioco a un'IA (e cosa ho imparato)"
+- **Data**: 1 luglio 2025
+- **Processo**: Pubblicazione tramite LLM/Cursor (modalità preferita)
+- **Durata**: ~15 minuti
+- **Template**: Rispettato completamente v2.1.4+
+- **Immagini**: 3 immagini integrate con formato standard del sito
+- **Contenuti Speciali**: 
+  - Integrazione completa contenuti infografica
+  - Sezioni aggiunte: 5 fasi sviluppo, distribuzione sforzi, anatomia sfide, evoluzione architettonica
+  - Tutti i dati percentuali convertiti da grafici Chart.js a liste HTML standard
+  - Mantento coerenza CSS senza classi personalizzate
+- **Correzioni Applicate**:
+  - Fix CSS styling (rimossi div custom e classi inesistenti)
+  - Fix allineamento immagini (aggiunto style="text-align: center;" standard)
+  - Streamlining contenuti (focus su dati/grafici, non elementi narrativi)
+- **File Aggiornati**:
+  - `pages/chi-sono/articoli/sviluppo-videogioco-ia.html` (creato)
+  - `index.html` (aggiunta card articolo in prima posizione)
+  - `docs/development/data/articles-metadata.json` (entry ID 6) 

@@ -23,8 +23,9 @@
     
     <link rel="stylesheet" href="../../css/style.css">
 </head>
-<body>
-    <!-- Header sarà caricato automaticamente dal JavaScript -->
+<body id="page-podcast">
+    <!-- ========= HEADER SKELETON (Anti-FOUC) ========= -->
+    <div id="header-placeholder" class="skeleton-placeholder header-skeleton"></div>
 
     <main>
         <!-- ========= Page Hero ========= -->
@@ -41,8 +42,7 @@
                 <div class="item-grid">
                     <!-- Podcast Card 1 -->
                     <div class="project-card">
-                        <div class="card-image">
-                            <img src="image/grandereset.jpg" alt="Copertina Podcast 1" loading="lazy">
+                        <div class="card-image" style="background-image: url('../../image/grandereset.jpg'); background-position: center 20%;">
                         </div>
                         <div class="card-content">
                             <h3>Grande Reset</h3>
@@ -52,8 +52,7 @@
                     </div>
                     <!-- Podcast Card 2 -->
                     <div class="project-card">
-                        <div class="card-image">
-                            <img src="https://placehold.co/600x400/0a0a0a/00ff88?text=Podcast+2" alt="Copertina Podcast 2">
+                        <div class="card-image" style="background-image: url('https://placehold.co/600x400/0a0a0a/00ff88?text=Podcast+2'); background-position: center center;">
                         </div>
                         <div class="card-content">
                             <h3>Dialoghi Digitali (Placeholder)</h3>
@@ -63,8 +62,7 @@
                     </div>
                     <!-- Podcast Card 3 -->
                     <div class="project-card">
-                        <div class="card-image">
-                            <img src="https://placehold.co/600x400/0a0a0a/00ff88?text=Podcast+3" alt="Copertina Podcast 3">
+                        <div class="card-image" style="background-image: url('https://placehold.co/600x400/0a0a0a/00ff88?text=Podcast+3'); background-position: center center;">
                         </div>
                         <div class="card-content">
                             <h3>Codice & Creatività (Placeholder)</h3>
@@ -74,8 +72,7 @@
                     </div>
                     <!-- Podcast Card 4 -->
                     <div class="project-card">
-                        <div class="card-image">
-                            <img src="https://placehold.co/600x400/0a0a0a/00ff88?text=Podcast+4" alt="Copertina Podcast 4">
+                        <div class="card-image" style="background-image: url('https://placehold.co/600x400/0a0a0a/00ff88?text=Podcast+4'); background-position: center center;">
                         </div>
                         <div class="card-content">
                             <h3>Storie in cuffia (Placeholder)</h3>
@@ -85,8 +82,7 @@
                     </div>
                     <!-- Podcast Card 5 -->
                     <div class="project-card">
-                        <div class="card-image">
-                            <img src="https://placehold.co/600x400/0a0a0a/00ff88?text=Podcast+5" alt="Copertina Podcast 5">
+                        <div class="card-image" style="background-image: url('https://placehold.co/600x400/0a0a0a/00ff88?text=Podcast+5'); background-position: center center;">
                         </div>
                         <div class="card-content">
                             <h3>Archivio Futuro (Placeholder)</h3>
@@ -99,7 +95,9 @@
         </section>
     </main>
 
-    <!-- Header e Footer saranno caricati automaticamente dal JavaScript -->
-    <script src="../../js/main.js"></script>
+    <!-- ========= FOOTER SKELETON (Anti-FOUC) ========= -->
+    <div id="footer-placeholder" class="skeleton-placeholder footer-skeleton"></div>
+
+    <script type="module" src="../../js/main.js"></script>
 </body>
 </html> 
