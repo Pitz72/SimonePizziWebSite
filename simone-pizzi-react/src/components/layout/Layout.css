@@ -1,0 +1,18 @@
+/* Layout Styles */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding-top: var(--header-height);
+}
+
+/* Ensure content doesn't overlap with fixed header/footer */
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: calc(var(--header-height) + 1rem);
+  }
+}

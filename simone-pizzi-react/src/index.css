@@ -1,0 +1,251 @@
+/* ===============================================
+   SIMONE PIZZI WEBSITE - REACT VERSION
+   Modern CSS Variables and Base Styles
+================================================== */
+
+:root {
+  /* Color Palette */
+  --primary-green: #00ff88;
+  --secondary-green: #00cc6a;
+  --background-dark: #0a0a0a;
+  --surface-dark: #1a1a1a;
+  --dark-green: #0d2818;
+  --text-light: #ffffff;
+  --text-muted: #b3b3b3;
+  --primary-color: #00ff88;
+  --background-color: #0a0a0a;
+  --background-light: #141414;
+  --background-dark-green: #002a15;
+  --text-primary: #e0e0e0;
+  --text-secondary: #a0a0a0;
+  --border-color: #2a2a2a;
+  
+  /* Spacing */
+  --spacing-section: 5rem;
+  --spacing-column-gap: 5rem;
+  --spacing-mobile-gap: 3rem;
+  --container-width: 1200px;
+  --nav-width: 1400px;
+  
+  /* Header & Footer */
+  --header-height: 80px;
+  --footer-height: 120px;
+  
+  /* Transitions */
+  --transition-fast: 0.2s ease;
+  --transition-medium: 0.3s ease;
+  --transition-slow: 0.5s ease;
+  
+  /* Shadows */
+  --shadow-light: 0 2px 10px rgba(0, 0, 0, 0.1);
+  --shadow-medium: 0 4px 20px rgba(0, 0, 0, 0.15);
+  --shadow-heavy: 0 8px 40px rgba(0, 0, 0, 0.25);
+  
+  /* Border Radius */
+  --radius-small: 8px;
+  --radius-medium: 12px;
+  --radius-large: 20px;
+}
+
+/* Reset and Base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  background-color: var(--background-dark);
+  color: var(--text-light);
+  line-height: 1.8;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+  line-height: 1.2;
+  font-weight: 700;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 800;
+  color: var(--text-light);
+}
+
+h2 {
+  font-size: clamp(2rem, 4vw, 2.8rem);
+  font-weight: 700;
+  color: var(--primary-green);
+}
+
+h3 {
+  font-size: clamp(1.5rem, 3vw, 1.8rem);
+  font-weight: 600;
+  color: var(--text-light);
+}
+
+p {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  font-weight: 400;
+  color: var(--text-primary);
+}
+
+a {
+  color: var(--primary-green);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+a:hover {
+  color: var(--secondary-green);
+  text-decoration: underline;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Layout */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content {
+  flex: 1;
+  padding-top: var(--header-height);
+  padding-bottom: 0;
+}
+
+.container {
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.section {
+  padding: var(--spacing-section) 0;
+}
+
+.section-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-column-gap);
+  align-items: center;
+}
+
+.section-column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-mobile-gap);
+  text-align: center;
+}
+
+/* Page Hero */
+.page-hero {
+  padding: 4rem 0;
+  background: linear-gradient(135deg, var(--background-dark-green), var(--surface-dark));
+  border-bottom: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.page-hero .tagline {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: var(--text-muted);
+  margin-top: 1rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Cards */
+.card {
+  background: var(--surface-dark);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-medium);
+  padding: 2rem;
+  transition: var(--transition-medium);
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-medium);
+  border-color: var(--primary-green);
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: var(--radius-small);
+  font-weight: 500;
+  text-decoration: none;
+  transition: var(--transition-fast);
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background: var(--primary-green);
+  color: var(--background-dark);
+  border: 2px solid var(--primary-green);
+}
+
+.btn-primary:hover {
+  background: transparent;
+  color: var(--primary-green);
+  border: 2px solid var(--primary-green);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--primary-green);
+  border: 2px solid var(--primary-green);
+}
+
+.btn-secondary:hover {
+  background: var(--primary-green);
+  color: var(--background-dark);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  :root {
+    --spacing-section: 3rem;
+    --spacing-column-gap: 2rem;
+    --spacing-mobile-gap: 2rem;
+  }
+  
+  .section-grid {
+    grid-template-columns: 1fr;
+    gap: var(--spacing-mobile-gap);
+  }
+  
+  .container {
+    padding: 0 1rem;
+  }
+  
+  .card {
+    padding: 1.5rem;
+  }
+}
+
+/* Focus styles for accessibility */
+*:focus {
+  outline: 2px solid var(--primary-green);
+  outline-offset: 2px;
+}

@@ -1,0 +1,258 @@
+/* Software Page Styles */
+
+.software-intro {
+  text-align: center;
+  max-width: 800px;
+  margin: 0 auto 3rem;
+  padding: 2rem;
+  background: var(--surface-dark);
+  border-radius: var(--radius-large);
+  border: 1px solid var(--border-color);
+}
+
+.software-intro p {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
+.software-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+  gap: 2.5rem;
+  margin-top: 2rem;
+}
+
+.software-card {
+  background: var(--surface-dark);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-large);
+  padding: 0;
+  transition: var(--transition-medium);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.software-card:hover {
+  transform: translateY(-8px);
+  box-shadow: var(--shadow-heavy);
+  border-color: var(--primary-green);
+}
+
+.software-image {
+  height: 200px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 150, 255, 0.1));
+  padding: 2rem;
+}
+
+.software-image img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  transition: var(--transition-slow);
+}
+
+.software-card:hover .software-image img {
+  transform: scale(1.1);
+}
+
+.software-content {
+  padding: 2rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.software-header {
+  margin-bottom: 1.5rem;
+}
+
+.software-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--text-light);
+  margin-bottom: 0.75rem;
+  line-height: 1.3;
+}
+
+.software-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.version {
+  background: var(--primary-green);
+  color: var(--surface-dark);
+  padding: 0.25rem 0.75rem;
+  border-radius: var(--radius-small);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.platforms {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.platform-tag {
+  background: rgba(0, 255, 136, 0.15);
+  color: var(--primary-green);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-small);
+  font-size: 0.8rem;
+  border: 1px solid rgba(0, 255, 136, 0.3);
+}
+
+.software-description {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.features-list {
+  margin-bottom: 2rem;
+}
+
+.features-list h4 {
+  color: var(--text-light);
+  font-size: 1rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+}
+
+.features-list ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.features-list li {
+  color: var(--text-secondary);
+  padding: 0.4rem 0;
+  position: relative;
+  padding-left: 1.5rem;
+  line-height: 1.4;
+}
+
+.features-list li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--primary-green);
+  font-weight: bold;
+}
+
+.software-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: auto;
+  flex-wrap: wrap;
+}
+
+.software-actions .btn {
+  flex: 1;
+  min-width: 160px;
+  justify-content: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+}
+
+.software-note {
+  margin-top: 4rem;
+  padding: 2rem;
+  background: var(--surface-dark);
+  border-radius: var(--radius-large);
+  border: 1px solid var(--border-color);
+}
+
+.software-note h3 {
+  color: var(--text-light);
+  margin-bottom: 1rem;
+  font-size: 1.2rem;
+}
+
+.software-note ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.software-note li {
+  color: var(--text-secondary);
+  padding: 0.5rem 0;
+  line-height: 1.5;
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+.software-note li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--primary-green);
+  font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .software-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  
+  .software-intro {
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+  }
+  
+  .software-content {
+    padding: 1.5rem;
+  }
+  
+  .software-meta {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
+  }
+  
+  .software-actions {
+    flex-direction: column;
+  }
+  
+  .software-actions .btn {
+    flex: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .software-image {
+    height: 150px;
+    padding: 1.5rem;
+  }
+  
+  .software-content {
+    padding: 1.25rem;
+  }
+  
+  .software-title {
+    font-size: 1.2rem;
+  }
+  
+  .software-note {
+    padding: 1.5rem;
+    margin-top: 3rem;
+  }
+}
