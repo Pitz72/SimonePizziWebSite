@@ -1,6 +1,5 @@
 import React from 'react';
 import { Mail, Github, Instagram, Mic } from 'lucide-react';
-import './Footer.css';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -36,23 +35,23 @@ const Footer = () => {
   ];
 
   return (
-    <footer className="main-footer">
-      <div className="container footer-container">
-        <div className="social-links">
+    <footer className="bg-[#1a1a1a] border-t border-[#2a2a2a] py-8 mt-auto">
+      <div className="max-w-7xl mx-auto px-8 text-center">
+        <div className="flex justify-center gap-8 mb-6 flex-wrap">
           {socialLinks.map((link, index) => (
             <a
               key={index}
               href={link.href}
               aria-label={link.label}
-              className="social-link"
+              className="flex items-center gap-2 text-[#a0a0a0] no-underline px-4 py-3 rounded-xl transition-all duration-200 border border-transparent hover:text-[#00ff88] hover:bg-[#00ff88]/10 hover:border-[#00ff88] hover:-translate-y-0.5"
               {...(link.external && { target: '_blank', rel: 'noopener noreferrer' })}
             >
               {link.icon}
-              <span>{link.text}</span>
+              <span className="font-medium">{link.text}</span>
             </a>
           ))}
         </div>
-        <p className="copyright">
+        <p className="text-[#b3b3b3] text-sm m-0">
           &copy; {currentYear} Simone Pizzi. Tutti i diritti riservati.
         </p>
       </div>

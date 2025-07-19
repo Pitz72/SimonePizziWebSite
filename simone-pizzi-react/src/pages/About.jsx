@@ -1,6 +1,5 @@
 import React from 'react';
 import ArticleCard from '../components/ui/ArticleCard';
-import './About.css';
 
 // In un'app reale, questi dati potrebbero venire da un file JSON o da un'API
 const articles = [
@@ -69,57 +68,59 @@ const articles = [
 const About = () => {
   return (
     <>
-      <header className="page-hero">
-        <div className="container section-column">
-          <h1>Il Mio Percorso</h1>
-          <p className="tagline">Riflessioni, aggiornamenti e storie dal mio mondo creativo e tecnico.</p>
+      <header className="py-16 bg-gradient-to-br from-[#002a15] to-[#1a1a1a] border-b border-[#2a2a2a] text-center">
+        <div className="max-w-7xl mx-auto px-8">
+          <div className="flex flex-col gap-12 text-center">
+            <h1 className="text-4xl lg:text-5xl font-bold text-white">Il Mio Percorso</h1>
+            <p className="text-xl text-[#b3b3b3] max-w-2xl mx-auto">Riflessioni, aggiornamenti e storie dal mio mondo creativo e tecnico.</p>
+          </div>
         </div>
       </header>
 
-      <section className="section">
-        <div className="container">
-          <article className="article-content">
-            <h2>Ciao, sono Simone! Il mio viaggio attraverso i media</h2>
-            <p>
+      <section className="py-20 bg-[#0a0a0a]">
+        <div className="max-w-4xl mx-auto px-8">
+          <article className="prose prose-invert max-w-none">
+            <h2 className="text-3xl font-bold text-[#00ff88] mb-6">Ciao, sono Simone! Il mio viaggio attraverso i media</h2>
+            <p className="text-lg text-[#e0e0e0] leading-relaxed mb-6">
               Ciao e benvenuto in questo angolo speciale del web, dove condivido con te un caleidoscopio di passioni, 
               progetti e sogni che prendono forma attraverso le parole e la tecnologia. Qui troverai il racconto sincero 
               delle mie <strong>tantissime idee</strong> e dei miei <strong>pochissimi talenti</strong> – una confessione 
               ironica che nasconde in realtà un mondo ricco di sperimentazioni e curiosità intellettuali.
             </p>
 
-            <h3>Il Podcasting: La Mia Prima Grande Passione</h3>
-            <p>
+            <h3 className="text-2xl font-semibold text-white mb-4">Il Podcasting: La Mia Prima Grande Passione</h3>
+            <p className="text-lg text-[#e0e0e0] leading-relaxed mb-6">
               Dal 2010, il podcasting è stata la mia prima finestra sul mondo della comunicazione digitale. Con 
               <strong>Runtime Radio</strong> e <strong>Italian Podcast Network</strong>, ho avuto il privilegio di 
               esplorare le infinite possibilità dell'audio narrativo, creando contenuti che spaziano dalla tecnologia 
               alla cultura, dalle interviste alle riflessioni personali.
             </p>
 
-            <h3>La Scrittura: Quando le Parole Diventano Mondi</h3>
-            <p>
+            <h3 className="text-2xl font-semibold text-white mb-4">La Scrittura: Quando le Parole Diventano Mondi</h3>
+            <p className="text-lg text-[#e0e0e0] leading-relaxed mb-6">
               La narrativa è sempre stata il mio rifugio creativo. Attraverso racconti e romanzi, esploro temi che 
               mi affascinano: la tecnologia, l'umanità, i rapporti interpersonali e le infinite possibilità del futuro. 
               Ogni storia che scrivo è un esperimento, un tentativo di catturare qualcosa di autentico e significativo.
             </p>
 
-            <h3>Lo Sviluppo Software: Dove Creatività e Logica si Incontrano</h3>
-            <p>
+            <h3 className="text-2xl font-semibold text-white mb-4">Lo Sviluppo Software: Dove Creatività e Logica si Incontrano</h3>
+            <p className="text-lg text-[#e0e0e0] leading-relaxed mb-6">
               Il mondo del software development mi ha conquistato per la sua capacità di trasformare idee astratte in 
               strumenti concreti e utili. Dalle utility per la gestione audio ai videogiochi narrativi, ogni progetto 
               rappresenta una sfida tecnica e creativa che mi spinge a crescere e imparare continuamente.
             </p>
 
-            <h3>L'Intelligenza Artificiale: Il Mio Nuovo Compagno di Viaggio</h3>
-            <p>
+            <h3 className="text-2xl font-semibold text-white mb-4">L'Intelligenza Artificiale: Il Mio Nuovo Compagno di Viaggio</h3>
+            <p className="text-lg text-[#e0e0e0] leading-relaxed mb-6">
               Negli ultimi anni, l'AI è diventata non solo un oggetto di studio, ma un vero e proprio collaboratore 
               creativo. Attraverso progetti come <strong>The Safe Place</strong>, sto esplorando come l'intelligenza 
               artificiale possa diventare un partner nella creazione di contenuti, aprendo nuove frontiere nella 
               narrativa interattiva e nello sviluppo software.
             </p>
 
-            <div className="highlight-box">
-              <h3>La Filosofia del "Fare Sperimentando"</h3>
-              <p>
+            <div className="bg-[#1a1a1a] border border-[#00ff88]/30 rounded-xl p-8 my-8">
+              <h3 className="text-2xl font-semibold text-[#00ff88] mb-4">La Filosofia del "Fare Sperimentando"</h3>
+              <p className="text-lg text-[#e0e0e0] leading-relaxed">
                 Quello che guida ogni mio progetto è una filosofia semplice ma potente: <em>imparare facendo</em>. 
                 Non aspetto di avere tutte le competenze necessarie prima di iniziare; piuttosto, mi lancio nei 
                 progetti con curiosità e determinazione, lasciando che sia il processo stesso a insegnarmi quello 
@@ -127,28 +128,30 @@ const About = () => {
               </p>
             </div>
 
-            <p>
+            <p className="text-lg text-[#e0e0e0] leading-relaxed mb-6">
               Questo sito è più di un portfolio: è un diario di bordo delle mie esplorazioni creative e tecnologiche. 
               Qui condivido non solo i risultati finiti, ma anche i processi, gli errori, le scoperte e le riflessioni 
               che accompagnano ogni progetto.
             </p>
 
-            <p>
+            <p className="text-lg text-[#e0e0e0] leading-relaxed">
               Ti invito a esplorare le diverse sezioni, a leggere i miei articoli, a provare i software che sviluppo 
               e a giocare ai miei esperimenti videoludici. E se qualcosa ti incuriosisce o vorresti saperne di più, 
-              non esitare a <a href="/contatti">contattarmi</a>. Adoro le conversazioni che nascono dalla condivisione 
+              non esitare a <a href="/contatti" className="text-[#00ff88] hover:text-[#00cc6a] transition-colors">contattarmi</a>. Adoro le conversazioni che nascono dalla condivisione 
               di passioni comuni!
             </p>
           </article>
         </div>
       </section>
 
-      <section className="blog-section alt-bg">
-        <div className="container">
-          <h2 className="blog-title">Approfondimenti e Aggiornamenti</h2>
-          <p className="blog-subtitle">Riflessioni su tecnologia, design e innovazione dal mio percorso di sviluppo</p>
+      <section className="py-20 bg-[#1a1a1a]">
+        <div className="max-w-7xl mx-auto px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl font-bold text-[#00ff88] mb-4">Approfondimenti e Aggiornamenti</h2>
+            <p className="text-xl text-[#a0a0a0] max-w-2xl mx-auto">Riflessioni su tecnologia, design e innovazione dal mio percorso di sviluppo</p>
+          </div>
           
-          <div className="articles-grid">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {articles.map(article => (
               <ArticleCard
                 key={article.id}
