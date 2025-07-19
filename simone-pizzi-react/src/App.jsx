@@ -9,7 +9,6 @@ import Contatti from './pages/Contatti';
 import GestoreDuplicatiMusicali from './pages/software/GestoreDuplicatiMusicali';
 import AudioMetadataConverter from './pages/software/AudioMetadataConverter';
 import AdvancedJingleMachine from './pages/software/AdvancedJingleMachine';
-import './App.css';
 
 function App() {
   return (
