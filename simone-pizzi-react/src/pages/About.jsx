@@ -11,7 +11,7 @@ const articles = [
     date: "2025-07-01",
     readTime: 9,
     preview: "Il viaggio di sviluppo di The Safe Place con Gemini: dall'idea di ricrecare un gioco d'infanzia usando l'IA come collaboratore, alle sfide, frustrazioni e lezioni apprese in questo esperimento di programmazione con LLM...",
-    link: "/chi-sono/articoli/sviluppo-videogioco-ia.html"
+    link: "/chi-sono/articoli/sviluppo-videogioco-ia"
   },
   {
     id: 2,
@@ -21,7 +21,7 @@ const articles = [
     date: "2025-06-28",
     readTime: 6,
     preview: "È con grande entusiasmo che annuncio il raggiungimento della Milestone 2 di The Safe Place v0.2.0 \"The Balanced World\"! Dopo una riprogettazione totale da zero in Godot, il progetto è evoluto a vero GDR post-apocalittico con estetica CRT anni '80...",
-    link: "/chi-sono/articoli/the-safe-place-v100.html"
+    link: "/chi-sono/articoli/the-safe-place-v100"
   },
   {
     id: 3,
@@ -31,7 +31,7 @@ const articles = [
     date: "2025-06-23",
     readTime: 8,
     preview: "Un viaggio nello sviluppo di un'interactive fiction italiana: dall'esperimento su Inkle Writer ai limiti tecnici di Ink, fino alla riprogettazione totale verso piattaforme più evolute come Yarn Spinner e Godot...",
-    link: "/chi-sono/articoli/lemmons-fortuna-spenta.html"
+    link: "/chi-sono/articoli/lemmons-fortuna-spenta"
   },
   {
     id: 4,
@@ -41,7 +41,7 @@ const articles = [
     date: "2025-06-20",
     readTime: 4,
     preview: "È con grande entusiasmo che annuncio l'apertura ufficiale di due nuove sezioni fondamentali del sito: Videogiochi e Software. Attualmente è disponibile \"Il Respiro Trattenuto del Mondo\", mentre altri progetti sono in arrivo...",
-    link: "/chi-sono/articoli/apertura-sezioni-sito.html"
+    link: "/chi-sono/articoli/apertura-sezioni-sito"
   },
   {
     id: 5,
@@ -51,7 +51,7 @@ const articles = [
     date: "2025-06-15",
     readTime: 7,
     preview: "Un progetto che segna una tappa importante nel mio percorso di sviluppo. La versione 1.5, il mio primo videogioco desktop completo che unisce narrativa letteraria, tecnologie moderne e opzioni di accessibilità...",
-    link: "/chi-sono/articoli/il-respiro-trattenuto-del-mondo.html"
+    link: "/chi-sono/articoli/il-respiro-trattenuto-del-mondo"
   },
   {
     id: 6,
@@ -61,7 +61,7 @@ const articles = [
     date: "2025-05-20",
     readTime: 6,
     preview: "Dopo mesi di sviluppo intenso, sono orgoglioso di annunciare il completamento di \"Corridor 2193: The Last Run\", un'avventura testuale interattiva dark sci-fi che omaggia i classici come Doom e Quake...",
-    link: "/chi-sono/articoli/corridor-2193-the-last-run.html"
+    link: "/chi-sono/articoli/corridor-2193-the-last-run"
   }
 ];
 

@@ -9,6 +9,12 @@ import Contatti from './pages/Contatti';
 import GestoreDuplicatiMusicali from './pages/software/GestoreDuplicatiMusicali';
 import AudioMetadataConverter from './pages/software/AudioMetadataConverter';
 import AdvancedJingleMachine from './pages/software/AdvancedJingleMachine';
+import SviluppoVideogiocoIA from './pages/articoli/SviluppoVideogiocoIA';
+import TheSafePlaceV100 from './pages/articoli/TheSafePlaceV100';
+import LemmonsFortunaSpenta from './pages/articoli/LemmonsFortunaSpenta';
+import AperturaSezioniSito from './pages/articoli/AperturaSezioniSito';
+import IlRespiroTrattenutoDelMondo from './pages/articoli/IlRespiroTrattenutoDelMondo';
+import Corridor2193TheLastRun from './pages/articoli/Corridor2193TheLastRun';
 
 function App() {
   return (
@@ -25,6 +31,12 @@ function App() {
           <Route path="/software/advanced-jingle-machine" element={<AdvancedJingleMachine />} />
           <Route path="/videogiochi" element={<Videogiochi />} />
           <Route path="/contatti" element={<Contatti />} />
+          <Route path="/chi-sono/articoli/sviluppo-videogioco-ia" element={<SviluppoVideogiocoIA />} />
+          <Route path="/chi-sono/articoli/the-safe-place-v100" element={<TheSafePlaceV100 />} />
+          <Route path="/chi-sono/articoli/lemmons-fortuna-spenta" element={<LemmonsFortunaSpenta />} />
+          <Route path="/chi-sono/articoli/apertura-sezioni-sito" element={<AperturaSezioniSito />} />
+          <Route path="/chi-sono/articoli/il-respiro-trattenuto-del-mondo" element={<IlRespiroTrattenutoDelMondo />} />
+          <Route path="/chi-sono/articoli/corridor-2193-the-last-run" element={<Corridor2193TheLastRun />} />
         </Routes>
       </Layout>
     </Router>
