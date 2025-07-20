@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react';
 
 const Toast = ({ 
@@ -17,15 +17,15 @@ const Toast = ({
     }, duration);
 
     return () => clearTimeout(timer);
-  }, [duration]);
+  }, [duration, handleClose]);
 
-  const handleClose = () => {
+  const handleClose = useCallback(() => {
     setIsExiting(true);
     setTimeout(() => {
       setIsVisible(false);
       onClose?.();
     }, 300);
-  };
+  }, [onClose]);
 
   const getIcon = () => {
     switch (type) {
@@ -113,28 +113,6 @@ export const ToastContainer = ({ toasts, removeToast }) => {
       ))}
     </div>
   );
-};
-
-// Hook per gestire i toast
-export const useToast = () => {
-  const [toasts, setToasts] = useState([]);
-
-  const addToast = (message, type = 'info', duration = 5000) => {
-    const id = Date.now() + Math.random();
-    const newToast = { id, message, type, duration };
-    setToasts(prev => [...prev, newToast]);
-  };
-
-  const removeToast = (id) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  };
-
-  const success = (message, duration) => addToast(message, 'success', duration);
-  const error = (message, duration) => addToast(message, 'error', duration);
-  const warning = (message, duration) => addToast(message, 'warning', duration);
-  const info = (message, duration) => addToast(message, 'info', duration);
-
-  return { toasts, addToast, removeToast, success, error, warning, info };
 };
 
 export default Toast; 

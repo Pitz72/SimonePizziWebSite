@@ -3,7 +3,8 @@ import Header from './Header';
 import Footer from './Footer';
 import Breadcrumb from '../ui/Breadcrumb';
 import ScrollProgress from '../ui/ScrollProgress';
-import { ToastContainer, useToast } from '../ui/Toast';
+import { ToastContainer } from '../ui/Toast';
+import { useToast } from '../../hooks/useToast';
 
 const Layout = ({ children }) => {
   const { toasts, removeToast } = useToast();

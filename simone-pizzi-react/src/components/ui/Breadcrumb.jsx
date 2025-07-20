@@ -35,7 +35,7 @@ const Breadcrumb = () => {
             </Link>
           </li>
           
-          {pathSegments.map((segment, index) => (
+          {pathSegments.map((segment) => (
             <li key={segment.path} className="flex items-center">
               <ChevronRight size={16} className="text-text-muted mx-2" />
               {segment.isLast ? (

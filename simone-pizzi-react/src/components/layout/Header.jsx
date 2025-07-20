@@ -8,7 +8,7 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState(null);
   const location = useLocation();
-  const [headerRef, headerVisible] = useScrollAnimation({ threshold: 0.1, triggerOnce: true });
+  const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.1, triggerOnce: true });
 
   useEffect(() => {
     const handleScroll = () => {
@@ -32,8 +32,8 @@ const Header = () => {
       hasDropdown: true,
       dropdownItems: [
         { label: 'Chi Sono', path: '/chi-sono' },
-        { label: 'Blog', path: '/chi-sono' },
-        { label: 'Articoli', path: '/chi-sono' }
+        { label: 'Blog', path: '/chi-sono/blog' },
+        { label: 'Articoli', path: '/chi-sono/articoli' }
       ]
     },
     { label: 'Podcast', path: '/podcast', disabled: true },
@@ -141,7 +141,7 @@ const Header = () => {
                         : 'opacity-0 -translate-y-2 pointer-events-none'
                     }`}>
                       <div className="p-2">
-                        {item.dropdownItems.map((dropdownItem, dropdownIndex) => (
+                        {item.dropdownItems.map((dropdownItem) => (
                           <Link
                             key={dropdownItem.path}
                             to={dropdownItem.path}

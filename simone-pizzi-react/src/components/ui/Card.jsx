@@ -25,7 +25,7 @@ const Card = ({
     interactive: 'bg-bg-surface border border-border-primary rounded-xl cursor-pointer',
   };
   
-  const hoverClasses = hover ? 'hover:-translate-y-2 hover:shadow-xl hover:border-primary-500 hover:shadow-glow' : '';
+  const hoverClasses = hover ? 'hover:-translate-y-2 hover:shadow-xl hover:border-primary-500 hover:shadow-glow hover:scale-105' : '';
   const featuredClasses = featured ? 'ring-2 ring-primary-500/20' : '';
   
   const cardClasses = `${baseClasses} ${variants[variant]} ${hoverClasses} ${featuredClasses} ${className}`;
@@ -37,7 +37,7 @@ const Card = ({
           <img 
             src={image} 
             alt={imageAlt || ''} 
-            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
             loading="lazy"
           />
           {badge && (
@@ -45,7 +45,7 @@ const Card = ({
               {badge}
             </div>
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-bg-primary/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+          <div className="absolute inset-0 bg-gradient-to-t from-primary-500/80 via-primary-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
         </div>
       )}
       <div className="p-6">

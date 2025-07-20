@@ -131,6 +131,8 @@ npm run preview
 - [ ] **Deploy su Produzione**
 - [ ] **Testing Cross-browser**
 - [ ] **Performance Optimization**
+- [ ] **Virtual Scrolling** (✅ Implementato)
+- [ ] **Gesture Recognition** (✅ Implementato)
 
 ## 📊 Performance
 

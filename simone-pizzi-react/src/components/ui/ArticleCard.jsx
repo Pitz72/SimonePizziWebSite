@@ -20,14 +20,16 @@ const ArticleCard = ({
   };
 
   return (
-    <article className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl overflow-hidden transition-all duration-300 h-full flex flex-col hover:-translate-y-2 hover:shadow-2xl hover:border-[#00ff88] group">
+    <article className="bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl overflow-hidden transition-all duration-500 h-full flex flex-col hover:-translate-y-2 hover:shadow-2xl hover:border-[#00ff88] hover:scale-105 group">
       <div className="relative h-48 overflow-hidden">
         <img 
           src={imageUrl} 
           alt={imageAlt} 
           loading="lazy"
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
         />
+        {/* Overlay gradiente al hover */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#00ff88]/80 via-[#00ff88]/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
       </div>
       
       <div className="p-6 flex flex-col flex-1">
@@ -42,7 +44,7 @@ const ArticleCard = ({
           </span>
         </div>
         
-        <h3 className="text-xl font-semibold text-white leading-tight mb-4 line-clamp-2 md:text-lg text-lg line-clamp-3 text-base line-clamp-3">
+        <h3 className="text-xl font-semibold text-white leading-tight mb-4 line-clamp-2 md:text-lg text-lg line-clamp-3 text-base line-clamp-3 group-hover:text-[#00ff88] transition-colors duration-300">
           {title}
         </h3>
         

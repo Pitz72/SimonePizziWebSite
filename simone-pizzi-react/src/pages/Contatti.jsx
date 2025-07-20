@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, Copy, Check } from 'lucide-react';
-import { Button, Card, useToast, Tooltip, RippleEffect } from '../components/ui';
+import { Button, Card, Tooltip, RippleEffect } from '../components/ui';
+import { useToast } from '../hooks/useToast';
 
 const Contatti = () => {
   const [formData, setFormData] = useState({
@@ -37,7 +38,7 @@ const Contatti = () => {
       setCopiedField(field);
       success(`${field} copiato negli appunti!`);
       setTimeout(() => setCopiedField(null), 2000);
-    } catch (err) {
+    } catch {
       error('Errore nella copia negli appunti');
     }
   };

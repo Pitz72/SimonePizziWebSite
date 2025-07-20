@@ -1,21 +1,17 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Download, Play, BookOpen, Code, Gamepad2, Sparkles } from 'lucide-react';
-import { Button, Card, ParticleBackground, TypewriterText } from '../components/ui';
-import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import { Button, Card, ParticleBackground, TypewriterText, ParallaxCard, AnimatedSection, AnimatedList, AnimatedCard } from '../components/ui';
 
 const Home = () => {
   const [typewriterComplete, setTypewriterComplete] = useState(false);
-  const [heroRef, heroVisible] = useScrollAnimation({ threshold: 0.1, triggerOnce: true });
-  const [featuresRef, featuresVisible] = useScrollAnimation({ threshold: 0.1, triggerOnce: true, delay: 200 });
-  const [updatesRef, updatesVisible] = useScrollAnimation({ threshold: 0.1, triggerOnce: true, delay: 400 });
-  const [contactRef, contactVisible] = useScrollAnimation({ threshold: 0.1, triggerOnce: true, delay: 600 });
 
   return (
     <>
       {/* Hero Section Avanzata */}
-      <section 
-        ref={heroRef}
+      <AnimatedSection
+        variant="fadeInUp"
+        threshold={0.1}
         className="hero relative overflow-hidden min-h-screen flex items-center"
       >
         {/* Particle Background */}
@@ -31,9 +27,7 @@ const Home = () => {
         
         <div className="container relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-            <div className={`space-y-8 transition-all duration-1000 ${
-              heroVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-            }`}>
+            <div className="space-y-8 transition-all duration-1000">
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 border border-primary-500/20 rounded-full text-primary-500 text-sm font-medium animate-fade-in-up">
                 <Sparkles size={16} />
@@ -105,36 +99,41 @@ const Home = () => {
               </div>
             </div>
             
-            {/* Hero Image */}
-            <div className={`flex justify-center items-center transition-all duration-1000 ${
-              heroVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-8 scale-95'
-            }`} style={{ animationDelay: '0.5s' }}>
-              <div className="relative group">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary-500/20 to-primary-600/20 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
-                <img 
-                  src="/assets/photo_2025-03-15_08-52-25.jpg" 
-                  alt="Simone Pizzi - Ritratto" 
-                  className="relative w-full max-w-md h-auto rounded-3xl shadow-2xl transition-all duration-500 group-hover:scale-105 group-hover:shadow-glow-lg"
-                />
-                {/* Floating badge */}
-                <div className="absolute -top-4 -right-4 bg-primary-500 text-bg-primary px-3 py-1 rounded-full text-sm font-semibold animate-bounce">
-                  ✨ Live
+            {/* Hero Image con Parallax */}
+            <div className="flex justify-center items-center transition-all duration-1000" style={{ animationDelay: '0.5s' }}>
+              <ParallaxCard
+                variant="glass"
+                parallaxOptions={{ speed: 0.05, direction: 'vertical' }}
+                tiltOptions={{ maxTilt: 2, speed: 400 }}
+                className="p-0 bg-transparent border-0 shadow-none"
+              >
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary-500/20 to-primary-600/20 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
+                  <img 
+                    src="/assets/photo_2025-03-15_08-52-25.jpg" 
+                    alt="Simone Pizzi - Ritratto" 
+                    className="relative w-full max-w-md h-auto rounded-3xl shadow-2xl transition-all duration-500 group-hover:scale-105 group-hover:shadow-glow-lg"
+                  />
+                  {/* Floating badge */}
+                  <div className="absolute -top-4 -right-4 bg-primary-500 text-bg-primary px-3 py-1 rounded-full text-sm font-semibold animate-bounce">
+                    ✨ Live
+                  </div>
                 </div>
-              </div>
+              </ParallaxCard>
             </div>
           </div>
         </div>
-      </section>
+      </AnimatedSection>
 
       {/* Features Section Migliorata */}
-      <section 
-        ref={featuresRef}
+      <AnimatedSection
+        variant="fadeInUp"
+        threshold={0.1}
+        animationDelay={200}
         className="section bg-bg-primary"
       >
         <div className="container">
-          <div className={`text-center mb-16 transition-all duration-700 ${
-            featuresVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}>
+          <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold text-gradient mb-6">
               Cosa Troverai Qui
             </h2>
@@ -174,61 +173,74 @@ const Home = () => {
                 link: "/videogiochi"
               }
             ].map((feature, index) => (
-              <Card
+              <ParallaxCard
                 key={feature.title}
-                variant="interactive"
-                className={`transition-all duration-700 ${
-                  featuresVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                }`}
+                variant="elevated"
+                parallaxOptions={{ speed: 0.04, direction: 'vertical' }}
+                tiltOptions={{ maxTilt: 2.5, speed: 350 }}
+                className="group transition-all duration-700 hover:scale-105"
                 style={{ animationDelay: `${index * 100}ms` }}
-                image={feature.image}
-                imageAlt={feature.title}
-                to={feature.link}
-                hover={!feature.disabled}
               >
-                <div className="relative z-10 text-center">
-                  <div className="text-primary-500 mb-6 flex justify-center">
-                    <feature.icon size={40} />
+                <div className="relative overflow-hidden rounded-xl">
+                  {/* Immagine con overlay gradiente al hover */}
+                  <div className="relative overflow-hidden">
+                    <img 
+                      src={feature.image} 
+                      alt={feature.title}
+                      className="w-full h-48 object-cover rounded-t-xl transition-all duration-500 group-hover:scale-110"
+                    />
+                    {/* Overlay gradiente al hover */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-primary-500/80 via-primary-500/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-500"></div>
                   </div>
-                  <Card.Title className="text-xl font-semibold mb-4">
-                    {feature.title}
-                  </Card.Title>
-                  <Card.Content className="text-text-secondary leading-relaxed mb-6">
-                    {feature.description}
-                  </Card.Content>
-                  {feature.disabled ? (
-                    <span className="text-text-muted cursor-not-allowed opacity-70 inline-flex items-center gap-2">
-                      Prossimamente <ArrowRight size={16} />
-                    </span>
-                  ) : (
-                    <Button 
-                      variant="ghost" 
-                      size="sm" 
-                      icon={ArrowRight}
-                      to={feature.link}
-                      className="group"
-                    >
-                      <span className="group-hover:translate-x-1 transition-transform duration-300">
-                        Scopri
-                      </span>
-                    </Button>
-                  )}
+                  
+                  <div className="p-6">
+                    <div className="relative z-10 text-center">
+                      {/* Icona sempre visibile nel testo */}
+                      <div className="text-primary-500 mb-6 flex justify-center">
+                        <feature.icon size={40} />
+                      </div>
+                      
+                      <h3 className="text-xl font-semibold mb-4 text-text-primary group-hover:text-primary-500 transition-colors duration-300">
+                        {feature.title}
+                      </h3>
+                      <p className="text-text-secondary leading-relaxed mb-6">
+                        {feature.description}
+                      </p>
+                      {feature.disabled ? (
+                        <span className="text-text-muted cursor-not-allowed opacity-70 inline-flex items-center gap-2">
+                          Prossimamente <ArrowRight size={16} />
+                        </span>
+                      ) : (
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          icon={ArrowRight}
+                          to={feature.link}
+                          className="group/btn"
+                        >
+                          <span className="group-hover/btn:translate-x-1 transition-transform duration-300">
+                            Scopri
+                          </span>
+                        </Button>
+                      )}
+                    </div>
+                  </div>
                 </div>
-              </Card>
+              </ParallaxCard>
             ))}
           </div>
         </div>
-      </section>
+      </AnimatedSection>
 
       {/* Latest Updates Section Migliorata */}
-      <section 
-        ref={updatesRef}
+      <AnimatedSection
+        variant="fadeInUp"
+        threshold={0.1}
+        animationDelay={400}
         className="section bg-bg-secondary"
       >
         <div className="container">
-          <div className={`text-center mb-16 transition-all duration-700 ${
-            updatesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}>
+          <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold text-gradient mb-6">
               Ultimi Aggiornamenti
             </h2>
@@ -267,11 +279,8 @@ const Home = () => {
               <Card
                 key={update.title}
                 variant="elevated"
-                className={`transition-all duration-700 ${
-                  updatesVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                }`}
+                className="transition-all duration-700"
                 style={{ animationDelay: `${index * 100}ms` }}
-                to={update.link}
               >
                 <div className="flex justify-between items-center mb-4">
                   <Card.Badge variant="primary">{update.category}</Card.Badge>
@@ -298,23 +307,22 @@ const Home = () => {
             ))}
           </div>
         </div>
-      </section>
+      </AnimatedSection>
 
       {/* Contact Section Migliorata */}
-      <section 
-        ref={contactRef}
+      <AnimatedSection
+        variant="fadeInUp"
+        threshold={0.1}
+        animationDelay={600}
         className="section bg-bg-primary"
       >
         <div className="container">
-          <div className={`text-center mb-16 transition-all duration-700 ${
-            contactVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-          }`}>
+          <div className="text-center mb-16">
             <h2 className="text-4xl lg:text-5xl font-bold text-gradient mb-6">
               Perché Contattarmi?
             </h2>
             <p className="text-xl text-text-secondary max-w-4xl mx-auto">
-              Ci sono diversi motivi per cui potresti voler entrare in contatto con me. 
-              Ecco alcune delle opportunità di collaborazione e interazione che mi interessano maggiormente.
+              Ci sono diversi motivi per cui potresti voler entrare in contatto con me. Ecco alcune delle opportunità di collaborazione e interazione che mi interessano maggiormente.
             </p>
           </div>
           
@@ -344,9 +352,7 @@ const Home = () => {
               <Card
                 key={reason.title}
                 variant="default"
-                className={`transition-all duration-700 ${
-                  contactVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
-                }`}
+                className="transition-all duration-700"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <Card.Title className="text-xl font-semibold mb-3">
@@ -373,7 +379,7 @@ const Home = () => {
             </Button>
           </div>
         </div>
-      </section>
+      </AnimatedSection>
     </>
   );
 };
