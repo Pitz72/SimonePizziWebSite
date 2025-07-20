@@ -30,6 +30,9 @@ function App() {
           <Route path="/software/audio-metadata-converter" element={<AudioMetadataConverter />} />
           <Route path="/software/advanced-jingle-machine" element={<AdvancedJingleMachine />} />
           <Route path="/videogiochi" element={<Videogiochi />} />
+          <Route path="/videogiochi/il-respiro-trattenuto-del-mondo" element={<IlRespiroTrattenutoDelMondo />} />
+          <Route path="/videogiochi/the-safe-place" element={<TheSafePlaceV100 />} />
+          <Route path="/videogiochi/lemmons" element={<LemmonsFortunaSpenta />} />
           <Route path="/contatti" element={<Contatti />} />
           <Route path="/chi-sono/articoli/sviluppo-videogioco-ia" element={<SviluppoVideogiocoIA />} />
           <Route path="/chi-sono/articoli/the-safe-place-v100" element={<TheSafePlaceV100 />} />

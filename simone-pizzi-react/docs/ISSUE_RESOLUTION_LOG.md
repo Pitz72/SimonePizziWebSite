@@ -62,6 +62,44 @@ dist/assets/index-Dl1YSqu1.js   189.78 kB │ gzip: 60.03 kB
 Total: ~262 kB │ gzip: ~82 kB
 ```
 
+#### 4. **Pagine Nere per Articoli Videogiochi** ❌➡️✅
+**Data**: 19 Luglio 2025
+
+**Problema**: 
+- Le pagine interne della sezione videogiochi mostravano pagina nera
+- Link "Dettagli" e "Scopri di più" non funzionanti
+- Navigazione interrotta tra sezione videogiochi e articoli specifici
+
+**Causa**: 
+- Route mancanti per i percorsi `/videogiochi/...` in App.jsx
+- I link nella pagina Videogiochi.jsx puntavano a percorsi non configurati
+- Navigazione "Torna a..." puntava alla sezione sbagliata
+
+**Soluzione Implementata**:
+```jsx
+// Route aggiunte in App.jsx
+<Route path="/videogiochi/il-respiro-trattenuto-del-mondo" element={<IlRespiroTrattenutoDelMondo />} />
+<Route path="/videogiochi/the-safe-place" element={<TheSafePlaceV100 />} />
+<Route path="/videogiochi/lemmons" element={<LemmonsFortunaSpenta />} />
+```
+
+**Modifiche Correlate**:
+- Aggiornamento link "Torna a..." in tutti gli articoli videogiochi
+- Navigazione corretta da `/videogiochi` agli articoli specifici
+- Mantenimento route esistenti per `/chi-sono/articoli/...`
+
+**File Modificati**:
+- `src/App.jsx` - Aggiunta route videogiochi
+- `src/pages/articoli/IlRespiroTrattenutoDelMondo.jsx` - Link aggiornato
+- `src/pages/articoli/TheSafePlaceV100.jsx` - Link aggiornato  
+- `src/pages/articoli/LemmonsFortunaSpenta.jsx` - Link aggiornato
+
+**Risultati**:
+- ✅ Navigazione videogiochi completamente funzionante
+- ✅ Pagine articoli caricano correttamente
+- ✅ Link "Torna ai Videogiochi" funzionanti
+- ✅ Build di produzione successful
+
 ### Status Finale: ✅ TUTTI I PROBLEMI RISOLTI
 
 #### Verifiche Effettuate:

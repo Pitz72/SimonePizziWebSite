@@ -7,9 +7,9 @@ const IlRespiroTrattenutoDelMondo = () => {
     <>
       <header className="py-16 bg-gradient-to-br from-[#002a15] to-[#1a1a1a] border-b border-[#2a2a2a]">
         <div className="max-w-4xl mx-auto px-8">
-          <Link to="/chi-sono" className="inline-flex items-center gap-2 text-[#00ff88] hover:text-[#00cc6a] transition-colors mb-8">
+          <Link to="/videogiochi" className="inline-flex items-center gap-2 text-[#00ff88] hover:text-[#00cc6a] transition-colors mb-8">
             <ArrowLeft size={20} />
-            Torna a Chi Sono
+            Torna ai Videogiochi
           </Link>
           
           <div className="flex flex-col gap-6">
