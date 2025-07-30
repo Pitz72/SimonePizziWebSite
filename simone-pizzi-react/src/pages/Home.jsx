@@ -1,10 +1,69 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Download, Play, BookOpen, Code, Gamepad2, Sparkles } from 'lucide-react';
-import { Button, Card, ParticleBackground, TypewriterText, ParallaxCard, AnimatedSection, AnimatedList, AnimatedCard } from '../components/ui';
+import { Button, Card, ParticleBackground, TypewriterText, ParallaxCard, AnimatedSection, AnimatedList, AnimatedCard, AchievementPanel } from '../components/ui';
+import { useAchievements, useEasterEggs, useNavigationTracking } from '../hooks';
+import { useToastContext } from '../contexts/ToastContext';
+import { achievements } from '../data/achievements';
 
 const Home = () => {
   const [typewriterComplete, setTypewriterComplete] = useState(false);
+  const [showAchievements, setShowAchievements] = useState(false);
+
+  // Sistema toast per notifiche
+  const { showToast } = useToastContext();
+
+  // Sistema gamification
+  const { unlockAchievement, updateProgress, isUnlocked } = useAchievements({
+    achievements,
+    enabled: true,
+    onUnlock: (achievement, id) => {
+      console.log(`🎉 Achievement sbloccato: ${achievement?.title || id}`);
+      showToast({
+        title: `🏆 Achievement Sbloccato!`,
+        message: achievement?.title || id,
+        type: 'success',
+        duration: 5000
+      });
+    }
+  });
+
+  const { triggerEasterEgg } = useEasterEggs({
+    easterEggs: [
+      {
+        id: 'konami-code',
+        title: 'Konami Code',
+        description: 'Hai inserito il Konami Code!',
+        type: 'keyboard',
+        trigger: 'konami'
+      }
+    ],
+    enabled: true,
+    onTrigger: (egg, id) => {
+      if (id === 'konami-code') {
+        unlockAchievement('konami-master');
+      }
+    }
+  });
+
+  // Sistema tracking navigazione
+  useNavigationTracking({
+    enabled: true,
+    unlockAchievement,
+    updateProgress,
+    onPageVisit: (pathname, count) => {
+      console.log(`📍 Pagina visitata: ${pathname} (totale: ${count})`);
+    }
+  });
+
+  // Sblocca achievement prima visita (una sola volta)
+  useEffect(() => {
+    const hasVisited = localStorage.getItem('simone-pizzi-first-visit');
+    if (!hasVisited) {
+      unlockAchievement('first-visit');
+      localStorage.setItem('simone-pizzi-first-visit', 'true');
+    }
+  }, []); // Dipendenze vuote per eseguire solo una volta
 
   return (
     <>
@@ -36,16 +95,18 @@ const Home = () => {
               
               {/* Main Title */}
               <h1 className="text-5xl lg:text-7xl font-extrabold text-text-primary leading-tight">
-                <TypewriterText 
-                  text="Benvenuto nel mio"
-                  speed={80}
-                  delay={500}
-                  className="block"
-                  onComplete={() => setTypewriterComplete(true)}
-                />
+                <span className="block">
+                  <TypewriterText 
+                    text="Benvenuto nel mio"
+                    speed={80}
+                    delay={500}
+                    className="block"
+                    onComplete={() => setTypewriterComplete(true)}
+                  />
+                </span>
                 <span className="block mt-2">
                   <span className="text-gradient animate-pulse-glow">
-                    {typewriterComplete ? 'universo creativo' : ''}
+                    {typewriterComplete ? 'universo creativo' : 'universo creativo'}
                   </span>
                 </span>
               </h1>
@@ -380,6 +441,47 @@ const Home = () => {
           </div>
         </div>
       </AnimatedSection>
+
+      {/* Achievement Panel */}
+      <AnimatedSection
+        variant="fadeInUp"
+        threshold={0.1}
+        animationDelay={800}
+        className="section bg-bg-secondary"
+      >
+        <div className="container">
+          <div className="text-center mb-8">
+            <h2 className="text-4xl lg:text-5xl font-bold text-gradient mb-6">
+              I Tuoi Achievement
+            </h2>
+            <p className="text-xl text-text-secondary max-w-3xl mx-auto mb-8">
+              Scopri i trofei che puoi sbloccare esplorando il sito
+            </p>
+            <Button 
+              variant="ghost" 
+              size="lg"
+              onClick={() => setShowAchievements(!showAchievements)}
+              className="group"
+            >
+              <span className="group-hover:translate-x-1 transition-transform duration-300">
+                {showAchievements ? 'Nascondi' : 'Mostra'} Achievement
+              </span>
+            </Button>
+          </div>
+          
+          {showAchievements && (
+            <div className="max-w-4xl mx-auto">
+              <AchievementPanel 
+                achievements={achievements}
+                showProgress={true}
+                showControls={true}
+                className="animate-fade-in-up"
+              />
+            </div>
+          )}
+        </div>
+      </AnimatedSection>
+
     </>
   );
 };

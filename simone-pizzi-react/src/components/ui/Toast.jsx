@@ -11,14 +11,6 @@ const Toast = ({
   const [isVisible, setIsVisible] = useState(true);
   const [isExiting, setIsExiting] = useState(false);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      handleClose();
-    }, duration);
-
-    return () => clearTimeout(timer);
-  }, [duration, handleClose]);
-
   const handleClose = useCallback(() => {
     setIsExiting(true);
     setTimeout(() => {
@@ -26,6 +18,14 @@ const Toast = ({
       onClose?.();
     }, 300);
   }, [onClose]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      handleClose();
+    }, duration);
+
+    return () => clearTimeout(timer);
+  }, [duration, handleClose]);
 
   const getIcon = () => {
     switch (type) {

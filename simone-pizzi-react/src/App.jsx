@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/layout/Layout';
+import { ToastProvider } from './contexts/ToastContext';
 import Home from './pages/Home';
 import About from './pages/About';
 import Software from './pages/Software';
@@ -18,9 +19,10 @@ import Corridor2193TheLastRun from './pages/articoli/Corridor2193TheLastRun';
 
 function App() {
   return (
-    <Router>
-      <Layout>
-        <Routes>
+    <ToastProvider>
+      <Router>
+        <Layout>
+          <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/chi-sono" element={<About />} />
           <Route path="/podcast" element={<div className="coming-soon">Sezione Podcast in arrivo presto!</div>} />
@@ -42,7 +44,8 @@ function App() {
           <Route path="/chi-sono/articoli/corridor-2193-the-last-run" element={<Corridor2193TheLastRun />} />
         </Routes>
       </Layout>
-    </Router>
+      </Router>
+    </ToastProvider>
   );
 }
 

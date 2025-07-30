@@ -19,5 +19,11 @@ export const useToast = () => {
   const warning = (message, duration) => addToast(message, 'warning', duration);
   const info = (message, duration) => addToast(message, 'info', duration);
 
-  return { toasts, addToast, removeToast, success, error, warning, info };
+  // Funzione showToast per compatibilità
+  const showToast = (options) => {
+    const { title, message, type = 'info', duration = 5000 } = options;
+    addToast(message || title, type, duration);
+  };
+
+  return { toasts, addToast, removeToast, success, error, warning, info, showToast };
 }; 

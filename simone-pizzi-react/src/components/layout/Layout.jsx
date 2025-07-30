@@ -4,10 +4,10 @@ import Footer from './Footer';
 import Breadcrumb from '../ui/Breadcrumb';
 import ScrollProgress from '../ui/ScrollProgress';
 import { ToastContainer } from '../ui/Toast';
-import { useToast } from '../../hooks/useToast';
+import { useToastContext } from '../../contexts/ToastContext';
 
 const Layout = ({ children }) => {
-  const { toasts, removeToast } = useToast();
+  const { toasts, removeToast } = useToastContext();
 
   return (
     <div className="min-h-screen flex flex-col bg-bg-primary">

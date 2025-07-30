@@ -18,3 +18,6 @@ export { default as ZoomableImage } from './ZoomableImage';
 
 // Virtual Scrolling Components
 export { default as VirtualList } from './VirtualList';
+
+// Gamification Components
+export { default as AchievementPanel } from './AchievementPanel';

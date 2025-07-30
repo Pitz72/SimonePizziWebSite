@@ -11,4 +11,9 @@ export { useLongPress } from './useLongPress';
 
 // Virtual Scrolling Hooks
 export { useVirtualScroll } from './useVirtualScroll';
-export { useInfiniteScroll } from './useInfiniteScroll'; 
+export { useInfiniteScroll } from './useInfiniteScroll';
+
+// Gamification Hooks
+export { useAchievements } from './useAchievements';
+export { useEasterEggs } from './useEasterEggs';
+export { useNavigationTracking } from './useNavigationTracking'; 
