@@ -1,5 +1,11 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
+const KONAMI_CODE = [
+  'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',
+  'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight',
+  'KeyB', 'KeyA'
+];
+
 /**
  * Hook per easter eggs interattivi
  * @param {Object} options - Opzioni di configurazione
@@ -20,12 +26,24 @@ export const useEasterEggs = (options = {}) => {
   const [isKonamiActive, setIsKonamiActive] = useState(false);
   const konamiTimeoutRef = useRef(null);
 
-  // Konami code sequence
-  const KONAMI_CODE = [
-    'ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown',
-    'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight',
-    'KeyB', 'KeyA'
-  ];
+  // Attiva easter egg
+  const triggerEasterEgg = useCallback((eggId) => {
+    if (!enabled || !eggId) return;
+
+    setTriggeredEggs(prev => {
+      const newTriggered = new Set(prev);
+      if (!newTriggered.has(eggId)) {
+        newTriggered.add(eggId);
+        
+        // Callback
+        if (onTrigger) {
+          const egg = easterEggs.find(e => e.id === eggId);
+          onTrigger(egg, eggId);
+        }
+      }
+      return newTriggered;
+    });
+  }, [enabled, easterEggs, onTrigger]);
 
   // Gestisce input Konami code
   const handleKonamiInput = useCallback((key) => {
@@ -62,7 +80,7 @@ export const useEasterEggs = (options = {}) => {
       setKonamiSequence([]);
       setIsKonamiActive(false);
     }, 3000);
-  }, [enabled, isKonamiActive, konamiSequence]);
+  }, [enabled, isKonamiActive, konamiSequence, KONAMI_CODE, triggerEasterEgg]);
 
   // Gestisce keydown events
   const handleKeyDown = useCallback((event) => {
@@ -95,7 +113,7 @@ export const useEasterEggs = (options = {}) => {
   }, [enabled, isKonamiActive, konamiSequence, handleKonamiInput, easterEggs]);
 
   // Gestisce click events per easter eggs
-  const handleClick = useCallback((event) => {
+  const handleClick = useCallback(() => {
     if (!enabled) return;
 
     // Easter eggs basati su click pattern
@@ -108,10 +126,10 @@ export const useEasterEggs = (options = {}) => {
       // Implementa pattern detection qui se necessario
       triggerEasterEgg(clickEgg.id);
     }
-  }, [enabled, easterEggs]);
+  }, [enabled, easterEggs, triggerEasterEgg]);
 
   // Gestisce scroll events per easter eggs
-  const handleScroll = useCallback((event) => {
+  const handleScroll = useCallback(() => {
     if (!enabled) return;
 
     // Easter eggs basati su scroll pattern
@@ -124,26 +142,7 @@ export const useEasterEggs = (options = {}) => {
       // Implementa scroll pattern detection qui se necessario
       triggerEasterEgg(scrollEgg.id);
     }
-  }, [enabled, easterEggs]);
-
-  // Attiva easter egg
-  const triggerEasterEgg = useCallback((eggId) => {
-    if (!enabled || !eggId) return;
-
-    setTriggeredEggs(prev => {
-      const newTriggered = new Set(prev);
-      if (!newTriggered.has(eggId)) {
-        newTriggered.add(eggId);
-        
-        // Callback
-        if (onTrigger) {
-          const egg = easterEggs.find(e => e.id === eggId);
-          onTrigger(egg, eggId);
-        }
-      }
-      return newTriggered;
-    });
-  }, [enabled, easterEggs, onTrigger]);
+  }, [enabled, easterEggs, triggerEasterEgg]);
 
   // Verifica se easter egg è stato attivato
   const isTriggered = useCallback((eggId) => {
@@ -206,4 +205,4 @@ export const useEasterEggs = (options = {}) => {
     isTriggered,
     resetEasterEggs
   };
-}; 
+};

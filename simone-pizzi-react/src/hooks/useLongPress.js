@@ -91,7 +91,7 @@ export const useLongPress = (options = {}) => {
   }, [enabled, isWithinThreshold, onPressCancel]);
 
   // Gestisce la fine del touch
-  const handleTouchEnd = useCallback((event) => {
+  const handleTouchEnd = useCallback(() => {
     if (!enabled || !isActive.current) return;
     
     if (timeoutId.current) {
@@ -138,7 +138,7 @@ export const useLongPress = (options = {}) => {
     }
   }, [enabled, isWithinThreshold, onPressCancel]);
 
-  const handleMouseUp = useCallback((event) => {
+  const handleMouseUp = useCallback(() => {
     if (!enabled || !isActive.current) return;
     
     if (timeoutId.current) {

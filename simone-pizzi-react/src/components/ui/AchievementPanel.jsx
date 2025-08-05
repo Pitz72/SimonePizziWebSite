@@ -14,7 +14,6 @@ import { Trophy, Lock, Unlock, BarChart3, RotateCcw, Download } from 'lucide-rea
 const AchievementPanel = ({
   achievements = [],
   showProgress = true,
-  showStats = true,
   showControls = false,
   className = '',
   ...props

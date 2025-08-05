@@ -42,59 +42,34 @@ export const useAchievements = (options = {}) => {
     }
   }, [enabled]);
 
-  // Salva achievement in localStorage
-  const saveAchievements = useCallback((unlocked, progressData) => {
-    if (!enabled) return;
-
-    try {
-      const data = {
-        unlocked: Array.from(unlocked),
-        progress: progressData,
-        lastUpdated: new Date().toISOString()
-      };
-      localStorage.setItem('simone-pizzi-achievements', JSON.stringify(data));
-    } catch (err) {
-      console.error('Errore salvataggio achievement:', err);
-      setError('Errore salvataggio achievement');
-    }
-  }, [enabled]);
-
   // Sblocca achievement
   const unlockAchievement = useCallback((achievementId) => {
     if (!enabled || !achievementId) return;
 
     setUnlockedAchievements(prev => {
+      if (prev.has(achievementId)) return prev;
+
       const newUnlocked = new Set(prev);
-      if (!newUnlocked.has(achievementId)) {
-        newUnlocked.add(achievementId);
-        
-        // Salva immediatamente
-        saveAchievements(newUnlocked, progress);
-        
-        // Callback
-        if (onUnlock) {
-          const achievement = achievements.find(a => a.id === achievementId);
-          onUnlock(achievement, achievementId);
-        }
+      newUnlocked.add(achievementId);
+
+      if (onUnlock) {
+        const achievement = achievements.find(a => a.id === achievementId);
+        onUnlock(achievement, achievementId);
       }
+
       return newUnlocked;
     });
-  }, [enabled, saveAchievements, onUnlock]);
+  }, [enabled, onUnlock, achievements]);
 
   // Aggiorna progress
   const updateProgress = useCallback((achievementId, value) => {
     if (!enabled || !achievementId) return;
 
-    setProgress(prev => {
-      const newProgress = { ...prev };
-      newProgress[achievementId] = value;
-      
-      // Salva immediatamente
-      saveAchievements(unlockedAchievements, newProgress);
-      
-      return newProgress;
-    });
-  }, [enabled, unlockedAchievements, saveAchievements]);
+    setProgress(prev => ({
+      ...prev,
+      [achievementId]: value
+    }));
+  }, [enabled]);
 
   // Verifica se achievement è sbloccato
   const isUnlocked = useCallback((achievementId) => {
@@ -121,8 +96,7 @@ export const useAchievements = (options = {}) => {
 
     setUnlockedAchievements(new Set());
     setProgress({});
-    saveAchievements(new Set(), {});
-  }, [enabled, saveAchievements]);
+  }, [enabled]);
 
   // Export achievement data
   const exportAchievements = useCallback(() => {
@@ -145,7 +119,24 @@ export const useAchievements = (options = {}) => {
   // Carica achievement al mount
   useEffect(() => {
     loadAchievements();
-  }, [loadAchievements]);
+  }, []);
+
+  // Salva achievement in localStorage quando cambiano
+  useEffect(() => {
+    if (!enabled || isLoading) return;
+
+    try {
+      const data = {
+        unlocked: Array.from(unlockedAchievements),
+        progress,
+        lastUpdated: new Date().toISOString()
+      };
+      localStorage.setItem('simone-pizzi-achievements', JSON.stringify(data));
+    } catch (err) {
+      console.error('Errore salvataggio achievement:', err);
+      setError('Errore salvataggio achievement');
+    }
+  }, [unlockedAchievements, progress, enabled, isLoading]);
 
   // Achievement con stato
   const achievementsWithState = useMemo(() => {
@@ -186,4 +177,4 @@ export const useAchievements = (options = {}) => {
     resetAchievements,
     exportAchievements
   };
-}; 
+};

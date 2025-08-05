@@ -59,16 +59,17 @@ export const useNavigationTracking = (options = {}) => {
         case '/software':
           unlockAchievement('software-explorer');
           break;
-        case '/chi-sono':
+        case '/chi-sono': {
           // Controlla se ha letto articoli
           const readArticles = JSON.parse(localStorage.getItem('simone-pizzi-read-articles') || '[]');
           if (readArticles.length >= 3) {
             unlockAchievement('reader');
           }
           break;
+        }
       }
     }
-  }, [enabled, onPageVisit, unlockAchievement, updateProgress]);
+  }, [enabled, onPageVisit]);
 
   // Traccia scroll
   const trackScroll = useCallback(() => {
@@ -81,7 +82,7 @@ export const useNavigationTracking = (options = {}) => {
     if (scrollY >= 1000) {
       unlockAchievement('scroll-master');
     }
-  }, [enabled, updateProgress, unlockAchievement]);
+  }, [enabled]);
 
   // Traccia click
   const trackClick = useCallback(() => {
@@ -96,7 +97,7 @@ export const useNavigationTracking = (options = {}) => {
     if (clickCount >= 50) {
       unlockAchievement('click-counter');
     }
-  }, [enabled, updateProgress, unlockAchievement]);
+  }, [enabled]);
 
   // Traccia tempo speso
   const trackTimeSpent = useCallback(() => {
@@ -112,7 +113,7 @@ export const useNavigationTracking = (options = {}) => {
     if (timeSpent >= 300) {
       unlockAchievement('time-spent');
     }
-  }, [enabled, updateProgress, unlockAchievement]);
+  }, [enabled]);
 
   // Setup tracking
   useEffect(() => {
@@ -149,4 +150,4 @@ export const useNavigationTracking = (options = {}) => {
     trackClick,
     trackTimeSpent
   };
-}; 
+};

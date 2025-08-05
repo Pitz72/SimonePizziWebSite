@@ -1,29 +1,24 @@
-import { useState } from 'react';
+// src/hooks/useToast.js
 
-// Hook per gestire i toast
+import { useContext } from 'react';
+// 1. Importa il contesto dal file del contesto
+import { ToastContext } from '../contexts/ToastContext';
+
+// 2. Crea ed esporta l'hook per consumare il contesto
 export const useToast = () => {
-  const [toasts, setToasts] = useState([]);
+  const context = useContext(ToastContext);
+  if (!context) {
+    throw new Error('useToast must be used within a ToastProvider');
+  }
+  
+  // 3. Aggiungi qui le funzioni di convenienza (success, error, etc.)
+  const { addToast } = context;
 
-  const addToast = (message, type = 'info', duration = 5000) => {
-    const id = Date.now() + Math.random();
-    const newToast = { id, message, type, duration };
-    setToasts(prev => [...prev, newToast]);
-  };
+  const showToast = (options) => addToast(options);
+  const success = (message, duration) => addToast({ message, type: 'success', duration });
+  const error = (message, duration) => addToast({ message, type: 'error', duration });
+  const warning = (message, duration) => addToast({ message, type: 'warning', duration });
+  const info = (message, duration) => addToast({ message, type: 'info', duration });
 
-  const removeToast = (id) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id));
-  };
-
-  const success = (message, duration) => addToast(message, 'success', duration);
-  const error = (message, duration) => addToast(message, 'error', duration);
-  const warning = (message, duration) => addToast(message, 'warning', duration);
-  const info = (message, duration) => addToast(message, 'info', duration);
-
-  // Funzione showToast per compatibilità
-  const showToast = (options) => {
-    const { title, message, type = 'info', duration = 5000 } = options;
-    addToast(message || title, type, duration);
-  };
-
-  return { toasts, addToast, removeToast, success, error, warning, info, showToast };
-}; 
+  return { ...context, showToast, success, error, warning, info };
+};

@@ -81,7 +81,7 @@ export const useSwipeActions = (options = {}) => {
   }, [enabled]);
 
   // Gestisce la fine del touch
-  const handleTouchEnd = useCallback((event) => {
+  const handleTouchEnd = useCallback(() => {
     if (!enabled || !isSwiping.current) return;
     
     const deltaX = currentPoint.current.x - startPoint.current.x;
@@ -144,7 +144,7 @@ export const useSwipeActions = (options = {}) => {
     };
   }, [enabled]);
 
-  const handleMouseUp = useCallback((event) => {
+  const handleMouseUp = useCallback(() => {
     if (!enabled || !isSwiping.current) return;
     
     const deltaX = currentPoint.current.x - startPoint.current.x;

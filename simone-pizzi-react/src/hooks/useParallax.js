@@ -10,14 +10,13 @@ import { useEffect, useRef, useState, useCallback } from 'react';
  * @param {number} options.throttle - Throttle in ms per performance (default: 16)
  * @returns {[React.RefObject, { x: number, y: number, isVisible: boolean }]}
  */
-export const useParallax = (options = {}) => {
-  const {
-    speed = 0.5,
-    direction = 'vertical',
-    threshold = 0,
-    enabled = true,
-    throttle = 16
-  } = options;
+export const useParallax = ({
+  speed = 0.5,
+  direction = 'vertical',
+  threshold = 0,
+  enabled = true,
+  throttle = 16
+} = {}) => {
 
   const elementRef = useRef(null);
   const [offset, setOffset] = useState({ x: 0, y: 0 });
@@ -94,7 +93,7 @@ export const useParallax = (options = {}) => {
         cancelAnimationFrame(animationFrameId.current);
       }
     };
-  }, [handleScroll, enabled]);
+  }, [enabled]);
 
   return [elementRef, { ...offset, isVisible }];
 };
@@ -106,8 +105,7 @@ export const useParallax = (options = {}) => {
  * @param {boolean} options.enabled - Abilita/disabilita (default: true)
  * @returns {[React.RefObject, { x: number, y: number }]}
  */
-export const useMouseParallax = (options = {}) => {
-  const { speed = 0.1, enabled = true } = options;
+export const useMouseParallax = ({ speed = 0.1, enabled = true } = {}) => {
   const elementRef = useRef(null);
   const [mouseOffset, setMouseOffset] = useState({ x: 0, y: 0 });
 
@@ -137,7 +135,7 @@ export const useMouseParallax = (options = {}) => {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [handleMouseMove, enabled]);
+  }, [enabled]);
 
   return [elementRef, mouseOffset];
 };
@@ -150,8 +148,7 @@ export const useMouseParallax = (options = {}) => {
  * @param {boolean} options.enabled - Abilita/disabilita (default: true)
  * @returns {[React.RefObject, { x: number, y: number, isHovered: boolean }]}
  */
-export const useTilt3D = (options = {}) => {
-  const { maxTilt = 15, enabled = true } = options;
+export const useTilt3D = ({ maxTilt = 15, enabled = true } = {}) => {
   const elementRef = useRef(null);
   const [tilt, setTilt] = useState({ x: 0, y: 0, isHovered: false });
 
@@ -201,7 +198,7 @@ export const useTilt3D = (options = {}) => {
       element.removeEventListener('mouseleave', handleMouseLeave);
       element.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [handleMouseEnter, handleMouseLeave, handleMouseMove, enabled]);
+  }, [enabled]);
 
   return [elementRef, tilt];
-}; 
+};

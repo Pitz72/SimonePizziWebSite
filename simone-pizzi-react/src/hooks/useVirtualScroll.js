@@ -16,9 +16,7 @@ export const useVirtualScroll = (options = {}) => {
     items = [],
     itemHeight = 60,
     overscan = 5,
-    enabled = true,
-    renderItem,
-    containerClassName = ''
+    enabled = true
   } = options;
 
   const containerRef = useRef(null);

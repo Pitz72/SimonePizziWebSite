@@ -38,14 +38,6 @@ export const usePinchZoom = (options = {}) => {
     return Math.sqrt(dx * dx + dy * dy);
   }, []);
 
-  // Calcola punto centrale tra due touch
-  const getCenterPoint = useCallback((point1, point2) => {
-    return {
-      x: (point1.x + point2.x) / 2,
-      y: (point1.y + point2.y) / 2
-    };
-  }, []);
-
   // Limita la scala tra min e max
   const clampScale = useCallback((newScale) => {
     return Math.min(Math.max(newScale, minScale), maxScale);
@@ -120,7 +112,7 @@ export const usePinchZoom = (options = {}) => {
   }, [enabled, scale, getDistance, clampScale, clampPosition, onZoomChange]);
 
   // Gestisce la fine del touch
-  const handleTouchEnd = useCallback((event) => {
+  const handleTouchEnd = useCallback(() => {
     if (!enabled) return;
     
     isPinching.current = false;
@@ -129,7 +121,7 @@ export const usePinchZoom = (options = {}) => {
   }, [enabled]);
 
   // Gestisce il double click per zoom
-  const handleDoubleClick = useCallback((event) => {
+  const handleDoubleClick = useCallback(() => {
     if (!enabled) return;
     
     const newScale = scale > 1 ? 1 : 2;
@@ -216,7 +208,6 @@ export const usePinchZoom = (options = {}) => {
   const transformStyles = {
     transform: `scale(${scale}) translate(${position.x}px, ${position.y}px)`,
     transition: isPinching.current || isDragging.current ? 'none' : 'transform 0.3s ease-out',
-    cursor: isZoomed ? 'grab' : 'zoom-in',
     cursor: isDragging.current ? 'grabbing' : (isZoomed ? 'grab' : 'zoom-in')
   };
 

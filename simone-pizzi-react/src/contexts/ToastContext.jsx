@@ -1,47 +1,28 @@
-import React, { createContext, useContext, useState } from 'react';
+// src/contexts/ToastContext.jsx
 
-const ToastContext = createContext();
+import React, { createContext, useState, useCallback } from 'react';
 
-export const useToastContext = () => {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error('useToastContext must be used within a ToastProvider');
-  }
-  return context;
-};
+// 1. Crea ed esporta il contesto qui
+export const ToastContext = createContext(null);
 
+// 2. Esporta solo il Provider
 export const ToastProvider = ({ children }) => {
   const [toasts, setToasts] = useState([]);
 
-  const addToast = (message, type = 'info', duration = 5000) => {
+  const addToast = useCallback((options) => {
     const id = Date.now() + Math.random();
-    const newToast = { id, message, type, duration };
+    const newToast = { ...options, id };
     setToasts(prev => [...prev, newToast]);
-  };
+  }, []);
 
-  const removeToast = (id) => {
+  const removeToast = useCallback((id) => {
     setToasts(prev => prev.filter(toast => toast.id !== id));
-  };
-
-  const showToast = (options) => {
-    const { title, message, type = 'info', duration = 5000 } = options;
-    addToast(message || title, type, duration);
-  };
-
-  const success = (message, duration) => addToast(message, 'success', duration);
-  const error = (message, duration) => addToast(message, 'error', duration);
-  const warning = (message, duration) => addToast(message, 'warning', duration);
-  const info = (message, duration) => addToast(message, 'info', duration);
+  }, []);
 
   const value = {
     toasts,
     addToast,
     removeToast,
-    showToast,
-    success,
-    error,
-    warning,
-    info
   };
 
   return (
@@ -49,4 +30,4 @@ export const ToastProvider = ({ children }) => {
       {children}
     </ToastContext.Provider>
   );
-}; 
+};

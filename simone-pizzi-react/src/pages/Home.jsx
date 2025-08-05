@@ -1,69 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Download, Play, BookOpen, Code, Gamepad2, Sparkles } from 'lucide-react';
-import { Button, Card, ParticleBackground, TypewriterText, ParallaxCard, AnimatedSection, AnimatedList, AnimatedCard, AchievementPanel } from '../components/ui';
-import { useAchievements, useEasterEggs, useNavigationTracking } from '../hooks';
-import { useToastContext } from '../contexts/ToastContext';
-import { achievements } from '../data/achievements';
+import { Button, Card, ParticleBackground, TypewriterText, AnimatedSection, AnimatedList, AnimatedCard } from '../components/ui';
 
 const Home = () => {
   const [typewriterComplete, setTypewriterComplete] = useState(false);
-  const [showAchievements, setShowAchievements] = useState(false);
 
-  // Sistema toast per notifiche
-  const { showToast } = useToastContext();
 
-  // Sistema gamification
-  const { unlockAchievement, updateProgress, isUnlocked } = useAchievements({
-    achievements,
-    enabled: true,
-    onUnlock: (achievement, id) => {
-      console.log(`🎉 Achievement sbloccato: ${achievement?.title || id}`);
-      showToast({
-        title: `🏆 Achievement Sbloccato!`,
-        message: achievement?.title || id,
-        type: 'success',
-        duration: 5000
-      });
-    }
-  });
-
-  const { triggerEasterEgg } = useEasterEggs({
-    easterEggs: [
-      {
-        id: 'konami-code',
-        title: 'Konami Code',
-        description: 'Hai inserito il Konami Code!',
-        type: 'keyboard',
-        trigger: 'konami'
-      }
-    ],
-    enabled: true,
-    onTrigger: (egg, id) => {
-      if (id === 'konami-code') {
-        unlockAchievement('konami-master');
-      }
-    }
-  });
-
-  // Sistema tracking navigazione
-  useNavigationTracking({
-    enabled: true,
-    unlockAchievement,
-    updateProgress,
-    onPageVisit: (pathname, count) => {
-      console.log(`📍 Pagina visitata: ${pathname} (totale: ${count})`);
-    }
-  });
-
-  // Sblocca achievement prima visita (una sola volta)
-  useEffect(() => {
-    const hasVisited = localStorage.getItem('simone-pizzi-first-visit');
-    if (!hasVisited) {
-      unlockAchievement('first-visit');
-      localStorage.setItem('simone-pizzi-first-visit', 'true');
-    }
-  }, []); // Dipendenze vuote per eseguire solo una volta
 
   return (
     <>
@@ -162,10 +105,8 @@ const Home = () => {
             
             {/* Hero Image con Parallax */}
             <div className="flex justify-center items-center transition-all duration-1000" style={{ animationDelay: '0.5s' }}>
-              <ParallaxCard
+              <Card
                 variant="glass"
-                parallaxOptions={{ speed: 0.05, direction: 'vertical' }}
-                tiltOptions={{ maxTilt: 2, speed: 400 }}
                 className="p-0 bg-transparent border-0 shadow-none"
               >
                 <div className="relative group">
@@ -180,7 +121,7 @@ const Home = () => {
                     ✨ Live
                   </div>
                 </div>
-              </ParallaxCard>
+              </Card>
             </div>
           </div>
         </div>
@@ -234,11 +175,9 @@ const Home = () => {
                 link: "/videogiochi"
               }
             ].map((feature, index) => (
-              <ParallaxCard
+              <Card
                 key={feature.title}
                 variant="elevated"
-                parallaxOptions={{ speed: 0.04, direction: 'vertical' }}
-                tiltOptions={{ maxTilt: 2.5, speed: 350 }}
                 className="group transition-all duration-700 hover:scale-105"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
@@ -287,7 +226,7 @@ const Home = () => {
                     </div>
                   </div>
                 </div>
-              </ParallaxCard>
+              </Card>
             ))}
           </div>
         </div>
@@ -442,45 +381,7 @@ const Home = () => {
         </div>
       </AnimatedSection>
 
-      {/* Achievement Panel */}
-      <AnimatedSection
-        variant="fadeInUp"
-        threshold={0.1}
-        animationDelay={800}
-        className="section bg-bg-secondary"
-      >
-        <div className="container">
-          <div className="text-center mb-8">
-            <h2 className="text-4xl lg:text-5xl font-bold text-gradient mb-6">
-              I Tuoi Achievement
-            </h2>
-            <p className="text-xl text-text-secondary max-w-3xl mx-auto mb-8">
-              Scopri i trofei che puoi sbloccare esplorando il sito
-            </p>
-            <Button 
-              variant="ghost" 
-              size="lg"
-              onClick={() => setShowAchievements(!showAchievements)}
-              className="group"
-            >
-              <span className="group-hover:translate-x-1 transition-transform duration-300">
-                {showAchievements ? 'Nascondi' : 'Mostra'} Achievement
-              </span>
-            </Button>
-          </div>
-          
-          {showAchievements && (
-            <div className="max-w-4xl mx-auto">
-              <AchievementPanel 
-                achievements={achievements}
-                showProgress={true}
-                showControls={true}
-                className="animate-fade-in-up"
-              />
-            </div>
-          )}
-        </div>
-      </AnimatedSection>
+
 
     </>
   );
