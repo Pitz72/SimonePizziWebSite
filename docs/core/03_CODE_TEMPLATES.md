@@ -1,6 +1,6 @@
 # 🔧 Code Templates - SimonePizziWebSite
 
-**Version:** v2.1.4+ Perfect Consistency  
+**Version:** v2.2.0 "Too much is too much" - React Templates  
 **Status:** Universal Standards  
 **Last Updated:** June 29, 2025
 
@@ -44,7 +44,7 @@
 1. [🏗️ Centralized System Template](#centralized-system-template)
 2. [🎨 Modular CSS Template](#modular-css-template)
 3. [📱 Standard Page Template](#standard-page-template)
-4. [⚡ Skeleton System Template (NEW v2.1.4+)](#skeleton-system-template)
+4. [⚡ React Loading States Template](#react-loading-states-template)
 5. [🃏 Project Card Template](#project-card-template)
 6. [📝 Contact Form Template](#contact-form-template)
 7. [💻 Software Page Template](#software-page-template)
@@ -54,7 +54,7 @@
 
 ## 🏗️ Centralized System Template
 
-> **Enterprise Architecture**: v2.1.3+ with centralized components  
+> **React Architecture**: v2.2.0 con componenti React e Tailwind CSS  
 > **Status**: MANDATORY for all pages
 
 ### Base Page Structure with Centralized System
@@ -94,7 +94,7 @@
 </head>
 <body>
     <!-- ========= HEADER SKELETON (Anti-FOUC) ========= -->
-    <!-- ⚠️ MANDATORY: Required on ALL pages v2.1.4+ -->
+    <!-- ⚠️ MANDATORY: Required in ALL React components v2.2.0 -->
     <div id="header-placeholder" class="skeleton-placeholder header-skeleton"></div>
 
     <main>
@@ -103,7 +103,7 @@
     </main>
 
     <!-- ========= FOOTER SKELETON (Anti-FOUC) ========= -->
-    <!-- ⚠️ MANDATORY: Required on ALL pages v2.1.4+ -->
+    <!-- ⚠️ MANDATORY: Required in ALL React components v2.2.0 -->
     <div id="footer-placeholder" class="skeleton-placeholder footer-skeleton"></div>
     <script type="module" src="[DYNAMIC_PATH]/js/main.js"></script>
 </body>
@@ -205,7 +205,7 @@
 
 ---
 
-## ⚡ Skeleton System Template (NEW v2.1.4+)
+## ⚡ React Loading States Template
 
 > **Anti-FOUC System**: MANDATORY skeleton placeholders for all pages  
 > **Status**: Required on ALL 21 pages
@@ -300,7 +300,7 @@
 3. **T+60ms**: ComponentManager.loadFooter() → Replace footer skeleton
 4. **Result**: Zero Layout Shift (CLS = 0) + Professional loading experience
 
-### ⚠️ FORBIDDEN Patterns (v2.1.4+)
+### ⚠️ FORBIDDEN Patterns (React v2.2.0)
 
 **NEVER use these legacy patterns**:
 ```html
@@ -322,7 +322,7 @@
 
 **✅ REQUIRED Pattern**:
 ```html
-<!-- ✅ CORRECT: v2.1.4+ skeleton system -->
+<!-- ✅ CORRECT: React v2.2.0 loading states -->
 <div id="header-placeholder" class="skeleton-placeholder header-skeleton"></div>
 <main>Content</main>
 <div id="footer-placeholder" class="skeleton-placeholder footer-skeleton"></div>
@@ -545,7 +545,7 @@ background-position: right center;      /* Right focus */
 
 ## 🎮 Videogiochi Page Template
 
-### CONSOLIDATED Template v2.1.3 (RIGIDLY PROTECTED)
+### React Component Template v2.2.0 (STANDARD)
 
 **⚠️ CRITICAL**: This template is RIGIDLY CONSOLIDATED and protected from modifications.
 
@@ -740,4 +740,4 @@ background-position: right center;      /* Right focus */
 2. **Ogni timeline** → Lista cronologica
 3. **Ogni workflow** → Lista con icone/emoji
 4. **Mantieni percentuali** e dati numerici esatti
-5. **Aggiungi interpretazione** testuale dei dati 
+5. **Aggiungi interpretazione** testuale dei dati

@@ -4,6 +4,8 @@ import Layout from './components/layout/Layout';
 import { ToastProvider } from './contexts/ToastContext';
 import Home from './pages/Home';
 import About from './pages/About';
+import Podcast from './pages/Podcast';
+import Libri from './pages/Libri';
 import Software from './pages/Software';
 import Videogiochi from './pages/Videogiochi';
 import Contatti from './pages/Contatti';
@@ -25,8 +27,8 @@ function App() {
           <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/chi-sono" element={<About />} />
-          <Route path="/podcast" element={<div className="coming-soon">Sezione Podcast in arrivo presto!</div>} />
-          <Route path="/libri" element={<div className="coming-soon">Sezione Libri in arrivo presto!</div>} />
+          <Route path="/podcast" element={<Podcast />} />
+          <Route path="/libri" element={<Libri />} />
           <Route path="/software" element={<Software />} />
           <Route path="/software/gestore-duplicati-musicali" element={<GestoreDuplicatiMusicali />} />
           <Route path="/software/audio-metadata-converter" element={<AudioMetadataConverter />} />

@@ -30,23 +30,23 @@ Migrazione completa da CSS tradizionale a Tailwind CSS con design system moderno
 
 ## 🚀 Tecnologie
 
-- **Frontend:** React 19, Vite 7.0
-- **Styling:** Tailwind CSS 3.4, PostCSS 8.4
-- **Routing:** React Router DOM
-- **Icons:** Lucide React
-- **Build:** Vite con ottimizzazioni automatiche
+- **Frontend:** React 19.1, Vite 7.0
+- **Styling:** Tailwind CSS 3.4, PostCSS 8.4.31
+- **Routing:** React Router DOM 7.6.3
+- **Icons:** Lucide React 0.525
+- **Build:** Vite 7.0 con ottimizzazioni automatiche
 
 ## 📦 Dipendenze Principali
 
 ```json
 {
-  "react": "^19.0.0",
-  "react-dom": "^19.0.0",
-  "react-router-dom": "^6.28.0",
+  "react": "^19.1.0",
+  "react-dom": "^19.1.0",
+  "react-router-dom": "^7.6.3",
   "tailwindcss": "^3.4.0",
-  "postcss": "^8.4.0",
-  "autoprefixer": "^10.4.0",
-  "lucide-react": "^0.468.0"
+  "postcss": "^8.4.31",
+  "autoprefixer": "^10.4.16",
+  "lucide-react": "^0.525.0"
 }
 ```
 

@@ -36,8 +36,8 @@ const Header = () => {
         { label: 'Articoli', path: '/chi-sono/articoli' }
       ]
     },
-    { label: 'Podcast', path: '/podcast', disabled: true },
-    { label: 'Libri', path: '/libri', disabled: true },
+    { label: 'Podcast', path: '/podcast' },
+    { label: 'Libri', path: '/libri' },
     { 
       label: 'Software', 
       path: '/software',

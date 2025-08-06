@@ -35,7 +35,7 @@
           "Evoluzione architettonica da monolite a moduli",
           "Workflow strutturato di collaborazione uomo-macchina"
         ],
-        "integration_notes": "Contenuti infografici integrati: tutti i grafici Chart.js convertiti in liste HTML standard, mantenuta coerenza CSS v2.1.4+, skeleton placeholders su tutte le sezioni"
+        "integration_notes": "Contenuti infografici integrati: tutti i grafici Chart.js convertiti in liste HTML standard, migrati a React v2.2.0 con Tailwind CSS"
       },
       "file_paths": {
         "article": "pages/chi-sono/articoli/sviluppo-videogioco-ia.html",
@@ -190,4 +190,4 @@
     "template_version": "3.0",
     "schema_version": "1.0"
   }
-} 
+}

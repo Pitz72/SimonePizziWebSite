@@ -215,7 +215,7 @@ docs/development/
 ```python
 #!/usr/bin/env python3
 """
-Blog Article Generator - SimonePizziWebSite v2.1.1
+Blog Article Generator - SimonePizziWebSite v2.2.0 React
 Genera automaticamente articoli seguendo i template standardizzati
 """
 
@@ -341,7 +341,7 @@ if __name__ == "__main__":
 ```python
 #!/usr/bin/env python3
 """
-Homepage Blog Updater - SimonePizziWebSite v2.1.1
+Homepage Blog Updater - SimonePizziWebSite v2.2.0 React
 Aggiorna automaticamente la homepage del blog con nuovi articoli
 """
 
@@ -441,7 +441,7 @@ if __name__ == "__main__":
 ```python
 #!/usr/bin/env python3
 """
-Blog Validation Tool - SimonePizziWebSite v2.1.1
+Blog Validation Tool - SimonePizziWebSite v2.2.0 React
 Valida consistenza e integrità del sistema blog
 """
 
@@ -805,7 +805,7 @@ if __name__ == "__main__":
 - **Data**: 1 luglio 2025
 - **Processo**: Pubblicazione tramite LLM/Cursor (modalità preferita)
 - **Durata**: ~15 minuti
-- **Template**: Rispettato completamente v2.1.4+
+- **Template**: Rispettato completamente React v2.2.0
 - **Immagini**: 3 immagini integrate con formato standard del sito
 - **Contenuti Speciali**: 
   - Integrazione completa contenuti infografica
@@ -819,4 +819,4 @@ if __name__ == "__main__":
 - **File Aggiornati**:
   - `pages/chi-sono/articoli/sviluppo-videogioco-ia.html` (creato)
   - `index.html` (aggiunta card articolo in prima posizione)
-  - `docs/development/data/articles-metadata.json` (entry ID 6) 
+  - `docs/development/data/articles-metadata.json` (entry ID 6)

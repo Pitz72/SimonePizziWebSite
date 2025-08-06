@@ -244,7 +244,7 @@ npm run dev
 ```json
 {
   "@vitejs/plugin-react": "^4.2.0", // Vite React plugin
-  "vite": "^5.0.0"                  // Build tool
+  "vite": "^7.0.0"                  // Build tool
 }
 ```
 

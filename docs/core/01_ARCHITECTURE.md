@@ -1,64 +1,70 @@
 # 🏗️ Architecture Documentation - SimonePizziWebSite
 
-**Version:** v2.1.4+ Enterprise Perfect  
-**Status:** Zero-Inconsistency Production Ready  
-**Last Updated:** June 29, 2025
+**Version:** v2.2.0 "Too much is too much"  
+**Status:** Stabile e Ottimizzato - React + Tailwind CSS  
+**Last Updated:** Gennaio 25, 2025
 
 ## 📋 System Overview
 
-The SimonePizziWebSite uses an **enterprise-grade modular architecture** with centralized components, separated concerns, and automated management systems. The architecture prioritizes maintainability, scalability, and performance while ensuring zero duplication.
+Il SimonePizziWebSite v2.2.0 utilizza un'**architettura React moderna** con Tailwind CSS, componenti modulari e gestione centralizzata dello stato. L'architettura prioritizza stabilità, performance e manutenibilità eliminando complessità non necessarie.
 
 ## 🏛️ Core Architecture Principles
 
-### **1. Centralized Components**
-- **Single Source of Truth**: All shared elements (header/footer) exist in one location
-- **Dynamic Loading**: JavaScript-based component injection
-- **Path Agnostic**: Automatic path resolution based on directory depth
+### **1. React Component Architecture**
+- **Component-Based**: Architettura modulare con componenti riutilizzabili
+- **Single Page Application**: React Router per navigazione client-side
+- **Hooks Pattern**: Gestione stato e side effects con React Hooks
 
-### **2. Modular CSS System**
-- **Layer Separation**: Base → Components → Pages hierarchy
-- **Import Orchestration**: Central style.css coordinates all modules
-- **Selective Loading**: Only necessary styles loaded per page
+### **2. Tailwind CSS System**
+- **Utility-First**: Classi utility per styling rapido e consistente
+- **Design System**: Colori, spacing e tipografia centralizzati
+- **Responsive Design**: Mobile-first con breakpoints predefiniti
 
-### **3. JavaScript Modularity**
-- **Separated Concerns**: Each module handles specific functionality
-- **ES6 Modules**: Modern import/export system
-- **Centralized Orchestration**: Main coordinator manages all modules
+### **3. Simplified Architecture (v2.2.0)**
+- **Stabilità Prima**: Rimossi hook complessi che causavano errori
+- **Performance Ottimizzate**: Eliminati effetti pesanti e loop infiniti
+- **Codice Pulito**: Architettura semplificata e manutenibile
 
 ## 🗂️ File Structure & Responsibilities
 
 ```
-SimonePizziWebSite/
-├── 🏗️ components/                    # CENTRALIZED COMPONENTS
-│   ├── header.html                  # Global navigation header
-│   └── footer.html                  # Global social footer
+simone-pizzi-react/
+├── 📁 src/                          # SOURCE CODE
+│   ├── App.jsx                     # Main app component e routing
+│   ├── main.jsx                    # Entry point React
+│   ├── index.css                   # Tailwind CSS imports
+│   │
+│   ├── 🧩 components/               # REACT COMPONENTS
+│   │   ├── ui/                     # UI Components base
+│   │   │   ├── ParticleBackground.jsx
+│   │   │   ├── AnimatedSection.jsx
+│   │   │   └── TypewriterText.jsx
+│   │   ├── layout/                 # Layout components
+│   │   │   ├── Header.jsx
+│   │   │   ├── Footer.jsx
+│   │   │   └── Navigation.jsx
+│   │   └── cards/                  # Card components
+│   │       └── Card.jsx
+│   │
+│   ├── 📄 pages/                    # PAGE COMPONENTS
+│   │   ├── Home.jsx
+│   │   ├── ChiSono.jsx
+│   │   ├── Progetti.jsx
+│   │   ├── Contatti.jsx
+│   │   └── articles/               # Article pages
+│   │
+│   └── 🎨 styles/                   # CUSTOM STYLES
+│       └── globals.css             # Global custom styles
 │
-├── 🎨 css/                          # MODULAR CSS SYSTEM
-│   ├── style.css                   # Import orchestrator
-│   ├── base.css                    # Variables, reset, layouts
-│   ├── components.css              # UI components (cards, buttons, forms)
-│   └── pages/                      # Page-specific styles
-│       ├── home.css               # Homepage aurora effects
-│       ├── videogiochi.css        # Game template styles
-│       └── contatti.css           # Contact form styles
+├── 📦 public/                       # STATIC ASSETS
+│   ├── images/
+│   └── favicon.ico
 │
-├── ⚡ js/                           # MODULAR JAVASCRIPT
-│   ├── main.js                    # Site orchestrator
-│   └── modules/                   # Separated concerns
-│       ├── componentManager.js    # Header/footer injection
-│       ├── formHandler.js         # Contact form logic
-│       └── uiAnimations.js        # UI interactions
-│
-├── 📱 pages/                        # CONTENT ORGANIZATION
-│   ├── software/                  # 3 desktop applications
-│   ├── videogiochi/               # Interactive games portfolio
-│   ├── libri/                     # Literary works
-│   ├── podcast/                   # Audio content archive
-│   ├── chi-sono/                  # Personal blog + articles
-│   └── contatti.html              # Contact form
-│
-├── 🖼️ image/                        # MEDIA ASSETS
-└── 📚 docs/                         # DOCUMENTATION
+└── ⚙️ config files                  # CONFIGURATION
+    ├── package.json                # Dependencies e scripts
+    ├── vite.config.js             # Vite configuration
+    ├── tailwind.config.js         # Tailwind configuration
+    └── postcss.config.js          # PostCSS configuration
 ```
 
 ## ⚙️ Component System Architecture
@@ -449,4 +455,4 @@ This structure separates concerns effectively, making the project scalable and e
 -   **Symptom:** The main index pages for "Chi Sono", "Videogiochi", and "Contatti" display a fallback version of the footer, which lacks social media icons.
 -   **Root Cause Analysis:** Despite the `ComponentManager`'s `fetch` operation succeeding, a yet-undiagnosed anomaly within the HTML structure of these specific "legacy" pages prevents the final DOM injection of the correct footer content. The header component, however, loads correctly.
 -   **Impact:** Minor aesthetic inconsistency. Core functionality is unaffected.
--   **Resolution Plan:** A future "Tabula Rasa" operation is planned, where these specific HTML files will be regenerated from a clean, validated template, ensuring 100% consistency. 
+-   **Resolution Plan:** A future "Tabula Rasa" operation is planned, where these specific HTML files will be regenerated from a clean, validated template, ensuring 100% consistency.
