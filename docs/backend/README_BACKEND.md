@@ -200,4 +200,4 @@ gunicorn -w 4 -b 0.0.0.0:5000 app:app
 
 **Autore:** Simone Pizzi  
 **Versione:** 1.0.0  
-**Ultimo aggiornamento:** Gennaio 2025 
+**Ultimo aggiornamento:** Gennaio 2025

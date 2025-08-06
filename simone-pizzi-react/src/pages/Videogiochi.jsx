@@ -6,7 +6,7 @@ const Videogiochi = () => {
     {
       id: 1,
       title: "Il Respiro Trattenuto del Mondo",
-      image: "/assets/icona-respiro.jpg",
+      image: "/assets/respiro-orizzontale.png",
       description: "Una piccola avventura interattiva a scelte con opzioni grafiche standard, CRT e alto contrasto per accessibilità. Ispirata al romanzo \"Echi Prima del Silenzio\", prequel di The Safe Place.",
       status: "available",
       version: "v1.5",
@@ -157,7 +157,17 @@ const Videogiochi = () => {
                   </div>
 
                   <div className="flex flex-col gap-3 pt-4">
-                    {game.status === 'available' && game.downloads.length > 0 ? (
+                    {game.id === 1 ? (
+                      <a 
+                        href="/respiro-trattenuto/index.html"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-[#00ff88] text-[#0a0a0a] px-6 py-3 rounded-lg font-semibold hover:bg-white hover:text-[#00ff88] transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Play size={16} />
+                        Scopri di più
+                      </a>
+                    ) : game.status === 'available' && game.downloads.length > 0 ? (
                       <>
                         {game.downloads.map((download, index) => (
                           <a 

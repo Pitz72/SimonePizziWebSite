@@ -188,4 +188,4 @@ Sistema di gamification per aumentare engagement utenti.
 
 **📅 Documento creato**: 20 Luglio 2025
 **🔄 Versione**: 1.0
-**👨‍💻 Proprietario**: Simone Pizzi 
+**👨‍💻 Proprietario**: Simone Pizzi

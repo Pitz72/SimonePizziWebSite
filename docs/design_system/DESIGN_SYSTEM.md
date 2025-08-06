@@ -394,4 +394,4 @@ module.exports = {
 
 **Versione:** 2.2.0  
 **Ultimo aggiornamento:** 19 Luglio 2025  
-**Mantenuto da:** Simone Pizzi 
+**Mantenuto da:** Simone Pizzi

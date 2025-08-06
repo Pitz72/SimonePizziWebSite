@@ -689,4 +689,4 @@ Il risultato sarà un sito web che non solo presenta il lavoro di Simone Pizzi, 
 **Versione:** 2.2.0  
 **Data:** 19 Luglio 2025  
 **Autore:** Simone Pizzi  
-**Status:** 🚀 Pronto per Implementazione 
+**Status:** 🚀 Pronto per Implementazione
