@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Download, Play, BookOpen, Code, Gamepad2, Sparkles } from 'lucide-react';
 import { Button, Card, ParticleBackground, TypewriterText, AnimatedSection, AnimatedList, AnimatedCard } from '../components/ui';
 
 const Home = () => {
-  const [typewriterComplete, setTypewriterComplete] = useState(false);
 
 
 
@@ -33,26 +32,20 @@ const Home = () => {
               {/* Badge */}
               <div className="inline-flex items-center gap-2 px-4 py-2 bg-primary-500/10 border border-primary-500/20 rounded-full text-primary-500 text-sm font-medium animate-fade-in-up">
                 <Sparkles size={16} />
-                Benvenuto nel mio universo creativo
+                Senza Intelligenza non c'è Creatività
               </div>
               
               {/* Main Title */}
               <h1 className="text-5xl lg:text-7xl font-extrabold text-text-primary leading-tight">
-                <span className="block">
                   <TypewriterText 
-                    text="Benvenuto nel mio"
+                    text={[
+                      { text: 'Benvenuto nel mio ', className: 'text-white' },
+                      { text: 'universo creativo', className: 'text-primary-500' }
+                    ]}
                     speed={80}
                     delay={500}
-                    className="block"
-                    onComplete={() => setTypewriterComplete(true)}
                   />
-                </span>
-                <span className="block mt-2">
-                  <span className="text-gradient animate-pulse-glow">
-                    {typewriterComplete ? 'universo creativo' : 'universo creativo'}
-                  </span>
-                </span>
-              </h1>
+                </h1>
               
               {/* Subtitle */}
               <p className="text-xl lg:text-2xl text-text-secondary leading-relaxed max-w-2xl animate-fade-in-up" style={{ animationDelay: '1s' }}>
@@ -89,16 +82,16 @@ const Home = () => {
               {/* Stats */}
               <div className="flex gap-8 pt-8 animate-fade-in-up" style={{ animationDelay: '2s' }}>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary-500">13+</div>
+                  <div className="text-2xl font-bold text-primary-500">15+</div>
                   <div className="text-sm text-text-muted">Anni di Podcasting</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary-500">50+</div>
+                  <div className="text-2xl font-bold text-primary-500">7+</div>
                   <div className="text-sm text-text-muted">Progetti Software</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-primary-500">100+</div>
-                  <div className="text-sm text-text-muted">Episodi Podcast</div>
+                  <div className="text-2xl font-bold text-primary-500">60.000+</div>
+                  <div className="text-sm text-text-muted">Ore di podcasting</div>
                 </div>
               </div>
             </div>
@@ -112,14 +105,10 @@ const Home = () => {
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-primary-500/20 to-primary-600/20 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-500"></div>
                   <img 
-                    src="/assets/photo_2025-03-15_08-52-25.jpg" 
+                    src="/assets/Simone-Pizzi.png" 
                     alt="Simone Pizzi - Ritratto" 
                     className="relative w-full max-w-md h-auto rounded-3xl shadow-2xl transition-all duration-500 group-hover:scale-105 group-hover:shadow-glow-lg"
                   />
-                  {/* Floating badge */}
-                  <div className="absolute -top-4 -right-4 bg-primary-500 text-bg-primary px-3 py-1 rounded-full text-sm font-semibold animate-bounce">
-                    ✨ Live
-                  </div>
                 </div>
               </Card>
             </div>
@@ -171,7 +160,7 @@ const Home = () => {
                 icon: Gamepad2,
                 title: "Videogiochi",
                 description: "Esperimenti interattivi che uniscono storytelling e tecnologia per creare esperienze uniche.",
-                image: "/assets/Whisk_d99885c46e.jpg",
+                image: "/assets/respiro-quad.png",
                 link: "/videogiochi"
               }
             ].map((feature, index) => (

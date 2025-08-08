@@ -1,45 +1,67 @@
 import React, { useState, useEffect } from 'react';
 
 const TypewriterText = ({ 
-  text, 
+  text, // Can be a string or an array of {text, className}
   speed = 100, 
   delay = 1000, 
   className = '',
   cursor = true,
   onComplete = null 
 }) => {
-  const [displayText, setDisplayText] = useState('');
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [displayedContent, setDisplayedContent] = useState([]);
   const [isTyping, setIsTyping] = useState(false);
 
+  const textParts = Array.isArray(text) ? text : [{ text, className }];
+
   useEffect(() => {
-    if (currentIndex === 0 && !isTyping) {
-      // Start typing after delay
-      const startTimer = setTimeout(() => {
-        setIsTyping(true);
-      }, delay);
+    const startTimer = setTimeout(() => setIsTyping(true), delay);
+    return () => clearTimeout(startTimer);
+  }, [delay]);
 
-      return () => clearTimeout(startTimer);
-    }
+  useEffect(() => {
+    if (!isTyping) return;
 
-    if (isTyping && currentIndex < text.length) {
-      const timer = setTimeout(() => {
-        setDisplayText(prev => prev + text[currentIndex]);
-        setCurrentIndex(prev => prev + 1);
-      }, speed);
+    let partIndex = 0;
+    let charIndex = 0;
+    let currentContent = [];
 
-      return () => clearTimeout(timer);
-    } else if (isTyping && currentIndex >= text.length) {
-      setIsTyping(false);
-      if (onComplete) {
-        onComplete();
+    const type = () => {
+      if (partIndex >= textParts.length) {
+        if (onComplete) onComplete();
+        setIsTyping(false);
+        return;
       }
-    }
-  }, [currentIndex, isTyping, text, speed, delay, onComplete]);
+
+      const currentPart = textParts[partIndex];
+      const currentText = currentPart.text;
+
+      if (charIndex < currentText.length) {
+        const newContent = [...textParts.slice(0, partIndex)];
+        newContent.push({
+          ...currentPart,
+          text: currentText.substring(0, charIndex + 1)
+        });
+        setDisplayedContent(newContent);
+        charIndex++;
+        setTimeout(type, speed);
+      } else {
+        partIndex++;
+        charIndex = 0;
+        setTimeout(type, speed);
+      }
+    };
+
+    type();
+
+  }, [isTyping, text, speed, onComplete]);
 
   return (
     <span className={className}>
-      {displayText}
+      {displayedContent.map((part, i) => (
+        <span key={i} className={part.className}>
+          {part.text}
+        </span>
+      ))}
       {cursor && isTyping && (
         <span className="inline-block w-0.5 h-6 bg-primary-500 ml-1 animate-blink">
           &nbsp;
@@ -49,4 +71,4 @@ const TypewriterText = ({
   );
 };
 
-export default TypewriterText; 
+export default TypewriterText;
