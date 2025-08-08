@@ -241,20 +241,20 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[
               {
+                category: "Videogioco",
+                title: "Il Respiro Trattenuto del Mondo",
+                description: "Avventura narrativa che esplora temi profondi attraverso meccaniche innovative.",
+                date: "Agosto 2025",
+                link: "/videogiochi/il-respiro-trattenuto-del-mondo",
+                icon: Play
+              },
+              {
                 category: "Software",
                 title: "Advanced Jingle Machine",
                 description: "Nuovo strumento per la creazione automatica di jingle professionali con AI integrata.",
                 date: "Gennaio 2025",
                 link: "/software/advanced-jingle-machine",
                 icon: Download
-              },
-              {
-                category: "Videogioco",
-                title: "Il Respiro Trattenuto del Mondo",
-                description: "Avventura narrativa che esplora temi profondi attraverso meccaniche innovative.",
-                date: "Dicembre 2024",
-                link: "/videogiochi/il-respiro-trattenuto-del-mondo",
-                icon: Play
               },
               {
                 category: "Blog",

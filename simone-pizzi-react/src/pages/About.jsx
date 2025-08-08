@@ -4,6 +4,16 @@ import ArticleCard from '../components/ui/ArticleCard';
 // In un'app reale, questi dati potrebbero venire da un file JSON o da un'API
 const articles = [
   {
+    id: 0,
+    imageUrl: '/assets/respiro-orizzontale.png',
+    imageAlt: "Il Respiro Trattenuto del Mondo - Cover",
+    title: "Il momento di TRATTENERE IL RESPIRO è arrivato",
+    date: "2025-08-08",
+    readTime: 5,
+    preview: "Un piccolo passo per un uomo, un passo ancora più impercettibile per l'umanità – videoludica o meno, non importa. Quello che ho terminato oggi non è rilevante per nessuno, ma lo è per me.",
+    link: "/chi-sono/articoli/il-momento-di-trattenere-il-respiro"
+  },
+  {
     id: 1,
     imageUrl: '/assets/01viaggiatore.png',
     imageAlt: "Il Viaggiatore - Sviluppo con IA",

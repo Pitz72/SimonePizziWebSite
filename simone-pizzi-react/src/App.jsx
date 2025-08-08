@@ -18,6 +18,7 @@ import LemmonsFortunaSpenta from './pages/articoli/LemmonsFortunaSpenta';
 import AperturaSezioniSito from './pages/articoli/AperturaSezioniSito';
 import IlRespiroTrattenutoDelMondo from './pages/articoli/IlRespiroTrattenutoDelMondo';
 import Corridor2193TheLastRun from './pages/articoli/Corridor2193TheLastRun';
+import IlMomentoDiTrattenereIlRespiro from './pages/articoli/IlMomentoDiTrattenereIlRespiro';
 
 function App() {
   return (
@@ -44,6 +45,7 @@ function App() {
           <Route path="/chi-sono/articoli/apertura-sezioni-sito" element={<AperturaSezioniSito />} />
           <Route path="/chi-sono/articoli/il-respiro-trattenuto-del-mondo" element={<IlRespiroTrattenutoDelMondo />} />
           <Route path="/chi-sono/articoli/corridor-2193-the-last-run" element={<Corridor2193TheLastRun />} />
+          <Route path="/chi-sono/articoli/il-momento-di-trattenere-il-respiro" element={<IlMomentoDiTrattenereIlRespiro />} />
         </Routes>
       </Layout>
       </Router>
