@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Come ho provato a far scrivere un videogioco a un'IA (e cosa ho imparato) | Simone Pizzi</title>
+    <meta name="description" content="Il viaggio di sviluppo di The Safe Place con Gemini: successi, fallimenti e lezioni apprese nella collaborazione uomo-IA per creare un videogioco.">
+    <meta name="keywords" content="Simone Pizzi, sviluppo con IA, Gemini, The Safe Place, Il Viaggiatore, game development, LLM, intelligenza artificiale, programmazione">
+    <meta name="author" content="Simone Pizzi">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://simonepizzi.runtimeradio.it/pages/chi-sono/articoli/sviluppo-videogioco-ia.html">
+    <meta property="og:title" content="Come ho provato a far scrivere un videogioco a un'IA (e cosa ho imparato)">
+    <meta property="og:description" content="Il viaggio di sviluppo di The Safe Place con Gemini: successi, fallimenti e lezioni apprese nella collaborazione uomo-IA per creare un videogioco.">
+    <meta property="og:image" content="https://simonepizzi.runtimeradio.it/image/articoli/01viaggiatore.png">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://simonepizzi.runtimeradio.it/pages/chi-sono/articoli/sviluppo-videogioco-ia.html">
+    <meta property="twitter:title" content="Come ho provato a far scrivere un videogioco a un'IA (e cosa ho imparato)">
+    <meta property="twitter:description" content="Il viaggio di sviluppo di The Safe Place con Gemini: successi, fallimenti e lezioni apprese nella collaborazione uomo-IA per creare un videogioco.">
+    <meta property="twitter:image" content="https://simonepizzi.runtimeradio.it/image/articoli/01viaggiatore.png">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://simonepizzi.runtimeradio.it/pages/chi-sono/articoli/sviluppo-videogioco-ia.html">
+
+    <!-- Performance optimizations -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
+    <!-- Typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    
+    <!-- Modular CSS -->
+    <link rel="stylesheet" href="../../../css/style.css">
+</head>
+<body>
+    <!-- ========= HEADER SKELETON (Anti-FOUC) ========= -->
+    <div id="header-placeholder" class="skeleton-placeholder header-skeleton"></div>
+
+    <main class="main-content">
+        <div class="container">
+            <!-- Breadcrumb Navigation -->
+            <nav class="breadcrumb">
+                <a href="../../../index.html">Home</a> / 
+                <a href="../index.html">Sono Simone</a> / 
+                <span>Sviluppo con IA</span>
+            </nav>
+
+            <!-- Article Content -->
+            <article class="blog-article">
+                <header class="article-header">
+                    <h1 class="article-title">Come ho provato a far scrivere un videogioco a un'IA (e cosa ho imparato)</h1>
+                    <p class="article-subtitle">La mia fissa, lo ZX Spectrum e un'Intelligenza Artificiale come game developer</p>
+                    <div class="article-meta">
+                        <time datetime="2025-07-01">1 Luglio 2025</time>
+                        <span class="reading-time">• 9 min di lettura</span>
+                    </div>
+                </header>
+
+                <figure class="article-featured-image" style="text-align: center;">
+                    <img src="../../../image/articoli/01viaggiatore.png" alt="Il Viaggiatore - Fase HTML + JavaScript" loading="lazy" style="max-width: 100%; height: auto;">
+                    <figcaption>Quando il gioco si chiamava Il Viaggiatore ed era appena entrato nella fase HTML + JavaScript</figcaption>
+                </figure>
+
+                <div class="article-content">
+                    <p><strong>Quando su YouTube iniziai a vedere che tra le evoluzioni di Gemini, l'LLM di Google, c'era una straordinaria capacità di sviluppare codice che andava ben oltre l'essere un semplice assistente per gli sviluppatori, mi si accese un'idea in testa.</strong> Era un'idea che avevo da tantissimo tempo e che mi riporta alla mia infanzia, più o meno.</p>
+
+                    <h2>L'Origine: Un Ricordo d'Infanzia</h2>
+                    <p>Tantissimi anni fa, nell'era in cui la tv pubblica, ma anche alcune tv locali, usavano degli home computer e le connessioni telefoniche per fare dei giochi a premi, vidi questo strano, bellissimo videogioco. Consisteva in un cursore che doveva essere mosso, tramite comandi direzionali, in una mappa a caselle. In queste caselle c'erano delle "R", i ristori, ma ci potevano anche essere dei bonus o dei malus, sia visibili che nascosti.</p>
+
+                    <p>La memoria di questo gioco, del quale non ricordo nient'altro – né nome, né programma tv, né canale televisivo – mi è rimasta stampata in testa per tutto il resto della mia vita. A occhio e croce sembrava uno ZX Spectrum: i colori erano quelli, il lampeggio e il tipo di "character" ASCII erano inconfondibili. E io, da allora, ho sempre ambito a ricostruire quel gioco.</p>
+
+
+
+                    <h2>Dal Python al Sogno Irrealizzabile</h2>
+                    <p>Negli anni, dato che da ragazzo ero molto bravo con il Basic del Commodore 64, mi sono sempre ripromesso di studiare un linguaggio di programmazione che mi permettesse di riprodurre questa fissa. Iniziai a studiare il Python, che mi sembrava la cosa più simile, sia sintatticamente che nella logica, al Basic originale che conoscevo io, ma con un'infinita potenza in più. Nel mio percorso di studio era come se mi si riaccendessero ricordi e lampadine, ma mi resi presto conto che non avevo né il tempo, né Python era veramente quello che stavo cercando.</p>
+
+                    <p>Nel mentre, il concept di questo gioco si sviluppava nella mia testa. L'idea di base rimaneva quella, ma con delle differenze sostanziali: come prima cosa, volevo un look da terminale retro-computazionale di fine anni '70, inizio anni '80. Poi ci ho aggiunto alcuni elementi RPG, cercando di farlo diventare un gioco di ruolo testuale, in pieno stile home computer degli albori.</p>
+
+                    <h2>L'Esperimento: Un Nuovo Flusso di Lavoro</h2>
+                    <p>Ma la mia, a quel punto, non era più soltanto una fissa relegata al gioco in sé. Era diventata un'ossessione diversa: volevo dimostrare, a me stesso prima che agli altri, se Gemini fosse veramente in grado di sviluppare un intero gioco, per quanto semplice, senza il mio intervento diretto sul codice, ma con la mia costante e minuziosa guida tecnica, creativa e strategica. E in parte, ci sono riuscito.</p>
+
+                    <h3>Il Nuovo Paradigma di Sviluppo</h3>
+                    <p>L'obiettivo era chiaro: usare l'IA non come assistente, ma come sviluppatore primario, guidato dalla visione strategica e creativa umana. Il flusso di lavoro si è strutturato in tre fasi distinte:</p>
+
+                    <ul>
+                        <li><strong>Fase Strategica (Umana):</strong> Definizione degli obiettivi, visione creativa, architettura generale e pianificazione del progetto</li>
+                        <li><strong>Fase di Implementazione (IA):</strong> Generazione del codice, sviluppo delle funzionalità e produzione dei contenuti seguendo le specifiche umane</li>
+                        <li><strong>Fase di Controllo (Umana):</strong> Review del codice, testing approfondito, debugging e ottimizzazioni finali</li>
+                    </ul>
+
+                    <p>Poi, si sa, il potere corrompe. È un fatto antropologicamente risaputo. E così è iniziata una delirante corsa verso il "si fa così, si aggiunge colà", che ha trasformato un'idea semplice in un progetto complesso, portando con sé tanta frustrazione ma anche enormi soddisfazioni. In questo continuo processo di "togli e metti", mi sono scontrato con i limiti oggettivi di uno strumento che avevo iniziato a usare senza conoscerne le problematiche, le meccaniche e i veri ostacoli. Problemi che poi, nei mesi, ho imparato – mai del tutto in senso assoluto – ad addomesticare.</p>
+
+                    <h2>Le Cinque Fasi dello Sviluppo</h2>
+                    <p>Il viaggio è stato tutt'altro che lineare. L'esperimento era chiaro: io definivo il "cosa" e il "perché", e l'IA doveva occuparsi del "come". All'inizio, l'efficacia di Gemini era sbalorditiva nel generare codice ripetitivo o implementare logiche semplici. Ma man mano che la complessità cresceva, emergevano le prime crepe. L'IA tendeva a generare codice ridondante, a duplicare funzioni in moduli diversi, rendendo la manutenzione un incubo. Il debugging di errori sottili, quelli legati all'interazione profonda tra le meccaniche di gioco, richiedeva un dialogo estenuante, fatto di cicli di analisi, suggerimenti specifici e correzioni guidate.</p>
+
+                    <p>Analizzando retrospettivamente l'intero processo, è possibile identificare cinque fasi distinte che caratterizzano questo esperimento di sviluppo collaborativo con l'IA:</p>
+
+                    <ul>
+                        <li><strong>Fase 1 - Euforia Iniziale:</strong> L'IA genera codice boilerplate e logiche semplici con una velocità sorprendente. L'idea sembra non solo possibile, ma rivoluzionaria.</li>
+                        <li><strong>Fase 2 - Crescita della Complessità:</strong> Man mano che il gioco cresce, emergono problemi: codice ridondante, mancanza di coerenza architetturale e difficoltà a gestire lo stato globale.</li>
+                        <li><strong>Fase 3 - Il "Great Map Bug":</strong> Un bug critico blocca lo sviluppo: la mappa appare vuota. Dopo giorni, si scopre che non è un errore di codice, ma di bilanciamento del gioco, un concetto che l'IA non poteva cogliere da sola.</li>
+                        <li><strong>Fase 4 - La Deviazione:</strong> La frustrazione porta a esplorare alternative (Godot, Python/Textual), incontrando nuovi ostacoli e confermando la complessità dello sviluppo software, con o senza IA.</li>
+                        <li><strong>Fase 5 - La Svolta e il Ritorno:</strong> Risolto il bug della mappa, si torna al progetto JS originale con nuove conoscenze, una codebase ristrutturata e una comprensione più profonda della collaborazione uomo-macchina.</li>
+                    </ul>
+
+                    <p>Il momento più critico, che quasi mi ha fatto abbandonare tutto, è stato un bug sulla mappa di gioco. La logica sembrava creare un mondo vario, con fiumi, villaggi, città. Eppure, a schermo vedevo solo un'infinita e monotona distesa di pianure, montagne e foreste.</p>
+
+                    <figure class="article-featured-image" style="text-align: center;">
+                        <img src="../../../image/articoli/02thesafeplace-godot1.jpg" alt="The Safe Place - Transizione a Godot" loading="lazy" style="max-width: 100%; height: auto;">
+                        <figcaption>Il passaggio a Godot, ma l'interfaccia era già cambiata tanto anche nella versione HTML</figcaption>
+                    </figure>
+
+                    <p>Per giorni, con l'IA, abbiamo esplorato ogni possibile causa: un errore nel rendering? Un problema di CSS? La console del browser che non mostrava la verità? Niente. La frustrazione era palpabile. Poi, l'illuminazione: non era un bug tecnico, ma un problema di bilanciamento. Le foreste e le montagne erano così fitte e i punti di interesse così rari che, semplicemente, non si vedevano. L'IA, pur bravissima a scrivere codice, non aveva la visione d'insieme di un game designer per capire che la sua generazione procedurale era, di fatto, sbilanciata.</p>
+
+                    <p>In preda allo sconforto, ho persino tentato delle vie di fuga. Ho provato a migrare il progetto su Godot Engine, incappando in un bug bloccante e inspiegabile dell'engine stesso. Ho tentato la via purista del terminale con Python e la libreria Textual, ottenendo un'interfaccia funzionante ma che sentivo rigida, non adatta alla mia visione.</p>
+
+                    <figure class="article-featured-image" style="text-align: center;">
+                        <img src="../../../image/articoli/03thesafeplace-godot2.jpg" alt="The Safe Place - Cambio di rotta in Godot" loading="lazy" style="max-width: 100%; height: auto;">
+                        <figcaption>Il progetto ha subito un vero e proprio cambio di rotta, forse perdendo la sua vera identità. Ma nulla mi impedisce di tornare indietro alle tile ASCII</figcaption>
+                    </figure>
+
+                    <p>Alla fine, risolto il mistero della mappa, sono tornato al mio progetto originale in JavaScript, più forte e consapevole di prima.</p>
+
+                    <h2>Lezioni Apprese: La Vera Divisione dei Ruoli</h2>
+                    <p>Questo andirivieni mi ha insegnato la lezione più importante: l'IA è un collaboratore potentissimo, ma non un sostituto della visione umana. Può scrivere il codice, ma la coerenza architettonica, il bilanciamento del gameplay e la capacità di risolvere problemi complessi che richiedono intuizione, restano ancora saldamente nelle mani dell'essere umano. Ho capito che dovevo verificare sistematicamente ogni riga che l'IA produceva, perché spesso c'era una discrepanza tra quello che diceva di aver fatto e quello che il codice faceva realmente.</p>
+
+                    <p>Dall'esperienza è emersa una chiara divisione delle competenze. L'analisi dettagliata delle attività mostra una distribuzione interessante:</p>
+
+                    <h3>Distribuzione dello Sforzo per Tipologia di Compito</h3>
+                    <ul>
+                        <li><strong>Concept & Design:</strong> 95% sforzo umano, 5% assistenza IA</li>
+                        <li><strong>Logica Complessa & Architettura:</strong> 80% sforzo umano, 20% assistenza IA</li>
+                        <li><strong>Codice Boilerplate & Ripetitivo:</strong> 10% sforzo umano, 90% assistenza IA</li>
+                        <li><strong>Debugging:</strong> 70% sforzo umano, 30% assistenza IA</li>
+                    </ul>
+
+                    <p>I dati evidenziano chiaramente come l'IA eccella nell'esecuzione di compiti ripetitivi e nella generazione di codice standard, mentre la strategia, la visione d'insieme e la risoluzione di problemi complessi restano saldamente in mano umana.</p>
+
+                    <h3>Anatomia delle Sfide Principali</h3>
+                    <p>Analizzando le difficoltà incontrate durante lo sviluppo, emerge una distribuzione che conferma come i problemi più significativi non fossero tecnici ma concettuali:</p>
+
+                    <ul>
+                        <li><strong>40% - Problemi di Game Balance:</strong> Come il "Map Bug", questioni legate al bilanciamento e alla giocabilità</li>
+                        <li><strong>30% - Logica & Ridondanza IA:</strong> Codice duplicato, mancanza di coerenza architettonica</li>
+                        <li><strong>15% - Bug Strumenti Esterni:</strong> Problemi con Godot e altri tool di sviluppo</li>
+                        <li><strong>15% - Curva di Apprendimento Umana:</strong> Tempo necessario per imparare a collaborare efficacemente con l'IA</li>
+                    </ul>
+
+                    <h2>Evoluzione Architettonica: Da Caos a Struttura</h2>
+                    <p>Una delle lezioni più importanti è stata la necessità di una struttura solida, anche quando si lavora con l'IA. Il refactoring manuale è stato cruciale per passare da un approccio monolitico a una codebase modulare organizzata.</p>
+
+                    <h3>La Trasformazione del Codice</h3>
+                    <p><strong>Versione Iniziale (v0.1):</strong></p>
+                    <ul>
+                        <li>📄 <code>game_logic.js</code> - Un unico file monolitico contenente tutta la logica</li>
+                        <li>Codice disorganizzato e difficile da mantenere</li>
+                        <li>Funzionalità duplicate e ridondanti</li>
+                    </ul>
+
+                    <p><strong>Versione Refactorizzata (v2.0):</strong></p>
+                    <ul>
+                        <li>📚 <strong>Moduli Specializzati:</strong></li>
+                        <li><code>game_data.js</code> - Gestione dati e configurazioni</li>
+                        <li><code>game_utils.js</code> - Funzioni di utilità generale</li>
+                        <li><code>ui.js</code> - Interfaccia utente e rendering</li>
+                        <li><code>player.js</code> - Logica del giocatore</li>
+                        <li><code>map.js</code> - Sistema di mappa e world generation</li>
+                        <li><code>events.js</code> - Gestione eventi e interazioni</li>
+                        <li><code>game_core.js</code> - Coordinamento generale e game loop</li>
+                    </ul>
+
+                    <p>Questa modularizzazione ha reso il progetto più mantenibile, ha ridotto significativamente la ridondanza del codice e ha migliorato la collaborazione con l'IA, che poteva concentrarsi su moduli specifici senza compromettere l'intera architettura.</p>
+
+                    <h2>Il Presente e il Futuro</h2>
+                    <p>Oggi le cose sono cambiate. Se riguardo indietro, paradossalmente, ho la nostalgia di quella singola, caotica schermata di un gioco che è nato come un unico file HTML e che poi si è evoluto. Oggi, alla terza generazione di sviluppo ricominciato da capo, sento di aver acquisito una competenza inaspettata.</p>
+
+                    <p>Ho imparato tantissimo sullo sviluppo, sull'importanza dell'organizzazione della documentazione di pre-produzione, sulla fondamentale traccia di logging dello sviluppo e sui documenti anti-regressione. Tutti questi testi, questa documentazione, la racchiuderò in un documento unitario legato proprio a The Safe Place, che allegherò al gioco originale quando sarà pronto.</p>
+
+                    <p>Spero che questo pezzo di viaggio vi sia piaciuto e che continuerete a seguire il processo e il cammino di questo gioco, che inizialmente si chiamava Il Viaggiatore, in questa fase finale dove è cambiato veramente tutto.</p>
+                </div>
+
+                <!-- Back Navigation -->
+                <nav class="article-navigation">
+                    <a href="../index.html" class="back-link">
+                        <i class="fas fa-arrow-left"></i> Torna al Blog
+                    </a>
+                </nav>
+            </article>
+        </div>
+    </main>
+
+    <!-- ========= FOOTER SKELETON (Anti-FOUC) ========= -->
+    <div id="footer-placeholder" class="skeleton-placeholder footer-skeleton"></div>
+
+    <script type="module" src="../../../js/main.js"></script>
+</body>
+</html> 

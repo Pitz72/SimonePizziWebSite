@@ -1,0 +1,106 @@
+import React, { useState, useEffect } from 'react';
+import { PortfolioItem } from '../types';
+
+interface PortfolioShowcaseProps {
+  items: PortfolioItem[];
+  title: string;
+}
+
+const PortfolioShowcase: React.FC<PortfolioShowcaseProps> = ({ items, title }) => {
+  const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
+
+  useEffect(() => {
+    if (items && items.length > 0) {
+      setSelectedItem(items[0]);
+    } else {
+      setSelectedItem(null);
+    }
+  }, [items]);
+
+  if (!items || items.length === 0) {
+    return (
+      <section className="container mx-auto py-24 text-center">
+        <p className="text-gray-400">Nessun progetto in questa categoria.</p>
+      </section>
+    );
+  }
+
+  return (
+    <section className="container mx-auto py-16 sm:py-24">
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar { width: 8px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(34, 197, 94, 0.3); border-radius: 20px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: rgba(34, 197, 94, 0.5); }
+      `}</style>
+      <div className="mb-16">
+        <h1 className="text-5xl font-bold text-white tracking-tight">{title}</h1>
+      </div>
+      <div className="grid lg:grid-cols-12 gap-8 lg:gap-16">
+        
+        <div className="lg:col-span-4">
+          <ul className="space-y-4">
+            {items.map((item) => (
+              <li key={item.id}>
+                <button
+                  onClick={() => setSelectedItem(item)}
+                  className={`w-full text-left p-4 rounded-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500/50 transform group ${
+                    selectedItem?.id === item.id
+                      ? 'bg-green-600/20 border-l-4 border-green-400 shadow-lg shadow-green-500/10'
+                      : 'bg-gray-900/30 border-l-4 border-transparent hover:bg-gray-800/50 hover:border-green-400/70 hover:translate-x-1'
+                  }`}
+                >
+                  <h3 className={`font-semibold text-lg transition-colors duration-300 ${ selectedItem?.id === item.id ? 'text-green-300' : 'text-white group-hover:text-green-300'}`}>{item.title}</h3>
+                  <p className="text-sm text-gray-400 line-clamp-2 mt-1">{item.summary}</p>
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="lg:col-span-8">
+          {selectedItem && (
+            <div key={selectedItem.id} className="sticky top-28 animate-fade-in">
+               <div className="bg-gray-900/30 backdrop-blur-md rounded-2xl p-6 lg:p-8 border border-white/10 overflow-hidden">
+                <div className="aspect-video w-full mb-8 rounded-lg overflow-hidden shadow-2xl shadow-black/50">
+                    <img 
+                      src={selectedItem.imageUrl} 
+                      alt={selectedItem.title} 
+                      className="w-full h-full object-cover"
+                    />
+                </div>
+                <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">{selectedItem.title}</h2>
+                <div className="flex flex-wrap gap-2 mb-6">
+                  {selectedItem.tags.map(tag => (
+                    <span key={tag} className="px-3 py-1 text-sm font-medium text-green-300 bg-green-900/60 rounded-full">
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+                <div className="prose prose-invert prose-p:text-gray-300 prose-headings:text-white max-h-[45vh] overflow-y-auto pr-4 custom-scrollbar">
+                    <p className="whitespace-pre-wrap leading-relaxed">{selectedItem.description}</p>
+                </div>
+                
+                {selectedItem.link && selectedItem.link !== '#' && (
+                   <div className="mt-10">
+                       <a 
+                            href={selectedItem.link} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="inline-block bg-green-500 text-black font-bold text-lg px-8 py-4 rounded-lg hover:bg-green-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-green-500/30"
+                        >
+                           {selectedItem.buttonText || 'Scopri di più'}
+                       </a>
+                   </div>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+      </div>
+    </section>
+  );
+};
+
+export default PortfolioShowcase;

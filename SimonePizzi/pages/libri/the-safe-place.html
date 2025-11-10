@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Safe Place - Gioco di Ruolo Testuale Post-Apocalittico | Simone Pizzi</title>
+    <meta name="description" content="The Safe Place: un GDR testuale post-apocalittico sviluppato con AI. Vivi l'avventura di Ultimo in un'Europa degli anni '80 devastata. Esperimento unico di collaborazione uomo-macchina.">
+    <meta name="keywords" content="The Safe Place, Simone Pizzi, gioco di ruolo testuale, GDR post-apocalittico, videogioco narrativo, sviluppo AI, LLM gaming, narrativa interattiva">
+    <meta name="author" content="Simone Pizzi">
+    <meta name="robots" content="index, follow">
+    <meta name="language" content="Italian">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://simonepizzi.runtimeradio.it/the-safe-place.html">
+    <meta property="og:title" content="The Safe Place - Gioco di Ruolo Testuale Post-Apocalittico">
+    <meta property="og:description" content="The Safe Place: un GDR testuale post-apocalittico sviluppato con AI. Vivi l'avventura di Ultimo in un'Europa degli anni '80 devastata.">
+    <meta property="og:image" content="https://simonepizzi.runtimeradio.it/image/TSP.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:locale" content="it_IT">
+    <meta property="og:site_name" content="Simone Pizzi">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://simonepizzi.runtimeradio.it/the-safe-place.html">
+    <meta property="twitter:title" content="The Safe Place - Gioco di Ruolo Testuale Post-Apocalittico">
+    <meta property="twitter:description" content="The Safe Place: un GDR testuale post-apocalittico sviluppato con AI. Vivi l'avventura di Ultimo in un'Europa degli anni '80 devastata.">
+    <meta property="twitter:image" content="https://simonepizzi.runtimeradio.it/image/TSP.jpg">
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="https://simonepizzi.runtimeradio.it/the-safe-place.html">
+
+    <!-- Favicon -->
+    <!-- <link rel="icon" type="image/x-icon" href="/favicon.ico"> -->
+    <!-- <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"> -->
+    <!-- <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"> -->
+    <!-- <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"> -->
+
+    <!-- Preconnect for performance -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Structured Data JSON-LD -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "The Safe Place",
+        "applicationCategory": "Game",
+        "operatingSystem": "Web Browser",
+        "description": "Gioco di Ruolo testuale post-apocalittico ambientato in un'Europa degli anni '80 devastata. Un esperimento di sviluppo collaborativo tra uomo e AI.",
+        "author": {
+            "@type": "Person",
+            "name": "Simone Pizzi",
+            "url": "https://simonepizzi.runtimeradio.it/"
+        },
+        "datePublished": "2025-05-29",
+        "softwareVersion": "1.0.0",
+        "image": "https://simonepizzi.runtimeradio.it/image/TSP.jpg",
+        "url": "https://simonepizzi.runtimeradio.it/the-safe-place.html",
+        "aggregateRating": {
+            "@type": "AggregateRating",
+            "ratingValue": "5",
+            "bestRating": "5",
+            "worstRating": "1",
+            "ratingCount": "1"
+        }
+    }
+    </script>
+    <link rel="stylesheet" href="../../css/style.css">
+    <style>
+        /* Stili specifici per la pagina The Safe Place */
+        .hero-section {
+            background: linear-gradient(135deg, #0d2818 0%, #0a1a0f 100%);
+            padding: 4rem 0;
+            margin-bottom: 4rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            align-items: center;
+            gap: 3rem;
+        }
+
+        .hero-image {
+            flex: 0 0 400px;
+            height: 300px;
+            overflow: hidden;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .hero-image:hover img {
+            transform: scale(1.05);
+        }
+
+        .hero-text {
+            flex: 1;
+        }
+
+        .hero-text h1 {
+            font-size: 3rem;
+            margin-bottom: 2rem;
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 800;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        .intro-section {
+            max-width: 900px;
+            margin: 0 auto 4rem;
+            padding: 0 2rem;
+        }
+
+        .intro-section h2 {
+            font-size: 2.2rem;
+            margin-bottom: 1.5rem;
+            color: #00ff88;
+            text-align: center;
+        }
+
+        .intro-section p {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 1.5rem;
+            text-align: justify;
+        }
+
+        .intro-section strong {
+            color: #00ff88;
+            font-weight: 600;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+            max-width: 1200px;
+            margin: 0 auto 4rem;
+            padding: 0 2rem;
+        }
+
+        .content-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(0, 255, 136, 0.3);
+            border-color: #00ff88;
+        }
+
+        .content-card-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .content-card:hover .content-card-image {
+            transform: scale(1.05);
+        }
+
+        .content-card-body {
+            padding: 1.5rem;
+        }
+
+        .content-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 0.8rem;
+            color: #00ff88;
+            font-weight: 700;
+        }
+
+        .content-card p {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .play-button {
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+            color: #0a0a0a;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+            padding: 1rem;
+            border: none;
+            transition: all 0.3s ease;
+        }
+
+        .play-button:hover {
+            background: linear-gradient(135deg, #00cc6a 0%, #00ff88 100%);
+        }
+
+        .news-banner {
+            background: linear-gradient(135deg, #00ff88 0%, #00cc6a 100%);
+            color: #0a0a0a;
+            padding: 0.8rem 2rem;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .news-banner::before {
+            content: '🎮';
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+        }
+
+        .news-banner::after {
+            content: '🎮';
+            position: absolute;
+            right: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .hero-image {
+                flex: none;
+                width: 100%;
+                max-width: 400px;
+            }
+
+            .hero-text h1 {
+                font-size: 2.2rem;
+            }
+
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .intro-section p {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">
+                <div class="logo-name">Simone Pizzi</div>
+                <div class="logo-tagline">Idee, Storie e Sperimentazione</div>
+            </div>
+            <div class="hamburger-menu">
+                <div class="bar1"></div>
+                <div class="bar2"></div>
+                <div class="bar3"></div>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html#home">Home</a></li>
+                                    <li><a href="../chi-sono/">Sono Simone (Blog)</a></li>
+                <li><a href="index.html#podcast">Podcast & Web Radio</a></li>
+                <li><a href="index.html#storie">Storie & Racconti</a></li>
+                <li><a href="sviluppo.html">Sviluppo & AI</a></li>
+                <li><a href="index.html#esperimenti">Esperimenti</a></li>
+                <li><a href="index.html#contatti">Contatti</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <!-- News Banner -->
+        <div class="news-banner">
+            The Safe Place v1.0.0 "Ultimo's Journey" è ora disponibile!
+        </div>
+
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <div class="hero-image">
+                    <img src="image/TSP.jpg" alt="The Safe Place v1.0.0 Ultimo's Journey" loading="lazy">
+                </div>
+                <div class="hero-text">
+                    <h1>The Safe Place</h1>
+                    <p style="font-size: 1.3rem; color: #00ff88; margin-bottom: 1rem;">Gioco di Ruolo Testuale Post-Apocalittico</p>
+                    <p>Un'esperienza narrativa che ti trasporta in un'Europa devastata degli anni '80, dove ogni scelta può significare la differenza tra la vita e la morte. Sviluppato attraverso una pionieristica collaborazione tra creatività umana e intelligenza artificiale.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Introduction Section -->
+        <section class="intro-section">
+            <h2>Benvenuti nel Mondo di "The Safe Place"</h2>
+            
+            <p>Nelle pagine che seguono, vi invitiamo a un viaggio duplice.</p>
+
+            <p>Da un lato, scoprirete <strong>"The Safe Place"</strong>, un Gioco di Ruolo testuale che vi trasporterà in un'Europa post-apocalittica degli anni '80, nei panni di Ultimo, un giovane sopravvissuto alla ricerca di un leggendario rifugio. È un'esperienza che omaggia i classici del genere, dove ogni scelta conta e la narrazione è il cuore pulsante dell'avventura.</p>
+
+            <p>Dall'altro, queste pagine raccontano la storia di un <strong>esperimento unico</strong>: lo sviluppo di "The Safe Place" è avvenuto attraverso una pionieristica collaborazione tra la visione creativa umana e la potenza dell'Intelligenza Artificiale. Qui troverete tutta la documentazione necessaria per comprendere l'<strong>idea</strong> che ha dato vita al progetto, la <strong>filosofia</strong> che ne ha guidato lo sviluppo, il <strong>concetto</strong> ludico e sperimentale, i dettagli tecnici del <strong>progetto</strong> software e, naturalmente, il <strong>gioco</strong> stesso nella sua versione più completa.</p>
+
+            <p>Per chi desidera immergersi ancora più a fondo nell'universo narrativo prima ancora di iniziare a giocare, è disponibile anche <strong>"Echi Prima del Silenzio"</strong>, il romanzo prequel che svela la formazione di Ultimo e gli eventi che hanno plasmato il suo mondo.</p>
+
+            <p>Preparatevi a esplorare non solo le terre desolate di "The Safe Place", ma anche le frontiere della creazione assistita dall'IA. Buona lettura e, speriamo presto, buon gioco.</p>
+
+            <hr style="border: 1px solid rgba(0, 255, 136, 0.3); margin: 3rem 0;">
+        </section>
+
+        <!-- Content Grid -->
+        <section class="content-grid">
+            <!-- Prequel Card -->
+            <a href="#" class="content-card">
+                <img src="image/Bianco Tipografico Romanzo Thriller Copertina Libro .png" alt="Echi Prima del Silenzio - Prequel di The Safe Place" class="content-card-image" loading="lazy">
+                <div class="content-card-body">
+                    <h3>Leggi il prequel di The Safe Place</h3>
+                    <p>Scopri "Echi Prima del Silenzio", il romanzo che narra le origini di Ultimo e gli eventi che hanno portato al collasso del mondo conosciuto.</p>
+                </div>
+            </a>
+
+            <!-- Documento Concettuale Card -->
+            <a href="#" class="content-card">
+                <div style="height: 200px; background: linear-gradient(135deg, #0d2818 0%, #0a1a0f 100%); display: flex; align-items: center; justify-content: center; color: #00ff88; font-size: 3rem;">
+                    📄
+                </div>
+                <div class="content-card-body">
+                    <h3>Il primo documento concettuale del progetto</h3>
+                    <p>Esplora le idee originali, i concept iniziali e la visione che ha guidato la creazione di The Safe Place fin dai suoi primi passi.</p>
+                </div>
+            </a>
+
+            <!-- Diario Tecnico Card -->
+            <a href="#" class="content-card">
+                <div style="height: 200px; background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); display: flex; align-items: center; justify-content: center; color: #00ff88; font-size: 3rem;">
+                    💭
+                </div>
+                <div class="content-card-body">
+                    <h3>Il diario di sviluppo: tecnica e filosofia</h3>
+                    <p>Un viaggio attraverso le sfide tecniche e le riflessioni filosofiche che hanno accompagnato la realizzazione di questo esperimento unico.</p>
+                </div>
+            </a>
+
+            <!-- Play Game Card -->
+            <a href="#" class="content-card">
+                <div class="play-button" style="height: 200px; display: flex; align-items: center; justify-content: center; font-size: 2rem;">
+                    🎮 GIOCA ORA
+                </div>
+                <div class="content-card-body">
+                    <h3>Gioca a The Safe Place v1.0.0 Ultimo's Journey</h3>
+                    <p>Inizia la tua avventura nelle terre desolate. Entra nel mondo di Ultimo e affronta le sfide di un'Europa post-apocalittica.</p>
+                </div>
+            </a>
+        </section>
+    </main>
+
+    <footer>
+        <div class="footer-content">
+            <div class="social-links">
+                <a href="https://www.facebook.com/simonepizzi72/" aria-label="Facebook">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                </a>
+                <a href="https://github.com/Pitz72" aria-label="GitHub">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                    </svg>
+                </a>
+                <a href="https://www.instagram.com/pizzisimone1972/" aria-label="Instagram">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+                    </svg>
+                </a>
+                <a href="https://www.spreaker.com/user/runtime-radio--8395974" aria-label="Podcast">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm0 3c-3.866 0-7 3.134-7 7s3.134 7 7 7 7-3.134 7-7-3.134-7-7-7zm0 2c2.761 0 5 2.239 5 5s-2.239 5-5 5-5-2.239-5-5 2.239-5 5-5zm0 2c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3-1.343-3-3-3zm0 1.5c.828 0 1.5.672 1.5 1.5s-.672 1.5-1.5 1.5-1.5-.672-1.5-1.5.672-1.5 1.5-1.5z"/>
+                    </svg>
+                </a>
+                <a href="https://www.youtube.com/@ArcheologiaInformatica" aria-label="YouTube">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                    </svg>
+                </a>
+            </div>
+            <div class="copyright">
+                <p>&copy; <span id="currentYear"></span> Simone Pizzi - simonepizzi.runtimeradio.it</p>
+            </div>
+        </div>
+    </footer>
+    <script type="module" src="../../js/main.js" defer></script>
+</body>
+</html> 

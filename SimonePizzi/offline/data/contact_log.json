@@ -1,0 +1,13 @@
+[
+  {
+    "timestamp": "2025-06-26T09:42:00.763568",
+    "ip_address": "127.0.0.1",
+    "success": false,
+    "name": "Mario Rossi",
+    "email": "mario@rossi.it",
+    "subject": "Altro",
+    "privacy_accepted": true,
+    "message_length": 34,
+    "error_message": "Password email non configurata"
+  }
+]

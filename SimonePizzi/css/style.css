@@ -1,0 +1,40 @@
+/* ===============================================
+   SIMONE PIZZI WEBSITE - CSS MODULARE v2.1.1
+   Sistema CSS reorganizzato e ottimizzato
+================================================== */
+
+/* Base Styles - Variabili, Reset, Layout */
+@import url('./base.css');
+
+/* Components - Header, Footer, Cards, Buttons */
+@import url('./components.css');
+
+/* Pages Specific Styles - Ora caricati dinamicamente da JavaScript */
+/* @import rimossi per caricamento condizionale e performance ottimizzate */
+
+/* ===============================================
+   LEGACY STYLES - Mantenuti per compatibilità
+   Solo parti non ancora modularizzate
+================================================== */
+
+/* Effetti hover per le immagini */
+.section .container.reverse .image-placeholder img {
+    transition: transform 0.4s ease;
+}
+
+.section .container.reverse:hover .image-placeholder img {
+    transform: translateY(-5px) scale(1.02);
+}
+
+/* OS Icons */
+.os-icons {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.os-icons svg {
+    width: 28px;
+    height: 28px;
+    fill: var(--text-secondary);
+}
