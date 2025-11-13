@@ -71,13 +71,110 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       buttonText: 'INIZIA LA TUA AVVENTURA SPAZIALE!',
     },
     {
+      id: 11,
+      title: 'LEMMONS: Una Fortuna Spenta',
+      summary: 'Un libro game interattivo noir con atmosfere thriller. Segui Jack Lemmons nel suo ritorno ad Aurinia Marittima per scoprire la verità dietro la morte del padre e i segreti di un passato mai dimenticato.',
+      description: `<p>Benvenuti nel mondo di <strong>"LEMMONS: Una Fortuna Spenta"</strong>, un'avventura narrativa con le atmosfere di un thriller noir e la profondità di un dramma psicologico.</p>
+
+<p>Questo progetto è un <strong>libro game interattivo</strong> presentato attraverso le pagine di un libro animato, dove ogni scelta che compirete non solo modificherà il corso degli eventi, ma plasmerà anche la mente e l'anima del suo tormentato protagonista.</p>
+
+<h3>Sinossi: Un Ritorno tra i Fantasmi</h3>
+<p>Dopo un esilio autoimposto durato dieci anni, <strong>Jack Lemmons</strong> è costretto a tornare nel piccolo e claustrofobico borgo di pescatori di <strong>Aurinia Marittima</strong>. La ragione ufficiale è semplice: sistemare l'eredità del padre Joseph, deceduto in circostanze poco chiare. Ma per Jack, tornare a casa significa riaprire una ferita mai guarita.</p>
+
+<p>Quel luogo è legato per sempre alla tragica scomparsa del suo primo, grande amore, <strong>Lisa</strong>, e a un evento traumatico conosciuto solo come "la tragedia di Punta Ovest", un segreto che l'intera comunità sembra voler tenere sepolto.</p>
+
+<p>Quello che inizia come un semplice dovere burocratico si trasforma rapidamente in una complessa e pericolosa indagine. Jack scopre che la morte del padre non è stata un semplice incidente e che la sua ossessione per il passato nascondeva una verità molto più grande. In un paese dove ogni volto nasconde un segreto e ogni silenzio è un'accusa, Jack dovrà affrontare i propri demoni per scoprire cosa si cela dietro la fortuna spenta della famiglia Lemmons.</p>
+
+<h3>Come si Gioca: Le Vostre Scelte, la Sua Storia</h3>
+<p>L'esperienza di "LEMMONS" si svolge attraverso le pagine di un libro animato. Sarete voi a guidare Jack, leggendo i suoi pensieri e decidendo le sue azioni.</p>
+
+<ul>
+<li><strong>Narrazione a Bivi:</strong> Ogni scelta di dialogo o di azione può aprire nuovi percorsi narrativi, svelare indizi cruciali o compromettere per sempre i rapporti con gli altri personaggi.</li>
+<li><strong>Stato Psicologico:</strong> Jack non è un eroe invincibile. Il suo stato psicologico, in particolare lo stress e l'astinenza da nicotina, è una meccanica di gioco fondamentale. Un livello di stress troppo alto può annebbiare il suo giudizio, impedirgli di notare dettagli importanti e persino forzarlo a compiere scelte impulsive di cui potreste pentirvi.</li>
+<li><strong>Indagine e Scoperta:</strong> Vestirete i panni di un detective. Dovrete esplorare ambienti carichi di atmosfera, raccogliere oggetti, risolvere enigmi e interrogare i diffidenti abitanti di Aurinia Marittima per mettere insieme i pezzi del puzzle.</li>
+<li><strong>Codex e Inventario:</strong> Per aiutarvi nell'indagine, avrete a disposizione un inventario interattivo per esaminare gli oggetti raccolti e un Codex (un diario di gioco) che si aggiornerà dinamicamente con ogni nuova scoperta su personaggi, luoghi ed eventi.</li>
+</ul>
+
+<h3>Stato dello Sviluppo: Un Prototipo Narrativo Completo</h3>
+<p><strong>LEMMONS</strong> è attualmente in <strong>fase di presentazione</strong> come prototipo avanzato. L'intera narrazione della Prima Stagione è completa e giocabile dall'inizio alla fine, permettendovi di vivere la storia di Jack in tutte le sue sfumature.</p>
+
+<p>Tuttavia, il gioco è ancora in una <strong>fase embrionale di sviluppo</strong> per quanto riguarda le funzionalità tecniche. L'esperienza attuale è focalizzata al 100% sulla narrazione e sulle meccaniche di scelta, mentre molte caratteristiche tecniche sono ancora in fase di progettazione.</p>
+
+<p><strong>Prossimi Sviluppi:</strong> La roadmap futura include l'implementazione di un sistema audio completo (musica d'atmosfera, effetti sonori e doppiaggio), un sistema di salvataggio e caricamento delle partite, e un'ulteriore rifinitura dell'interfaccia utente per un'integrazione ancora più profonda delle meccaniche di gioco.</p>
+
+<p>Grazie per il vostro interesse in "LEMMONS: Una Fortuna Spenta". Seguite questa pagina per rimanere aggiornati sull'evoluzione del progetto mentre trasformiamo questa storia in un'esperienza indimenticabile.</p>
+`,
+      imageUrl: '/images/lemmons.png',
+      category: Category.VIDEOGIOCHI,
+      tags: ['Libro Game', 'Thriller Noir', 'Narrativa Interattiva'],
+      link: '#',
+    },
+    {
       id: 12,
-      title: 'PixelDebh Official Videogame',
-      summary: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
-      description: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
+      title: 'PixelDebh: Retro-Rescue!',
+      summary: 'Un platform arcade in stile anni \'80/\'90 creato come omaggio a PixelDebh e alla sua community. Un\'avventura retro sviluppata in collaborazione con l\'IA, con grafica pixel-perfect e audio chiptune procedurale.',
+      description: `<h3>Un Omaggio a una Community Speciale</h3>
+<p><strong>PixelDebh</strong> è una giovane donna appassionata di videogiochi, avventure grafiche e retrogaming. Ha un canale YouTube che, sebbene non faccia ancora i numeri dei grandi influencer, ha avuto la forza e la capacità di creare una <strong>community molto attiva, appassionata e affezionata</strong>.</p>
+
+<p>Per rendere omaggio a tutta questa coesione e senso di appartenenza, abbiamo pensato di celebrare il suo canale e Debh stessa con questo videogioco in stile arcade anni '80/'90. Non sarà un gioco lunghissimo, forse non rappresenterà un esempio di level design di alto livello, ma era la prima volta che mi cimentavo con un concetto di gioco che non fa parte della mia esperienza abituale.</p>
+
+<p>Il resto... sapete come procedo ormai: <strong>prototipazione veloce in cooperazione con LLM</strong>.</p>
+
+<h3>Un Progetto Speciale: Creatività Umana, Realizzazione AI</h3>
+<p>Lo sviluppo di "PixelDebh: Retro-Rescue!" nasce da una partnership simbiotica:</p>
+
+<ul>
+<li><strong>La Visione Umana:</strong> Il game designer fornisce l'idea, la direzione creativa, le meccaniche di gioco e il "cuore" del progetto. È la scintilla creativa che definisce l'esperienza, l'atmosfera e il divertimento.</li>
+<li><strong>L'Esecuzione AI:</strong> L'LLM agisce come programmatore, artista e sound designer instancabile, traducendo la visione in codice funzionante, generando asset grafici in pixel art e componendo musica ed effetti sonori chiptune.</li>
+</ul>
+
+<p>Questo processo di "sviluppo conversazionale" ci ha permesso di sperimentare e rifinire le idee in tempo reale, con un'iterazione e una prototipazione a una velocità senza precedenti.</p>
+
+<h3>Il Mondo di PixelDebh: Un Tuffo nel Passato</h3>
+
+<p><strong>Grafica Pixel-Perfect:</strong> Ogni elemento visivo è progettato per essere fedele all'era d'oro dei 16-bit. Utilizziamo un font pixelato (Press Start 2P) e regole specifiche per disattivare l'anti-aliasing del browser, garantendo che ogni singolo pixel sia netto e preciso.</p>
+
+<p><strong>Sonoro Chiptune Autentico:</strong> L'intero sound design è generato proceduralmente attraverso la Web Audio API. Ogni salto, colpo, power-up e musica sono sintetizzati in tempo reale dal codice, garantendo un'esperienza sonora chiptune coerente e nostalgica.</p>
+
+<p><strong>Livelli Dinamici:</strong> Ogni livello è un mondo espanso che si estende in orizzontale. Una telecamera dinamica segue fluidamente le avventure di PixelDebh, mentre sfondi parallasse a più strati creano un'illusione di profondità.</p>
+
+<h3>Gameplay: La Meccanica "Cattura e Lancia"</h3>
+
+<p>Il cuore del gioco è l'abilità unica di PixelDebh: <strong>catturare i nemici e usarli come proiettili!</strong> Avvicinatevi a un avversario, catturatelo e lanciatelo contro gli altri per sbaragliare le file nemiche.</p>
+
+<p><strong>Bestiario Vario:</strong></p>
+<ul>
+<li><strong>Globby:</strong> Il nemico base, prevedibile ma tenace</li>
+<li><strong>Hoppy:</strong> Un nemico saltellante dal movimento imprevedibile</li>
+<li><strong>Flappy:</strong> Un nemico volante che pattuglia i cieli</li>
+</ul>
+
+<p><strong>Power-Up Strategici:</strong></p>
+<ul>
+<li><strong>Scudo:</strong> Protezione da un colpo nemico</li>
+<li><strong>Speed-Boost:</strong> Aumento drastico della velocità</li>
+<li><strong>Super-Throw:</strong> Trasforma il prossimo nemico lanciato in una bomba esplosiva</li>
+</ul>
+
+<h3>L'Epica Battaglia contro il Boss: Il Cyclops Frog</h3>
+<p>Al termine del Livello 4, vi attende il <strong>Cyclops Frog</strong>. Fluttua nell'arena con movimenti imprevedibili e vi bersaglia con CD-ROM rotanti. Per sconfiggerlo, dovrete abbandonare la meccanica di cattura e affidarvi a un potente sparo energetico!</p>
+
+<h3>Stato di Sviluppo: In Arrivo Prossimamente</h3>
+<p>Il gioco è attualmente in <strong>fase di sviluppo avanzato</strong>. Stiamo lavorando per perfezionare l'esperienza e aggiungere contenuti. Seguite questa pagina per rimanere aggiornati sul rilascio!</p>
+
+<p><strong>Roadmap Futura:</strong></p>
+<ul>
+<li>Nuovi livelli più complessi e pieni di segreti</li>
+<li>Nuove tipologie di nemici e ostacoli ambientali</li>
+<li>Altre epiche battaglie contro boss unici</li>
+<li>Una trama che si dipanerà attraverso i livelli</li>
+</ul>
+
+<p>Grazie per l'interesse in "PixelDebh: Retro-Rescue!". Speriamo che l'entusiasmo e la passione che stiamo mettendo in questo progetto possano trasparire in ogni pixel e in ogni nota chiptune.</p>
+`,
       imageUrl: '/images/pixeldebh.jpg',
       category: Category.VIDEOGIOCHI,
-      tags: ['In Sviluppo', 'Official Game'],
+      tags: ['Platform Arcade', 'Retro Gaming', 'Pixel Art'],
       link: '#',
     },
     {
@@ -88,16 +185,6 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       imageUrl: '/images/tspc-respiro.png',
       category: Category.VIDEOGIOCHI,
       tags: ['In Sviluppo', 'RPG Testuale', 'Sequel'],
-      link: '#',
-    },
-    {
-      id: 11,
-      title: 'LEMMONS: Una Fortuna Spenta',
-      summary: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
-      description: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
-      imageUrl: '/images/lemmons.png',
-      category: Category.VIDEOGIOCHI,
-      tags: ['In Sviluppo', 'Puzzle', 'Platform'],
       link: '#',
     }
   ],

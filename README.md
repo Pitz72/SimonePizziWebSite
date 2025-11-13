@@ -19,21 +19,24 @@ Il sito è una Single Page Application (SPA) moderna e reattiva, progettata per 
 
 ```
 .
-├── public/                   # Risorse statiche (es. favicon, immagini)
-├── src/                      # Codice sorgente dell'applicazione React
-│   ├── components/           # Componenti React riutilizzabili (Header, Footer, Hero, Modal, PortfolioGrid, PortfolioShowcase)
-│   ├── data/                 # Dati dell'applicazione (es. portfolioData.ts)
-│   ├── utils/                # Utility e hooks personalizzati (es. navigation.ts)
-│   ├── App.tsx               # Componente principale dell'applicazione e gestore del routing
-│   ├── index.css             # Stili globali e Tailwind CSS
-│   └── index.tsx             # Punto di ingresso dell'applicazione React
-├── index.html                # File HTML principale
-├── package.json              # Dipendenze e script di progetto
-├── postcss.config.js         # Configurazione PostCSS
-├── tailwind.config.js        # Configurazione Tailwind CSS
-├── tsconfig.json             # Configurazione TypeScript
-├── vite.config.ts            # Configurazione Vite
-└── README.md                 # Questo file
+├── backup/                   # Versioni archiviate (escluse da Git)
+│   └── SimonePizzi/         # Siti HTML e React precedenti
+├── public/                   # Risorse statiche
+│   ├── favicon.png          # Favicon personalizzato
+│   └── images/              # Immagini portfolio
+├── src/                      # Codice sorgente React
+│   ├── components/          # Componenti riutilizzabili
+│   ├── data/                # Dati portfolio (portfolioData.ts)
+│   ├── utils/               # Utility e hooks
+│   ├── App.tsx              # Componente principale e routing
+│   ├── index.css            # Stili globali Tailwind
+│   └── index.tsx            # Entry point
+├── docs/                     # Documentazione e log modifiche
+│   ├── 1.0.5.md            # Log archiviazione versioni
+│   └── 1.0.6.md            # Log aggiornamenti videogiochi
+├── index.html               # File HTML principale
+├── package.json             # Dipendenze e script
+└── README.md                # Questo file
 ```
 
 ## Stato di Sviluppo Attuale
@@ -47,21 +50,50 @@ Il progetto è in fase di sviluppo attivo e miglioramento continuo. Le funzional
 *   **Design Reattivo**: Layout ottimizzato per diverse dimensioni di schermo.
 *   **Animazioni**: Effetti di transizione e animazioni per migliorare l'esperienza utente.
 
-### Modifiche Recenti e Miglioramenti:
-*   **Ingrandimento Immagine Hero**: L'immagine principale nella sezione Hero è stata ingrandita del 75% per maggiore impatto visivo.
-*   **Pulsante GitHub nell'Header**: Aggiunto un pulsante "IL MIO GITHUB" nell'header per un accesso rapido al profilo GitHub.
-*   **Miglioramento Modale**: Il componente modale è stato ottimizzato per essere sempre visibile al centro della viewport, indipendentemente dallo scroll della pagina, e ora si chiude cliccando all'esterno. Il problema di posizionamento verticale che richiedeva lo scroll della pagina è stato risolto.
-*   **Sezione Videogiochi Completata**: Tutte le immagini di copertina sono state importate e applicate. Le descrizioni dei videogiochi sono state formattate per una migliore leggibilità, e il box di testo della descrizione è stato esteso orizzontalmente.
-*   **Sezione Progetti Software (Favella 1)**: Immagine di copertina importata e applicata. Descrizione formattata per una migliore leggibilità. Aggiunto pulsante GitHub.
-*   **Header Aggiornato**: Aggiunta voce "Home". Voci "Narrativa e Pubblicazioni" e "Podcast, Radio e Altro" rese temporaneamente inaccessibili.
-*   **Home Page Aggiornata**: L'anteprima di "L'Albero dei Racconti" è stata sostituita con quella di "IL RELITTO SILENTE".
-*   **Sezione "Ultimi Aggiornamenti"**: La sezione "Progetti in evidenza" è stata rinominata in "Ultimi Aggiornamenti" con un testo descrittivo aggiornato.
-*   **Sezione "Contattami"**: Aggiunta una nuova sezione "Contattami" con testo esortativo e pulsanti per GitHub e email.
-*   **Footer Aggiornato**: Rimossa la seconda riga di testo nel footer.
-*   **Build e Anteprima**: Il processo di build (`npm run build`) e il server di anteprima (`npm run preview`) sono stati eseguiti con successo.
+### Aggiornamenti Recenti (Versione 1.0.6 - 13 Novembre 2025):
 
-### Log delle Modifiche:
-*   **1.0.4.md**: Documenta gli ultimi aggiornamenti, il successo del build e del server di anteprima.
+#### **Riorganizzazione Repository**
+*   **Archiviazione Versioni Precedenti**: Creata cartella `backup/` contenente le versioni HTML e React precedenti del sito (192 MB, 9.842 file)
+*   **Pulizia Repository**: Aggiornato `.gitignore` per escludere la cartella backup dal version control
+*   **Focus Progetto**: Repository ora concentrato esclusivamente sul Portfolio React attivo
+
+#### **Sezione Videogiochi - Espansione Contenuti (+100%)**
+*   **LEMMONS: Una Fortuna Spenta** (3° posto - NUOVO)
+    - Libro game interattivo con atmosfere thriller noir
+    - Descrizione completa con sinossi, meccaniche di gioco e stato sviluppo
+    - Prototipo narrativo completo, funzionalità tecniche in sviluppo
+    - Tags: Libro Game, Thriller Noir, Narrativa Interattiva
+
+*   **PixelDebh: Retro-Rescue!** (4° posto - NUOVO)
+    - Platform arcade in stile anni '80/'90
+    - Omaggio a PixelDebh e alla sua community YouTube
+    - Sviluppato in collaborazione con LLM
+    - Grafica pixel-perfect e audio chiptune procedurale
+    - Tags: Platform Arcade, Retro Gaming, Pixel Art
+
+*   **Progetti Attivi**: Da 2 a 4 (+100% contenuti interattivi)
+*   **Ordine Finale**: The Safe Place Chronicles → Il Relitto Silente → LEMMONS → PixelDebh → Il Respiro (disabilitato)
+
+#### **Personalizzazione e Finalizzazione**
+*   **Favicon Personalizzato**: Creato `favicon.png` utilizzando la foto del profilo
+*   **Titolo Aggiornato**: "Simone Pizzi | Portfolio Creativo"
+*   **Build di Produzione**: Completata con successo (820ms, 0 errori)
+    - HTML: 1.15 kB (gzip: 0.55 kB)
+    - CSS: 34.04 kB (gzip: 6.31 kB)
+    - JS: 187.25 kB (gzip: 61.37 kB)
+
+### Modifiche Precedenti (Versione 1.0.4):
+*   **Ingrandimento Immagine Hero**: Immagine principale ingrandita del 75%
+*   **Pulsante GitHub nell'Header**: Accesso rapido al profilo GitHub
+*   **Miglioramento Modale**: Ottimizzato posizionamento e chiusura
+*   **Sezione Progetti Software**: Favella 1 con descrizione completa
+*   **Sezione "Contattami"**: Nuova sezione con pulsanti GitHub e email
+*   **Footer Aggiornato**: Rimossa seconda riga di testo
+
+### Log delle Modifiche Completi:
+*   **[1.0.5.md](docs/1.0.5.md)**: Archiviazione versioni precedenti e riorganizzazione repository
+*   **[1.0.6.md](docs/1.0.6.md)**: Espansione sezione Videogiochi, favicon personalizzato e build finale
+*   **1.0.4.md**: Aggiornamenti precedenti e miglioramenti UI
 
 ## Sviluppo Locale
 

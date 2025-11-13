@@ -18,7 +18,7 @@ const App: React.FC = () => {
   const renderPage = () => {
     switch (route) {
       case Category.VIDEOGIOCHI:
-        return <PortfolioShowcase key={Category.VIDEOGIOCHI} title="Videogiochi" items={portfolioData[Category.VIDEOGIOCHI]} enabledItemIds={[1, 2]} />;
+        return <PortfolioShowcase key={Category.VIDEOGIOCHI} title="Videogiochi" items={portfolioData[Category.VIDEOGIOCHI]} enabledItemIds={[1, 2, 11, 12]} />;
       case Category.PROGETTI_SOFTWARE:
         return <PortfolioShowcase key={Category.PROGETTI_SOFTWARE} title="Progetti Software" items={portfolioData[Category.PROGETTI_SOFTWARE]} enabledItemIds={[4]} />;
       case Category.NARRATIVA_E_PUBBLICAZIONI:
