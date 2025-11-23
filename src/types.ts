@@ -14,4 +14,5 @@ export interface PortfolioItem {
   tags: string[];
   link?: string;
   buttonText?: string;
+  isVisible?: boolean;
 }

@@ -50,50 +50,32 @@ Il progetto è in fase di sviluppo attivo e miglioramento continuo. Le funzional
 *   **Design Reattivo**: Layout ottimizzato per diverse dimensioni di schermo.
 *   **Animazioni**: Effetti di transizione e animazioni per migliorare l'esperienza utente.
 
-### Aggiornamenti Recenti (Versione 1.0.6 - 13 Novembre 2025):
+### Aggiornamenti Recenti (Versione 1.0.7 - 23 Novembre 2025):
 
-#### **Riorganizzazione Repository**
-*   **Archiviazione Versioni Precedenti**: Creata cartella `backup/` contenente le versioni HTML e React precedenti del sito (192 MB, 9.842 file)
-*   **Pulizia Repository**: Aggiornato `.gitignore` per escludere la cartella backup dal version control
-*   **Focus Progetto**: Repository ora concentrato esclusivamente sul Portfolio React attivo
+#### **SEO & Metadati**
+*   **Implementazione Completa**: Integrazione di `react-helmet-async` per la gestione dinamica dei tag `<head>`.
+*   **Titoli Dinamici**: Ogni pagina ora ha un titolo specifico (es. "Videogiochi | Simone Pizzi").
+*   **Social Ready**: Aggiunti meta tag Open Graph e Twitter Cards per anteprime social ottimizzate.
 
-#### **Sezione Videogiochi - Espansione Contenuti (+100%)**
-*   **LEMMONS: Una Fortuna Spenta** (3° posto - NUOVO)
-    - Libro game interattivo con atmosfere thriller noir
-    - Descrizione completa con sinossi, meccaniche di gioco e stato sviluppo
-    - Prototipo narrativo completo, funzionalità tecniche in sviluppo
-    - Tags: Libro Game, Thriller Noir, Narrativa Interattiva
+#### **Visual Overhaul (Restyling Grafico)**
+*   **Animazioni Premium**: Migrazione a `framer-motion` per transizioni fluide e professionali.
+*   **Hero Section Dinamica**: Effetto "Typewriter" sul titolo principale e animazioni di entrata sequenziali.
+*   **Sfondo Interattivo**: Le particelle ora reagiscono al movimento del mouse e formano costellazioni dinamiche.
+*   **Card 3D**: Effetto Tilt e Glassmorphism migliorato sulle card dei progetti.
 
-*   **PixelDebh: Retro-Rescue!** (4° posto - NUOVO)
-    - Platform arcade in stile anni '80/'90
-    - Omaggio a PixelDebh e alla sua community YouTube
-    - Sviluppato in collaborazione con LLM
-    - Grafica pixel-perfect e audio chiptune procedurale
-    - Tags: Platform Arcade, Retro Gaming, Pixel Art
+#### **UX & Contenuti**
+*   **Navigazione Migliorata**: Scroll Progress Bar e pulsante "Back To Top".
+*   **Lettera alla Community**: Nuova modale dedicata per il progetto "The Safe Place" con lettera aperta ai sostenitori.
+*   **Routing Moderno**: Migrazione a `react-router-dom` per una gestione più robusta della navigazione.
 
-*   **Progetti Attivi**: Da 2 a 4 (+100% contenuti interattivi)
-*   **Ordine Finale**: The Safe Place Chronicles → Il Relitto Silente → LEMMONS → PixelDebh → Il Respiro (disabilitato)
-
-#### **Personalizzazione e Finalizzazione**
-*   **Favicon Personalizzato**: Creato `favicon.png` utilizzando la foto del profilo
-*   **Titolo Aggiornato**: "Simone Pizzi | Portfolio Creativo"
-*   **Build di Produzione**: Completata con successo (820ms, 0 errori)
-    - HTML: 1.15 kB (gzip: 0.55 kB)
-    - CSS: 34.04 kB (gzip: 6.31 kB)
-    - JS: 187.25 kB (gzip: 61.37 kB)
-
-### Modifiche Precedenti (Versione 1.0.4):
-*   **Ingrandimento Immagine Hero**: Immagine principale ingrandita del 75%
-*   **Pulsante GitHub nell'Header**: Accesso rapido al profilo GitHub
-*   **Miglioramento Modale**: Ottimizzato posizionamento e chiusura
-*   **Sezione Progetti Software**: Favella 1 con descrizione completa
-*   **Sezione "Contattami"**: Nuova sezione con pulsanti GitHub e email
-*   **Footer Aggiornato**: Rimossa seconda riga di testo
+### Modifiche Precedenti (Versione 1.0.6):
+*   **Espansione Videogiochi**: Aggiunti "LEMMONS" e "PixelDebh".
+*   **Riorganizzazione Repository**: Archiviazione versioni precedenti.
 
 ### Log delle Modifiche Completi:
-*   **[1.0.5.md](docs/1.0.5.md)**: Archiviazione versioni precedenti e riorganizzazione repository
+*   **[1.0.7.md](docs/1.0.7.md)**: SEO, Visual Overhaul & Community Content
 *   **[1.0.6.md](docs/1.0.6.md)**: Espansione sezione Videogiochi, favicon personalizzato e build finale
-*   **1.0.4.md**: Aggiornamenti precedenti e miglioramenti UI
+*   **[1.0.5.md](docs/1.0.5.md)**: Archiviazione versioni precedenti e riorganizzazione repository
 
 ## Sviluppo Locale
 

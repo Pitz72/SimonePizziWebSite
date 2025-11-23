@@ -33,6 +33,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       tags: ['RPG Testuale', 'Sopravvivenza', 'Narrativa'],
       link: 'https://thesafeplace.runtimeradio.it',
       buttonText: 'ENTRA NEL MONDO DI THE SAFE PLACE',
+      isVisible: true,
     },
     {
       id: 2,
@@ -69,6 +70,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       tags: ['Avventura Testuale', 'Fantascienza', 'React'],
       link: 'https://simonepizzi.runtimeradio.it/relitto',
       buttonText: 'INIZIA LA TUA AVVENTURA SPAZIALE!',
+      isVisible: true,
     },
     {
       id: 11,
@@ -108,6 +110,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       category: Category.VIDEOGIOCHI,
       tags: ['Libro Game', 'Thriller Noir', 'Narrativa Interattiva'],
       link: '#',
+      isVisible: true,
     },
     {
       id: 12,
@@ -176,6 +179,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       category: Category.VIDEOGIOCHI,
       tags: ['Platform Arcade', 'Retro Gaming', 'Pixel Art'],
       link: '#',
+      isVisible: true,
     },
     {
       id: 10,
@@ -236,6 +240,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       tags: ['Linguaggio di Programmazione', 'Python', 'IA', 'Parser'],
       link: 'https://github.com/Pitz72/FAVELLA1',
       buttonText: 'VAI AL GITHUB DI FAVELLA 1',
+      isVisible: true,
     },
     {
       id: 13,
