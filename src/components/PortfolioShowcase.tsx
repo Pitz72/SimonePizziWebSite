@@ -102,6 +102,16 @@ const PortfolioShowcase: React.FC<PortfolioShowcaseProps> = ({ items, title }) =
                     </a>
                   )}
 
+                  {selectedItem.extraLink && (
+                    <a
+                      href={selectedItem.extraLink}
+                      download
+                      className="inline-block bg-blue-600 text-white font-bold text-lg px-8 py-4 rounded-lg hover:bg-blue-500 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-blue-500/30"
+                    >
+                      {selectedItem.extraLinkText || 'Download Extra'}
+                    </a>
+                  )}
+
                   {/* Pulsante Lettera alla Community (solo per The Safe Place) */}
                   {selectedItem.id === 1 && (
                     <button

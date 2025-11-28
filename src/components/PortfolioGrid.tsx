@@ -54,9 +54,9 @@ const HomePage: React.FC = () => {
                     <p className="text-lg text-gray-400 mt-2">Le modifiche o le pubblicazioni più recenti dei miei progetti.</p>
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {featuredRelittoSilente && <FeaturedCard item={featuredRelittoSilente} category={Category.VIDEOGIOCHI} />}
                     {featuredVideogiochi && <FeaturedCard item={featuredVideogiochi} category={Category.VIDEOGIOCHI} />}
                     {featuredSoftware && <FeaturedCard item={featuredSoftware} category={Category.PROGETTI_SOFTWARE} />}
-                    {featuredRelittoSilente && <FeaturedCard item={featuredRelittoSilente} category={Category.VIDEOGIOCHI} />} {/* Usa la categoria VIDEOGIOCHI per il link */}
                 </div>
             </section>
 

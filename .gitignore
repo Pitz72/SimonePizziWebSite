@@ -23,5 +23,9 @@ dist-ssr
 *.sln
 *.sw?
 
+
 # Backup folder
 backup/
+
+# Downloads
+public/downloads/

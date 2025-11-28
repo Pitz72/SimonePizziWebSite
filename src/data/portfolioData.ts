@@ -38,38 +38,33 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
     {
       id: 2,
       title: 'IL RELITTO SILENTE',
-      summary: 'Un\'avventura testuale fantascientifica "scritta a mano" che evoca il fascino dei terminali anni \'80. Esplora una nave stellare alla deriva e svela il mistero di una civiltà perduta.',
-      description: `<p>IL RELITTO SILENTE non è solo un progetto; è la mia lettera d'amore a un genere che ha definito la mia passione per la narrazione interattiva. È un'avventura testuale fantascientifica, costruita interamente da zero, che rievoca l'estetica e il fascino dei terminali a fosfori verdi degli anni '80, ma con una sensibilità e un ritmo narrativo moderni.</p>
+      summary: 'Versione Gold Master (v1.0.1) disponibile per Windows. Un\'avventura testuale fantascientifica completa e definitiva, che omaggia i terminali anni \'80 con un\'esperienza narrativa curata e non punitiva.',
+      description: `<p><strong>Versione:</strong> 1.0.1 (Gold Master) | <strong>Stato:</strong> Completo</p>
+<p>IL RELITTO SILENTE è la mia lettera d'amore a un genere che ha definito la mia passione per la narrazione interattiva. È un'avventura testuale fantascientifica che rievoca l'estetica dei terminali a fosfori verdi degli anni '80, ma con un cuore moderno.</p>
 
-<h3>L'Esperienza: Un Viaggio nella Solitudine e nella Meraviglia</h3>
-<p>Nei panni di un solitario mercante spaziale, ti imbatterai in una colossale e silenziosa nave stellare alla deriva ai margini del sistema solare. Spinto dalla curiosità e dalla speranza di un guadagno inatteso, deciderai di esplorarne i corridoi bui e silenziosi.</p>
-<p>Quello che scoprirai, però, non sarà un tesoro, ma un'eredità.</p>
-<p>Il gameplay non si basa sulla sopravvivenza, ma sulla curiosità. Non ci sono morti improvvise o vicoli ciechi frustranti. L'unica arma a tua disposizione è il tuo ingegno, incarnato in due comandi fondamentali:</p>
+<h3>Un Omaggio, Non una Sfida Punitiva</h3>
+<p>Voglio essere chiaro: questo non è un gioco pensato per frustrare. Dimenticate le avventure testuali punitive di un tempo dove si moriva per un comando sbagliato. <strong>Qui non si muore e non ci sono enigmi impossibili.</strong></p>
+<p>È un'esperienza prevalentemente narrativa, breve e curata, progettata per fluire senza intoppi. È un omaggio all'atmosfera e alla magia di digitare comandi in un prompt, godendosi la storia senza la paura del "Game Over".</p>
+
+<h3>Il Viaggio verso la Gold Master</h3>
+<p>Raggiungere la versione <strong>1.0.1</strong> è stato un viaggio incredibile. Quello che è iniziato come un esperimento è diventato un prodotto software maturo:</p>
 <ul>
-<li><strong>ESAMINA:</strong> Per osservare il mondo con i tuoi occhi.</li>
-<li><strong>ANALIZZA:</strong> Per svelare i segreti nascosti con il tuo scanner portatile.</li>
+<li><strong>Motore Proprietario:</strong> Non ho usato tool esistenti. Ho scritto da zero un <strong>Motore a Oggetti Ibrido</strong> (passando da semplici regex a un sistema Entity-Component) per gestire interazioni complesse come <code>USA X SU Y</code>.</li>
+<li><strong>Packaging Desktop:</strong> Grazie a Electron, il gioco ora è un'applicazione desktop nativa per <strong>Windows</strong>. Versioni per Linux e Mac potrebbero arrivare in futuro.</li>
+<li><strong>Cura del Dettaglio:</strong> Ogni risposta del parser, ogni descrizione della "lore" e ogni pixel dell'interfaccia (inclusi i font VT323 e le scanlines) è stato calibrato per l'immersione totale.</li>
 </ul>
-<p>Sarà solo padroneggiando questa dualità tra vedere e capire che potrai decifrare il linguaggio di una civiltà perduta, risolvere enigmi ambientali e svelare la verità struggente dietro la loro missione finale.</p>
 
-<h3>La Filosofia: Un'Esperienza "Scritta a Mano"</h3>
-<p>In un'era di contenuti generati proceduralmente, ho voluto tornare all'artigianato. Ogni testo, ogni enigma e ogni risposta del parser sono stati scritti e programmati a mano per garantire un'esperienza narrativa coerente, curata e ricca di atmosfera. Il motore di gioco, sviluppato appositamente per questo progetto, è progettato per essere flessibile e intelligente, per comprenderti e guidarti, non per combatterti.</p>
-<p>L'intera avventura è racchiusa in un "monitor virtuale" a risoluzione fissa che si adatta a qualsiasi schermo, garantendo che l'identità visiva e l'immersione retrò rimangano perfette, proprio come le ricordavo.</p>
+<p>Dalla riscrittura del motore nella v0.4.8 alla rifinitura finale della v1.0.0, ogni passo è stato una lezione di design e architettura software. Il risultato è un piccolo gioiello di archeologia digitale moderna di cui vado immensamente fiero.</p>
 
-<h3>La Tecnologia Dietro il Silenzio</h3>
-<p>Questo progetto è stato un viaggio che mi ha permesso di unire la passione per il game design con le competenze di sviluppo front-end. Le tecnologie e le architetture chiave includono:</p>
-<ul>
-<li><strong>Frontend:</strong> React, TypeScript, Tailwind CSS</li>
-<li><strong>Motore di Gioco:</strong> Un'architettura di gioco modulare e personalizzata, con un parser di comandi flessibile basato su espressioni regolari.</li>
-<li><strong>Audio:</strong> Un sistema audio procedurale, costruito con la Web Audio API, che genera al volo tutti gli effetti sonori 8-bit, dall'eco dei tasti agli eventi di gioco.</li>
-<li><strong>Persistenza:</strong> Un robusto sistema di salvataggio e caricamento basato su file, che ti dà il pieno controllo delle tue partite.</li>
-</ul>
-<p>IL RELITTO SILENTE è più di un semplice gioco: è un esperimento di archeologia digitale, un tributo ai pionieri delle avventure testuali (con un piccolo omaggio a un maestro italiano del genere) e la dimostrazione che, a volte, le storie più potenti sono quelle che sussurriamo a noi stessi nel buio.</p>
+<p><em>Inoltre, nel pacchetto "Materiale Extra" troverete una raccolta di contenuti curiosi: video, audio e testi generati durante lo sviluppo, che offrono uno sguardo dietro le quinte di questo progetto.</em></p>
 `,
-      imageUrl: '/images/relitto-silente.png',
+      imageUrl: '/images/relitto-silente-v2.webp',
       category: Category.VIDEOGIOCHI,
       tags: ['Avventura Testuale', 'Fantascienza', 'React'],
       link: 'https://simonepizzi.runtimeradio.it/relitto',
       buttonText: 'INIZIA LA TUA AVVENTURA SPAZIALE!',
+      extraLink: '/downloads/MATERIALE-EXTRA.zip',
+      extraLinkText: 'MATERIALE EXTRA',
       isVisible: true,
     },
     {

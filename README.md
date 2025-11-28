@@ -50,32 +50,23 @@ Il progetto è in fase di sviluppo attivo e miglioramento continuo. Le funzional
 *   **Design Reattivo**: Layout ottimizzato per diverse dimensioni di schermo.
 *   **Animazioni**: Effetti di transizione e animazioni per migliorare l'esperienza utente.
 
-### Aggiornamenti Recenti (Versione 1.0.7 - 23 Novembre 2025):
+### Aggiornamenti Recenti (Versione 1.0.8 - 28 Novembre 2025):
 
-#### **SEO & Metadati**
-*   **Implementazione Completa**: Integrazione di `react-helmet-async` per la gestione dinamica dei tag `<head>`.
-*   **Titoli Dinamici**: Ogni pagina ora ha un titolo specifico (es. "Videogiochi | Simone Pizzi").
-*   **Social Ready**: Aggiunti meta tag Open Graph e Twitter Cards per anteprime social ottimizzate.
+#### **Il Relitto Silente: Gold Master & Desktop Release**
+*   **Stato**: Rilasciata versione 1.0.1 (Gold Master).
+*   **Desktop App**: Disponibile versione Windows (Electron).
+*   **Contenuti Extra**: Aggiunto pacchetto scaricabile con materiale "dietro le quinte".
+*   **Restyling**: Nuova immagine di copertina ottimizzata e testi aggiornati.
+*   **Home Page**: Progetto messo in evidenza nella sezione "Ultimi Aggiornamenti".
 
-#### **Visual Overhaul (Restyling Grafico)**
-*   **Animazioni Premium**: Migrazione a `framer-motion` per transizioni fluide e professionali.
-*   **Hero Section Dinamica**: Effetto "Typewriter" sul titolo principale e animazioni di entrata sequenziali.
-*   **Sfondo Interattivo**: Le particelle ora reagiscono al movimento del mouse e formano costellazioni dinamiche.
-*   **Card 3D**: Effetto Tilt e Glassmorphism migliorato sulle card dei progetti.
-
-#### **UX & Contenuti**
-*   **Navigazione Migliorata**: Scroll Progress Bar e pulsante "Back To Top".
-*   **Lettera alla Community**: Nuova modale dedicata per il progetto "The Safe Place" con lettera aperta ai sostenitori.
-*   **Routing Moderno**: Migrazione a `react-router-dom` per una gestione più robusta della navigazione.
-
-### Modifiche Precedenti (Versione 1.0.6):
-*   **Espansione Videogiochi**: Aggiunti "LEMMONS" e "PixelDebh".
-*   **Riorganizzazione Repository**: Archiviazione versioni precedenti.
+### Modifiche Precedenti (Versione 1.0.7):
+*   **SEO & Visual**: React Helmet, Framer Motion, Particle Background.
+*   **Community**: Lettera aperta per "The Safe Place".
 
 ### Log delle Modifiche Completi:
+*   **[1.0.8.md](docs/1.0.8.md)**: Il Relitto Silente: Gold Master & Desktop Release
 *   **[1.0.7.md](docs/1.0.7.md)**: SEO, Visual Overhaul & Community Content
 *   **[1.0.6.md](docs/1.0.6.md)**: Espansione sezione Videogiochi, favicon personalizzato e build finale
-*   **[1.0.5.md](docs/1.0.5.md)**: Archiviazione versioni precedenti e riorganizzazione repository
 
 ## Sviluppo Locale
 
