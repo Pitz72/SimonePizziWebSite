@@ -87,7 +87,7 @@ const Header: React.FC = () => {
             <CustomNavLink to={`/${Category.NARRATIVA_E_PUBBLICAZIONI}`} isDisabled={true}>
               Narrativa e Pubblicazioni
             </CustomNavLink>
-            <CustomNavLink to="#" isDisabled={true}>
+            <CustomNavLink to={`/${Category.PODCAST_AUDIO_ALTRO}`}>
               Podcast, Radio e Altro
             </CustomNavLink>
           </div>

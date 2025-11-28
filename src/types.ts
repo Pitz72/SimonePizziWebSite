@@ -2,6 +2,7 @@ export enum Category {
   VIDEOGIOCHI = 'videogiochi',
   PROGETTI_SOFTWARE = 'progetti-software',
   NARRATIVA_E_PUBBLICAZIONI = 'narrativa-e-pubblicazioni',
+  PODCAST_AUDIO_ALTRO = 'podcast-audio-altro',
 }
 
 export interface PortfolioItem {

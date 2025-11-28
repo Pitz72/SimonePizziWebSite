@@ -34,9 +34,11 @@ const FeaturedCard: React.FC<{ item: PortfolioItem, category: Category }> = ({ i
 
 const HomePage: React.FC = () => {
     const featuredVideogiochi = portfolioData[Category.VIDEOGIOCHI]?.[0];
-    const featuredSoftware = portfolioData[Category.PROGETTI_SOFTWARE]?.[0];
+    // const featuredSoftware = portfolioData[Category.PROGETTI_SOFTWARE]?.[0];
     // Trova "IL RELITTO SILENTE" nella categoria VIDEOGIOCHI
     const featuredRelittoSilente = portfolioData[Category.VIDEOGIOCHI]?.find(item => item.id === 2);
+    // Trova il Podcast "Tutto è nato da qui"
+    const featuredPodcast = portfolioData[Category.PODCAST_AUDIO_ALTRO]?.find(item => item.id === 22);
 
     const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
 
@@ -55,8 +57,9 @@ const HomePage: React.FC = () => {
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {featuredRelittoSilente && <FeaturedCard item={featuredRelittoSilente} category={Category.VIDEOGIOCHI} />}
+                    {featuredPodcast && <FeaturedCard item={featuredPodcast} category={Category.PODCAST_AUDIO_ALTRO} />}
                     {featuredVideogiochi && <FeaturedCard item={featuredVideogiochi} category={Category.VIDEOGIOCHI} />}
-                    {featuredSoftware && <FeaturedCard item={featuredSoftware} category={Category.PROGETTI_SOFTWARE} />}
+                    {/* {featuredSoftware && <FeaturedCard item={featuredSoftware} category={Category.PROGETTI_SOFTWARE} />} */}
                 </div>
             </section>
 

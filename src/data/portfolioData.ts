@@ -330,4 +330,70 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       link: '#',
     },
   ],
+  [Category.PODCAST_AUDIO_ALTRO]: [
+    {
+      id: 22,
+      title: 'PODCAST: Tutto è nato da qui',
+      summary: 'La storia di come un esperimento casalingo è diventato una "Radio Geek" ascoltata in tutta Italia. Due voci, una vita: la storia di Simone e Michela.',
+      description: `
+        <h2 class="text-3xl font-bold text-white mb-4">Due Voci, Una Vita: La Storia di Simone e Michela</h2>
+        
+        <h3 class="text-xl text-green-400 mb-2">Prologo: Quando l'Audio era Artigianato</h3>
+        <p>Se chiudo gli occhi e torno al 2010, non vedo gli smartphone luccicanti o le icone verdi di Spotify che oggi diamo per scontate. Vedo un mondo digitale che assomigliava più al Far West: frammentato, lento, ma incredibilmente libero. In quel mondo, ascoltare una voce che non fosse quella della radio FM richiedeva impegno, quasi una vocazione. Bisognava cercare i feed RSS, scaricare file MP3, sincronizzare lettori fisici. Era "artigianato digitale" puro.</p>
+        <p>È in questo scenario pionieristico, tra cavi intrecciati e microfoni da pochi euro, che io, Simone Pizzi, e mia moglie, Michela De Paola, abbiamo deciso di premere per la prima volta il tasto REC. Non sapevamo ancora che quel gesto avrebbe definito i successivi quindici anni della nostra vita. Non sapevamo che stavamo iniziando a scrivere non solo la nostra storia, ma un pezzo della storia del podcasting indipendente italiano.</p>
+        <p>Questa è la cronaca di come un esperimento casalingo è diventato una "Radio Geek" ascoltata in tutta Italia. Ma soprattutto, è la storia di come due voci hanno imparato a raccontare il mondo insieme.</p>
+
+        <h3 class="text-xl text-green-400 mt-8 mb-2">Capitolo 1: Il Brodo Primordiale (2010–2012)</h3>
+        <h4 class="text-lg text-white font-semibold mb-2">Di Tutto Un Podcast: La Scoperta della Chimica</h4>
+        <p>Il nostro inizio ha un nome che oggi suona quasi naif: <a href="https://dituttumpodcast.wordpress.com/" target="_blank" rel="noopener noreferrer" class="text-green-400 hover:underline">Di Tutto Un Podcast</a> (DTUP). Il titolo era una dichiarazione d'intenti, forse un po' ribelle: rifiutavamo le etichette. Volevamo parlare di tutto, mossi solo dalla nostra curiosità.</p>
+        <p>Il nostro quartier generale era un semplice blog su WordPress, ma la nostra ambizione non aveva confini. In quegli anni formativi abbiamo imparato il mestiere sul campo. Non eravamo solo conduttori; eravamo reporter. Ricordo con orgoglio le nostre incursioni al Festival del Giornalismo di Perugia, dove, armati di registratori e faccia tosta, intervistavamo figure di spicco, o la nostra partecipazione a eventi culturali come "Un paese e cento storie".</p>
+        <p>Fu in quel periodo che scoprimmo la nostra "chimica", quell'alchimia invisibile che ancora oggi è il motore di tutto ciò che facciamo. Michela si rivelò subito la voce empatica, il "cuore" narrativo capace di connettersi con chiunque, mentre io iniziavo a definire quel ruolo ibrido che sarebbe diventato la mia firma: non un regista silenzioso dietro il vetro, ma una presenza attiva, una "regia invadente" fatta di stacchi, effetti sonori e interruzioni ritmiche. Stavamo costruendo, senza saperlo, i nostri personaggi radiofonici.</p>
+
+        <div class="my-8">
+          <img src="/images/ipn-istituzionale.jpg" alt="IPN Istituzionale" class="w-full rounded-lg shadow-lg border border-white/10" />
+        </div>
+
+        <h3 class="text-xl text-green-400 mt-8 mb-2">Capitolo 2: Costruire un Mondo (2012–2017)</h3>
+        <h4 class="text-lg text-white font-semibold mb-2">L'Era dell'Italian Podcast Network</h4>
+        <p>Ben presto, la passione non bastò più. Sentivamo il bisogno di costruire qualcosa di più grande, una struttura che potesse ospitare non solo le nostre voci, ma quelle di altri appassionati come noi. Nel 2012 fondammo l'Italian Podcast Network (IPN).</p>
+        <p>Non era più solo un blog personale. Era un collettivo. Ci alleammo con la storica community di OldGamesItalia, trovando una casa naturale tra appassionati di tecnologia, videogiochi e cultura "nerd". In quegli anni, il nostro salotto virtuale si affollò di compagni di viaggio straordinari come Peppe "Professor Jones" Scaletta e Roberto "Marcus Brody" Bertoni.</p>
+        
+        <h4 class="text-lg text-white font-semibold mt-4 mb-2">Il Capolavoro: Archeologia Videoludica</h4>
+        <p>Il simbolo di questa era fu senza dubbio Archeologia Videoludica. Lì, il gioco si fece serio. Trasformammo le chiacchiere tra amici in veri e propri documentari audio. Ricordo la puntata sulla storia dell'Apple II come un momento epico: non stavamo solo elencando specifiche tecniche, stavamo raccontando una saga, sfidando "quel tipo lassù nella stanza dei bottoni". Avevamo capito che la tecnologia poteva essere narrata con lo stesso pathos di un romanzo.</p>
+        <p>L'IPN ci insegnò il valore della community. I nostri ascoltatori non erano numeri; erano nomi, nickname, persone che discutevano con noi sui forum fino a notte fonda. Eravamo una tribù.</p>
+        <p>Ma nel 2017, qualcosa doveva cambiare. L'etichetta di "network" iniziava a starci stretta. Sentivamo il bisogno di una metamorfosi. Chiudemmo IPN non per smettere, ma per rinascere.</p>
+
+        <h3 class="text-xl text-green-400 mt-8 mb-2">Capitolo 3: La Fenice (2017–Oggi)</h3>
+        <h4 class="text-lg text-white font-semibold mb-2">Runtime Radio: La Radio Geek</h4>
+        <p>Dalle ceneri di IPN nacque <a href="https://www.runtimeradio.com/" target="_blank" rel="noopener noreferrer" class="text-green-400 hover:underline">Runtime Radio</a>. Questa volta, il salto fu quantico. Abbandonammo la logica del solo download per abbracciare il flusso continuo dello streaming. Non eravamo più solo podcaster; eravamo una vera emittente digitale, "La Radio Geek", dotata di un'app proprietaria (sviluppata dal genio di Alessandro Raccuglia) che ci permetteva di essere nelle tasche dei nostri ascoltatori 24 ore su 24.</p>
+        <p>In questa nuova casa, più matura e professionale, i nostri progetti hanno raggiunto la loro forma definitiva. È qui che il nostro ecosistema si è completato.</p>
+
+        <h4 class="text-lg text-white font-semibold mt-4 mb-2">I Pilastri del Nostro Palinsesto</h4>
+        <ul class="list-disc pl-5 space-y-2 text-gray-300">
+          <li><strong>Archeologia Informatica:</strong> L'eredità culturale del passato si è evoluta. Sotto la direzione del monumentale Carlo Santagostino (con me sempre in produzione), questo show è diventato un'istituzione. Celebrare i suoi 10 anni è stato celebrare la storia stessa dell'informatica in Italia.</li>
+          <li><strong>EveryTHINK:</strong> Se cercate l'anima di quel primo Di Tutto Un Podcast, la troverete qui. EveryTHINK è il mio e di Michela spazio sacro. È dove io e lei (spesso con Carlo) continuiamo a guardare il mondo – dalla Brexit all'Eurovision, dalle pandemie alle frivolezze – con i nostri occhi, unendo la mia regia frenetica alla voce rassicurante di Michela. È la prova che, nonostante tutto, siamo rimasti noi.</li>
+          <li><strong>Morti di Bestemmie (MDB):</strong> La nostra valvola di sfogo. Insieme ad Alex Raccuglia e Marco Gualdi, abbiamo creato uno spazio di libertà assoluta, politicamente scorretto, satirico e feroce. È il luogo dove ridiamo per non piangere, dove analizziamo la società (e le serie TV, e i guru del marketing) senza filtri.</li>
+          <li><strong>DataKnightmare:</strong> Grazie a Walter Vannini, abbiamo dato spazio alla coscienza critica. In un mondo ubriaco di dati, Walter ci ricorda che "l'algoritmico è politico", portando avanti battaglie etiche fondamentali sulla privacy e sui diritti digitali.</li>
+          <li><strong>Runtime by Night:</strong> Quando cala la notte, si accende la "Talk Radio". Tra un "Nano Banana" e l'altro, questo è il cuore pulsante della nostra community. È il momento in cui le difese si abbassano e, attraverso Telegram e la diretta, siamo davvero tutti nella stessa stanza.</li>
+        </ul>
+
+        <h3 class="text-xl text-green-400 mt-8 mb-2">Capitolo 4: Il Futuro è Già Qui</h3>
+        <h4 class="text-lg text-white font-semibold mb-2">L'Intelligenza Artificiale e Nuove Sfide</h4>
+        <p>Dopo 15 anni, si potrebbe pensare di aver visto tutto. E invece, la nostra curiosità è ancora affamata. L'ultima frontiera che abbiamo deciso di esplorare è l'Intelligenza Artificiale Generativa.</p>
+        <p>Con il Festival della Canzone Artificiale, abbiamo chiuso un cerchio perfetto. Io all'ideazione, Michela alla conduzione live: i ruoli sono gli stessi di sempre, ma lo strumento è futuristico. Utilizziamo l'AI non per sostituire l'umano, ma per sfidarlo, per creare nuove forme di spettacolo e goliardia. È la dimostrazione che Runtime Radio non si limita a raccontare il futuro; ci gioca.</p>
+
+        <h3 class="text-xl text-green-400 mt-8 mb-2">Epilogo: Una Perfetta Continuità</h3>
+        <p>Se guardo indietro a quel 2010, vedo tante cose cambiate. La tecnologia è irriconoscibile, le piattaforme sono nate e morte, il mondo stesso è diverso. Ma c'è un filo rosso che non si è mai spezzato.</p>
+        <p>È la continuità.</p>
+        <p>Nonostante i cambi di nome, da Di Tutto Un Podcast a Runtime Radio, noi siamo rimasti fedeli a noi stessi. La voce di Michela che accoglie e racconta, la mia regia che costruisce mondi sonori, la nostra voglia di "fare cose" insieme. Questa non è solo la storia di un progetto editoriale o di un'azienda. È la storia di due persone che hanno scelto di condividere la propria voce con il mondo, e che nel farlo hanno costruito una famiglia allargata di migliaia di persone.</p>
+        <p class="font-bold text-white mt-4">Benvenuti nella nostra storia. Benvenuti su Runtime.</p>
+      `,
+      imageUrl: '/images/podcast-cover.jpg',
+      category: Category.PODCAST_AUDIO_ALTRO,
+      tags: ['Podcast', 'Storia', 'Radio'],
+      link: 'https://www.runtimeradio.com/',
+      buttonText: 'ASCOLTA RUNTIME RADIO',
+      isVisible: true,
+    },
+  ],
 };
