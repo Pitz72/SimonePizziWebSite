@@ -33,12 +33,14 @@ const FeaturedCard: React.FC<{ item: PortfolioItem, category: Category }> = ({ i
 );
 
 const HomePage: React.FC = () => {
-    const featuredVideogiochi = portfolioData[Category.VIDEOGIOCHI]?.[0];
+    // const featuredVideogiochi = portfolioData[Category.VIDEOGIOCHI]?.[0];
     // const featuredSoftware = portfolioData[Category.PROGETTI_SOFTWARE]?.[0];
     // Trova "IL RELITTO SILENTE" nella categoria VIDEOGIOCHI
     const featuredRelittoSilente = portfolioData[Category.VIDEOGIOCHI]?.find(item => item.id === 2);
     // Trova il Podcast "Tutto è nato da qui"
     const featuredPodcast = portfolioData[Category.PODCAST_AUDIO_ALTRO]?.find(item => item.id === 22);
+    // Trova "FREQUENZA DI CHIAMATA" nella categoria NARRATIVA
+    const featuredNarrativa = portfolioData[Category.NARRATIVA_E_PUBBLICAZIONI]?.find(item => item.id === 23);
 
     const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
 
@@ -56,9 +58,10 @@ const HomePage: React.FC = () => {
                     <p className="text-lg text-gray-400 mt-2">Le modifiche o le pubblicazioni più recenti dei miei progetti.</p>
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {featuredNarrativa && <FeaturedCard item={featuredNarrativa} category={Category.NARRATIVA_E_PUBBLICAZIONI} />}
                     {featuredRelittoSilente && <FeaturedCard item={featuredRelittoSilente} category={Category.VIDEOGIOCHI} />}
                     {featuredPodcast && <FeaturedCard item={featuredPodcast} category={Category.PODCAST_AUDIO_ALTRO} />}
-                    {featuredVideogiochi && <FeaturedCard item={featuredVideogiochi} category={Category.VIDEOGIOCHI} />}
+                    {/* {featuredVideogiochi && <FeaturedCard item={featuredVideogiochi} category={Category.VIDEOGIOCHI} />} */}
                     {/* {featuredSoftware && <FeaturedCard item={featuredSoftware} category={Category.PROGETTI_SOFTWARE} />} */}
                 </div>
             </section>

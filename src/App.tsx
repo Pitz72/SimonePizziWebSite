@@ -54,6 +54,7 @@ const App: React.FC = () => {
                 element={<PortfolioShowcase title="Progetti Software" items={portfolioData[Category.PROGETTI_SOFTWARE]} />}
               />
               <Route
+                path={`/${Category.NARRATIVA_E_PUBBLICAZIONI}`}
                 element={<PortfolioShowcase title="Narrativa e Pubblicazioni" items={portfolioData[Category.NARRATIVA_E_PUBBLICAZIONI]} />}
               />
               <Route

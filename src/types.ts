@@ -17,5 +17,7 @@ export interface PortfolioItem {
   buttonText?: string;
   extraLink?: string;
   extraLinkText?: string;
+  relatedLink?: string;
+  relatedLinkText?: string;
   isVisible?: boolean;
 }

@@ -106,9 +106,20 @@ const PortfolioShowcase: React.FC<PortfolioShowcaseProps> = ({ items, title }) =
                     <a
                       href={selectedItem.extraLink}
                       download
-                      className="inline-block bg-blue-600 text-white font-bold text-lg px-8 py-4 rounded-lg hover:bg-blue-500 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-blue-500/30"
+                      className="inline-block bg-green-600 text-white font-bold text-lg px-8 py-4 rounded-lg hover:bg-green-500 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-green-600/30"
                     >
                       {selectedItem.extraLinkText || 'Download Extra'}
+                    </a>
+                  )}
+
+                  {selectedItem.relatedLink && (
+                    <a
+                      href={selectedItem.relatedLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-block bg-gray-800 text-green-400 border border-green-500/50 font-bold text-lg px-8 py-4 rounded-lg hover:bg-gray-700 hover:border-green-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-green-900/20"
+                    >
+                      {selectedItem.relatedLinkText || 'Vedi Correlato'}
                     </a>
                   )}
 

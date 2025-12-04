@@ -280,6 +280,46 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
   ],
   [Category.NARRATIVA_E_PUBBLICAZIONI]: [
     {
+      id: 23,
+      title: 'FREQUENZA DI CHIAMATA',
+      summary: 'Torniamo a bordo della Santa Maria: Un nuovo racconto nell\'universo de "Il Relitto Silente". Una storia di solitudine, connessione e voci nel vuoto.',
+      description: `
+        <h2 class="text-3xl font-bold text-white mb-4">Torniamo a bordo della Santa Maria</h2>
+        <h3 class="text-xl text-green-400 mb-4">Un nuovo racconto nell'universo de "Il Relitto Silente"</h3>
+
+        <p class="italic text-gray-400 border-l-4 border-green-500 pl-4 mb-6">"Il silenzio non esiste. Chi dice di amare lo spazio per il silenzio è un turista o un bugiardo."</p>
+
+        <p>Con queste parole inizia un nuovo viaggio. Se avete giocato a <strong>Il Relitto Silente</strong>, conoscete già l'odore di ozono riciclato e il ronzio costante dei vecchi macchinari della Santa Maria. Conoscete la solitudine che si prova ai margini del sistema solare, dove le stelle sono solo punti freddi su uno schermo a fosfori verdi.</p>
+        <p>Ma prima del Relitto, prima del mistero degli Antichi, c'era solo la routine. C'erano i lunghi turni di notte, il caffè dal sapore metallico e il vuoto assoluto fuori dagli oblò.</p>
+        <p>Oggi sono felice di annunciare l'uscita di <strong>"Frequenza di Servizio"</strong>, un racconto breve inedito scritto da me, Simone Pizzi, che espande l'universo narrativo del gioco con una storia intima, toccante e profondamente umana.</p>
+
+        <h3 class="text-2xl font-bold text-white mt-8 mb-4">Di cosa parla?</h3>
+        <p>William è un pilota commerciale freelance. Vive secondo regole semplici: rispetta la tabella di marcia, tieni i sistemi operativi e, soprattutto, resta solo. La solitudine non è una condanna, è una misura di sicurezza.</p>
+        <p>Tuttavia, durante una traversata di routine verso la Fascia Esterna, la sua radio a onde corte — sintonizzata su una frequenza che dovrebbe captare solo il rumore di fondo dell'universo — riceve qualcosa di impossibile.</p>
+        <p>Non un SOS. Non coordinate di navigazione.</p>
+        <p><strong>Ma una voce.</strong></p>
+        <p>Limpida, giovane, che parla di cose che nello spazio non esistono: pioggia, semafori, liste della spesa.</p>
+        <p>È un'allucinazione da isolamento? Un guasto ai sistemi? O c'è qualcosa, nascosto nel ventre metallico della sua nave, che si è svegliato prima del tempo?</p>
+
+        <h3 class="text-2xl font-bold text-white mt-8 mb-4">Perché leggerlo?</h3>
+        <p>Se Il Relitto Silente vi ha messo nei panni di un archeologo spaziale, "Frequenza di Servizio" scava più a fondo nella psicologia di chi vive nel vuoto. È una storia che parla di "Industrial Sci-Fi", di tecnologia sporca e vissuta, ma soprattutto parla di connessione. Di cosa succede quando due solitudini si incontrano in circostanze impossibili.</p>
+        <p>Non aspettatevi battaglie spaziali. Aspettatevi ruggine, luci al neon e una domanda che vi rimarrà dentro: <em>cosa ci rende davvero umani?</em></p>
+
+        <h3 class="text-2xl font-bold text-white mt-8 mb-4">Scaricalo ora</h3>
+        <p>Il racconto è disponibile da oggi, gratuitamente, nella sezione Narrativa del sito. È impaginato in un comodo PDF, perfetto per essere letto su tablet, e-reader o monitor, magari al buio, con le cuffie sulle orecchie.</p>
+        <p class="mt-4">Buona lettura, e ricordate: anche nel vuoto più assoluto, a volte basta sintonizzarsi sulla frequenza giusta per trovare qualcuno.</p>
+      `,
+      imageUrl: '/images/frequenza-di-servizio.webp',
+      category: Category.NARRATIVA_E_PUBBLICAZIONI,
+      tags: ['Racconto', 'Sci-Fi', 'Il Relitto Silente'],
+      link: '#',
+      extraLink: '/downloads/frequenza-di-servizio.pdf',
+      extraLinkText: 'SCARICA IL PDF - FREQUENZA DI SERVIZIO',
+      relatedLink: 'https://simonepizzi.runtimeradio.it/relitto',
+      relatedLinkText: 'Gioca nei panni di William',
+      isVisible: true,
+    },
+    {
       id: 17,
       title: 'L\'Albero dei Racconti',
       summary: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',

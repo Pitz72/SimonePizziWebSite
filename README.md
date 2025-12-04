@@ -50,18 +50,19 @@ Il progetto è in fase di sviluppo attivo e miglioramento continuo. Le funzional
 *   **Design Reattivo**: Layout ottimizzato per diverse dimensioni di schermo.
 *   **Animazioni**: Effetti di transizione e animazioni per migliorare l'esperienza utente.
 
-### Aggiornamenti Recenti (Versione 1.0.9 - 28 Novembre 2025):
+### Aggiornamenti Recenti (Versione 1.1.0 - 4 Dicembre 2025):
 
-#### **Podcast & Storytelling**
-*   **Nuova Sezione**: Attivata "Podcast, Radio e Altro" con la storia di "Di Tutto Un Podcast" e "Runtime Radio".
-*   **Contenuti**: Articolo "Due Voci, Una Vita" con immagini storiche recuperate.
-*   **Home Page**: Nuovo layout "Ultimi Aggiornamenti" (Relitto, Podcast, Videogiochi).
+#### **Narrativa & Home Page Revolution**
+*   **Nuova Sezione**: Attivata "Narrativa e Pubblicazioni" con il racconto inedito "Frequenza di Servizio".
+*   **Contenuti**: Scheda "FREQUENZA DI CHIAMATA" con download PDF e cross-link a "Il Relitto Silente".
+*   **Home Page**: Nuovo layout a 3 colonne (Frequenza, Relitto, Podcast) per massimizzare la visibilità delle novità.
 
-### Modifiche Precedenti (Versione 1.0.8):
-*   **Il Relitto Silente**: Gold Master, Desktop Release & Extra Content.
-*   **Home Page**: Progetto messo in evidenza.
+### Modifiche Precedenti (Versione 1.0.9):
+*   **Podcast**: Nuova sezione "Podcast, Radio e Altro" con storia di Runtime Radio.
+*   **Home Page**: Primo restyling della sezione aggiornamenti.
 
 ### Log delle Modifiche Completi:
+*   **[1.1.0.md](docs/1.1.0.md)**: Narrativa & Home Page Revolution
 *   **[1.0.9.md](docs/1.0.9.md)**: Podcast & Storytelling Expansion
 *   **[1.0.8.md](docs/1.0.8.md)**: Il Relitto Silente: Gold Master & Desktop Release
 *   **[1.0.7.md](docs/1.0.7.md)**: SEO, Visual Overhaul & Community Content
