@@ -1,46 +1,31 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
 import Hero from './Hero';
 import Modal from './Modal'; // Import Modal component
 import SEO from './SEO';
 import { portfolioData } from '../data/portfolioData';
-import { Category, PortfolioItem } from '../types';
-import { motion } from 'framer-motion';
+import { Category } from '../types';
 
-const FeaturedCard: React.FC<{ item: PortfolioItem, category: Category }> = ({ item, category }) => (
-    <Link to={`/${category}`}>
-        <motion.div
-            whileHover={{
-                scale: 1.02,
-                rotateX: 5,
-                rotateY: 5,
-                transition: { duration: 0.3 }
-            }}
-            className="block bg-white/5 border border-white/10 rounded-xl p-6 group backdrop-blur-sm hover:bg-white/10 hover:border-green-400/30 hover:shadow-2xl hover:shadow-green-500/10 transition-all duration-300"
-            style={{ transformStyle: 'preserve-3d' }}
-        >
-            <div className="h-40 mb-6 rounded-lg overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
-                <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
-            </div>
-            <h3 className="font-bold text-xl text-white mb-2 group-hover:text-green-400 transition-colors">{item.title}</h3>
-            <p className="text-gray-400 text-sm line-clamp-3 mb-4">{item.summary}</p>
-            <span className="font-semibold text-green-400 text-sm flex items-center gap-2 group-hover:translate-x-2 transition-transform">
-                Scopri di più &rarr;
-            </span>
-        </motion.div>
-    </Link>
-);
+import FeaturedCard from './FeaturedCard';
 
 const HomePage: React.FC = () => {
-    // const featuredVideogiochi = portfolioData[Category.VIDEOGIOCHI]?.[0];
-    // const featuredSoftware = portfolioData[Category.PROGETTI_SOFTWARE]?.[0];
-    // Trova "IL RELITTO SILENTE" nella categoria VIDEOGIOCHI
-    const featuredRelittoSilente = portfolioData[Category.VIDEOGIOCHI]?.find(item => item.id === 2);
-    // Trova il Podcast "Tutto è nato da qui"
-    const featuredPodcast = portfolioData[Category.PODCAST_AUDIO_ALTRO]?.find(item => item.id === 22);
-    // Trova "FREQUENZA DI CHIAMATA" nella categoria NARRATIVA
-    const featuredNarrativa = portfolioData[Category.NARRATIVA_E_PUBBLICAZIONI]?.find(item => item.id === 23);
+    // Trova tutti gli elementi con isFeatured: true
+    const featuredItems = Object.values(Category).flatMap(category => {
+        return (portfolioData[category] || [])
+            .filter(item => item.isFeatured)
+            .map(item => ({ item, category }));
+    });
+
+    // Ordina per ID decrescente per mantenere l'ordine approssimativo (Narrativa > Podcast > Relitto)
+    // Oppure lascia l'ordine naturale delle categorie.
+    // Per rispettare l'ordine originale (Narrativa, Relitto, Podcast) servirebbe una logica specifica o un campo 'order'.
+    // Qui usiamo un sort custom per replicare l'ordine originale: Narrativa (23), Relitto (2), Podcast (22)
+    // Ordine desiderato: 23, 2, 22.
+    // Facciamo un sort manuale basato sugli ID per ora, o lasciamo l'ordine di categoria.
+    // L'ordine di categoria è: Videogiochi, Software, Narrativa, Podcast.
+    // Quindi: Relitto (2), Narrativa (23), Podcast (22).
+    // Per avere Narrativa prima, possiamo ordinare per ID decrescente: 23, 22, 2. (Narrativa, Podcast, Relitto).
+    // L'originale era: Narrativa, Relitto, Podcast.
+    // Lasciamo l'ordine di categoria per semplicità e coerenza futura.
 
     const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
 
@@ -58,11 +43,9 @@ const HomePage: React.FC = () => {
                     <p className="text-lg text-gray-400 mt-2">Le modifiche o le pubblicazioni più recenti dei miei progetti.</p>
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {featuredNarrativa && <FeaturedCard item={featuredNarrativa} category={Category.NARRATIVA_E_PUBBLICAZIONI} />}
-                    {featuredRelittoSilente && <FeaturedCard item={featuredRelittoSilente} category={Category.VIDEOGIOCHI} />}
-                    {featuredPodcast && <FeaturedCard item={featuredPodcast} category={Category.PODCAST_AUDIO_ALTRO} />}
-                    {/* {featuredVideogiochi && <FeaturedCard item={featuredVideogiochi} category={Category.VIDEOGIOCHI} />} */}
-                    {/* {featuredSoftware && <FeaturedCard item={featuredSoftware} category={Category.PROGETTI_SOFTWARE} />} */}
+                    {featuredItems.map(({ item, category }) => (
+                        <FeaturedCard key={item.id} item={item} category={category} />
+                    ))}
                 </div>
             </section>
 

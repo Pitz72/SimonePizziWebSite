@@ -34,6 +34,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       link: 'https://thesafeplace.runtimeradio.it',
       buttonText: 'ENTRA NEL MONDO DI THE SAFE PLACE',
       isVisible: true,
+      hasLetter: true,
     },
     {
       id: 2,
@@ -66,6 +67,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       extraLink: '/downloads/MATERIALE-EXTRA.zip',
       extraLinkText: 'MATERIALE EXTRA',
       isVisible: true,
+      isFeatured: true,
     },
     {
       id: 11,
@@ -306,18 +308,19 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
         <p>Non aspettatevi battaglie spaziali. Aspettatevi ruggine, luci al neon e una domanda che vi rimarrà dentro: <em>cosa ci rende davvero umani?</em></p>
 
         <h3 class="text-2xl font-bold text-white mt-8 mb-4">Scaricalo ora</h3>
-        <p>Il racconto è disponibile da oggi, gratuitamente, nella sezione Narrativa del sito. È impaginato in un comodo PDF, perfetto per essere letto su tablet, e-reader o monitor, magari al buio, con le cuffie sulle orecchie.</p>
+        <p>Il racconto è disponibile da oggi, gratuitamente, nella sezione Narrativa del sito. È impaginato in un comodo EPUB, perfetto per essere letto su tablet, e-reader o monitor, magari al buio, con le cuffie sulle orecchie.</p>
         <p class="mt-4">Buona lettura, e ricordate: anche nel vuoto più assoluto, a volte basta sintonizzarsi sulla frequenza giusta per trovare qualcuno.</p>
       `,
       imageUrl: '/images/frequenza-di-servizio.webp',
       category: Category.NARRATIVA_E_PUBBLICAZIONI,
       tags: ['Racconto', 'Sci-Fi', 'Il Relitto Silente'],
       link: '#',
-      extraLink: '/downloads/frequenza-di-servizio.pdf',
-      extraLinkText: 'SCARICA IL PDF - FREQUENZA DI SERVIZIO',
+      extraLink: '/downloads/frequenza-di-servizio.epub',
+      extraLinkText: 'SCARICA L\'EPUB - FREQUENZA DI SERVIZIO',
       relatedLink: 'https://simonepizzi.runtimeradio.it/relitto',
       relatedLinkText: 'Gioca nei panni di William',
       isVisible: true,
+      isFeatured: true,
     },
     {
       id: 17,
@@ -434,6 +437,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       link: 'https://www.runtimeradio.com/',
       buttonText: 'ASCOLTA RUNTIME RADIO',
       isVisible: true,
+      isFeatured: true,
     },
   ],
 };

@@ -47,19 +47,35 @@ const App: React.FC = () => {
               <Route path="/" element={<HomePage />} />
               <Route
                 path={`/${Category.VIDEOGIOCHI}`}
-                element={<PortfolioShowcase title="Videogiochi" items={portfolioData[Category.VIDEOGIOCHI]} />}
+                element={<PortfolioShowcase title="Videogiochi" items={portfolioData[Category.VIDEOGIOCHI]} category={Category.VIDEOGIOCHI} />}
+              />
+              <Route
+                path={`/${Category.VIDEOGIOCHI}/:projectSlug`}
+                element={<PortfolioShowcase title="Videogiochi" items={portfolioData[Category.VIDEOGIOCHI]} category={Category.VIDEOGIOCHI} />}
               />
               <Route
                 path={`/${Category.PROGETTI_SOFTWARE}`}
-                element={<PortfolioShowcase title="Progetti Software" items={portfolioData[Category.PROGETTI_SOFTWARE]} />}
+                element={<PortfolioShowcase title="Progetti Software" items={portfolioData[Category.PROGETTI_SOFTWARE]} category={Category.PROGETTI_SOFTWARE} />}
+              />
+              <Route
+                path={`/${Category.PROGETTI_SOFTWARE}/:projectSlug`}
+                element={<PortfolioShowcase title="Progetti Software" items={portfolioData[Category.PROGETTI_SOFTWARE]} category={Category.PROGETTI_SOFTWARE} />}
               />
               <Route
                 path={`/${Category.NARRATIVA_E_PUBBLICAZIONI}`}
-                element={<PortfolioShowcase title="Narrativa e Pubblicazioni" items={portfolioData[Category.NARRATIVA_E_PUBBLICAZIONI]} />}
+                element={<PortfolioShowcase title="Narrativa e Pubblicazioni" items={portfolioData[Category.NARRATIVA_E_PUBBLICAZIONI]} category={Category.NARRATIVA_E_PUBBLICAZIONI} />}
+              />
+              <Route
+                path={`/${Category.NARRATIVA_E_PUBBLICAZIONI}/:projectSlug`}
+                element={<PortfolioShowcase title="Narrativa e Pubblicazioni" items={portfolioData[Category.NARRATIVA_E_PUBBLICAZIONI]} category={Category.NARRATIVA_E_PUBBLICAZIONI} />}
               />
               <Route
                 path={`/${Category.PODCAST_AUDIO_ALTRO}`}
-                element={<PortfolioShowcase title="Podcast, Audio e Altro" items={portfolioData[Category.PODCAST_AUDIO_ALTRO]} />}
+                element={<PortfolioShowcase title="Podcast, Audio e Altro" items={portfolioData[Category.PODCAST_AUDIO_ALTRO]} category={Category.PODCAST_AUDIO_ALTRO} />}
+              />
+              <Route
+                path={`/${Category.PODCAST_AUDIO_ALTRO}/:projectSlug`}
+                element={<PortfolioShowcase title="Podcast, Audio e Altro" items={portfolioData[Category.PODCAST_AUDIO_ALTRO]} category={Category.PODCAST_AUDIO_ALTRO} />}
               />
             </Routes>
           </main>

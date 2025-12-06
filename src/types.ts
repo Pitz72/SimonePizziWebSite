@@ -20,4 +20,6 @@ export interface PortfolioItem {
   relatedLink?: string;
   relatedLinkText?: string;
   isVisible?: boolean;
+  hasLetter?: boolean;
+  isFeatured?: boolean;
 }
