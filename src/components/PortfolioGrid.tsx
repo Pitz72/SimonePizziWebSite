@@ -8,24 +8,19 @@ import { Category } from '../types';
 import FeaturedCard from './FeaturedCard';
 
 const HomePage: React.FC = () => {
-    // Trova tutti gli elementi con isFeatured: true
-    const featuredItems = Object.values(Category).flatMap(category => {
-        return (portfolioData[category] || [])
-            .filter(item => item.isFeatured)
-            .map(item => ({ item, category }));
-    });
-
-    // Ordina per ID decrescente per mantenere l'ordine approssimativo (Narrativa > Podcast > Relitto)
-    // Oppure lascia l'ordine naturale delle categorie.
-    // Per rispettare l'ordine originale (Narrativa, Relitto, Podcast) servirebbe una logica specifica o un campo 'order'.
-    // Qui usiamo un sort custom per replicare l'ordine originale: Narrativa (23), Relitto (2), Podcast (22)
-    // Ordine desiderato: 23, 2, 22.
-    // Facciamo un sort manuale basato sugli ID per ora, o lasciamo l'ordine di categoria.
-    // L'ordine di categoria è: Videogiochi, Software, Narrativa, Podcast.
-    // Quindi: Relitto (2), Narrativa (23), Podcast (22).
-    // Per avere Narrativa prima, possiamo ordinare per ID decrescente: 23, 22, 2. (Narrativa, Podcast, Relitto).
-    // L'originale era: Narrativa, Relitto, Podcast.
-    // Lasciamo l'ordine di categoria per semplicità e coerenza futura.
+    // Trova tutti gli elementi con isFeatured: true e li ordina per featuredOrder
+    const featuredItems = Object.values(Category)
+        .flatMap(category => {
+            return (portfolioData[category] || [])
+                .filter(item => item.isFeatured)
+                .map(item => ({ item, category }));
+        })
+        .sort((a, b) => {
+            const orderA = a.item.featuredOrder ?? 999;
+            const orderB = b.item.featuredOrder ?? 999;
+            return orderA - orderB;
+        })
+        .slice(0, 6); // Limita a 6 elementi
 
     const [isModalOpen, setIsModalOpen] = useState(false); // Modal state
 

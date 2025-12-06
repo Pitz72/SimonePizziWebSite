@@ -22,4 +22,5 @@ export interface PortfolioItem {
   isVisible?: boolean;
   hasLetter?: boolean;
   isFeatured?: boolean;
+  featuredOrder?: number;
 }

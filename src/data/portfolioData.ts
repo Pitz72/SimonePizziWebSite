@@ -68,6 +68,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       extraLinkText: 'MATERIALE EXTRA',
       isVisible: true,
       isFeatured: true,
+      featuredOrder: 2,
     },
     {
       id: 11,
@@ -177,6 +178,8 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       tags: ['Platform Arcade', 'Retro Gaming', 'Pixel Art'],
       link: '#',
       isVisible: true,
+      isFeatured: true,
+      featuredOrder: 6,
     },
     {
       id: 10,
@@ -238,6 +241,32 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       link: 'https://github.com/Pitz72/FAVELLA1',
       buttonText: 'VAI AL GITHUB DI FAVELLA 1',
       isVisible: true,
+      isFeatured: true,
+      featuredOrder: 5,
+    },
+    {
+      id: 15,
+      title: 'TuneUP 3.0.2',
+      summary: 'TuneUp: La storia di come ho rimesso in ordine la mia musica. Un curatore intelligente per la propria collezione musicale che elimina i duplicati e organizza i file in sicurezza.',
+      description: `<h3>TuneUp: La storia di come ho rimesso in ordine la mia musica</h3>
+<p>Chiunque ami la musica digitale conosce quel lento e inesorabile accumulo di file che, nel tempo, trasforma una libreria ordinata in un vero e proprio caos. Canzoni duplicate, versioni a bassa qualità, file con nomi indecifrabili e, peggio ancora, l'audio estratto da qualche video musicale che si confonde tra gli album. È un problema che ho vissuto in prima persona e da cui nasce TuneUp, uno strumento che ho sviluppato per rimettere ordine senza ansie.</p>
+
+<p>TuneUp è la mia soluzione per chi, come me, vuole un curatore intelligente per la propria collezione. Il programma analizza l'intera libreria musicale e agisce con un obiettivo preciso: fare pulizia in modo sicuro. Quando trova più copie dello stesso brano, ad esempio, non si limita a eliminarle a caso: confronta la qualità di ogni file e conserva solo la versione migliore, spostando le altre in una cartella apposita. Allo stesso modo, riconosce e isola tutti quei file "estranei" come video o allegati, spostandoli in uno spazio separato per non confonderli con le tracce audio vere e proprie.</p>
+
+<p>La filosofia alla base di TuneUp è la totale sicurezza e il pieno controllo da parte dell'utente. Il programma, infatti, non cancella mai nulla. Ogni file ritenuto un duplicato o non conforme viene semplicemente spostato in sottocartelle dedicate, come DOPPIONI o NON CONFORMI, permettendoti di controllare tutto con calma e recuperare qualsiasi file, se necessario. Anche per le diverse versioni di una canzone, come un remix o una registrazione live, TuneUp le raggruppa in uno spazio "Da Verificare", lasciando a te la decisione finale su cosa tenere.</p>
+
+<p>Il momento più importante del processo è la finestra di anteprima interattiva. Prima che qualsiasi modifica venga applicata, TuneUp ti presenta un resoconto dettagliato di ogni singola operazione che intende eseguire, spiegandone il motivo. In questa fase, hai il potere di approvare l'intero piano con un clic o di annullare tutto, lasciando la tua libreria esattamente com'è. Questo garantisce che nessuna modifica avvenga senza il tuo esplicito consenso.</p>
+
+<p>Ho voluto che fosse uno strumento pratico e accessibile, per questo è un'applicazione "portatile" che non richiede installazione ed è disponibile in più lingue. TuneUp è gratuito, open source, e nasce dalla semplice esigenza di godersi la propria passione digitale senza più disordine.</p>
+`,
+      imageUrl: '/images/tuneup-logo.png',
+      category: Category.PROGETTI_SOFTWARE,
+      tags: ['Utility', 'Musica', 'Open Source', 'Portatile'],
+      link: 'https://simonepizzi.runtimeradio.it/sw/tuneup',
+      buttonText: 'VAI AL SITO DI TUNEUP',
+      isVisible: true,
+      isFeatured: true,
+      featuredOrder: 1,
     },
     {
       id: 13,
@@ -257,16 +286,6 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       imageUrl: 'https://picsum.photos/seed/app4/800/600',
       category: Category.PROGETTI_SOFTWARE,
       tags: ['In Sviluppo', 'Podcast', 'Software Suite'],
-      link: '#',
-    },
-    {
-      id: 15,
-      title: 'Gestore di Duplicati Musicali',
-      summary: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
-      description: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
-      imageUrl: 'https://picsum.photos/seed/app5/800/600',
-      category: Category.PROGETTI_SOFTWARE,
-      tags: ['In Sviluppo', 'Utility', 'Musica'],
       link: '#',
     },
     {
@@ -321,6 +340,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       relatedLinkText: 'Gioca nei panni di William',
       isVisible: true,
       isFeatured: true,
+      featuredOrder: 3,
     },
     {
       id: 17,
@@ -438,6 +458,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       buttonText: 'ASCOLTA RUNTIME RADIO',
       isVisible: true,
       isFeatured: true,
+      featuredOrder: 4,
     },
   ],
 };

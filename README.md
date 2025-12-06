@@ -1,4 +1,4 @@
-# Simone Pizzi - Portfolio Creativo (v1.1.1)
+# Simone Pizzi - Portfolio Creativo (v1.1.2)
 
 Questo repository contiene il codice sorgente del portfolio personale di Simone Pizzi, un sito web dedicato a presentare i suoi lavori creativi nel campo della narrativa, dei videogiochi e delle applicazioni che esplorano l'intersezione tra arte e intelligenza artificiale.
 
@@ -53,12 +53,11 @@ Il progetto è in fase di sviluppo attivo e miglioramento continuo. Le funzional
 *   **SEO Ottimizzato**: Meta tag dinamici per ogni pagina e progetto.
 *   **Animazioni**: Effetti di transizione e animazioni per migliorare l'esperienza utente.
 
-### Aggiornamenti Recenti (Versione 1.1.1 - 6 Dicembre 2025):
-*   **Refactoring Modulare**: Suddivisione di componenti monolitici in unità più piccole (`ProjectList`, `ProjectDetail`, `FeaturedCard`).
-*   **Routing Dinamico**: Implementazione di URL specifici per ogni progetto.
-*   **Condivisione Social**: Nuova funzionalità per condividere i progetti sui social network.
-*   **Contenuti Aggiornati**: Disponibile il download in formato EPUB per "Frequenza di Servizio".
-*   **Supporto**: Nuova sezione nel footer per sostenere il progetto tramite PayPal.
+### Aggiornamenti Recenti (Versione 1.1.2 - 6 Dicembre 2025):
+*   **TuneUp 3.0.2**: Importante aggiornamento alla scheda software: nuova grafica, testi rivisti e link diretti al mini-sito.
+*   **Home Page Rinnovata**: Esposta una selezione di 6 progetti chiave, con TuneUp in evidenza.
+*   **Refactoring Tecnico**: Consolidamento delle modifiche modulari e di routing della 1.1.1.
+*   **SEO & Social**: Ottimizzazione completa per motori di ricerca e condivisione social.
 
 ### Aggiornamenti Recenti (Versione 1.1.0 - 4 Dicembre 2025):
 
