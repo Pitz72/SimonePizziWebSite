@@ -35,6 +35,8 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       buttonText: 'ENTRA NEL MONDO DI THE SAFE PLACE',
       isVisible: true,
       hasLetter: true,
+      isFeatured: true,
+      featuredOrder: 6,
     },
     {
       id: 2,
@@ -178,8 +180,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       tags: ['Platform Arcade', 'Retro Gaming', 'Pixel Art'],
       link: '#',
       isVisible: true,
-      isFeatured: true,
-      featuredOrder: 6,
+      isFeatured: false,
     },
     {
       id: 10,
