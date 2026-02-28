@@ -15,7 +15,7 @@ const Hero: React.FC<HeroProps> = ({ onOpenModal }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-tight mb-6"
+            className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-white leading-tight mb-6 text-balance"
           >
             Creazioni Ibride.
             <br />

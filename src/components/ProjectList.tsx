@@ -14,10 +14,10 @@ const ProjectList: React.FC<ProjectListProps> = ({ items, selectedItem, onSelect
                 <li key={item.id}>
                     <button
                         onClick={() => onSelect(item)}
-                        className={`w-full text-left p-4 rounded-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500/50 transform group ${selectedItem?.id === item.id
-                            ? 'bg-green-600/20 border-l-4 border-green-400 shadow-lg shadow-green-500/10' // Se selezionato
+                        className={`w-full text-left p-4 rounded-lg transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-green-500/50 transform group backdrop-blur-sm ${selectedItem?.id === item.id
+                            ? 'bg-green-600/20 border-l-4 border-green-400 shadow-lg shadow-green-500/30 ring-1 ring-green-500/20' // Se selezionato
                             : item.isVisible // Se è abilitato
-                                ? 'bg-gray-900/30 border-l-4 border-transparent hover:bg-gray-800/50 hover:border-green-400/70 hover:translate-x-1'
+                                ? 'bg-gray-900/30 border-l-4 border-transparent hover:bg-white/5 hover:border-green-400/70 hover:translate-x-1 hover:shadow-lg hover:shadow-green-500/10 hover:ring-1 hover:ring-green-500/20'
                                 : 'bg-gray-900/30 border-l-4 border-transparent cursor-not-allowed opacity-50' // Se disabilitato
                             }`}
                         disabled={!item.isVisible} // Disabilita se non è visibile

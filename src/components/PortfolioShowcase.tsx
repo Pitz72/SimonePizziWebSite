@@ -60,7 +60,7 @@ const PortfolioShowcase: React.FC<PortfolioShowcaseProps> = ({ items, title, cat
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background-color: rgba(34, 197, 94, 0.5); }
       `}</style>
       <div className="mb-16">
-        <h1 className="text-5xl font-bold text-white tracking-tight">{title}</h1>
+        <h1 className="text-5xl font-bold text-white tracking-tight text-balance">{title}</h1>
       </div>
       <div className="grid lg:grid-cols-12 gap-8 lg:gap-16">
 

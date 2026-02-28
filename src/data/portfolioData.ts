@@ -195,6 +195,69 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
   ],
   [Category.PROGETTI_SOFTWARE]: [
     {
+      id: 13,
+      title: 'Runtime Live Machine',
+      summary: 'Runtime Live Machine: Come ho reimmaginato la regia audio per l\'era dei Creator. Un software "Live" nel DNA che unisce l\'agilità di una console fisica alla potenza del digitale.',
+      description: `<h2>Runtime Live Machine: Come ho reimmaginato la regia audio per l'era dei Creator</h2>
+
+<p>Spesso, le soluzioni migliori nascono da una frustrazione personale. Come direttore di <strong>Runtime Radio</strong>, mi sono trovato per anni di fronte a un bivio tecnologico: da una parte software di automazione radiofonica costosi, monolitici e pensati per girare h24 senza intervento umano; dall'altra, player audio amatoriali (come VLC o semplici soundboard) totalmente inadatti alla tensione di una diretta.</p>
+
+<p>Mancava qualcosa nel mezzo. Mancava uno strumento che fosse <strong>"Live"</strong> nel DNA. Un software che non "automatizzasse" il regista, ma che lo <strong>potenziasse</strong>.</p>
+
+<p>Così è nato <strong>Runtime Live Machine</strong>.</p>
+
+<h3>La Filosofia: Lo Software come Strumento Musicale</h3>
+
+<p>L'idea alla base di RLM non è quella di creare una playlist statica, ma di fornire una console di regia reattiva. Ho progettato l'interfaccia basandomi su <strong>5 "Swimlanes" (Corsie)</strong> logiche: Assets, Musica, Voci, Effetti e Pre-Show.
+Non si tratta solo di organizzazione visiva. Ogni colonna ha un "cervello" diverso:</p>
+<ul>
+    <li>Le <strong>Voci</strong> hanno priorità assoluta e abbassano tutto il resto.</li>
+    <li>La <strong>Musica</strong> sa di dover lasciare spazio alle voci (Ducking) ma di dover coprire i tappeti sonori (Dominance).</li>
+    <li>Gli <strong>Effetti</strong> (Cartwall) sono liberi battitori che si sovrappongono a tutto.</li>
+</ul>
+
+<p>Il risultato? Il software agisce come un <strong>fonico virtuale</strong>. Mentre lo speaker si concentra sui contenuti, il sistema gestisce i livelli e i crossfade in millisecondi, garantendo un suono "broadcast" senza bisogno di tre mani.</p>
+
+<h3>Sotto il Cofano: Performance e Stabilità</h3>
+
+<p>Dal punto di vista tecnico, la sfida più grande è stata la gestione della memoria. In una diretta non puoi permetterti glitch.
+Ho sviluppato RLM su stack <strong>Electron + React</strong>, ma con una modifica architetturale critica: il <strong>Native Disk Streaming</strong>.</p>
+<p>Invece di caricare i file audio nella RAM (che causerebbe crash con file lunghi o WAV pesanti), il software legge i flussi direttamente dal disco in tempo reale, sfruttando il motore nativo di Chromium. Questo garantisce latenza zero e stabilità totale, anche su macchine non potentissime.</p>
+
+<h3>L'Ibridazione Hardware</h3>
+
+<p>Un software di regia non può vivere isolato in un monitor. Per questo ho implementato un supporto hardware profondo:</p>
+<ol>
+    <li><strong>Routing Professionale</strong>: RLM può indirizzare l'audio su uscite specifiche (es. canali USB dedicati di un Rødecaster Pro o mixer digitali).</li>
+    <li><strong>Integrazione MIDI</strong>: Ho voluto che il software fosse "tattile". Grazie alla modalità <em>MIDI Learn</em>, è possibile mappare qualsiasi pulsante, pad o fader fisico per lanciare clip, gestire volumi o attivare il "Panic Stop". Il software diventa hardware.</li>
+</ol>
+
+<h3>Sicurezza e "Peace of Mind"</h3>
+
+<p>In diretta, la legge di Murphy è sempre in agguato. Per questo ho integrato feature di sicurezza ossessive:</p>
+<ul>
+    <li><strong>Auto-Backup</strong>: Ogni 5 minuti, il lavoro viene salvato in background.</li>
+    <li><strong>Dead Air Alert</strong>: Se la playlist sta per finire e non c'è nulla in coda, l'interfaccia lampeggia visibilmente per avvertire il regista.</li>
+    <li><strong>Portabilità</strong>: La funzione <em>Collect & Save</em> permette di impacchettare un intero show (file audio inclusi) e portarlo su qualsiasi altro PC via USB.</li>
+</ul>
+
+<h3>Conclusioni</h3>
+
+<p><strong>Runtime Live Machine</strong> è oggi una realtà in <strong>Beta Pubblica</strong>, disponibile gratuitamente. Non è solo un software, è la sintesi della mia visione di come dovrebbe essere fare radio oggi: agile, potente e, soprattutto, divertente.</p>
+<br />
+<p><em>Tecnologie utilizzate: Electron, React, TypeScript, Vite, TailwindCSS, Web Audio API, Web MIDI API.</em><br />
+<em>Sviluppato da Simone Pizzi con il supporto di Gemini 3.0.</em></p>
+`,
+      imageUrl: '/images/rlm.png',
+      category: Category.PROGETTI_SOFTWARE,
+      tags: ['Regia Audio', 'Electron', 'React', 'MIDI', 'Open Source'],
+      link: 'https://simonepizzi.runtimeradio.it/sw/rlm/',
+      buttonText: 'VAI AL SITO UFFICIALE',
+      isVisible: true,
+      isFeatured: true,
+      featuredOrder: 0,
+    },
+    {
       id: 4,
       title: "Favella 1: Linguaggio di Programmazione in Prosa Italiana per Interactive Fiction",
       summary: "Un linguaggio di programmazione per narrativa interattiva, ispirato a Inform 7 ma progettato per l'italiano, e sviluppato in stretta collaborazione con un'IA come partner di co-progettazione.",
@@ -269,16 +332,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       isFeatured: true,
       featuredOrder: 1,
     },
-    {
-      id: 13,
-      title: 'Runtime Advanced Jingle Machine',
-      summary: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
-      description: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
-      imageUrl: 'https://picsum.photos/seed/app3/800/600',
-      category: Category.PROGETTI_SOFTWARE,
-      tags: ['In Sviluppo', 'Audio Tool', 'Desktop App'],
-      link: '#',
-    },
+
     {
       id: 14,
       title: 'Runtime Podcast Professional ToolKit',

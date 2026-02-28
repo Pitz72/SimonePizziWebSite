@@ -54,13 +54,13 @@ const HomePage: React.FC = () => {
                         href="https://github.com/Pitz72"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-block bg-green-500 text-black font-bold text-lg px-8 py-4 rounded-lg hover:bg-green-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-green-500/30"
+                        className="inline-block bg-green-500 text-black font-bold text-lg px-8 py-4 rounded-lg hover:bg-green-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-green-500/40 ring-1 ring-green-400/50 hover:ring-white/50"
                     >
                         IL MIO GITHUB
                     </a>
                     <a
                         href="mailto:pizzisimone1972@gmail.com"
-                        className="inline-block bg-gray-700 text-white font-bold text-lg px-8 py-4 rounded-lg hover:bg-gray-600 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-gray-700/30"
+                        className="inline-block bg-gray-800/80 backdrop-blur-md text-white font-bold text-lg px-8 py-4 rounded-lg hover:bg-gray-700 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-green-900/20 ring-1 ring-white/10 hover:ring-green-500/50"
                     >
                         INVIAMI UNA MAIL
                     </a>

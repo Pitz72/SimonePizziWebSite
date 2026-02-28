@@ -23,7 +23,7 @@ const LetterModal: React.FC<LetterModalProps> = ({ isOpen, onClose }) => {
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="relative bg-gray-900 border border-green-500/30 w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-xl shadow-2xl shadow-green-900/20 custom-scrollbar"
+                        className="relative bg-gray-900/40 backdrop-blur-xl border border-green-500/30 w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl shadow-green-500/10 custom-scrollbar ring-1 ring-white/10"
                     >
                         <button
                             onClick={onClose}

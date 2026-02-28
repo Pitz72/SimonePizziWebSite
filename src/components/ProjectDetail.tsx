@@ -20,7 +20,7 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ selectedItem, onOpenLette
                 url={currentUrl}
                 title={selectedItem.title}
             />
-            <div className="bg-gray-900/30 backdrop-blur-md rounded-2xl p-6 lg:p-8 border border-white/10 overflow-hidden">
+            <div className="bg-gray-900/40 backdrop-blur-xl rounded-2xl p-6 lg:p-8 border border-white/10 shadow-2xl shadow-green-900/10 overflow-hidden">
                 <div className="aspect-video w-full mb-8 rounded-lg overflow-hidden shadow-2xl shadow-black/50">
                     <img
                         src={selectedItem.imageUrl}
@@ -28,7 +28,7 @@ const ProjectDetail: React.FC<ProjectDetailProps> = ({ selectedItem, onOpenLette
                         className="w-full h-full object-cover object-[50%_65%]"
                     />
                 </div>
-                <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">{selectedItem.title}</h2>
+                <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4 text-balance">{selectedItem.title}</h2>
                 <div className="flex flex-wrap gap-2 mb-6">
                     {selectedItem.tags.map(tag => (
                         <span key={tag} className="px-3 py-1 text-sm font-medium text-green-300 bg-green-900/60 rounded-full">

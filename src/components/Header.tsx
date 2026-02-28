@@ -62,7 +62,7 @@ const Header: React.FC = () => {
       <nav className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-20">
           <Link to="/" className="flex items-center gap-3 text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 rounded-sm group">
-            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-500/90 flex items-center justify-center text-black font-bold text-lg shadow-[0_0_15px_rgba(34,197,94,0.7)] transition-transform duration-300 group-hover:scale-110">
+            <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-green-500/80 backdrop-blur-md flex items-center justify-center text-black font-bold text-lg shadow-[0_0_20px_rgba(34,197,94,0.8)] ring-2 ring-green-400/50 transition-transform duration-300 group-hover:scale-110">
               SP
             </div>
             <div>
@@ -96,7 +96,7 @@ const Header: React.FC = () => {
               href="https://github.com/Pitz72"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-block bg-green-500 text-black font-bold text-sm px-4 py-2 rounded-lg hover:bg-green-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-green-500/30"
+              className="inline-block bg-green-500 text-black font-bold text-sm px-4 py-2 rounded-lg hover:bg-green-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-green-500/40 ring-1 ring-green-400/50 hover:ring-white/50"
             >
               IL MIO GITHUB
             </a>
