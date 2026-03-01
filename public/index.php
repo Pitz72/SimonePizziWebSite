@@ -7,10 +7,11 @@
 $dbPath = __DIR__ . '/api/.data/database.sqlite';
 
 // Default Meta (Fallback)
+$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
 $metaTitle = "Simone Pizzi - Videogiochi, Software e Narrativa";
 $metaDescription = "Portfolio Creativo, Game Design, Sviluppo Software e Pubblicazioni";
-$metaImage = "https://simonepizzi.it/cover-default.jpg"; // Da sostituire con URL reale in prod
-$currentUrl = "https://" . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+$metaImage = $protocol . $_SERVER['HTTP_HOST'] . "/Simone-Pizzi.png"; // Usa l'immagine fallback reale presente in public
+$currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 
 $slug = null;
 
@@ -54,7 +55,8 @@ if ($slug && file_exists($dbPath)) {
                 $metaImage = filter_var($article['cover_image'], FILTER_SANITIZE_URL);
                 if (strpos($metaImage, 'http') !== 0) {
                      // Rendi la copertina dell'articolo un path assoluto (necessario per Social Bots)
-                     $metaImage = "https://" . $_SERVER['HTTP_HOST'] . $metaImage; 
+                     $prefix = (substr($metaImage, 0, 1) !== '/') ? '/' : '';
+                     $metaImage = $protocol . $_SERVER['HTTP_HOST'] . $prefix . $metaImage; 
                 }
             }
         }

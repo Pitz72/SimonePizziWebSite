@@ -77,6 +77,14 @@ try {
     )");
     $logs[] = "Tabella 'subscribers' creata/verificata.";
 
+    // 6. Tabella Rate Limiting
+    $pdo->exec("CREATE TABLE IF NOT EXISTS login_attempts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        ip_address TEXT NOT NULL,
+        attempt_time DATETIME DEFAULT CURRENT_TIMESTAMP
+    )");
+    $logs[] = "Tabella 'login_attempts' creata/verificata.";
+
     echo json_encode(["status" => "success", "message" => "Database inizializzato con successo.", "logs" => $logs]);
 
 } catch (Exception $e) {

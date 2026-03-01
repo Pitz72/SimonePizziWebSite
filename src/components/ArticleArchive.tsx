@@ -1,10 +1,10 @@
+
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Calendar, ArrowRight } from 'lucide-react';
 import { Category } from '../types';
 import SEO from './SEO';
-import { slugify } from '../utils/slugify';
 import { useFetchArticles } from '../hooks/useFetchArticles';
-import { ArrowRight, Calendar } from 'lucide-react';
 
 interface ArticleArchiveProps {
     title: string;
@@ -30,7 +30,7 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category }) => {
                 <SEO title={title} />
                 <h1 className="text-5xl md:text-6xl font-black text-white tracking-tight text-balance mb-8 opacity-20">{title}</h1>
                 <div className="inline-block bg-zinc-900 border border-zinc-800 p-8 rounded-2xl">
-                    <p className="text-gray-400 text-lg">{error ? `Errore: ${error}` : 'Nessun articolo pubblicato in questa categoria.'}</p>
+                    <p className="text-gray-400 text-lg">{error ? `Errore: ${error} ` : 'Nessun articolo pubblicato in questa categoria.'}</p>
                 </div>
             </section>
         );
@@ -38,7 +38,7 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category }) => {
 
     return (
         <section className="container mx-auto py-16 sm:py-24 min-h-[80vh] animate-in fade-in duration-700">
-            <SEO title={title} description={`Archivio articoli della sezione ${title}`} />
+            <SEO title={title} description={`Archivio articoli della sezione ${title} `} />
 
             {/* HEADER DELLA CATEGORIA */}
             <div className="mb-16 md:mb-24 text-center md:text-left relative">
@@ -65,7 +65,7 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category }) => {
                             {/* HERO ITEM (1° Articolo come Hub) */}
                             {heroItem && (
                                 <article
-                                    onClick={() => navigate(`/${category || heroItem.category}/${slugify(heroItem.title)}`)}
+                                    onClick={() => navigate(`/ ${category || heroItem.category}/${heroItem.slug}`)}
                                     className="group flex flex-col md:flex-row bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden cursor-pointer hover:border-dis-green/60 transition-all duration-500 hover:shadow-[0_0_60px_-10px_rgba(34,197,94,0.4)] hover:-translate-y-1 animate-[fade-in_0.5s_ease-out_forwards]"
                                 >
                                     <div className="w-full md:w-3/5 lg:w-2/3 relative aspect-[16/10] md:aspect-auto md:h-full min-h-[300px] overflow-hidden bg-black">
@@ -78,11 +78,14 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category }) => {
                                         />
                                     </div>
                                     <div className="w-full md:w-2/5 lg:w-1/3 p-8 md:p-12 flex flex-col justify-center relative z-20 bg-zinc-900 shadow-[-20px_0_30px_rgba(9,9,11,1)]">
-                                        {heroItem.isFeatured && (
-                                            <div className="mb-4">
+                                        <div className="mb-4 flex flex-wrap gap-2">
+                                            {heroItem.isFeatured && (
                                                 <span className="bg-dis-green text-black text-[10px] md:text-xs font-black px-3 py-1.5 rounded-full shadow-lg uppercase tracking-widest">In Primo Piano</span>
-                                            </div>
-                                        )}
+                                            )}
+                                            <span className="bg-zinc-800 border border-zinc-700 text-white text-[10px] md:text-xs font-black px-3 py-1.5 rounded-full shadow-lg uppercase tracking-widest">
+                                                {(category || heroItem.category).replace(/-/g, ' ')}
+                                            </span>
+                                        </div>
                                         <h2 className="text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight mb-6 group-hover:text-dis-green transition-colors text-balance tracking-tight">
                                             {heroItem.title}
                                         </h2>
@@ -96,14 +99,14 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category }) => {
                                             </span>
                                         </div>
                                     </div>
-                                </article>
+                                </article >
                             )}
-                        </div>
+                        </div >
 
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10">
                             {gridItems.map((item, index) => {
                                 const urlCategory = category || item.category;
-                                const targetUrl = `/${urlCategory}/${slugify(item.title)}`;
+                                const targetUrl = `/${urlCategory}/${item.slug}`;
 
                                 return (
                                     <article
@@ -112,12 +115,17 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category }) => {
                                         className="group relative flex flex-col bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden cursor-pointer hover:border-dis-green/60 transition-all duration-500 hover:shadow-[0_0_50px_-5px_rgba(34,197,94,0.5)] hover:-translate-y-2 opacity-0 animate-[fade-in_0.5s_ease-out_forwards]"
                                         style={{ animationDelay: `${index * 100}ms` }}
                                     >
-                                        {/* Etichetta FEATURED (Se presente) */}
-                                        {item.isFeatured && (
-                                            <div className="absolute top-4 left-4 z-20 bg-dis-green text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg">
-                                                IN VETRINA
+                                        {/* Etichette in Hover/Top */}
+                                        <div className="absolute top-4 left-4 right-4 flex justify-between items-start z-20 pointer-events-none">
+                                            {item.isFeatured ? (
+                                                <div className="bg-dis-green text-black text-xs font-bold px-3 py-1 rounded-full shadow-lg">
+                                                    IN VETRINA
+                                                </div>
+                                            ) : <div></div>}
+                                            <div className="px-3 py-1 bg-zinc-900/80 backdrop-blur-md border border-zinc-700/50 text-white text-[10px] font-bold tracking-widest uppercase rounded-full shadow-lg">
+                                                {urlCategory.replace(/-/g, ' ')}
                                             </div>
-                                        )}
+                                        </div>
 
                                         {/* THUMBNAIL CON EFFETTO ELASTICO ZOOM */}
                                         <div className="relative aspect-[16/10] overflow-hidden bg-black">
@@ -171,7 +179,7 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category }) => {
                     </>
                 );
             })()}
-        </section>
+        </section >
     );
 };
 

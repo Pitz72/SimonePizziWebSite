@@ -40,6 +40,24 @@ try {
             exit;
         }
 
+        // --- INIZIO RATE LIMITING ---
+        $ip_address = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        
+        // Pulizia vecchi tentativi (più vecchi di 15 minuti)
+        $pdo->exec("DELETE FROM login_attempts WHERE attempt_time < datetime('now', '-15 minutes')");
+        
+        // Controllo quanti tentativi errati nell'ultima finestra temporale
+        $stmtLimit = $pdo->prepare("SELECT COUNT(*) FROM login_attempts WHERE ip_address = ?");
+        $stmtLimit->execute([$ip_address]);
+        $attempts = $stmtLimit->fetchColumn();
+        
+        if ($attempts >= 5) {
+            http_response_code(429); // Too Many Requests
+            echo json_encode(['status' => 'error', 'message' => 'Too many failed login attempts. Try again in 15 minutes.']);
+            exit;
+        }
+        // --- FINE RATE LIMITING ---
+
         $stmt = $pdo->prepare("SELECT id, username, password_hash FROM users WHERE username = ?");
         $stmt->execute([$username]);
         $user = $stmt->fetch();
@@ -49,8 +67,16 @@ try {
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             
+            // Login riuscito: reset tentativi falliti per questo IP
+            $stmtReset = $pdo->prepare("DELETE FROM login_attempts WHERE ip_address = ?");
+            $stmtReset->execute([$ip_address]);
+
             echo json_encode(['status' => 'success', 'message' => 'Login effettuato']);
         } else {
+            // Registra tentativo fallito
+            $stmtFail = $pdo->prepare("INSERT INTO login_attempts (ip_address) VALUES (?)");
+            $stmtFail->execute([$ip_address]);
+
             http_response_code(401);
             echo json_encode(['status' => 'error', 'message' => 'Credenziali non valide']);
         }

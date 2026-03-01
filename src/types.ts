@@ -8,6 +8,7 @@ export enum Category {
 
 export interface PortfolioItem {
   id: number;
+  slug: string;
   title: string;
   summary: string;
   description: string;

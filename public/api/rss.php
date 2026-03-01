@@ -1,0 +1,59 @@
+<?php
+require_once 'db.php';
+
+header('Content-Type: application/rss+xml; charset=utf-8');
+
+$pdo = Database::connect();
+
+$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
+$host = $_SERVER['HTTP_HOST'];
+$base_url = $protocol . '://' . $host;
+
+// Assumiamo che il nome del feed venga dai settings, per ora hardcodiamo un title di base
+$site_title = "Simone Pizzi - Blog & Portfolio";
+$site_description = "Le ultime pubblicazioni di Simone Pizzi";
+
+echo '<?xml version="1.0" encoding="UTF-8" ?>' . "\n";
+echo '<rss version="2.0">' . "\n";
+echo '<channel>' . "\n";
+echo '  <title>' . htmlspecialchars($site_title) . '</title>' . "\n";
+echo '  <link>' . htmlspecialchars($base_url) . '</link>' . "\n";
+echo '  <description>' . htmlspecialchars($site_description) . '</description>' . "\n";
+echo '  <language>it-IT</language>' . "\n";
+
+try {
+    $query = "SELECT title, slug, excerpt, content, cover_image, category, published_at 
+              FROM articles 
+              WHERE status = 'published' AND (published_at IS NULL OR published_at = '' OR datetime(published_at) <= datetime('now', 'localtime'))
+              ORDER BY published_at DESC 
+              LIMIT 50";
+    
+    $stmt = $pdo->query($query);
+    $articles = $stmt->fetchAll();
+
+    foreach ($articles as $article) {
+        // Formatta la data secondo rfc822
+        $pubDate = date(DATE_RSS, strtotime($article['published_at'] ?? 'now'));
+        
+        $item_url = $base_url . '/' . rawurlencode($article['category']) . '/' . rawurlencode($article['slug']);
+        
+        echo '  <item>' . "\n";
+        echo '    <title>' . htmlspecialchars($article['title']) . '</title>' . "\n";
+        echo '    <link>' . htmlspecialchars($item_url) . '</link>' . "\n";
+        echo '    <description>' . htmlspecialchars($article['excerpt']) . '</description>' . "\n";
+        
+        if (!empty($article['cover_image'])) {
+            $image_url = (str_starts_with($article['cover_image'], 'http')) ? $article['cover_image'] : $base_url . '/' . ltrim($article['cover_image'], '/');
+            echo '    <enclosure url="' . htmlspecialchars($image_url) . '" type="image/jpeg" />' . "\n";
+        }
+        
+        echo '    <pubDate>' . $pubDate . '</pubDate>' . "\n";
+        echo '    <guid>' . htmlspecialchars($item_url) . '</guid>' . "\n";
+        echo '  </item>' . "\n";
+    }
+} catch (Exception $e) {
+    // Ignoriamo silenti in caso di errore DB nell'RSS
+}
+
+echo '</channel>' . "\n";
+echo '</rss>';

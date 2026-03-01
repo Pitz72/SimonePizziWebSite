@@ -6,6 +6,7 @@ import { PortfolioItem, Category } from '../types';
 const mapArticleToPortfolioItem = (article: any): PortfolioItem => {
     return {
         id: article.id,
+        slug: article.slug,
         title: article.title,
         summary: article.excerpt || '',
         description: article.content, // Verrà renderizzato da showdown altrove o passato nativamente se HTML

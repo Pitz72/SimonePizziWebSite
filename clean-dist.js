@@ -10,7 +10,12 @@ const dirsToRemove = [
     path.join(__dirname, 'dist', 'uploads')
 ];
 
-console.log('🧹 Esecuzione clean-dist.js: Pulizia cartelle di sicurezza post-build...');
+const filesToRemove = [
+    path.join(__dirname, 'dist', 'api', 'init_db.php'),
+    path.join(__dirname, 'dist', 'api', 'migrate_rate_limit.php')
+];
+
+console.log('🧹 Esecuzione clean-dist.js: Pulizia elementi di sicurezza post-build...');
 
 dirsToRemove.forEach((dir) => {
     if (fs.existsSync(dir)) {
@@ -22,6 +27,19 @@ dirsToRemove.forEach((dir) => {
         }
     } else {
         console.log(`ℹ️ La directory ${dir} non esiste in dist, niente da pulire.`);
+    }
+});
+
+filesToRemove.forEach((file) => {
+    if (fs.existsSync(file)) {
+        try {
+            fs.unlinkSync(file);
+            console.log(`✅ Eliminato con successo lo script eseguibile: ${file}`);
+        } catch (err) {
+            console.error(`❌ Errore durante l'eliminazione di ${file}:`, err);
+        }
+    } else {
+        console.log(`ℹ️ Il file ${file} non esiste in dist.`);
     }
 });
 

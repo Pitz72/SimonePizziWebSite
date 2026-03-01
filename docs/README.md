@@ -14,6 +14,12 @@ Benvenuto nell'Hub Documentale del progetto. Da qui è possibile rintracciare in
 
 ---
 
+### Aggiornamenti Recenti (Versione 1.5.0 - 01 Marzo 2026):
+*   **Feature Update & RSS**: `1.5.0` (Implementazione Feed RSS Pubblico, Schedule Articoli con data programmabile, fix UI Tailwind v4)
+
+### Aggiornamenti Recenti (Versione 1.4.8 - 01 Marzo 2026):
+*   **Hotfix Bottoni CTA e Perfomance Loading**: `1.4.8` (Rifinitura query al database e ripristino bottoni personalizzati su singoli articoli)
+
 ### Aggiornamenti Recenti (Versione 1.4.6 - 01 Marzo 2026):
 *   **The Final Polish (Rifiniture)**: `1.4.6` (Hero Layout, Fast-Toggle Vetrina)
 
@@ -66,6 +72,9 @@ Il progetto è versionato seguendo una rigorosa tracciabilità delle implementaz
 
 Per una tracciabilità trasparente dello sviluppo, ogni aggiornamento maggiore è documentato:
 
+- [v1.5.0 - Feature Update & Architettura di Pubblicazione](changelogs/1.5.0.md)
+- [v1.4.8 - Hotfix Call To Action (Bottoni Articolo)](changelogs/1.4.8.md)
+- [v1.4.7 - Rilascio Pulizia/Sicurezza Server](changelogs/1.4.7.md)
 - [v1.4.6 - The Final Polish (Rifiniture Redesign Editoriale)](changelogs/1.4.6.md)
 - [v1.4.5 - Redesign Editoriale (Da Vetrina a Magazine)](changelogs/1.4.5.md)
 - [v1.4.4 - Editor Visuale WYSIWYG](changelogs/1.4.4.md)

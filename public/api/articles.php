@@ -64,10 +64,12 @@ try {
         $params = [];
         
         $conditions = [];
-        // Se l'utente non è autenticato, mostriamo solo i pubblicati. 
-        // Per semplicità qui simuliamo il controllo
-        if (!isset($_SESSION['user_id'])) {
+        $is_admin_dashboard = isset($_SESSION['user_id']) && isset($_GET['admin']) && $_GET['admin'] === 'true';
+
+        // Se la chiamata non proviene espressamente dalla dashboard admin, nascondiamo bozze e futuri.
+        if (!$is_admin_dashboard) {
            $conditions[] = "status = 'published'"; 
+           $conditions[] = "(published_at IS NULL OR published_at = '' OR datetime(published_at) <= datetime('now', 'localtime'))";
         }
 
         if ($category) {
@@ -124,26 +126,26 @@ try {
         Auth::check();
         
         $data = json_decode(file_get_contents('php://input'), true);
-        $id = $_GET['id'] ?? null;
+        $id = $_GET['id'] ?? ($data['id'] ?? null);
         
         if (!$id) {
             http_response_code(400); echo json_encode(['error' => 'ID mancante']); exit;
         }
 
-        $title = $data['title'];
+        $title = $data['title'] ?? 'Senza Titolo';
         $slug = $data['slug'] ?? generateSlug($title, $pdo);
-        $content = $data['content'];
-        $excerpt = $data['excerpt'];
-        $cover_image = $data['cover_image'];
-        $category = $data['category'];
-        $tags = $data['tags'];
+        $content = $data['content'] ?? '';
+        $excerpt = $data['excerpt'] ?? '';
+        $cover_image = $data['cover_image'] ?? '';
+        $category = $data['category'] ?? 'blog-e-riflessioni';
+        $tags = $data['tags'] ?? '';
         $is_featured = isset($data['is_featured']) ? (int)$data['is_featured'] : 0;
-        $button_a_label = $data['button_a_label'];
-        $button_a_link = $data['button_a_link'];
-        $button_b_label = $data['button_b_label'];
-        $button_b_link = $data['button_b_link'];
-        $status = $data['status'];
-        $published_at = $data['published_at'];
+        $button_a_label = $data['button_a_label'] ?? '';
+        $button_a_link = $data['button_a_link'] ?? '';
+        $button_b_label = $data['button_b_label'] ?? '';
+        $button_b_link = $data['button_b_link'] ?? '';
+        $status = $data['status'] ?? 'draft';
+        $published_at = $data['published_at'] ?? date('Y-m-d H:i:s');
 
         $stmt = $pdo->prepare("UPDATE articles SET title=?, slug=?, content=?, excerpt=?, cover_image=?, category=?, tags=?, is_featured=?, button_a_label=?, button_a_link=?, button_b_label=?, button_b_link=?, status=?, published_at=? WHERE id=?");
         $stmt->execute([$title, $slug, $content, $excerpt, $cover_image, $category, $tags, $is_featured, $button_a_label, $button_a_link, $button_b_label, $button_b_link, $status, $published_at, $id]);
@@ -152,7 +154,8 @@ try {
     }
     elseif ($method === 'DELETE') {
         Auth::check();
-        $id = $_GET['id'] ?? null;
+        $data = json_decode(file_get_contents('php://input'), true);
+        $id = $_GET['id'] ?? ($data['id'] ?? null);
         if (!$id) {
             http_response_code(400); echo json_encode(['error' => 'ID mancante']); exit;
         }

@@ -15,7 +15,7 @@ export default function ArticlesList() {
     const loadArticles = async () => {
         setLoading(true);
         try {
-            const data = await api.getArticles();
+            const data = await api.getArticles(undefined, true);
             setArticles(data);
         } catch (err) {
             console.error('Failed to load articles', err);
@@ -59,15 +59,28 @@ export default function ArticlesList() {
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold text-white">Gestione Articoli</h1>
-                    <p className="text-zinc-400 mt-1">Crea, modifica ed elimina i progetti dal portfolio.</p>
+                    <p className="text-zinc-400 mt-1">Crea, modifica ed elimina i progetti dal portfolio. Ottieni il feed RSS.</p>
                 </div>
-                <Link
-                    to="/admin/articles/new"
-                    className="flex items-center gap-2 bg-dis-green text-black font-bold px-4 py-2 rounded-lg hover:bg-green-400 transition-colors"
-                >
-                    <Plus size={20} />
-                    <span>Nuovo Articolo</span>
-                </Link>
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                    <button
+                        onClick={() => {
+                            navigator.clipboard.writeText(window.location.origin + '/api/rss.php');
+                            alert('Link Feed RSS copiato negli appunti!');
+                        }}
+                        className="flex items-center justify-center gap-2 bg-zinc-800 border border-zinc-700 text-zinc-200 font-bold px-4 py-2 rounded-lg hover:bg-zinc-700 transition-colors w-full sm:w-auto"
+                        title="Copia l'indirizzo del Feed RSS da dare ai distributori"
+                    >
+                        <ExternalLink size={18} />
+                        <span>Copia RSS</span>
+                    </button>
+                    <Link
+                        to="/admin/articles/new"
+                        className="flex items-center justify-center gap-2 bg-dis-green text-black font-bold px-4 py-2 rounded-lg hover:bg-green-400 transition-colors w-full sm:w-auto shadow-lg shadow-dis-green/20"
+                    >
+                        <Plus size={20} />
+                        <span>Nuovo Articolo</span>
+                    </Link>
+                </div>
             </header>
 
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
@@ -121,9 +134,18 @@ export default function ArticlesList() {
                                             </span>
                                         </td>
                                         <td className="p-4">
-                                            <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold ${article.status === 'published' ? 'bg-green-500/10 text-green-400' : 'bg-orange-500/10 text-orange-400'}`}>
-                                                {article.status === 'published' ? 'Pubblicato' : 'Bozza'}
-                                            </span>
+                                            {(() => {
+                                                const isScheduled = article.status === 'published' && new Date(article.published_at) > new Date();
+                                                const statusLabel = isScheduled ? 'Programmato' : (article.status === 'published' ? 'Pubblicato' : 'Bozza');
+                                                const statusColor = isScheduled ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' :
+                                                    (article.status === 'published' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-orange-500/10 text-orange-400 border border-orange-500/20');
+
+                                                return (
+                                                    <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold ${statusColor}`}>
+                                                        {statusLabel}
+                                                    </span>
+                                                );
+                                            })()}
                                         </td>
                                         <td className="p-4">
                                             <button

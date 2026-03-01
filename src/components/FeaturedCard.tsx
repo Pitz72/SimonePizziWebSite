@@ -2,7 +2,6 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Category, PortfolioItem } from '../types';
-import { slugify } from '../utils/slugify';
 
 interface FeaturedCardProps {
     item: PortfolioItem;
@@ -11,7 +10,8 @@ interface FeaturedCardProps {
 }
 
 const FeaturedCard: React.FC<FeaturedCardProps> = ({ item, category, isHero = false }) => {
-    const targetUrl = `/${category}/${slugify(item.title)}`;
+    const targetUrl = `/${category}/${item.slug}`;
+    const displayCategory = typeof category === 'string' ? category.replace(/-/g, ' ') : String(category);
 
     if (isHero) {
         return (
@@ -25,9 +25,12 @@ const FeaturedCard: React.FC<FeaturedCardProps> = ({ item, category, isHero = fa
                         <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105" />
                     </div>
                     <div className="w-full md:w-2/5 lg:w-1/3 p-8 md:p-12 flex flex-col justify-center relative z-20 bg-zinc-900 shadow-[-20px_0_30px_rgba(9,9,11,1)]">
-                        <div className="mb-4">
+                        <div className="mb-4 flex flex-wrap gap-2">
                             <span className="inline-block px-3 py-1.5 bg-dis-green text-black text-xs font-black tracking-widest uppercase rounded-full shadow-lg">
                                 In Primo Piano
+                            </span>
+                            <span className="inline-block px-3 py-1.5 bg-zinc-800 border border-zinc-700 text-white text-xs font-black tracking-widest uppercase rounded-full shadow-lg">
+                                {displayCategory}
                             </span>
                         </div>
                         <h3 className="text-3xl md:text-4xl lg:text-5xl font-black text-white leading-tight mb-6 group-hover:text-dis-green transition-colors tracking-tight text-balance">{item.title}</h3>
@@ -51,6 +54,11 @@ const FeaturedCard: React.FC<FeaturedCardProps> = ({ item, category, isHero = fa
                 className="flex flex-col h-full bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden group hover:border-dis-green/60 hover:shadow-[0_0_50px_-5px_rgba(34,197,94,0.3)] transition-all duration-500 hover:-translate-y-2"
             >
                 <div className="h-56 overflow-hidden relative bg-black">
+                    <div className="absolute top-4 right-4 z-20">
+                        <span className="px-3 py-1 bg-zinc-900/80 backdrop-blur-md border border-zinc-700/50 text-white text-[10px] font-bold tracking-widest uppercase rounded-full shadow-lg">
+                            {displayCategory}
+                        </span>
+                    </div>
                     <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 via-transparent to-transparent z-10 opacity-80" />
                     <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-110" />
                 </div>

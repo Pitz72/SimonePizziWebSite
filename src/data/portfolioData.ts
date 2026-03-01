@@ -4,6 +4,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
   [Category.VIDEOGIOCHI]: [
     {
       id: 1,
+      slug: 'THE SAFE PLACE CHRONICLES: The Echo of The Journey',
       title: 'THE SAFE PLACE CHRONICLES: The Echo of The Journey',
       summary: 'Un\'avventura testuale che omaggia i classici RPG degli anni \'80, creata in simbiosi con l\'IA. Unisce una filosofia "keyboard-only" e un\'interfaccia retrò a meccaniche moderne e una narrazione profonda sul viaggio emotivo del protagonista.',
       description: `
@@ -40,6 +41,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
     },
     {
       id: 2,
+      slug: 'IL RELITTO SILENTE',
       title: 'IL RELITTO SILENTE',
       summary: 'Versione Gold Master (v1.0.1) disponibile per Windows. Un\'avventura testuale fantascientifica completa e definitiva, che omaggia i terminali anni \'80 con un\'esperienza narrativa curata e non punitiva.',
       description: `<p><strong>Versione:</strong> 1.0.1 (Gold Master) | <strong>Stato:</strong> Completo</p>
@@ -74,6 +76,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
     },
     {
       id: 11,
+      slug: 'LEMMONS: Una Fortuna Spenta',
       title: 'LEMMONS: Una Fortuna Spenta',
       summary: 'Un libro game interattivo noir con atmosfere thriller. Segui Jack Lemmons nel suo ritorno ad Aurinia Marittima per scoprire la verità dietro la morte del padre e i segreti di un passato mai dimenticato.',
       description: `<p>Benvenuti nel mondo di <strong>"LEMMONS: Una Fortuna Spenta"</strong>, un'avventura narrativa con le atmosfere di un thriller noir e la profondità di un dramma psicologico.</p>
@@ -114,6 +117,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
     },
     {
       id: 12,
+      slug: 'PixelDebh: Retro-Rescue!',
       title: 'PixelDebh: Retro-Rescue!',
       summary: 'Un platform arcade in stile anni \'80/\'90 creato come omaggio a PixelDebh e alla sua community. Un\'avventura retro sviluppata in collaborazione con l\'IA, con grafica pixel-perfect e audio chiptune procedurale.',
       description: `<h3>Un Omaggio a una Community Speciale</h3>
@@ -184,6 +188,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
     },
     {
       id: 10,
+      slug: 'THE SAFE PLACE CHRONICLES: IL RESPIRO TRATTENUTO DEL MONDO',
       title: 'THE SAFE PLACE CHRONICLES: IL RESPIRO TRATTENUTO DEL MONDO',
       summary: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
       description: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
@@ -196,6 +201,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
   [Category.PROGETTI_SOFTWARE]: [
     {
       id: 13,
+      slug: 'Runtime Live Machine',
       title: 'Runtime Live Machine',
       summary: 'Runtime Live Machine: Come ho reimmaginato la regia audio per l\'era dei Creator. Un software "Live" nel DNA che unisce l\'agilità di una console fisica alla potenza del digitale.',
       description: `<h2>Runtime Live Machine: Come ho reimmaginato la regia audio per l'era dei Creator</h2>
@@ -259,6 +265,7 @@ Ho sviluppato RLM su stack <strong>Electron + React</strong>, ma con una modific
     },
     {
       id: 4,
+      slug: "Favella 1: Linguaggio di Programmazione in Prosa Italiana per Interactive Fiction",
       title: "Favella 1: Linguaggio di Programmazione in Prosa Italiana per Interactive Fiction",
       summary: "Un linguaggio di programmazione per narrativa interattiva, ispirato a Inform 7 ma progettato per l'italiano, e sviluppato in stretta collaborazione con un'IA come partner di co-progettazione.",
       description: `<h3><strong>Cronaca di un'Avventura nello Sviluppo, con l'IA come Compagna di Viaggio</strong></h3>
@@ -310,6 +317,7 @@ Ho sviluppato RLM su stack <strong>Electron + React</strong>, ma con una modific
     },
     {
       id: 15,
+      slug: 'TuneUP 3.0.2',
       title: 'TuneUP 3.0.2',
       summary: 'TuneUp: La storia di come ho rimesso in ordine la mia musica. Un curatore intelligente per la propria collezione musicale che elimina i duplicati e organizza i file in sicurezza.',
       description: `<h3>TuneUp: La storia di come ho rimesso in ordine la mia musica</h3>
@@ -335,6 +343,7 @@ Ho sviluppato RLM su stack <strong>Electron + React</strong>, ma con una modific
 
     {
       id: 14,
+      slug: 'Runtime Podcast Professional ToolKit',
       title: 'Runtime Podcast Professional ToolKit',
       summary: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
       description: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
@@ -345,6 +354,7 @@ Ho sviluppato RLM su stack <strong>Electron + React</strong>, ma con una modific
     },
     {
       id: 16,
+      slug: 'Quotidianitiy',
       title: 'Quotidianitiy',
       summary: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
       description: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
@@ -357,6 +367,7 @@ Ho sviluppato RLM su stack <strong>Electron + React</strong>, ma con una modific
   [Category.NARRATIVA_E_PUBBLICAZIONI]: [
     {
       id: 23,
+      slug: 'FREQUENZA DI CHIAMATA',
       title: 'FREQUENZA DI CHIAMATA',
       summary: 'Torniamo a bordo della Santa Maria: Un nuovo racconto nell\'universo de "Il Relitto Silente". Una storia di solitudine, connessione e voci nel vuoto.',
       description: `
@@ -399,6 +410,7 @@ Ho sviluppato RLM su stack <strong>Electron + React</strong>, ma con una modific
     },
     {
       id: 17,
+      slug: 'L\'Albero dei Racconti',
       title: 'L\'Albero dei Racconti',
       summary: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
       description: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
@@ -409,6 +421,7 @@ Ho sviluppato RLM su stack <strong>Electron + React</strong>, ma con una modific
     },
     {
       id: 18,
+      slug: 'I Tre Racconti Perduti',
       title: 'I Tre Racconti Perduti',
       summary: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
       description: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
@@ -419,6 +432,7 @@ Ho sviluppato RLM su stack <strong>Electron + React</strong>, ma con una modific
     },
     {
       id: 19,
+      slug: 'Echi Prima del Silenzio',
       title: 'Echi Prima del Silenzio',
       summary: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
       description: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
@@ -429,6 +443,7 @@ Ho sviluppato RLM su stack <strong>Electron + React</strong>, ma con una modific
     },
     {
       id: 20,
+      slug: 'The Safe Place',
       title: 'The Safe Place',
       summary: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
       description: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
@@ -439,6 +454,7 @@ Ho sviluppato RLM su stack <strong>Electron + React</strong>, ma con una modific
     },
     {
       id: 21,
+      slug: 'L\'ultima Estate',
       title: 'L\'ultima Estate',
       summary: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
       description: 'Prossimamente disponibile. Segui questa pagina per ricevere aggiornamenti.',
@@ -451,6 +467,7 @@ Ho sviluppato RLM su stack <strong>Electron + React</strong>, ma con una modific
   [Category.PODCAST_AUDIO_ALTRO]: [
     {
       id: 22,
+      slug: 'PODCAST: Tutto è nato da qui',
       title: 'PODCAST: Tutto è nato da qui',
       summary: 'La storia di come un esperimento casalingo è diventato una "Radio Geek" ascoltata in tutta Italia. Due voci, una vita: la storia di Simone e Michela.',
       description: `

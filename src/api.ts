@@ -60,15 +60,24 @@ export const api = {
     },
 
     // --- ARTICLES ---
-    getArticles: async (category?: string) => {
-        const url = category ? `${API_URL}/articles.php?category=${encodeURIComponent(category)}` : `${API_URL}/articles.php`;
-        const res = await fetch(url, fetchConfig);
+    getArticles: async (category?: string, admin?: boolean) => {
+        const params = new URLSearchParams();
+        if (category) params.append('category', category);
+        if (admin) params.append('admin', 'true');
+
+        const qs = params.toString() ? `?${params.toString()}` : '';
+        const res = await fetch(`${API_URL}/articles.php${qs}`, fetchConfig);
         if (!res.ok) throw new Error('Errore recupero articoli');
         return res.json();
     },
     getArticle: async (id: number) => {
         const res = await fetch(`${API_URL}/articles.php?id=${id}`, fetchConfig);
         if (!res.ok) throw new Error('Errore recupero articolo');
+        return res.json();
+    },
+    getArticleBySlug: async (slug: string) => {
+        const res = await fetch(`${API_URL}/articles.php?slug=${encodeURIComponent(slug)}`, fetchConfig);
+        if (!res.ok) throw new Error('Errore recupero articolo per slug');
         return res.json();
     },
     createArticle: async (data: any) => {
@@ -84,7 +93,7 @@ export const api = {
         return res.json();
     },
     updateArticle: async (id: number, data: any) => {
-        const res = await fetch(`${API_URL}/articles.php`, {
+        const res = await fetch(`${API_URL}/articles.php?id=${id}`, {
             ...fetchConfig,
             method: 'PUT',
             body: JSON.stringify({ id, ...data })
@@ -105,7 +114,7 @@ export const api = {
         return res.json();
     },
     deleteArticle: async (id: number) => {
-        const res = await fetch(`${API_URL}/articles.php`, {
+        const res = await fetch(`${API_URL}/articles.php?id=${id}`, {
             ...fetchConfig,
             method: 'DELETE',
             body: JSON.stringify({ id })

@@ -4,6 +4,11 @@ import { ArrowLeft, Save, Image as ImageIcon, LayoutTemplate } from 'lucide-reac
 import { api } from '../../api';
 import { RichTextEditor } from '../../components/admin/RichTextEditor';
 
+const getLocalDatetime = () => {
+    const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+    return (new Date(Date.now() - tzoffset)).toISOString().slice(0, 16);
+};
+
 const CATEGORIES = [
     { id: 'videogiochi', label: 'Videogiochi' },
     { id: 'progetti-software', label: 'Progetti Software' },
@@ -30,6 +35,7 @@ export default function ArticleEditor() {
         tags: '',
         is_featured: false,
         status: 'draft',
+        published_at: getLocalDatetime(),
         button_a_label: '',
         button_a_link: '',
         button_b_label: '',
@@ -47,7 +53,8 @@ export default function ArticleEditor() {
             const article = await api.getArticle(Number(id));
             setFormData({
                 ...article,
-                is_featured: article.is_featured === 1 || article.is_featured === true
+                is_featured: article.is_featured === 1 || article.is_featured === true,
+                published_at: article.published_at ? article.published_at.replace(' ', 'T').slice(0, 16) : getLocalDatetime()
             });
         } catch (err: any) {
             setError('Impossibile caricare l\'articolo.');
@@ -74,7 +81,8 @@ export default function ArticleEditor() {
         try {
             const payload = {
                 ...formData,
-                is_featured: formData.is_featured ? 1 : 0
+                is_featured: formData.is_featured ? 1 : 0,
+                published_at: formData.published_at ? formData.published_at.replace('T', ' ') + ':00' : null
             };
 
             if (isEditing) {
@@ -160,8 +168,20 @@ export default function ArticleEditor() {
                                 className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white focus:border-dis-green focus:outline-none"
                             >
                                 <option value="draft">Bozza (Non visibile)</option>
-                                <option value="published">Pubblicato (Live)</option>
+                                <option value="published">Pubblicato (Live / Programmato)</option>
                             </select>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-zinc-300">Data e Ora di Pubblicazione</label>
+                            <input
+                                type="datetime-local"
+                                name="published_at"
+                                value={formData.published_at}
+                                onChange={handleChange}
+                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white focus:border-dis-green focus:outline-none [color-scheme:dark]"
+                            />
+                            <p className="text-xs text-zinc-500">Imposta una data futura per programmare l'uscita dell'articolo.</p>
                         </div>
 
                         <div className="space-y-2">
@@ -228,14 +248,22 @@ export default function ArticleEditor() {
                             Call To Action (Bottoni)
                         </h3>
 
-                        <div className="space-y-2">
-                            <input name="button_a_label" value={formData.button_a_label} onChange={handleChange} placeholder="Testo Bottone Primario (Es: Vai GitHub)" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-white text-sm focus:border-dis-green focus:outline-none" />
-                            <input name="button_a_link" value={formData.button_a_link} onChange={handleChange} placeholder="URL (Es: https://...)" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-white text-sm focus:border-dis-green focus:outline-none" />
-                        </div>
-                        <div className="border-t border-zinc-800 my-2 pt-2"></div>
-                        <div className="space-y-2">
-                            <input name="button_b_label" value={formData.button_b_label} onChange={handleChange} placeholder="Testo Bottone Base (Es: Maggiori Info)" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-white text-sm focus:border-dis-green focus:outline-none" />
-                            <input name="button_b_link" value={formData.button_b_link} onChange={handleChange} placeholder="URL (Es: https://...)" className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-2 text-white text-sm focus:border-dis-green focus:outline-none" />
+                        <div className="space-y-4">
+                            {/* Bottone Primario */}
+                            <div className="p-4 bg-dis-green/5 border border-dis-green/20 rounded-lg space-y-3">
+                                <label className="text-xs font-black text-dis-green uppercase tracking-wider block">Bottone Primario (Verde)</label>
+                                <p className="text-xs text-zinc-400 mb-2">Usato per l'azione principale (Es: Vai GitHub, Ascolta, ecc...)</p>
+                                <input name="button_a_label" value={formData.button_a_label} onChange={handleChange} placeholder="Testo Bottone (Es: VISITA SITO)" className="w-full bg-zinc-950/80 border border-dis-green/30 rounded-lg p-3 text-white text-sm focus:border-dis-green focus:outline-none" />
+                                <input name="button_a_link" value={formData.button_a_link} onChange={handleChange} placeholder="URL del link (Es: https://...)" className="w-full bg-zinc-950/80 border border-dis-green/30 rounded-lg p-3 text-white text-sm focus:border-dis-green focus:outline-none" />
+                            </div>
+
+                            {/* Bottone Secondario */}
+                            <div className="p-4 bg-zinc-950 border border-zinc-800 rounded-lg space-y-3">
+                                <label className="text-xs font-black text-zinc-300 uppercase tracking-wider block">Bottone Secondario (Grigio)</label>
+                                <p className="text-xs text-zinc-500 mb-2">Usato per materiale bonus o approfondimenti secondari.</p>
+                                <input name="button_b_label" value={formData.button_b_label} onChange={handleChange} placeholder="Testo Bottone (Es: SCARICA MATERIALE)" className="w-full bg-black border border-zinc-800 rounded-lg p-3 text-white text-sm focus:border-zinc-500 focus:outline-none" />
+                                <input name="button_b_link" value={formData.button_b_link} onChange={handleChange} placeholder="URL del link (Es: https://...)" className="w-full bg-black border border-zinc-800 rounded-lg p-3 text-white text-sm focus:border-zinc-500 focus:outline-none" />
+                            </div>
                         </div>
                     </div>
                 </div>

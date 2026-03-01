@@ -34,12 +34,12 @@ const SingleArticle: React.FC<SingleArticleProps> = () => {
             setLoading(true);
             try {
                 // Recuperiamo dal DB passando lo slug esatto pescato dalla URL
-                const data = await api.getArticles();
-                const found = data.find((a: any) => a.slug === projectSlug);
+                const found = await api.getArticleBySlug(projectSlug);
 
-                if (found) {
+                if (found && !found.error) {
                     setArticle({
                         id: found.id,
+                        slug: found.slug,
                         title: found.title,
                         summary: found.excerpt || '',
                         description: found.content,
