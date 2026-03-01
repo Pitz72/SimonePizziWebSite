@@ -90,6 +90,9 @@ const Header: React.FC = () => {
             <CustomNavLink to={`/${Category.PODCAST_AUDIO_ALTRO}`}>
               Podcast, Radio e Altro
             </CustomNavLink>
+            <CustomNavLink to={`/${Category.BLOG_E_RIFLESSIONI}`}>
+              Blog e Riflessioni
+            </CustomNavLink>
           </div>
           <div className="ml-4">
             <a

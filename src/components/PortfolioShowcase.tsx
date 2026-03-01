@@ -6,21 +6,26 @@ import LetterModal from './LetterModal';
 import ProjectList from './ProjectList';
 import ProjectDetail from './ProjectDetail';
 import { slugify } from '../utils/slugify';
+import { useFetchArticles } from '../hooks/useFetchArticles';
 
 interface PortfolioShowcaseProps {
-  items: PortfolioItem[];
   title: string;
-  category: Category;
+  category?: Category; // Resa Opzionale per le liste non filtrate (es Blog)
+  items?: PortfolioItem[];
 }
 
-const PortfolioShowcase: React.FC<PortfolioShowcaseProps> = ({ items, title, category }) => {
+const PortfolioShowcase: React.FC<PortfolioShowcaseProps> = ({ title, category }) => {
   const { projectSlug } = useParams<{ projectSlug: string }>();
   const navigate = useNavigate();
+
+  // Utilizziamo il Custom Hook passando la categoria di appartenenza della Showcase in corso
+  const { items, loading, error } = useFetchArticles(category);
+
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
   const [isLetterModalOpen, setIsLetterModalOpen] = useState(false);
 
   useEffect(() => {
-    if (items && items.length > 0) {
+    if (!loading && items && items.length > 0) {
       if (projectSlug) {
         const found = items.find(item => slugify(item.title) === projectSlug);
         if (found) {
@@ -31,20 +36,35 @@ const PortfolioShowcase: React.FC<PortfolioShowcaseProps> = ({ items, title, cat
       } else {
         setSelectedItem(items[0]);
       }
-    } else {
+    } else if (!loading) {
       setSelectedItem(null);
     }
-  }, [items, projectSlug]);
+  }, [items, projectSlug, loading]);
 
   const handleSelect = (item: PortfolioItem) => {
-    navigate(`/${category}/${slugify(item.title)}`);
+    // Se la prop category è undefined (cioè navighiamo in un aggregatore globale tipo il Blog feed),
+    // navighiamo usando la categoria nativa dell'item recuperata dal DB, altrimenti usiamo la category prop per restare nel contesto vetrina.
+    const urlCategory = category || item.category;
+    navigate(`/${urlCategory}/${slugify(item.title)}`);
   };
 
-  if (!items || items.length === 0) {
+  if (loading) {
+    return (
+      <section className="container mx-auto py-32 flex flex-col items-center justify-center">
+        <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-dis-green mb-6"></div>
+        <p className="text-zinc-400 text-lg">Caricamento progetti {title}...</p>
+      </section>
+    );
+  }
+
+  if (error || !items || items.length === 0) {
     return (
       <section className="container mx-auto py-24 text-center">
         <SEO title={title} />
-        <p className="text-gray-400">Nessun progetto in questa categoria.</p>
+        <h1 className="text-5xl font-bold text-white tracking-tight text-balance mb-8 opacity-50">{title}</h1>
+        <div className="inline-block bg-zinc-900 border border-zinc-800 p-8 rounded-2xl">
+          <p className="text-gray-400 text-lg">{error ? `Errore: ${error}` : 'Nessun progetto pubblicato in questa categoria.'}</p>
+        </div>
       </section>
     );
   }

@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+
+  # Mantiene l'accesso ai file reali (immagini, endpoint php API, css bundles)
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_URI} !^/api/ [NC]
+
+  # Dirotta tutte le URL puramente virtuali di React sul motore SEO PHP
+  RewriteRule ^(.*)$ /index.php [L,QSA]
+</IfModule>

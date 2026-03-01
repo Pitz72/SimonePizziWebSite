@@ -516,4 +516,5 @@ Ho sviluppato RLM su stack <strong>Electron + React</strong>, ma con una modific
       featuredOrder: 4,
     },
   ],
+  [Category.BLOG_E_RIFLESSIONI]: [],
 };

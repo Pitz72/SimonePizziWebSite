@@ -1,13 +1,22 @@
 import React, { useEffect } from 'react';
-import { HashRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import ParticleBackground from './components/ParticleBackground';
-import HomePage from './components/PortfolioGrid';
-import PortfolioShowcase from './components/PortfolioShowcase';
+import PortfolioGrid from './components/PortfolioGrid';
+import ArticleArchive from './components/ArticleArchive';
+import SingleArticle from './components/SingleArticle';
 import SEO from './components/SEO';
-import { portfolioData } from './data/portfolioData';
+import ScrollProgress from './components/ScrollProgress';
+import BackToTop from './components/BackToTop';
+import Login from './pages/admin/Login';
+import AdminLayout from './pages/admin/AdminLayout';
+import Dashboard from './pages/admin/Dashboard';
+import Settings from './pages/admin/Settings';
+import ArticlesList from './pages/admin/ArticlesList';
+import ArticleEditor from './pages/admin/ArticleEditor';
+import MediaGallery from './pages/admin/MediaGallery';
 import { Category } from './types';
 
 const backgroundStyle = {
@@ -25,63 +34,92 @@ const ScrollToTop = () => {
   return null;
 };
 
-import ScrollProgress from './components/ScrollProgress';
-import BackToTop from './components/BackToTop';
+const PublicLayout: React.FC = () => {
+  return (
+    <>
+      <ScrollToTop />
+      <ScrollProgress />
+      <BackToTop />
+      <SEO /> {/* Default SEO */}
+      <div className="min-h-screen bg-black text-gray-200" style={backgroundStyle}>
+        <ParticleBackground />
+        <div className="absolute inset-0 h-full w-full bg-black bg-[linear-gradient(to_right,#161616_1px,transparent_1px),linear-gradient(to_bottom,#161616_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] -z-10"></div>
+
+        <Header />
+
+        <main className="px-4 sm:px-6 lg:px-8">
+          <Routes>
+            <Route path="/" element={<PortfolioGrid />} />
+            <Route
+              path={`/${Category.VIDEOGIOCHI}`}
+              element={<ArticleArchive title="Videogiochi" category={Category.VIDEOGIOCHI} />}
+            />
+            <Route
+              path={`/${Category.VIDEOGIOCHI}/:projectSlug`}
+              element={<SingleArticle />}
+            />
+            <Route
+              path={`/${Category.PROGETTI_SOFTWARE}`}
+              element={<ArticleArchive title="Progetti Software" category={Category.PROGETTI_SOFTWARE} />}
+            />
+            <Route
+              path={`/${Category.PROGETTI_SOFTWARE}/:projectSlug`}
+              element={<SingleArticle />}
+            />
+            <Route
+              path={`/${Category.NARRATIVA_E_PUBBLICAZIONI}`}
+              element={<ArticleArchive title="Narrativa e Pubblicazioni" category={Category.NARRATIVA_E_PUBBLICAZIONI} />}
+            />
+            <Route
+              path={`/${Category.NARRATIVA_E_PUBBLICAZIONI}/:projectSlug`}
+              element={<SingleArticle />}
+            />
+            <Route
+              path={`/${Category.PODCAST_AUDIO_ALTRO}`}
+              element={<ArticleArchive title="Podcast, Audio e Altro" category={Category.PODCAST_AUDIO_ALTRO} />}
+            />
+            <Route
+              path={`/${Category.PODCAST_AUDIO_ALTRO}/:projectSlug`}
+              element={<SingleArticle />}
+            />
+            <Route
+              path={`/${Category.BLOG_E_RIFLESSIONI}`}
+              element={<ArticleArchive title="Blog e Riflessioni" />}
+            />
+            <Route
+              path={`/${Category.BLOG_E_RIFLESSIONI}/:projectSlug`}
+              element={<SingleArticle />}
+            />
+            <Route path="*" element={<div className="min-h-[50vh] flex items-center justify-center text-white text-2xl">404 - Pagina non trovata</div>} />
+          </Routes>
+        </main>
+
+        <Footer />
+      </div>
+    </>
+  );
+};
 
 const App: React.FC = () => {
   return (
     <HelmetProvider>
       <Router>
-        <ScrollToTop />
-        <ScrollProgress />
-        <BackToTop />
-        <SEO /> {/* Default SEO */}
-        <div className="min-h-screen bg-black text-gray-200" style={backgroundStyle}>
-          <ParticleBackground />
-          <div className="absolute inset-0 h-full w-full bg-black bg-[linear-gradient(to_right,#161616_1px,transparent_1px),linear-gradient(to_bottom,#161616_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] -z-10"></div>
+        <Routes>
+          {/* Rotte del Pannello di Controllo */}
+          <Route path="/admin/login" element={<Login />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="settings" element={<Settings />} />
+            <Route path="articles" element={<ArticlesList />} />
+            <Route path="articles/new" element={<ArticleEditor />} />
+            <Route path="articles/edit/:id" element={<ArticleEditor />} />
+            <Route path="media" element={<MediaGallery />} />
+            <Route index element={<Dashboard />} />
+          </Route>
 
-          <Header />
-
-          <main className="px-4 sm:px-6 lg:px-8">
-            <Routes>
-              <Route path="/" element={<HomePage />} />
-              <Route
-                path={`/${Category.VIDEOGIOCHI}`}
-                element={<PortfolioShowcase title="Videogiochi" items={portfolioData[Category.VIDEOGIOCHI]} category={Category.VIDEOGIOCHI} />}
-              />
-              <Route
-                path={`/${Category.VIDEOGIOCHI}/:projectSlug`}
-                element={<PortfolioShowcase title="Videogiochi" items={portfolioData[Category.VIDEOGIOCHI]} category={Category.VIDEOGIOCHI} />}
-              />
-              <Route
-                path={`/${Category.PROGETTI_SOFTWARE}`}
-                element={<PortfolioShowcase title="Progetti Software" items={portfolioData[Category.PROGETTI_SOFTWARE]} category={Category.PROGETTI_SOFTWARE} />}
-              />
-              <Route
-                path={`/${Category.PROGETTI_SOFTWARE}/:projectSlug`}
-                element={<PortfolioShowcase title="Progetti Software" items={portfolioData[Category.PROGETTI_SOFTWARE]} category={Category.PROGETTI_SOFTWARE} />}
-              />
-              <Route
-                path={`/${Category.NARRATIVA_E_PUBBLICAZIONI}`}
-                element={<PortfolioShowcase title="Narrativa e Pubblicazioni" items={portfolioData[Category.NARRATIVA_E_PUBBLICAZIONI]} category={Category.NARRATIVA_E_PUBBLICAZIONI} />}
-              />
-              <Route
-                path={`/${Category.NARRATIVA_E_PUBBLICAZIONI}/:projectSlug`}
-                element={<PortfolioShowcase title="Narrativa e Pubblicazioni" items={portfolioData[Category.NARRATIVA_E_PUBBLICAZIONI]} category={Category.NARRATIVA_E_PUBBLICAZIONI} />}
-              />
-              <Route
-                path={`/${Category.PODCAST_AUDIO_ALTRO}`}
-                element={<PortfolioShowcase title="Podcast, Audio e Altro" items={portfolioData[Category.PODCAST_AUDIO_ALTRO]} category={Category.PODCAST_AUDIO_ALTRO} />}
-              />
-              <Route
-                path={`/${Category.PODCAST_AUDIO_ALTRO}/:projectSlug`}
-                element={<PortfolioShowcase title="Podcast, Audio e Altro" items={portfolioData[Category.PODCAST_AUDIO_ALTRO]} category={Category.PODCAST_AUDIO_ALTRO} />}
-              />
-            </Routes>
-          </main>
-
-          <Footer />
-        </div>
+          {/* Rotte Pubbliche */}
+          <Route path="/*" element={<PublicLayout />} />
+        </Routes>
       </Router>
     </HelmetProvider>
   );

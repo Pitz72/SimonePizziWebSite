@@ -1,7 +1,7 @@
 # Relazione sullo Stato del Progetto "Simone Pizzi - Portfolio Creativo"
 
 **Data**: 28 Febbraio 2026
-**Versione Sotto Analisi**: 1.2.0
+**Versione Sotto Analisi**: 1.4.0
 
 ## 1. Panoramica Generale
 Il progetto è una Single Page Application (SPA) reattiva e moderna, sviluppata con **React 19**, **TypeScript**, **Vite 7** e **Tailwind CSS v4**. Il sito funge da portfolio personale, organizzando i contenuti in categorie ben definite (Videogiochi, Software, Narrativa, Podcast).
@@ -36,10 +36,18 @@ Inizialmente la documentazione constava di un `README.md` in root e molteplici f
 
 ## 4. Verifica Sincronizzazione Documentazione-Codice
 
-È stata effettuata una verifica puntuale tra il changelog più recente (**v1.2.0**) e l'ecosistema fisico della build.
+È stata effettuata una verifica puntuale tra il changelog più recente (**v1.4.0**) e l'ecosistema fisico della build.
 
-| Feature Documentata (v1.2.0) | Riscontro File System / Src | Esito |
+| Feature Documentata (v1.4.0) | Riscontro File System / Src | Esito |
 | :--- | :--- | :--- |
+| **SEO Server Side** | `index.php` root router creato. | ✅ CONFORME |
+| **Sezione Blog Dinamica** | `Header.tsx` e custom Enum Type aggiunti. | ✅ CONFORME |
+| **Iniezione Dinamica Frontend** | `useFetchArticles.ts`, `PortfolioGrid` (Home). | ✅ PRECEDENTE |
+| **Auth Base** | `Login.tsx` / `Settings.tsx` & `App.tsx` routing. | ✅ PRECEDENTE |
+| **Rete API Principale** | Scripts `articles.php` / `upload.php` backend. | ✅ PRECEDENTE |
+| **Foundation Backend (Mini-CMS)** | Setup `public/api/db.php` e schema SQLite | ✅ PRECEDENTE |
+| **Fix Code Smell Formali** | `src/App.tsx` e nomenclatura `PortfolioGrid` | ✅ PRECEDENTE |
+| **Data-Driven About Me** | `src/data/aboutMeData.ts` estrazione testi | ✅ CONFORME |
 | **Glassmorphism Modali** | `LetterModal.tsx` & `ProjectDetail.tsx` | ✅ CONFORME |
 | **Glow Interactions** | `Header.tsx` e bottoni grid (Ring utils) | ✅ CONFORME |
 | **Text Balance** | Tailwind v4 properties applicate | ✅ CONFORME |
