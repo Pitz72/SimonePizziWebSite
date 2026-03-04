@@ -162,11 +162,9 @@ export default function ArticlesList() {
                                         </td>
                                         <td className="p-4">
                                             <div className="flex items-center justify-end gap-2">
-                                                {article.status === 'published' && (
-                                                    <a href={`#/${article.category}/${article.slug}`} target="_blank" rel="noreferrer" className="p-2 text-zinc-400 hover:text-blue-400 hover:bg-zinc-800 rounded transition-colors" title="Vedi sul sito">
-                                                        <ExternalLink size={18} />
-                                                    </a>
-                                                )}
+                                                <a href={`/${article.category}/${article.slug}`} target="_blank" rel="noreferrer" className="p-2 text-zinc-400 hover:text-blue-400 hover:bg-zinc-800 rounded transition-colors" title="Vedi Anteprima / Vedi sul sito">
+                                                    <ExternalLink size={18} />
+                                                </a>
                                                 <Link to={`/admin/articles/edit/${article.id}`} className="p-2 text-zinc-400 hover:text-dis-green hover:bg-zinc-800 rounded transition-colors" title="Modifica">
                                                     <Edit2 size={18} />
                                                 </Link>

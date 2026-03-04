@@ -40,11 +40,9 @@ export const useFetchArticles = (categoryFilter?: string) => {
                 // Per ora prendiamoli tutti e filtriamo.
                 const data = await api.getArticles(categoryFilter);
 
-                // Filtra solo quelli 'published'
-                const published = data.filter((a: any) => a.status === 'published');
-
+                // Filter gestito a monte dal backend per gli utenti non autenticati.
                 // Mappa verso PortfolioItem
-                const mappedItems = published.map(mapArticleToPortfolioItem);
+                const mappedItems = data.map(mapArticleToPortfolioItem);
 
                 setItems(mappedItems);
             } catch (err: any) {

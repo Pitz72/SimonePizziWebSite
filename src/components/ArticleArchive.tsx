@@ -65,7 +65,7 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category }) => {
                             {/* HERO ITEM (1° Articolo come Hub) */}
                             {heroItem && (
                                 <article
-                                    onClick={() => navigate(`/ ${category || heroItem.category}/${heroItem.slug}`)}
+                                    onClick={() => navigate(`/${category || heroItem.category}/${heroItem.slug}`)}
                                     className="group flex flex-col md:flex-row bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden cursor-pointer hover:border-dis-green/60 transition-all duration-500 hover:shadow-[0_0_60px_-10px_rgba(34,197,94,0.4)] hover:-translate-y-1 animate-[fade-in_0.5s_ease-out_forwards]"
                                 >
                                     <div className="w-full md:w-3/5 lg:w-2/3 relative aspect-[16/10] md:aspect-auto md:h-full min-h-[300px] overflow-hidden bg-black">

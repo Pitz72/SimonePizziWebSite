@@ -161,38 +161,44 @@ const SingleArticle: React.FC<SingleArticleProps> = () => {
 
             {/* CALL TO ACTION GLASSMORPHIC FLOAT (Fondo Pagina) */}
             <div className="max-w-4xl mx-auto px-6 md:px-10">
-                <div className="bg-zinc-900/60 backdrop-blur-2xl border border-zinc-800/80 rounded-3xl p-8 md:p-10 shadow-2xl flex flex-col md:flex-row items-center gap-6 justify-between">
+                <div className="bg-zinc-900/60 backdrop-blur-2xl border border-zinc-800/80 rounded-3xl p-8 md:p-10 shadow-2xl flex flex-col gap-8">
 
-                    <div className="flex-1">
-                        <h3 className="text-2xl font-bold text-white mb-2">Ti è piaciuto questo progetto?</h3>
-                        <p className="text-zinc-400">Aiutaci a diffonderlo con la condivisione sui tuoi social.</p>
-                    </div>
-
-                    <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-                        {article.link && (
-                            <a href={formatExternalUrl(article.link)} target="_blank" rel="noopener noreferrer" className="flex-1 md:flex-none flex justify-center items-center gap-2 bg-dis-green text-black font-bold px-6 py-4 rounded-xl hover:bg-green-400 transition-colors shadow-[0_0_30px_-5px_rgba(34,197,94,0.4)] hover:shadow-[0_0_40px_-5px_rgba(34,197,94,0.6)]">
-                                {article.buttonText || 'Naviga'}
-                                <ExternalLink size={18} />
-                            </a>
-                        )}
-
-                        {article.extraLink && (
-                            <a href={formatExternalUrl(article.extraLink)} download className="flex-1 md:flex-none flex justify-center items-center gap-2 bg-zinc-800 text-white font-bold px-6 py-4 rounded-xl hover:bg-zinc-700 transition-colors border border-zinc-700">
-                                {article.extraLinkText || 'File Aggiuntivo'}
-                                <Download size={18} />
-                            </a>
-                        )}
-
-                        {article.hasLetter && (
-                            <button onClick={() => setIsLetterModalOpen(true)} className="flex-1 md:flex-none flex justify-center items-center gap-2 bg-purple-600/20 text-purple-400 font-bold px-6 py-4 rounded-xl hover:bg-purple-600/30 transition-colors border border-purple-500/30">
-                                Leggi Lettera
-                            </button>
-                        )}
-
-                        <button onClick={() => setIsShareModalOpen(true)} className="flex justify-center flex-1 md:flex-none p-4 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors" title="Condividi">
+                    {/* RIGA SUPERIORE: Testo a sinistra, Condividi a destra */}
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                        <div className="flex-1 text-center md:text-left">
+                            <h3 className="text-2xl font-bold text-white mb-2">Ti è piaciuto questo progetto?</h3>
+                            <p className="text-zinc-400">Aiutaci a diffonderlo con la condivisione sui tuoi social.</p>
+                        </div>
+                        <button onClick={() => setIsShareModalOpen(true)} className="flex items-center gap-3 w-full md:w-auto px-6 py-4 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-500 hover:bg-zinc-800 transition-all font-medium whitespace-nowrap" title="Condividi">
                             <Share2 size={20} />
+                            Condividi
                         </button>
                     </div>
+
+                    {/* RIGA INFERIORE: Bottoni Custom (Se l'articolo ne possiede almeno uno) */}
+                    {(article.link || article.extraLink || article.hasLetter) && (
+                        <div className="pt-6 border-t border-zinc-800/50 flex flex-col sm:flex-row items-stretch justify-center gap-4">
+                            {article.link && (
+                                <a href={formatExternalUrl(article.link)} target="_blank" rel="noopener noreferrer" className="flex-1 flex justify-center items-center gap-2 bg-dis-green text-black font-bold px-6 py-4 rounded-xl hover:bg-green-400 transition-colors shadow-[0_0_30px_-5px_rgba(34,197,94,0.4)] hover:shadow-[0_0_40px_-5px_rgba(34,197,94,0.6)]">
+                                    {article.buttonText || 'Naviga'}
+                                    <ExternalLink size={18} />
+                                </a>
+                            )}
+
+                            {article.extraLink && (
+                                <a href={formatExternalUrl(article.extraLink)} download className="flex-1 flex justify-center items-center gap-2 bg-zinc-800 text-white font-bold px-6 py-4 rounded-xl hover:bg-zinc-700 transition-colors border border-zinc-700">
+                                    {article.extraLinkText || 'File Aggiuntivo'}
+                                    <Download size={18} />
+                                </a>
+                            )}
+
+                            {article.hasLetter && (
+                                <button onClick={() => setIsLetterModalOpen(true)} className="flex-1 flex justify-center items-center gap-2 bg-purple-600/20 text-purple-400 font-bold px-6 py-4 rounded-xl hover:bg-purple-600/30 transition-colors border border-purple-500/30">
+                                    Leggi Lettera
+                                </button>
+                            )}
+                        </div>
+                    )}
 
                 </div>
             </div>

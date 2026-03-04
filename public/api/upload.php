@@ -26,7 +26,21 @@ $fileExt = strtolower(pathinfo($fileName, PATHINFO_EXTENSION));
 $allowedExts = ['jpg', 'jpeg', 'png', 'webp', 'gif', 'pdf', 'zip', 'rar', 'mp3'];
 if (!in_array($fileExt, $allowedExts)) {
     http_response_code(400);
-    echo json_encode(['error' => 'Formato file non supportato. File ammessi: ' . implode(', ', $allowedExts)]);
+    echo json_encode(['error' => 'Formato file non supportato nell\'estensione. File ammessi: ' . implode(', ', $allowedExts)]);
+    exit;
+}
+
+// Verifica Sicurezza Intrinseca (Magic Bytes / MIME Type) 
+// Previene estensioni falsificate es. shell.php.jpg o file text camuffati.
+$realMime = mime_content_type($file['tmp_name']);
+$allowedMimes = [
+    'image/jpeg', 'image/png', 'image/webp', 'image/gif',
+    'application/pdf', 'application/zip', 'application/x-rar-compressed', 'audio/mpeg'
+];
+
+if (!in_array($realMime, $allowedMimes)) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Il contenuto reale del file non corrisponde all\'estensione dichiarata (Spoofing bloccato).']);
     exit;
 }
 

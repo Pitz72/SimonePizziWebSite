@@ -14,6 +14,18 @@ Benvenuto nell'Hub Documentale del progetto. Da qui è possibile rintracciare in
 
 ---
 
+### Aggiornamenti Recenti (Versione 1.5.4 - 04 Marzo 2026):
+*   **Redesign CTA Articoli**: `1.5.4` (Riordino strutturale in React Flexbox per il div di fine lettura con divisione netta delle Calls-To-Action)
+
+### Aggiornamenti Recenti (Versione 1.5.3 - 04 Marzo 2026):
+*   **Fix Href Admin (HashRouter Legacy)**: `1.5.3` (Rimozione del cancelletto hardcodato nel link dell'anteprima, ripristino pieno supporto in BrowserRouter per la Dashboard)
+
+### Aggiornamenti Recenti (Versione 1.5.2 - 04 Marzo 2026):
+*   **Anteprima Bozze Admin**: `1.5.2` (Sblocco tasto anteprima per articoli in stato "Bozza" riservato agli amministratori loggati)
+
+### Aggiornamenti Recenti (Versione 1.5.1 - 04 Marzo 2026):
+*   **Fix Forensi & Blockquote**: `1.5.1` (Patch Security Upload, Typo Backend API e introduzione tool citazione nell'Editor CMS)
+
 ### Aggiornamenti Recenti (Versione 1.5.0 - 01 Marzo 2026):
 *   **Feature Update & RSS**: `1.5.0` (Implementazione Feed RSS Pubblico, Schedule Articoli con data programmabile, fix UI Tailwind v4)
 
@@ -72,6 +84,10 @@ Il progetto è versionato seguendo una rigorosa tracciabilità delle implementaz
 
 Per una tracciabilità trasparente dello sviluppo, ogni aggiornamento maggiore è documentato:
 
+- [v1.5.4 - Redesign Box CTA Lettura](changelogs/1.5.4.md)
+- [v1.5.3 - Hotfix Rendering Link Anteprima](changelogs/1.5.3.md)
+- [v1.5.2 - Sblocco Anteprima Bozze (Admin-Only)](changelogs/1.5.2.md)
+- [v1.5.1 - Patch Sicurezza Forense & Feature Editor](changelogs/1.5.1.md)
 - [v1.5.0 - Feature Update & Architettura di Pubblicazione](changelogs/1.5.0.md)
 - [v1.4.8 - Hotfix Call To Action (Bottoni Articolo)](changelogs/1.4.8.md)
 - [v1.4.7 - Rilascio Pulizia/Sicurezza Server](changelogs/1.4.7.md)

@@ -1,7 +1,7 @@
 # Relazione sullo Stato del Progetto "Simone Pizzi - Portfolio Creativo"
 
-**Data**: 28 Febbraio 2026
-**Versione Sotto Analisi**: 1.4.0
+**Data**: 04 Marzo 2026
+**Versione Sotto Analisi**: 1.5.4
 
 ## 1. Panoramica Generale
 Il progetto è una Single Page Application (SPA) reattiva e moderna, sviluppata con **React 19**, **TypeScript**, **Vite 7** e **Tailwind CSS v4**. Il sito funge da portfolio personale, organizzando i contenuti in categorie ben definite (Videogiochi, Software, Narrativa, Podcast).
@@ -15,10 +15,10 @@ La codebase segue una struttura chiara e modulare isolata all'interno della dire
     -   `PortfolioGrid`: Gestisce la Home Page e la logica dei "Featured Items", implementando correttamente l'ordinamento tramite `featuredOrder`.
     -   `PortfolioShowcase`: Componente riutilizzabile per le pagine di categoria (Videogiochi, Software, ecc.), che gestisce anche il routing dinamico dei dettagli progetto.
     -   `SEO`, `HelmetProvider`: Implementazione corretta dei meta tag dinamici per ogni pagina.
--   **`src/App.tsx`**: Gestisce il routing principale tramite `react-router-dom` (HashRouter), garantendo la navigazione tra le categorie e i dettagli dei progetti.
+-   **`src/App.tsx`**: Gestisce il routing principale tramite `react-router-dom` (BrowserRouter), garantendo la navigazione tra le categorie e i dettagli dei progetti.
 
 ### Tecnologie e Pattern
--   **Routing**: Utilizzo di `HashRouter` (ottimale per hosting statico come GitHub Pages) con route dinamiche (`/:projectSlug`).
+-   **Routing**: Utilizzo di `BrowserRouter` supportato attivamente da `public/index.php` e `.htaccess` per le vere URL SEO-friendly con route dinamiche (`/:projectSlug`).
 -   **State Management**: Uso leggero di `useState` per modali e UI interaction (es. `FeaturedCard`, `Hero`).
 -   **Styling**: Tailwind CSS utilizzato coerentemente per layout responsive e design system (colori, spaziature). Non sono stati rilevati stili CSS "inline" caotici o file CSS globali disordinati.
 
@@ -36,10 +36,13 @@ Inizialmente la documentazione constava di un `README.md` in root e molteplici f
 
 ## 4. Verifica Sincronizzazione Documentazione-Codice
 
-È stata effettuata una verifica puntuale tra il changelog più recente (**v1.4.0**) e l'ecosistema fisico della build.
+È stata effettuata una verifica puntuale tra il changelog più recente (**v1.5.0**) e l'ecosistema fisico della build.
 
-| Feature Documentata (v1.4.0) | Riscontro File System / Src | Esito |
+| Feature Documentata (v1.5.0) | Riscontro File System / Src | Esito |
 | :--- | :--- | :--- |
+| **Sistema Scheduling** | `articles.php` time-check e badge admin | ✅ CONFORME |
+| **Generatore Nativo RSS** | `/api/rss.php` XML engine | ✅ CONFORME |
+| **Fix Colori Tailwind v4** | `index.css` const reintegra | ✅ CONFORME |
 | **SEO Server Side** | `index.php` root router creato. | ✅ CONFORME |
 | **Sezione Blog Dinamica** | `Header.tsx` e custom Enum Type aggiunti. | ✅ CONFORME |
 | **Iniezione Dinamica Frontend** | `useFetchArticles.ts`, `PortfolioGrid` (Home). | ✅ PRECEDENTE |

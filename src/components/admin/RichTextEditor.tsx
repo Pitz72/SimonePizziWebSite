@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { Bold, Italic, Link as LinkIcon, List, ListOrdered, AlignLeft, AlignCenter, AlignRight, Type, Eraser } from 'lucide-react';
+import { Bold, Italic, Quote, Link as LinkIcon, List, ListOrdered, AlignLeft, AlignCenter, AlignRight, Type, Eraser } from 'lucide-react';
 import showdown from 'showdown';
 
 interface RichTextEditorProps {
@@ -193,6 +193,8 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
                 <ToolbarBtn onClick={() => exec('insertUnorderedList')} icon={<List size={16} />} title="Elenco Puntato" />
                 <ToolbarBtn onClick={() => exec('insertOrderedList')} icon={<ListOrdered size={16} />} title="Elenco Numerato" />
+                <div className="w-px h-6 bg-zinc-800 mx-1" />
+                <ToolbarBtn onClick={() => formatBlock('blockquote')} icon={<Quote size={16} />} title="Citazione (Blockquote)" />
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
                 <ToolbarBtn onClick={promptLink} icon={<LinkIcon size={16} />} title="Inserisci Link" />
                 <ToolbarBtn onClick={removeLink} icon={<LinkIcon size={16} className="text-red-400" />} title="Rimuovi Link" />

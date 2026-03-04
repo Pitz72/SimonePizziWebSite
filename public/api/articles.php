@@ -36,7 +36,23 @@ try {
             $stmt = $pdo->prepare("SELECT * FROM articles WHERE slug = ?");
             $stmt->execute([$_GET['slug']]);
             $article = $stmt->fetch();
+            
             if ($article) {
+                // Controllo Autorizzazione Visiva
+                $is_admin = isset($_SESSION['user_id']);
+                
+                // Un articolo si definisce "pubblico" se il suo status è 'published' E la data di uscita è nel passato/presente.
+                $is_published = $article['status'] === 'published' && 
+                                (empty($article['published_at']) || strtotime($article['published_at']) <= time());
+                
+                // Se NON è admin e l'articolo NON è pubblico (bozza o programmato futuro), negare fingendo il 404.
+                if (!$is_admin && !$is_published) {
+                    http_response_code(404);
+                    echo json_encode(['error' => 'Articolo non trovato (Bozza/Privato)']);
+                    exit;
+                }
+                
+                // Altrimenti, consegna l'articolo per la lettura
                 echo json_encode($article);
             } else {
                 http_response_code(404);
@@ -109,7 +125,7 @@ try {
         $cover_image = $data['cover_image'] ?? '';
         $category = $data['category'] ?? 'blog-e-riflessioni';
         $tags = $data['tags'] ?? '';
-        $is_featured = isset($data['is_featured']) ? (int)$_data['is_featured'] : 0;
+        $is_featured = isset($data['is_featured']) ? (int)$data['is_featured'] : 0;
         $button_a_label = $data['button_a_label'] ?? '';
         $button_a_link = $data['button_a_link'] ?? '';
         $button_b_label = $data['button_b_label'] ?? '';
