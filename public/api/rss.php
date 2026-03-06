@@ -9,6 +9,10 @@ $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : '
 $host = $_SERVER['HTTP_HOST'];
 $base_url = $protocol . '://' . $host;
 
+// [V1.5.5] Forzatura Fuso Orario Italiano (Bypass orario server Los Angeles per pubblicazione tempestiva)
+date_default_timezone_set('Europe/Rome');
+$ita_now_str = date('Y-m-d H:i:s');
+
 // Assumiamo che il nome del feed venga dai settings, per ora hardcodiamo un title di base
 $site_title = "Simone Pizzi - Blog & Portfolio";
 $site_description = "Le ultime pubblicazioni di Simone Pizzi";
@@ -24,11 +28,12 @@ echo '  <language>it-IT</language>' . "\n";
 try {
     $query = "SELECT title, slug, excerpt, content, cover_image, category, published_at 
               FROM articles 
-              WHERE status = 'published' AND (published_at IS NULL OR published_at = '' OR datetime(published_at) <= datetime('now', 'localtime'))
+              WHERE status = 'published' AND (published_at IS NULL OR published_at = '' OR published_at <= :ita_now)
               ORDER BY published_at DESC 
               LIMIT 50";
     
-    $stmt = $pdo->query($query);
+    $stmt = $pdo->prepare($query);
+    $stmt->execute([':ita_now' => $ita_now_str]);
     $articles = $stmt->fetchAll();
 
     foreach ($articles as $article) {

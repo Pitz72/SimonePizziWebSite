@@ -8,6 +8,11 @@ header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH');
 $pdo = Database::connect();
 $method = $_SERVER['REQUEST_METHOD'];
 
+// [V1.5.5] Forzatura Fuso Orario Italiano (Bypass orario server Los Angeles)
+date_default_timezone_set('Europe/Rome');
+$ita_now_str = date('Y-m-d H:i:s');
+$ita_now_time = time();
+
 // Helper per generare slug unici
 function generateSlug($title, $pdo) {
     $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title)));
@@ -43,7 +48,7 @@ try {
                 
                 // Un articolo si definisce "pubblico" se il suo status è 'published' E la data di uscita è nel passato/presente.
                 $is_published = $article['status'] === 'published' && 
-                                (empty($article['published_at']) || strtotime($article['published_at']) <= time());
+                                (empty($article['published_at']) || strtotime($article['published_at']) <= $ita_now_time);
                 
                 // Se NON è admin e l'articolo NON è pubblico (bozza o programmato futuro), negare fingendo il 404.
                 if (!$is_admin && !$is_published) {
@@ -85,7 +90,8 @@ try {
         // Se la chiamata non proviene espressamente dalla dashboard admin, nascondiamo bozze e futuri.
         if (!$is_admin_dashboard) {
            $conditions[] = "status = 'published'"; 
-           $conditions[] = "(published_at IS NULL OR published_at = '' OR datetime(published_at) <= datetime('now', 'localtime'))";
+           $conditions[] = "(published_at IS NULL OR published_at = '' OR published_at <= ?)";
+           $params[] = $ita_now_str;
         }
 
         if ($category) {

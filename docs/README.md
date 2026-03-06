@@ -14,6 +14,9 @@ Benvenuto nell'Hub Documentale del progetto. Da qui è possibile rintracciare in
 
 ---
 
+### Aggiornamenti Recenti (Versione 1.5.5 - 06 Marzo 2026):
+*   **Timezone Sync Los Angeles/Italia**: `1.5.5` (Forzatura fuso orario 'Europe/Rome' in PHP per sbloccare tempestivamente gli articoli programmati, bypassando il ritardo di 9 ore del server di hosting).
+
 ### Aggiornamenti Recenti (Versione 1.5.4 - 04 Marzo 2026):
 *   **Redesign CTA Articoli**: `1.5.4` (Riordino strutturale in React Flexbox per il div di fine lettura con divisione netta delle Calls-To-Action)
 
@@ -84,6 +87,7 @@ Il progetto è versionato seguendo una rigorosa tracciabilità delle implementaz
 
 Per una tracciabilità trasparente dello sviluppo, ogni aggiornamento maggiore è documentato:
 
+- [v1.5.5 - Correzione Timezone Database Server (L.A./ITA)](changelogs/1.5.5.md)
 - [v1.5.4 - Redesign Box CTA Lettura](changelogs/1.5.4.md)
 - [v1.5.3 - Hotfix Rendering Link Anteprima](changelogs/1.5.3.md)
 - [v1.5.2 - Sblocco Anteprima Bozze (Admin-Only)](changelogs/1.5.2.md)
