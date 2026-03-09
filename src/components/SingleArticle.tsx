@@ -98,7 +98,7 @@ const SingleArticle: React.FC<SingleArticleProps> = () => {
             <LetterModal isOpen={isLetterModalOpen} onClose={() => setIsLetterModalOpen(false)} />
 
             {/* HERO IMMERSIVO PARALLAX/FADE */}
-            <header className="relative w-full h-[60vh] md:h-[75vh] flex items-end">
+            <header className="relative w-full min-h-[60vh] md:min-h-[75vh] flex items-end pt-32">
                 {/* Immagine di Copertina */}
                 <div className="absolute inset-0 w-full h-full">
                     <img

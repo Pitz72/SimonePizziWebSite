@@ -11,8 +11,12 @@ Benvenuto nell'Hub Documentale del progetto. Da qui è possibile rintracciare in
 | :--- | :--- |
 | **[README Principale](../README.md)** | Start point del progetto, tecnologie, come fixare/runnare l'applicativo. |
 | **[Stato del Progetto (project_status.md)](project_status.md)** | Diagnostica puntuale ed ispezione strutturale dell'ultima release in produzione (Architettura Data-Driven, stato componenti). |
+| **[Roadmap Futura (roadmap.md)](roadmap.md)** | Pianificazione strategica per l'evoluzione del CMS, UI/UX e architettura di sistema. |
 
 ---
+
+### Aggiornamenti Recenti (Versione 1.5.6 - 09 Marzo 2026):
+*   **Fix Media Gallery e UI Articoli**: `1.5.6` (Risolto il crash causato da chiavi inesistenti nella tabella media nel componente `MediaGallery.tsx` e corretto l'overlap della testata del componente `SingleArticle.tsx` per titoli lunghi passando ad altezze minime e padding).
 
 ### Aggiornamenti Recenti (Versione 1.5.5 - 06 Marzo 2026):
 *   **Timezone Sync Los Angeles/Italia**: `1.5.5` (Forzatura fuso orario 'Europe/Rome' in PHP per sbloccare tempestivamente gli articoli programmati, bypassando il ritardo di 9 ore del server di hosting).
@@ -87,6 +91,7 @@ Il progetto è versionato seguendo una rigorosa tracciabilità delle implementaz
 
 Per una tracciabilità trasparente dello sviluppo, ogni aggiornamento maggiore è documentato:
 
+- [v1.5.6 - Fix Media Gallery e UI Articoli](changelogs/1.5.6.md)
 - [v1.5.5 - Correzione Timezone Database Server (L.A./ITA)](changelogs/1.5.5.md)
 - [v1.5.4 - Redesign Box CTA Lettura](changelogs/1.5.4.md)
 - [v1.5.3 - Hotfix Rendering Link Anteprima](changelogs/1.5.3.md)

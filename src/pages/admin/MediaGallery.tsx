@@ -133,11 +133,11 @@ export default function MediaGallery() {
                                     {/* Media Preview Box */}
                                     <div className="h-40 bg-zinc-900 flex items-center justify-center relative overflow-hidden">
                                         {isImage ? (
-                                            <img src={media.file_path} alt={media.file_name} className="w-full h-full object-cover" loading="lazy" />
+                                            <img src={media.file_path} alt={media.filename} className="w-full h-full object-cover" loading="lazy" />
                                         ) : (
                                             <div className="flex flex-col items-center justify-center text-zinc-600">
                                                 <FileIcon size={48} />
-                                                <span className="text-xs font-bold mt-2 uppercase">{media.file_name.split('.').pop()}</span>
+                                                <span className="text-xs font-bold mt-2 uppercase">{media.filename.split('.').pop()}</span>
                                             </div>
                                         )}
 
@@ -164,11 +164,11 @@ export default function MediaGallery() {
 
                                     {/* Media Details */}
                                     <div className="p-3 text-xs flex-1 flex flex-col justify-between gap-2">
-                                        <p className="font-medium text-white truncate" title={media.original_name}>{media.original_name}</p>
+                                        <p className="font-medium text-white truncate" title={media.filename}>{media.filename}</p>
                                         <div className="flex justify-between items-center text-zinc-500">
-                                            <span>{formatBytes(media.file_size)}</span>
+                                            <span>{formatBytes(media.size)}</span>
                                             <button
-                                                onClick={() => handleDelete(media.id, media.original_name)}
+                                                onClick={() => handleDelete(media.id, media.filename)}
                                                 className="text-zinc-600 hover:text-red-400 transition-colors"
                                                 title="Elimina File"
                                             >
