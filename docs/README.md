@@ -15,8 +15,9 @@ Benvenuto nell'Hub Documentale del progetto. Da qui è possibile rintracciare in
 
 ---
 
-### Aggiornamenti Recenti (Versione 1.5.6 - 09 Marzo 2026):
+### Aggiornamenti Recenti (Versione 1.5.6 - 17 Marzo 2026):
 *   **Fix Media Gallery e UI Articoli**: `1.5.6` (Risolto il crash causato da chiavi inesistenti nella tabella media nel componente `MediaGallery.tsx` e corretto l'overlap della testata del componente `SingleArticle.tsx` per titoli lunghi passando ad altezze minime e padding).
+*   **Emergency Admin Password Reset**: `1.5.6` (Gestione incidente smarrimento credenziali via script PHP temporaneo protetto da chiave e successiva bonifica con innesto feature recovery in Roadmap).
 
 ### Aggiornamenti Recenti (Versione 1.5.5 - 06 Marzo 2026):
 *   **Timezone Sync Los Angeles/Italia**: `1.5.5` (Forzatura fuso orario 'Europe/Rome' in PHP per sbloccare tempestivamente gli articoli programmati, bypassando il ritardo di 9 ore del server di hosting).
