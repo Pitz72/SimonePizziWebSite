@@ -1,65 +1,82 @@
 # Relazione sullo Stato del Progetto "Simone Pizzi - Portfolio Creativo"
 
-**Data**: 17 Marzo 2026
-**Versione Sotto Analisi**: 1.5.6
+**Data:** 17 Marzo 2026
+**Versione Sotto Analisi:** 1.5.6
 
 ## 1. Panoramica Generale
-Il progetto è una Single Page Application (SPA) reattiva e moderna, sviluppata con **React 19**, **TypeScript**, **Vite 7** e **Tailwind CSS v4**. Il sito funge da portfolio personale, organizzando i contenuti in categorie ben definite (Videogiochi, Software, Narrativa, Podcast).
 
-## 2. Analisi della Codebase (Microscopica)
+Il progetto e una Single Page Application (SPA) reattiva e moderna, sviluppata con **React 19**, **TypeScript**, **Vite 7** e **Tailwind CSS v4**. Il sito funge da portfolio personale con un Mini-CMS integrato, organizzando i contenuti in categorie ben definite (Videogiochi, Software, Narrativa, Podcast, Blog). Il backend e un layer PHP/SQLite che espone API REST e gestisce SEO server-side, scheduling articoli e media.
+
+## 2. Analisi della Codebase
 
 ### Struttura
-La codebase segue una struttura chiara e modulare isolata all'interno della direttiva nativa `/src`:
--   **`src/data/portfolioData.ts`**: Unico "source of truth" per i contenuti. Questo file centralizza tutti i dati (titoli, descrizioni HTML, tag, immagini, flag `isFeatured`). Questo approccio rende la manutenzione estremamente semplice.
--   **`src/components/`**: Componenti ben segregati.
-    -   `PortfolioGrid`: Gestisce la Home Page e la logica dei "Featured Items", implementando correttamente l'ordinamento tramite `featuredOrder`.
-    -   `PortfolioShowcase`: Componente riutilizzabile per le pagine di categoria (Videogiochi, Software, ecc.), che gestisce anche il routing dinamico dei dettagli progetto.
-    -   `SEO`, `HelmetProvider`: Implementazione corretta dei meta tag dinamici per ogni pagina.
--   **`src/App.tsx`**: Gestisce il routing principale tramite `react-router-dom` (BrowserRouter), garantendo la navigazione tra le categorie e i dettagli dei progetti.
+
+La codebase segue una struttura chiara e modulare:
+
+- **`src/data/portfolioData.ts`**: Fonte di dati statici di fallback. Con l'avvento del Mini-CMS, i contenuti vivi transitano via API; questo file rimane come reference per i dati legacy.
+- **`src/components/`**: Componenti ben segregati.
+  - `PortfolioGrid`: Gestisce la Home Page con gli articoli in vetrina (flag `is_featured`), alimentata via API.
+  - `ArticleArchive`: Hub editoriale per ogni categoria, con card tridimensionali e layout Magazine.
+  - `SingleArticle`: Landing page dedicata alla lettura Zen di ogni articolo (Hero parallax, tipografia centrata, Control Bar fluttuante).
+  - `SEO`, `HelmetProvider`: Meta tag dinamici per ogni pagina.
+- **`src/hooks/useFetchArticles.ts`**: Custom hook per il fetching live degli articoli dalle API PHP.
+- **`src/pages/admin/`**: Pannello CMS completo (Login, Dashboard, ArticleEditor, ArticlesList, MediaGallery, Settings).
+- **`public/api/`**: Layer PHP REST (articles, auth, media, upload, rss, stats, settings).
+- **`public/index.php`**: Router backend che inietta meta tag OpenGraph/TwitterCard per SEO server-side.
+- **`public/.htaccess`**: Regole Apache per BrowserRouter + protezione risorse.
 
 ### Tecnologie e Pattern
--   **Routing**: Utilizzo di `BrowserRouter` supportato attivamente da `public/index.php` e `.htaccess` per le vere URL SEO-friendly con route dinamiche (`/:projectSlug`).
--   **State Management**: Uso leggero di `useState` per modali e UI interaction (es. `FeaturedCard`, `Hero`).
--   **Styling**: Tailwind CSS utilizzato coerentemente per layout responsive e design system (colori, spaziature). Non sono stati rilevati stili CSS "inline" caotici o file CSS globali disordinati.
 
-### Qualità del Codice
-Il codice è **pulito, tipizzato e manutenibile**. La logica di business (es. ordinamento algoritmico basato su custom fields, come accade con *Runtime Live Machine*) non sfora nei componenti presentazionali ma viene trattata nativamente nella struttura Dati e Array filtering.
+- **Routing:** BrowserRouter supportato da `public/index.php` e `.htaccess` per URL SEO-friendly.
+- **State Management:** `useState` per UI locale; fetch centralizzate via `useFetchArticles` e `api.ts`.
+- **Styling:** Tailwind CSS v4 con `@tailwindcss/vite`, design token in `@theme` dentro `index.css`.
+- **Database:** SQLite via PDO, schema in `init_db.php`, file protetto in `public/api/.data/`. Tabelle attive: `users`, `articles`, `media`, `login_attempts`. Tabelle presenti ma inattive (placeholder): `messages` (form contatti), `subscribers` (newsletter — `total_subscribers` ritorna sempre 0 in `stats.php`).
 
-## 3. Analisi e Ristrutturazione della Documentazione
+### Qualita del Codice
 
-### Stato Iniziale vs Status Attuale
-Inizialmente la documentazione constava di un `README.md` in root e molteplici file markdown sparsi. Con l'avvento dell'architettura consolidata v1.1.4:
--   È stato creato un **Master Index Documentale** in `docs/README.md`.
--   La Root Directory del progetto è stata deframmentata confinando tutto lo sviluppo web in `src/` e l'uso di tool in `scripts/`. L'Indice base strutturale è `docs/structure_index.md`.
--   La cartella `docs/changelogs/` detiene storicamente lo scale-up cronologico del prodotto in pura concezione *git-like*.
--   Il disaccoppiamento dei Log di Progetto (chiamati Changelog) è totale.
+Il codice e pulito, tipizzato e manutenibile. La separazione tra dati e presentazione e netta. La logica di business risiede negli hook e nelle API PHP, non nei componenti presentazionali.
 
-## 4. Verifica Sincronizzazione Documentazione-Codice
+## 3. Verifica Sincronizzazione Documentazione-Codice
 
-È stata effettuata una verifica puntuale tra il changelog più recente (**v1.5.0**) e l'ecosistema fisico della build.
+Verifica puntuale tra le ultime versioni rilasciate e l'ecosistema fisico della build.
 
-| Feature Documentata (v1.5.0) | Riscontro File System / Src | Esito |
-| :--- | :--- | :--- |
-| **Sistema Scheduling** | `articles.php` time-check e badge admin | ✅ CONFORME |
-| **Generatore Nativo RSS** | `/api/rss.php` XML engine | ✅ CONFORME |
-| **Fix Colori Tailwind v4** | `index.css` const reintegra | ✅ CONFORME |
-| **SEO Server Side** | `index.php` root router creato. | ✅ CONFORME |
-| **Sezione Blog Dinamica** | `Header.tsx` e custom Enum Type aggiunti. | ✅ CONFORME |
-| **Iniezione Dinamica Frontend** | `useFetchArticles.ts`, `PortfolioGrid` (Home). | ✅ PRECEDENTE |
-| **Auth Base** | `Login.tsx` / `Settings.tsx` & `App.tsx` routing. | ✅ PRECEDENTE |
-| **Rete API Principale** | Scripts `articles.php` / `upload.php` backend. | ✅ PRECEDENTE |
-| **Foundation Backend (Mini-CMS)** | Setup `public/api/db.php` e schema SQLite | ✅ PRECEDENTE |
-| **Fix Code Smell Formali** | `src/App.tsx` e nomenclatura `PortfolioGrid` | ✅ PRECEDENTE |
-| **Data-Driven About Me** | `src/data/aboutMeData.ts` estrazione testi | ✅ CONFORME |
-| **Glassmorphism Modali** | `LetterModal.tsx` & `ProjectDetail.tsx` | ✅ CONFORME |
-| **Glow Interactions** | `Header.tsx` e bottoni grid (Ring utils) | ✅ CONFORME |
-| **Text Balance** | Tailwind v4 properties applicate | ✅ CONFORME |
+| Feature Documentata | Versione | Riscontro File System | Esito |
+| :--- | :--- | :--- | :--- |
+| Fix Crash Media Gallery (chiavi DB) | v1.5.6 | `MediaGallery.tsx` map keys allineate | CONFORME |
+| Fix Overlap Hero articoli lunghi | v1.5.6 | `SingleArticle.tsx` min-h + pt-32 | CONFORME |
+| Emergency Password Reset | v1.5.6 | Script temporaneo eliminato + Roadmap aggiornata | CONFORME |
+| Timezone Europe/Rome in PHP | v1.5.5 | `articles.php` e `rss.php` con `date_default_timezone_set` | CONFORME |
+| Redesign Box CTA fine lettura | v1.5.4 | `SingleArticle.tsx` Flexbox CTA | CONFORME |
+| Fix link anteprima BrowserRouter | v1.5.3 | Dashboard link senza `#` hardcoded | CONFORME |
+| Anteprima bozze per admin | v1.5.2 | Verifica session in `SingleArticle.tsx` | CONFORME |
+| Blockquote editor + patch upload | v1.5.1 | `RichTextEditor.tsx` + `upload.php` | CONFORME |
+| Sistema Scheduling articoli | v1.5.0 | `articles.php` time-check + badge admin | CONFORME |
+| Generatore RSS Feed | v1.5.0 | `/api/rss.php` XML engine | CONFORME |
+| Fix colori Tailwind v4 | v1.5.0 | `index.css` `--color-dis-green` in `@theme` | CONFORME |
+| SEO Server Side | v1.4.0 | `index.php` root router | CONFORME |
+| Sezione Blog Dinamica | v1.4.0 | `Header.tsx` + enum `BLOG_E_RIFLESSIONI` | CONFORME |
+| Redesign Magazine (ArticleArchive + SingleArticle) | v1.4.5 | Componenti creati, vecchi eliminati | CONFORME |
+| Editor WYSIWYG | v1.4.4 | `RichTextEditor.tsx` + Showdown | CONFORME |
+| Iniezione DB Live Frontend | v1.3.5 | `useFetchArticles.ts`, `PortfolioGrid` | CONFORME |
+| Admin Media Gallery | v1.3.4 | `MediaGallery.tsx` + `upload.php` | CONFORME |
+| Admin Editor React | v1.3.3 | `ArticleEditor.tsx`, `ArticlesList.tsx` | CONFORME |
+| Auth & Foundation UI | v1.3.2 | `Login.tsx`, `Settings.tsx`, `AdminLayout` | CONFORME |
+| Rete API Principale | v1.3.1 | `articles.php`, `upload.php`, `auth_helper.php` | CONFORME |
+| Foundation Backend SQLite | v1.3.0 | `db.php`, `init_db.php`, schema tabelle | CONFORME |
+| Rate limiting login | v1.3.1 | `login_attempts` table + max 5 tentativi/15min per IP in `auth.php` | CONFORME (non documentato) |
+| Schema `users` senza colonna `email` | v1.3.0 | `init_db.php`: solo id, username, password_hash, created_at | NOTA: vecchia docs errata |
+| Data-Driven About Me | v1.2.1 | `src/data/aboutMeData.ts` | CONFORME |
+| Glassmorphism Modali | v1.2.0 | `LetterModal.tsx` backdrop-blur | CONFORME |
 
-**Conclusione Verifica**: Lo stato del codice è **perfettamente sincronizzato**. Il sistema "Single Source of Truth" funziona brillantemente per arginare deriva UI.
+**Conclusione Verifica:** Lo stato del codice e perfettamente sincronizzato con la documentazione. Il sistema funziona come architettura ibrida React/PHP consolidata.
 
-## 5. Conclusioni
-Lo stato di salute del progetto è **eccellente**. L'infrastruttura è stabilizzata e pronta per una manutenzione data-driven unicamente basata su update del TypeScript Data Object o delle schede markdown descrittive, con intervento sui Componenti React quasi nullo.
+## 4. Conclusioni
 
-**Prossimi Passi Consigliati**:
--   Mantenere intatta questa struttura Data-Driven basata su `portfolioData.ts` per l'inserimento di eventuali nuovi racconti/progetti.
--   Continuare a versionare la folder `/docs/changelogs/` e mantenere sincronizzato `docs/README.md`.
+Lo stato di salute del progetto e **eccellente**. L'infrastruttura e stabilizzata e pienamente operativa in produzione.
+
+**Prossimi Passi Consigliati (da Roadmap):**
+
+- Implementare sistema di login/recovery via email (priorita alta, dopo incidente v1.5.6)
+- Aggiungere paginazione backend-driven su `PortfolioGrid` e `ArticleArchive`
+- Sistema di Backup automatico del database SQLite
+- Filtri a Tab nella Media Gallery per tipo MIME

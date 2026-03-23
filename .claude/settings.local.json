@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(powershell -Command \"[System.IO.File]::ReadAllBytes\\(''c:\\\\Users\\\\Utente\\\\Documents\\\\GitHub\\\\SITI-WEB\\\\SimonePizziWebSite\\\\docs\\\\roadmap.md''\\) | Select-Object -First 4 | ForEach-Object { ''{0:X2}'' -f $_}\")",
+      "Bash(powershell -Command \"$bytes = [System.IO.File]::ReadAllBytes\\(''c:/Users/Utente/Documents/GitHub/SITI-WEB/SimonePizziWebSite/docs/roadmap.md''\\); $bytes[0..3] | foreach { $_ToString\\(''X2''\\) }\")",
+      "Bash(powershell -Command \"$path = ''c:/Users/Utente/Documents/GitHub/SITI-WEB/SimonePizziWebSite/docs/roadmap.md''; $bytes = [System.IO.File]::ReadAllBytes\\($path\\); Write-Host \\($bytes[0].ToString\\(''X2''\\) + '' '' + $bytes[1].ToString\\(''X2''\\) + '' '' + $bytes[2].ToString\\(''X2''\\) + '' '' + $bytes[3].ToString\\(''X2''\\)\\)\")",
+      "Bash(python3 -c \":*)"
+    ]
+  }
+}
