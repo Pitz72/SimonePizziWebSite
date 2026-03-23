@@ -1,7 +1,7 @@
 # Relazione sullo Stato del Progetto "Simone Pizzi - Portfolio Creativo"
 
-**Data:** 17 Marzo 2026
-**Versione Sotto Analisi:** 1.5.6
+**Data:** 23 Marzo 2026
+**Versione Sotto Analisi:** 1.5.7
 
 ## 1. Panoramica Generale
 
@@ -42,6 +42,8 @@ Verifica puntuale tra le ultime versioni rilasciate e l'ecosistema fisico della 
 
 | Feature Documentata | Versione | Riscontro File System | Esito |
 | :--- | :--- | :--- | :--- |
+| Security fix: `?id=X` ora richiede `Auth::check()` | v1.5.7 | `articles.php` riga 71 | CONFORME |
+| Fix ordinamento articoli schedulati (ORDER BY published_at) | v1.5.7 | `articles.php` riga 107 | CONFORME |
 | Fix Crash Media Gallery (chiavi DB) | v1.5.6 | `MediaGallery.tsx` map keys allineate | CONFORME |
 | Fix Overlap Hero articoli lunghi | v1.5.6 | `SingleArticle.tsx` min-h + pt-32 | CONFORME |
 | Emergency Password Reset | v1.5.6 | Script temporaneo eliminato + Roadmap aggiornata | CONFORME |

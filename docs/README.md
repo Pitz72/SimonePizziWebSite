@@ -1,5 +1,5 @@
 # Indice Master della Documentazione
-**Simone Pizzi - Portfolio Creativo (v1.5.6)**
+**Simone Pizzi - Portfolio Creativo (v1.5.7)**
 
 Benvenuto nell'Hub Documentale del progetto. Da qui e possibile rintracciare in modo sistematico l'intera evoluzione della codebase, esplorare le architetture, e recuperare informazioni di sistema o log del passato.
 
@@ -22,6 +22,7 @@ Per una tracciabilita trasparente dello sviluppo, ogni aggiornamento e documenta
 
 ### Filone 1.5.x (Architettura di Pubblicazione & Stabilizzazione)
 
+- [v1.5.7 - Security Fix & Ordinamento Articoli Programmati](changelogs/1.5.7.md)
 - [v1.5.6 - Fix Media Gallery e UI Articoli](changelogs/1.5.6.md)
 - [v1.5.5 - Correzione Timezone Database Server (L.A./ITA)](changelogs/1.5.5.md)
 - [v1.5.4 - Redesign Box CTA Lettura](changelogs/1.5.4.md)

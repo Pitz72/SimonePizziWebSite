@@ -66,8 +66,9 @@ try {
             exit;
         }
 
-        // Modalità GET per singolo articolo via ID (usato da React Editor)
+        // Modalità GET per singolo articolo via ID (usato da React Editor - solo admin)
         if (isset($_GET['id'])) {
+            Auth::check();
             $stmt = $pdo->prepare("SELECT * FROM articles WHERE id = ?");
             $stmt->execute([$_GET['id']]);
             $article = $stmt->fetch();
@@ -103,7 +104,11 @@ try {
             $query .= " WHERE " . implode(" AND ", $conditions);
         }
 
-        $query .= " ORDER BY created_at DESC LIMIT ? OFFSET ?";
+        // [V1.5.7] Ordinamento per data di pubblicazione effettiva.
+        // Gli articoli programmati appaiono in cima al feed nel momento in cui si sbloccano,
+        // non sepolti nella posizione della data di creazione.
+        // Fallback a created_at per articoli senza published_at (legacy o bozze promosse).
+        $query .= " ORDER BY CASE WHEN published_at IS NOT NULL AND published_at != '' THEN published_at ELSE created_at END DESC LIMIT ? OFFSET ?";
         
         $stmt = $pdo->prepare($query);
         
