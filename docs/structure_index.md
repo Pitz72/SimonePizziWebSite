@@ -16,7 +16,7 @@ Questo documento traccia l'architettura macroscopica e la logica delle cartelle 
   - `src/types.ts` — Definizioni delle interfacce TypeScript (Category enum, PortfolioItem).
 
 - **`/public/`** — ASSET STATICI + BACKEND PHP.
-  - `/public/api/` — Layer REST in PHP (articles.php, auth.php, db.php, init_db.php, media.php, upload.php, rss.php, stats.php, settings.php, auth_helper.php, fix_db.php).
+  - `/public/api/` — Layer REST in PHP (articles.php, auth.php, db.php, media.php, upload.php, rss.php, stats.php, settings.php, auth_helper.php).
   - `/public/api/.data/` — Cartella protetta contenente `database.sqlite` (gitignored, accesso bloccato da `.htaccess` interno).
   - `/public/uploads/` — File caricati tramite la Media Gallery (immagini, PDF, ZIP, MP3). Creata automaticamente al primo upload.
   - `/public/images/` — Copertine dei progetti e artwork statici (WebP, PNG, JPG ottimizzati).
@@ -32,8 +32,9 @@ Questo documento traccia l'architettura macroscopica e la logica delle cartelle 
   - `roadmap.md` — Sviluppi futuri pianificati.
   - `/docs/changelogs/` — Storico lineare delle versioni dal v1.0.1 a oggi.
 
-- **`/scripts/`** — CASSETTA DEGLI ATTREZZI. Utility esterne al compilatore.
+- **`/scripts/`** — CASSETTA DEGLI ATTREZZI. Utility esterne al compilatore e script di manutenzione DB.
   - `optimize_image.ps1` — Script PowerShell per ottimizzazione immagini bulk.
+  - `init_db.php` — Schema completo del database SQLite (tutte e 6 le tabelle + utente admin iniziale). **NON deployare**: usare solo come riferimento per disaster recovery o setup da zero. Eseguire localmente o via FTP temporaneo sul server, poi cancellare subito.
 
 - **`/dist/`** — Output della build di produzione generato da Vite (`npm run build`). Non editare manualmente.
 
@@ -46,4 +47,4 @@ Questo documento traccia l'architettura macroscopica e la logica delle cartelle 
 
 ---
 
-> **Regola d'Oro per gli Agenti Autonomi:** Non iniettare cartelle come `components` o file come `types.ts` nella root del progetto. Seguire l'architettura `src/`. Non abbandonare immagini pesanti in root: usare `/public/images/`. Non creare file PHP fuori da `/public/api/`. I file `tailwind.config.js` e `postcss.config.js` NON ESISTONO dal v1.1.5: Tailwind v4 e configurato esclusivamente via `@theme` in `src/index.css` e il plugin `@tailwindcss/vite`.
+> **Regola d'Oro per gli Agenti Autonomi:** Non iniettare cartelle come `components` o file come `types.ts` nella root del progetto. Seguire l'architettura `src/`. Non abbandonare immagini pesanti in root: usare `/public/images/`. Non creare file PHP fuori da `/public/api/` (eccezione: `init_db.php` e script di manutenzione one-shot vanno in `/scripts/`). I file `tailwind.config.js` e `postcss.config.js` NON ESISTONO dal v1.1.5: Tailwind v4 e configurato esclusivamente via `@theme` in `src/index.css` e il plugin `@tailwindcss/vite`.

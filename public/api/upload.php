@@ -47,7 +47,7 @@ if (!in_array($realMime, $allowedMimes)) {
 // Crea directory uploads definita nella Public root (compilata da Vite)
 $uploadDir = __DIR__ . '/../uploads/';
 if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0777, true);
+    mkdir($uploadDir, 0755, true); // [v1.5.10] 0755: rwxr-xr-x — owner pieno, altri solo lettura/esecuzione
 }
 
 // Genera un nome unico per il file per non sovrascrivere

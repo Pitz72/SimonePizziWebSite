@@ -56,7 +56,7 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                 e.stopPropagation();
 
                 const mdHtml = mdConverter.makeHtml(plainText);
-                document.execCommand('insertHTML', false, mdHtml);
+                try { document.execCommand('insertHTML', false, mdHtml); } catch { /* fallback silenzioso */ } // eslint-disable-line @typescript-eslint/no-deprecated
                 return;
             }
 
@@ -80,7 +80,7 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                 const allEls = doc.querySelectorAll('*');
                 allEls.forEach(el => { if (el instanceof HTMLElement) el.removeAttribute('class'); });
 
-                document.execCommand('insertHTML', false, doc.body.innerHTML);
+                try { document.execCommand('insertHTML', false, doc.body.innerHTML); } catch { /* fallback silenzioso */ } // eslint-disable-line @typescript-eslint/no-deprecated
                 return;
             }
         };
@@ -91,8 +91,15 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
         };
     }, [mdConverter]);
 
+    // [v1.5.10] document.execCommand è deprecated ma ancora supportato da tutti i browser nel 2026.
+    // Migrazione completa a Selection/Range API tracciata in roadmap come task futuro.
+    // try-catch aggiunto per robustezza anticipatoria.
     const exec = (command: string, value: string | undefined = undefined) => {
-        document.execCommand(command, false, value);
+        try {
+            document.execCommand(command, false, value); // eslint-disable-line @typescript-eslint/no-deprecated
+        } catch {
+            console.warn(`[RichTextEditor] execCommand '${command}' non supportato in questo browser.`);
+        }
         if (editorRef.current) onChange(editorRef.current.innerHTML);
         setShowColorPicker(false);
     };

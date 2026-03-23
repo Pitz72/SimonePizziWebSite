@@ -1,6 +1,10 @@
 <?php
 require_once 'db.php';
 
+// [v1.5.8] Cookie di sessione con flag di sicurezza: HttpOnly, Secure, SameSite=Strict
+ini_set('session.cookie_httponly', 1);
+ini_set('session.cookie_secure', 1);
+ini_set('session.cookie_samesite', 'Strict');
 session_start();
 header('Content-Type: application/json');
 
@@ -25,6 +29,15 @@ try {
 
         // Logout
         if (isset($data['action']) && $data['action'] === 'logout') {
+            // [v1.5.8] Logout completo: svuota i dati, invalida il cookie client, distrugge la sessione
+            $_SESSION = [];
+            if (ini_get('session.use_cookies')) {
+                $params = session_get_cookie_params();
+                setcookie(session_name(), '', time() - 42000,
+                    $params['path'], $params['domain'],
+                    $params['secure'], $params['httponly']
+                );
+            }
             session_destroy();
             echo json_encode(['status' => 'success']);
             exit;
@@ -63,6 +76,8 @@ try {
         $user = $stmt->fetch();
 
         if ($user && password_verify($password, $user['password_hash'])) {
+            // [v1.5.8] Rigenerazione ID sessione per prevenire Session Fixation Attack
+            session_regenerate_id(true);
             // Setup Session
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];

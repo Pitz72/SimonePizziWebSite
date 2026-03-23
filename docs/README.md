@@ -1,5 +1,5 @@
 # Indice Master della Documentazione
-**Simone Pizzi - Portfolio Creativo (v1.5.7)**
+**Simone Pizzi - Portfolio Creativo (v1.5.10)**
 
 Benvenuto nell'Hub Documentale del progetto. Da qui e possibile rintracciare in modo sistematico l'intera evoluzione della codebase, esplorare le architetture, e recuperare informazioni di sistema o log del passato.
 
@@ -22,6 +22,9 @@ Per una tracciabilita trasparente dello sviluppo, ogni aggiornamento e documenta
 
 ### Filone 1.5.x (Architettura di Pubblicazione & Stabilizzazione)
 
+- [v1.5.10 - Security Sweep Finale: DOMPurify, CSP Headers, mkdir 0755, Slug Accenti, execCommand](changelogs/1.5.10.md)
+- [v1.5.9 - Security Fix: Password Casuale init_db & Deprecation FILTER_SANITIZE_STRING](changelogs/1.5.9.md)
+- [v1.5.8 - Security Hardening Sessioni PHP (Session Fixation & Cookie Flags)](changelogs/1.5.8.md)
 - [v1.5.7 - Security Fix & Ordinamento Articoli Programmati](changelogs/1.5.7.md)
 - [v1.5.6 - Fix Media Gallery e UI Articoli](changelogs/1.5.6.md)
 - [v1.5.5 - Correzione Timezone Database Server (L.A./ITA)](changelogs/1.5.5.md)

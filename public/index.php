@@ -36,8 +36,8 @@ if ($slug && file_exists($dbPath)) {
         $pdo = new PDO('sqlite:' . $dbPath);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-        // Prepariamo la stringa per farla sfuggire da attacchi (anche col PDO param funziona)
-        $cleanSlug = filter_var($slug, FILTER_SANITIZE_STRING);
+        // [v1.5.9] Sostituzione FILTER_SANITIZE_STRING (deprecated PHP 8.1+) con strip_tags + trim
+        $cleanSlug = strip_tags(trim($slug));
         
         $stmt = $pdo->prepare("SELECT title, excerpt, cover_image FROM articles WHERE slug = :slug AND status = 'published' LIMIT 1");
         $stmt->execute([':slug' => $cleanSlug]);

@@ -10,3 +10,27 @@
   # Dirotta tutte le URL puramente virtuali di React sul motore SEO PHP
   RewriteRule ^(.*)$ /index.php [L,QSA]
 </IfModule>
+
+# [v1.5.10] Security Headers
+<IfModule mod_headers.c>
+  # Impedisce MIME-type sniffing (es. eseguire un file .jpg come script)
+  Header always set X-Content-Type-Options "nosniff"
+
+  # Blocca il sito nell'essere caricato in iframe da altri domini (Clickjacking)
+  Header always set X-Frame-Options "SAMEORIGIN"
+
+  # Limita le informazioni di referrer inviate a siti terzi
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
+  # Disabilita API hardware non necessarie (camera, microfono, geolocalizzazione)
+  Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
+
+  # Content Security Policy
+  # script-src 'self': solo bundle Vite locali (nessun inline script in produzione)
+  # style-src 'self' 'unsafe-inline': CSS Vite + inline style="" usati da Framer Motion per le animazioni
+  # img-src 'self' data: https:: immagini locali + data URI + immagini esterne (cover articoli CDN)
+  # connect-src 'self': chiamate API solo verso stesso dominio
+  # object-src 'none': blocca plugin Flash/PDF embed (vettore attacco legacy)
+  # frame-ancestors 'self': equivale a X-Frame-Options SAMEORIGIN ma per browser moderni
+  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; connect-src 'self'; font-src 'self' data:; object-src 'none'; frame-ancestors 'self'; base-uri 'self'"
+</IfModule>

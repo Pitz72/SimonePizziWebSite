@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Share2, Download, ExternalLink, Tag } from 'lucide-react';
+import DOMPurify from 'dompurify';
 import { api } from '../api';
 import { PortfolioItem } from '../types';
 import SEO from './SEO';
@@ -154,7 +155,7 @@ const SingleArticle: React.FC<SingleArticleProps> = () => {
                             prose-img:rounded-2xl prose-img:shadow-2xl prose-img:border prose-img:border-zinc-800
                             prose-blockquote:border-l-4 prose-blockquote:border-dis-green prose-blockquote:bg-zinc-900/50 prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-xl prose-blockquote:not-italic prose-blockquote:text-zinc-200
                         "
-                        dangerouslySetInnerHTML={{ __html: article.description }}
+                        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.description) }}
                     />
                 </div>
             </div>

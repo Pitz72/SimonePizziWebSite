@@ -1,7 +1,7 @@
 # Relazione sullo Stato del Progetto "Simone Pizzi - Portfolio Creativo"
 
 **Data:** 23 Marzo 2026
-**Versione Sotto Analisi:** 1.5.7
+**Versione Sotto Analisi:** 1.5.10
 
 ## 1. Panoramica Generale
 
@@ -42,6 +42,19 @@ Verifica puntuale tra le ultime versioni rilasciate e l'ecosistema fisico della 
 
 | Feature Documentata | Versione | Riscontro File System | Esito |
 | :--- | :--- | :--- | :--- |
+| DOMPurify.sanitize() su article.description in SingleArticle (XSS Stored) | v1.5.10 | `SingleArticle.tsx` riga 157 | CONFORME |
+| Security Headers HTTP: X-Content-Type-Options, X-Frame-Options, CSP, Referrer-Policy | v1.5.10 | `public/.htaccess` righe 15-33 | CONFORME |
+| upload.php: mkdir 0777 → 0755 (permessi directory corretti) | v1.5.10 | `upload.php` riga 50 | CONFORME |
+| generateSlug: normalizzazione accenti italiani (à,è,é,ì,ò,ù) | v1.5.10 | `articles.php` righe 18-21 | CONFORME |
+| execCommand deprecated: try-catch + commento, migrazione Selection API in roadmap | v1.5.10 | `RichTextEditor.tsx` righe 94-103 | CONFORME |
+| RSS LIMIT 50: costante nominata RSS_FEED_LIMIT | v1.5.10 | `rss.php` riga 16 | CONFORME |
+| Migrazione DB updated_at: script creato in /scripts/ (da eseguire su server) | v1.5.10 | `scripts/migrate_add_updated_at.php` | PENDENTE (deploy manuale) |
+| init_db.php: password generata casualmente con bin2hex(random_bytes), no hardcoded | v1.5.9 | `scripts/init_db.php` righe 22-28 | CONFORME |
+| init_db.php: INSERT users con PDO prepared statement (no string interpolation) | v1.5.9 | `scripts/init_db.php` riga 25 | CONFORME |
+| index.php: FILTER_SANITIZE_STRING sostituito con strip_tags(trim()) | v1.5.9 | `public/index.php` riga 40 | CONFORME |
+| Security hardening sessioni: cookie HttpOnly + Secure + SameSite=Strict | v1.5.8 | `auth.php` righe 4-7 | CONFORME |
+| Security: `session_regenerate_id(true)` dopo login (Session Fixation) | v1.5.8 | `auth.php` riga 80 | CONFORME |
+| Security: logout completo con svuotamento sessione e invalidazione cookie | v1.5.8 | `auth.php` righe 33-43 | CONFORME |
 | Security fix: `?id=X` ora richiede `Auth::check()` | v1.5.7 | `articles.php` riga 71 | CONFORME |
 | Fix ordinamento articoli schedulati (ORDER BY published_at) | v1.5.7 | `articles.php` riga 107 | CONFORME |
 | Fix Crash Media Gallery (chiavi DB) | v1.5.6 | `MediaGallery.tsx` map keys allineate | CONFORME |

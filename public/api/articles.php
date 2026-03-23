@@ -15,6 +15,10 @@ $ita_now_time = time();
 
 // Helper per generare slug unici
 function generateSlug($title, $pdo) {
+    // [v1.5.10] Normalizzazione accenti italiani prima del replace (evita slug come "caf-" da "caffè")
+    $accents      = ['à','è','é','ì','ò','ù','À','È','É','Ì','Ò','Ù','â','ê','î','ô','û','ä','ë','ï','ö','ü'];
+    $replacements = ['a','e','e','i','o','u','a','e','e','i','o','u','a','e','i','o','u','a','e','i','o','u'];
+    $title = str_replace($accents, $replacements, $title);
     $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title)));
     
     // Verifica pendenza

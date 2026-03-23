@@ -1,6 +1,6 @@
 # Simone Pizzi - Portfolio Creativo
 
-![Version](https://img.shields.io/badge/version-1.5.7-green.svg)
+![Version](https://img.shields.io/badge/version-1.5.10-green.svg)
 ![React](https://img.shields.io/badge/react-v19.2.4-blue.svg)
 ![TypeScript](https://img.shields.io/badge/typescript-v5.2.2-blue.svg)
 ![Vite](https://img.shields.io/badge/vite-v7.3.1-646cff.svg)

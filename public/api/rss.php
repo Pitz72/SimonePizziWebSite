@@ -13,6 +13,9 @@ $base_url = $protocol . '://' . $host;
 date_default_timezone_set('Europe/Rome');
 $ita_now_str = date('Y-m-d H:i:s');
 
+// [v1.5.10] Limite articoli nel feed RSS — valore nominato per facile manutenzione futura
+define('RSS_FEED_LIMIT', 50);
+
 // Assumiamo che il nome del feed venga dai settings, per ora hardcodiamo un title di base
 $site_title = "Simone Pizzi - Blog & Portfolio";
 $site_description = "Le ultime pubblicazioni di Simone Pizzi";
@@ -30,7 +33,7 @@ try {
               FROM articles 
               WHERE status = 'published' AND (published_at IS NULL OR published_at = '' OR published_at <= :ita_now)
               ORDER BY published_at DESC 
-              LIMIT 50";
+              LIMIT " . RSS_FEED_LIMIT;
     
     $stmt = $pdo->prepare($query);
     $stmt->execute([':ita_now' => $ita_now_str]);

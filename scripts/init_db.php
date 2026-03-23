@@ -19,10 +19,14 @@ try {
     // Inserimento utente Admin predefinito se non esiste
     $stmt = $pdo->query("SELECT COUNT(*) FROM users");
     if ($stmt->fetchColumn() == 0) {
-        // Password iniziale: 'admin2026'
-        $hash = password_hash('admin2026', PASSWORD_DEFAULT);
-        $pdo->exec("INSERT INTO users (username, password_hash) VALUES ('admin', '$hash')");
-        $logs[] = "Utente 'admin' predefinito creato (password iniziale: admin2026). Potrai cambiarla dal pannello.";
+        // [v1.5.9] Password temporanea casuale generata al momento dell'esecuzione (nessuna password hardcoded)
+        $tempPassword = bin2hex(random_bytes(12)); // 24 caratteri hex casuali, crittograficamente sicuri
+        $hash = password_hash($tempPassword, PASSWORD_DEFAULT);
+        $stmtInsert = $pdo->prepare("INSERT INTO users (username, password_hash) VALUES (?, ?)");
+        $stmtInsert->execute(['admin', $hash]);
+        $logs[] = "Utente 'admin' creato. PASSWORD TEMPORANEA: " . $tempPassword . " — CAMBIARLA IMMEDIATAMENTE dal pannello /admin/settings dopo il primo accesso. Questa password non viene salvata da nessuna parte.";
+    } else {
+        $logs[] = "Tabella 'users' gia popolata. Nessun utente creato (dati esistenti preservati).";
     }
 
     // 2. Tabella Articles (Il mini-CMS)
