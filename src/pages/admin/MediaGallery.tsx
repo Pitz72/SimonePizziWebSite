@@ -1,19 +1,41 @@
 import { useState, useEffect, useRef } from 'react';
-import { UploadCloud, Trash2, Copy, FileIcon, Image as ImageIcon, Link as LinkIcon, RefreshCw, CheckCircle2 } from 'lucide-react';
+import { UploadCloud, Trash2, Copy, FileIcon, Image as ImageIcon, Link as LinkIcon, RefreshCw, CheckCircle2, FileText, File } from 'lucide-react';
 import { api } from '../../api';
+
+type TabKey = 'immagini' | 'documenti' | 'file';
+
+function getTab(mimeType: string): TabKey {
+    if (mimeType.startsWith('image/')) return 'immagini';
+    if (mimeType === 'application/pdf') return 'documenti';
+    return 'file';
+}
+
+const TABS: { key: TabKey; label: string; icon: React.ReactNode }[] = [
+    { key: 'immagini', label: 'Immagini', icon: <ImageIcon size={16} /> },
+    { key: 'documenti', label: 'Documenti', icon: <FileText size={16} /> },
+    { key: 'file', label: 'File', icon: <File size={16} /> },
+];
+
+const formatBytes = (bytes: number) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
 
 export default function MediaGallery() {
     const [mediaList, setMediaList] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [uploading, setUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState(0);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
     const [copiedId, setCopiedId] = useState<number | null>(null);
+    const [activeTab, setActiveTab] = useState<TabKey>('immagini');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    useEffect(() => {
-        loadMedia();
-    }, []);
+    useEffect(() => { loadMedia(); }, []);
 
     const loadMedia = async () => {
         setLoading(true);
@@ -21,7 +43,7 @@ export default function MediaGallery() {
         try {
             const data = await api.getMedia();
             setMediaList(data);
-        } catch (err: any) {
+        } catch {
             setError('Impossibile caricare i file multimediali.');
         } finally {
             setLoading(false);
@@ -33,30 +55,33 @@ export default function MediaGallery() {
         if (!file) return;
 
         setUploading(true);
+        setUploadProgress(0);
         setError('');
         setSuccessMessage('');
 
         try {
-            await api.uploadMedia(file);
+            await api.uploadMediaWithProgress(file, (percent) => {
+                setUploadProgress(percent);
+            });
             setSuccessMessage(`File "${file.name}" caricato con successo.`);
-            loadMedia(); // Ricarica la lista per inglobare il nuovo file
+            loadMedia();
         } catch (err: any) {
-            setError(err.message || 'Errore durante l\'upload.');
+            setError(err.message || "Errore durante l'upload.");
         } finally {
             setUploading(false);
+            setUploadProgress(0);
             if (fileInputRef.current) fileInputRef.current.value = '';
         }
     };
 
     const handleDelete = async (id: number, filename: string) => {
         if (!window.confirm(`Sei sicuro di voler eliminare irrevocabilmente "${filename}" dal server?`)) return;
-
         try {
             await api.deleteMedia(id);
             setMediaList(mediaList.filter(m => m.id !== id));
             setSuccessMessage('File eliminato correttamente.');
             setTimeout(() => setSuccessMessage(''), 3000);
-        } catch (err: any) {
+        } catch {
             alert('Errore eliminazione file.');
         }
     };
@@ -67,12 +92,12 @@ export default function MediaGallery() {
         setTimeout(() => setCopiedId(null), 2000);
     };
 
-    const formatBytes = (bytes: number) => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    const filteredMedia = mediaList.filter(m => getTab(m.mime_type) === activeTab);
+
+    const tabCounts: Record<TabKey, number> = {
+        immagini: mediaList.filter(m => getTab(m.mime_type) === 'immagini').length,
+        documenti: mediaList.filter(m => getTab(m.mime_type) === 'documenti').length,
+        file: mediaList.filter(m => getTab(m.mime_type) === 'file').length,
     };
 
     return (
@@ -99,18 +124,55 @@ export default function MediaGallery() {
                         {uploading ? <RefreshCw className="animate-spin" size={20} /> : <UploadCloud size={20} />}
                         <span>{uploading ? 'Caricamento...' : 'Carica File'}</span>
                     </button>
-                    <p className="text-xs text-zinc-500 mt-2 text-right">Max 10MB per file</p>
+                    <p className="text-xs text-zinc-500 mt-2 text-right">Max 256MB per file</p>
                 </div>
             </header>
 
+            {/* Barra di progresso upload */}
+            {uploading && (
+                <div className="space-y-1">
+                    <div className="flex justify-between text-xs text-zinc-400">
+                        <span>Upload in corso...</span>
+                        <span>{uploadProgress}%</span>
+                    </div>
+                    <div className="w-full bg-zinc-800 rounded-full h-2 overflow-hidden">
+                        <div
+                            className="h-2 bg-dis-green rounded-full transition-all duration-150"
+                            style={{ width: `${uploadProgress}%` }}
+                        />
+                    </div>
+                </div>
+            )}
+
             {error && <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 text-sm font-medium">{error}</div>}
-            {successMessage && <div className="p-4 bg-dis-green/10 border border-dis-green/20 rounded-lg text-dis-green text-sm font-medium flex items-center gap-2"><CheckCircle2 size={16} /> {successMessage}</div>}
+            {successMessage && (
+                <div className="p-4 bg-dis-green/10 border border-dis-green/20 rounded-lg text-dis-green text-sm font-medium flex items-center gap-2">
+                    <CheckCircle2 size={16} /> {successMessage}
+                </div>
+            )}
 
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-                <div className="p-6 border-b border-zinc-800 flex justify-between items-center">
-                    <h2 className="text-lg font-bold text-white flex items-center gap-2">
-                        <ImageIcon className="text-dis-green" size={20} /> Catalogo Server
-                    </h2>
+                {/* Tab bar + refresh */}
+                <div className="p-4 border-b border-zinc-800 flex items-center justify-between gap-4">
+                    <div className="flex gap-1">
+                        {TABS.map(tab => (
+                            <button
+                                key={tab.key}
+                                onClick={() => setActiveTab(tab.key)}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                                    activeTab === tab.key
+                                        ? 'bg-dis-green/10 text-dis-green border border-dis-green/20'
+                                        : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+                                }`}
+                            >
+                                {tab.icon}
+                                {tab.label}
+                                <span className={`text-xs rounded-full px-1.5 py-0.5 ${activeTab === tab.key ? 'bg-dis-green/20 text-dis-green' : 'bg-zinc-800 text-zinc-500'}`}>
+                                    {tabCounts[tab.key]}
+                                </span>
+                            </button>
+                        ))}
+                    </div>
                     <button onClick={loadMedia} className="text-zinc-500 hover:text-white transition-colors" title="Aggiorna Lista">
                         <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
                     </button>
@@ -118,18 +180,17 @@ export default function MediaGallery() {
 
                 {loading && mediaList.length === 0 ? (
                     <div className="p-12 text-center text-zinc-500">Consultazione database in corso...</div>
-                ) : mediaList.length === 0 ? (
+                ) : filteredMedia.length === 0 ? (
                     <div className="p-12 text-center flex flex-col items-center">
                         <FileIcon size={48} className="text-zinc-700 mb-4" />
-                        <p className="text-zinc-400">Nessun file presente. Clicca su "Carica File" per iniziare.</p>
+                        <p className="text-zinc-400">Nessun file in questa sezione.</p>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
-                        {mediaList.map((media) => {
+                        {filteredMedia.map((media) => {
                             const isImage = media.mime_type.startsWith('image/');
                             return (
                                 <div key={media.id} className="bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden group hover:border-zinc-600 transition-colors flex flex-col">
-
                                     {/* Media Preview Box */}
                                     <div className="h-40 bg-zinc-900 flex items-center justify-center relative overflow-hidden">
                                         {isImage ? (

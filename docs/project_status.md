@@ -1,7 +1,7 @@
 # Relazione sullo Stato del Progetto "Simone Pizzi - Portfolio Creativo"
 
 **Data:** 23 Marzo 2026
-**Versione Sotto Analisi:** 1.5.10
+**Versione Sotto Analisi:** 1.6.0
 
 ## 1. Panoramica Generale
 

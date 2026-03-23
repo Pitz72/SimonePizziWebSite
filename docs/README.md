@@ -1,5 +1,5 @@
 # Indice Master della Documentazione
-**Simone Pizzi - Portfolio Creativo (v1.5.10)**
+**Simone Pizzi - Portfolio Creativo (v1.6.0)**
 
 Benvenuto nell'Hub Documentale del progetto. Da qui e possibile rintracciare in modo sistematico l'intera evoluzione della codebase, esplorare le architetture, e recuperare informazioni di sistema o log del passato.
 
@@ -19,6 +19,10 @@ Benvenuto nell'Hub Documentale del progetto. Da qui e possibile rintracciare in 
 ## Cronologia delle Versioni e Note di Rilascio
 
 Per una tracciabilita trasparente dello sviluppo, ogni aggiornamento e documentato nel dettaglio.
+
+### Filone 1.6.x (Tutti i Progetti & Media Gallery Evoluta)
+
+- [v1.6.0 - Tutti i Progetti (pagina pubblica + admin CRUD), Media Gallery tabs + progress bar upload](changelogs/1.6.0.md)
 
 ### Filone 1.5.x (Architettura di Pubblicazione & Stabilizzazione)
 

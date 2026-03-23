@@ -95,14 +95,12 @@ const Header: React.FC = () => {
             </CustomNavLink>
           </div>
           <div className="ml-4">
-            <a
-              href="https://github.com/Pitz72"
-              target="_blank"
-              rel="noopener noreferrer"
+            <Link
+              to="/tutti-i-progetti"
               className="inline-block bg-green-500 text-black font-bold text-sm px-4 py-2 rounded-lg hover:bg-green-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-green-500/40 ring-1 ring-green-400/50 hover:ring-white/50"
             >
-              IL MIO GITHUB
-            </a>
+              Tutti i Progetti
+            </Link>
           </div>
         </div>
       </nav>

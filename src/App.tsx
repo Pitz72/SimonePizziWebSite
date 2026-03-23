@@ -17,6 +17,9 @@ import Settings from './pages/admin/Settings';
 import ArticlesList from './pages/admin/ArticlesList';
 import ArticleEditor from './pages/admin/ArticleEditor';
 import MediaGallery from './pages/admin/MediaGallery';
+import ProjectsList from './pages/admin/ProjectsList';
+import ProjectEditor from './pages/admin/ProjectEditor';
+import AllProjects from './pages/AllProjects';
 import { Category } from './types';
 
 const backgroundStyle = {
@@ -50,6 +53,7 @@ const PublicLayout: React.FC = () => {
         <main className="px-4 sm:px-6 lg:px-8">
           <Routes>
             <Route path="/" element={<PortfolioGrid />} />
+            <Route path="/tutti-i-progetti" element={<AllProjects />} />
             <Route
               path={`/${Category.VIDEOGIOCHI}`}
               element={<ArticleArchive title="Videogiochi" category={Category.VIDEOGIOCHI} />}
@@ -113,6 +117,9 @@ const App: React.FC = () => {
             <Route path="articles" element={<ArticlesList />} />
             <Route path="articles/new" element={<ArticleEditor />} />
             <Route path="articles/edit/:id" element={<ArticleEditor />} />
+            <Route path="projects" element={<ProjectsList />} />
+            <Route path="projects/new" element={<ProjectEditor />} />
+            <Route path="projects/edit/:id" element={<ProjectEditor />} />
             <Route path="media" element={<MediaGallery />} />
             <Route index element={<Dashboard />} />
           </Route>

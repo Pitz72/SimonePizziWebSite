@@ -35,7 +35,11 @@ if (!in_array($fileExt, $allowedExts)) {
 $realMime = mime_content_type($file['tmp_name']);
 $allowedMimes = [
     'image/jpeg', 'image/png', 'image/webp', 'image/gif',
-    'application/pdf', 'application/zip', 'application/x-rar-compressed', 'audio/mpeg'
+    'application/pdf',
+    'application/zip', 'application/x-zip-compressed', 'application/x-zip',
+    'application/x-rar-compressed', 'application/vnd.rar',
+    'application/octet-stream', // ZIP/RAR su alcuni server vengono rilevati così
+    'audio/mpeg'
 ];
 
 if (!in_array($realMime, $allowedMimes)) {

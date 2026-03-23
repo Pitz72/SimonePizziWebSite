@@ -1,3 +1,11 @@
+# [v1.6.0] Upload size limits per file di grandi dimensioni (ZIP, archivi)
+<IfModule mod_php.c>
+  php_value upload_max_filesize 256M
+  php_value post_max_size 256M
+  php_value max_execution_time 300
+  php_value max_input_time 300
+</IfModule>
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /

@@ -123,6 +123,47 @@ export const api = {
         return res.json();
     },
 
+    // --- PROJECTS ---
+    getProjects: async (category?: string) => {
+        const qs = category ? `?category=${encodeURIComponent(category)}` : '';
+        const res = await fetch(`${API_URL}/projects.php${qs}`, fetchConfig);
+        if (!res.ok) throw new Error('Errore recupero progetti');
+        return res.json();
+    },
+    getProject: async (id: number) => {
+        const res = await fetch(`${API_URL}/projects.php?id=${id}`, fetchConfig);
+        if (!res.ok) throw new Error('Errore recupero progetto');
+        return res.json();
+    },
+    createProject: async (data: any) => {
+        const res = await fetch(`${API_URL}/projects.php`, {
+            ...fetchConfig, method: 'POST', body: JSON.stringify(data)
+        });
+        if (!res.ok) { const r = await res.json(); throw new Error(r.error || 'Errore creazione progetto'); }
+        return res.json();
+    },
+    updateProject: async (id: number, data: any) => {
+        const res = await fetch(`${API_URL}/projects.php?id=${id}`, {
+            ...fetchConfig, method: 'PUT', body: JSON.stringify({ id, ...data })
+        });
+        if (!res.ok) { const r = await res.json(); throw new Error(r.error || 'Errore aggiornamento progetto'); }
+        return res.json();
+    },
+    deleteProject: async (id: number) => {
+        const res = await fetch(`${API_URL}/projects.php?id=${id}`, {
+            ...fetchConfig, method: 'DELETE', body: JSON.stringify({ id })
+        });
+        if (!res.ok) throw new Error('Errore cancellazione progetto');
+        return res.json();
+    },
+    patchProject: async (id: number, data: any) => {
+        const res = await fetch(`${API_URL}/projects.php`, {
+            ...fetchConfig, method: 'PATCH', body: JSON.stringify({ id, ...data })
+        });
+        if (!res.ok) throw new Error('Errore patch progetto');
+        return res.json();
+    },
+
     // --- MEDIA ---
     uploadMedia: async (file: File) => {
         const formData = new FormData();
@@ -158,5 +199,43 @@ export const api = {
         });
         if (!res.ok) throw new Error('Errore cancellazione media');
         return res.json();
+    },
+    uploadMediaWithProgress: (file: File, onProgress: (percent: number) => void): Promise<any> => {
+        return new Promise((resolve, reject) => {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const xhr = new XMLHttpRequest();
+            xhr.withCredentials = true; // Mantiene i cookie di sessione PHP
+
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    onProgress(Math.round((e.loaded / e.total) * 100));
+                }
+            };
+
+            xhr.onload = () => {
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    try {
+                        resolve(JSON.parse(xhr.responseText));
+                    } catch {
+                        reject(new Error('Risposta non valida dal server'));
+                    }
+                } else {
+                    try {
+                        const err = JSON.parse(xhr.responseText);
+                        reject(new Error(err.error || `Errore upload (HTTP ${xhr.status})`));
+                    } catch {
+                        reject(new Error(`Errore upload (HTTP ${xhr.status})`));
+                    }
+                }
+            };
+            xhr.onerror = () => reject(new Error("Errore di rete durante l'upload"));
+            xhr.onabort = () => reject(new Error('Upload annullato'));
+
+            xhr.open('POST', `${API_URL}/upload.php`);
+            xhr.setRequestHeader('Accept', 'application/json');
+            xhr.send(formData);
+        });
     }
 };
