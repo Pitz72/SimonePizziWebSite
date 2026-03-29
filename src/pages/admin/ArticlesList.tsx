@@ -1,12 +1,19 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Search, ExternalLink } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, ExternalLink, Calendar } from 'lucide-react';
 import { api } from '../../api';
 
 export default function ArticlesList() {
     const [articles, setArticles] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+
+    const formatDate = (dateStr: string | null | undefined) => {
+        if (!dateStr) return '—';
+        return new Date(dateStr).toLocaleDateString('it-IT', {
+            day: '2-digit', month: 'short', year: 'numeric'
+        });
+    };
 
     useEffect(() => {
         loadArticles();
@@ -104,6 +111,7 @@ export default function ArticlesList() {
                                 <th className="p-4 font-medium">Titolo</th>
                                 <th className="p-4 font-medium">Categoria</th>
                                 <th className="p-4 font-medium">Stato</th>
+                                <th className="p-4 font-medium">Data</th>
                                 <th className="p-4 font-medium">Vetrina</th>
                                 <th className="p-4 font-medium text-right">Azioni</th>
                             </tr>
@@ -111,13 +119,13 @@ export default function ArticlesList() {
                         <tbody className="divide-y divide-zinc-800/50">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={5} className="p-8 text-center text-zinc-500">
+                                    <td colSpan={6} className="p-8 text-center text-zinc-500">
                                         Caricamento articoli in corso...
                                     </td>
                                 </tr>
                             ) : filteredArticles.length === 0 ? (
                                 <tr>
-                                    <td colSpan={5} className="p-8 text-center text-zinc-500">
+                                    <td colSpan={6} className="p-8 text-center text-zinc-500">
                                         Nessun articolo trovato.
                                     </td>
                                 </tr>
@@ -144,6 +152,23 @@ export default function ArticlesList() {
                                                     <span className={`inline-flex items-center px-2 py-1 rounded text-xs font-bold ${statusColor}`}>
                                                         {statusLabel}
                                                     </span>
+                                                );
+                                            })()}
+                                        </td>
+                                        <td className="p-4">
+                                            {(() => {
+                                                const isScheduled = article.status === 'published' && new Date(article.published_at) > new Date();
+                                                const isDraft = article.status !== 'published';
+                                                const dateValue = isDraft ? article.created_at : article.published_at;
+                                                const dateLabel = isDraft ? 'Creato' : (isScheduled ? 'Sched.' : 'Pubbl.');
+                                                const dateColor = isDraft ? 'text-zinc-500' : (isScheduled ? 'text-blue-400' : 'text-zinc-400');
+
+                                                return (
+                                                    <div className={`flex items-center gap-1.5 text-xs ${dateColor}`}>
+                                                        <Calendar size={12} />
+                                                        <span className="text-zinc-600 font-medium">{dateLabel}</span>
+                                                        <span>{formatDate(dateValue)}</span>
+                                                    </div>
                                                 );
                                             })()}
                                         </td>

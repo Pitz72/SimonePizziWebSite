@@ -86,8 +86,12 @@ export default function MediaGallery() {
         }
     };
 
-    const handleCopyUrl = (url: string, id: number) => {
-        navigator.clipboard.writeText(url);
+    const handleCopyUrl = (media: any, id: number) => {
+        const isImage = media.mime_type.startsWith('image/');
+        const urlToCopy = isImage
+            ? window.location.origin + media.file_path
+            : window.location.origin + '/api/download.php?id=' + media.id;
+        navigator.clipboard.writeText(urlToCopy);
         setCopiedId(id);
         setTimeout(() => setCopiedId(null), 2000);
     };
@@ -205,18 +209,19 @@ export default function MediaGallery() {
                                         {/* Hover Overlay Actions */}
                                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px]">
                                             <button
-                                                onClick={() => handleCopyUrl(media.file_path, media.id)}
+                                                onClick={() => handleCopyUrl(media, media.id)}
                                                 className="p-2 bg-zinc-800 hover:bg-dis-green hover:text-black rounded-full text-white transition-colors"
-                                                title="Copia Link (Url Assoluto)"
+                                                title={isImage ? 'Copia Link Immagine' : 'Copia Link Download (nome pulito)'}
                                             >
                                                 {copiedId === media.id ? <CheckCircle2 size={18} /> : <Copy size={18} />}
                                             </button>
                                             <a
-                                                href={media.file_path}
-                                                target="_blank"
+                                                href={isImage ? media.file_path : `/api/download.php?id=${media.id}`}
+                                                target={isImage ? '_blank' : undefined}
+                                                download={!isImage ? media.filename : undefined}
                                                 rel="noreferrer"
                                                 className="p-2 bg-zinc-800 hover:bg-white hover:text-black rounded-full text-white transition-colors"
-                                                title="Apri nuova scheda"
+                                                title={isImage ? 'Apri in nuova scheda' : 'Scarica con nome originale'}
                                             >
                                                 <LinkIcon size={18} />
                                             </a>

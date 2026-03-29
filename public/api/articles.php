@@ -86,7 +86,7 @@ try {
         }
 
         // Filtro Categoria
-        $query = "SELECT id, title, slug, content, excerpt, cover_image, category, tags, is_featured, status, published_at FROM articles";
+        $query = "SELECT id, title, slug, content, excerpt, cover_image, category, tags, is_featured, status, published_at, created_at FROM articles";
         $params = [];
         
         $conditions = [];
