@@ -192,10 +192,9 @@ export const api = {
         return res.json();
     },
     deleteMedia: async (id: number) => {
-        const res = await fetch(`${API_URL}/media.php`, {
+        const res = await fetch(`${API_URL}/media.php?id=${id}`, {
             ...fetchConfig,
             method: 'DELETE',
-            body: JSON.stringify({ id })
         });
         if (!res.ok) throw new Error('Errore cancellazione media');
         return res.json();

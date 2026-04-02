@@ -1,5 +1,5 @@
 # Indice Master della Documentazione
-**Simone Pizzi - Portfolio Creativo (v1.6.0)**
+**Simone Pizzi - Portfolio Creativo (v1.6.3)**
 
 Benvenuto nell'Hub Documentale del progetto. Da qui e possibile rintracciare in modo sistematico l'intera evoluzione della codebase, esplorare le architetture, e recuperare informazioni di sistema o log del passato.
 
@@ -22,6 +22,9 @@ Per una tracciabilita trasparente dello sviluppo, ogni aggiornamento e documenta
 
 ### Filone 1.6.x (Tutti i Progetti & Media Gallery Evoluta)
 
+- [v1.6.3 - Fix Cancellazione Media, Ottimizzazione WebP automatica, Multi-Selezione Gallery](changelogs/1.6.3.md)
+- [v1.6.2 - Hotfix CSP: Google Fonts (Poppins) sbloccato](changelogs/1.6.2.md)
+- [v1.6.1 - Colonna Data articoli admin, Download file con nome originale pulito](changelogs/1.6.1.md)
 - [v1.6.0 - Tutti i Progetti (pagina pubblica + admin CRUD), Media Gallery tabs + progress bar upload](changelogs/1.6.0.md)
 
 ### Filone 1.5.x (Architettura di Pubblicazione & Stabilizzazione)

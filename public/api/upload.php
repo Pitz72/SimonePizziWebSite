@@ -62,15 +62,60 @@ $destination = $uploadDir . $newFileName;
 $publicUrl = '/uploads/' . $newFileName;
 
 if (move_uploaded_file($file['tmp_name'], $destination)) {
+
+    // --- Ottimizzazione immagini: conversione automatica a WebP ---
+    // Converte JPEG e PNG in WebP (qualità 82, resize max 1920px).
+    // GIF: solo primo frame (le GIF animate perdono l'animazione — edge case accettato).
+    // Richiede GD Library abilitata sul server (extension_loaded('gd')).
+    $imageMimes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (in_array($realMime, $imageMimes) && extension_loaded('gd') && function_exists('imagewebp')) {
+        $img = false;
+        if ($realMime === 'image/jpeg') $img = @imagecreatefromjpeg($destination);
+        elseif ($realMime === 'image/png')  $img = @imagecreatefrompng($destination);
+        elseif ($realMime === 'image/gif')  $img = @imagecreatefromgif($destination);
+
+        if ($img !== false) {
+            // Resize se larghezza > 1920px mantenendo le proporzioni
+            $origW = imagesx($img);
+            $origH = imagesy($img);
+            if ($origW > 1920) {
+                $newW  = 1920;
+                $newH  = (int) round($origH * (1920 / $origW));
+                $canvas = imagecreatetruecolor($newW, $newH);
+                // Preserva trasparenza PNG
+                imagealphablending($canvas, false);
+                imagesavealpha($canvas, true);
+                imagecopyresampled($canvas, $img, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
+                imagedestroy($img);
+                $img = $canvas;
+            }
+
+            // Salva WebP con qualità 82 (ottimo compromesso peso/qualità)
+            $webpNewFileName = preg_replace('/\.[^.]+$/', '.webp', $newFileName);
+            $webpDestination = $uploadDir . $webpNewFileName;
+            if (@imagewebp($img, $webpDestination, 82)) {
+                // Rimozione originale PNG/JPEG, aggiornamento variabili
+                unlink($destination);
+                $destination = $webpDestination;
+                $newFileName  = $webpNewFileName;
+                $publicUrl    = '/uploads/' . $newFileName;
+                // Aggiorna il nome display con estensione .webp
+                $fileName = preg_replace('/\.[^.]+$/', '.webp', $fileName);
+            }
+            imagedestroy($img);
+        }
+    }
+    // --- Fine ottimizzazione immagini ---
+
     // Traccia nel Database Media
     try {
         $pdo = Database::connect();
         $mime = mime_content_type($destination);
         $size = filesize($destination);
-        
+
         $stmt = $pdo->prepare("INSERT INTO media (filename, file_path, mime_type, size) VALUES (?, ?, ?, ?)");
         $stmt->execute([$fileName, $publicUrl, $mime, $size]);
-        
+
         echo json_encode([
             'status' => 'success',
             'url' => $publicUrl,

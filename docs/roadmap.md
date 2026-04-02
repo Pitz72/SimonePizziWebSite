@@ -1,5 +1,6 @@
 # Roadmap Strategica e Sviluppi Futuri
-**Simone Pizzi - Portfolio Creativo**
+
+## Simone Pizzi - Portfolio Creativo
 
 Questo documento traccia le traiettorie di sviluppo future per l'infrastruttura del sito e del Mini-CMS, al fine di guidare i prossimi sprint di programmazione, scalare le funzionalita e migliorare l'esperienza utente sia lato visitatore che lato amministratore.
 
@@ -9,12 +10,13 @@ Questo documento traccia le traiettorie di sviluppo future per l'infrastruttura 
 
 L'area di amministrazione ha raggiunto una stabilita notevole, ma per sostenere un archivio in crescita necessita di strumenti organizzativi e di sicurezza avanzati.
 
-### Media Gallery: Navigazione a Schede (Tabs) e Filtri
+### ✅ Media Gallery: Navigazione a Schede (Tabs) e Filtri [COMPLETATA — v1.6.0]
 
-Attualmente la Media Gallery mostra tutti i file in un'unica griglia. Con l'aumento dei caricamenti, e prioritario implementare una suddivisione per tipologia di media:
+Implementata in v1.6.0 con 3 tab (Immagini / Documenti / File) e contatori per tipo.
 
-- **Feature:** Creare un'interfaccia a Tab (es. "Tutti", "Immagini", "Documenti PDF", "Archivi ZIP", "Audio").
-- **Logica Tecnica:** Modificare il componente React `MediaGallery.tsx` per filtrare l'array `mediaList` basandosi sulla colonna `mime_type` proveniente dal database.
+### ✅ Media Gallery: Multi-Selezione e Bulk Delete [COMPLETATA — v1.6.3]
+
+Implementata in v1.6.3: checkbox per card, "Seleziona tutti" per tab, barra azioni contestuale, eliminazione in blocco sequenziale. Vedi [changelog v1.6.3](changelogs/1.6.3.md).
 
 ### Gestore Categorie e Tag Dinamici
 
@@ -58,34 +60,9 @@ Visto il focus su "Podcast, Audio e Altro" (Runtime Radio, favole, ecc.):
 
 ## 3. Ottimizzazione e Architettura di Sistema
 
-### 🖼️ Ottimizzazione Automatica delle Immagini [PRIORITÀ ALTA]
+### ✅ Ottimizzazione Automatica delle Immagini [COMPLETATA — v1.6.3]
 
-**Problema rilevato:** Audit prestazioni del 30/03/2026 ha evidenziato immagini PNG generate da AI caricate senza compressione (5.6 MB, 2.7 MB, 2.6 MB). Il sito risulta lento a causa del peso totale degli asset (12-15 MB per sessione di navigazione). La causa è strutturale: le immagini vengono caricate via `upload.php` senza alcuna fase di ottimizzazione.
-
-**Soluzione da implementare in due parti:**
-
-#### Parte 1 — Ottimizzazione Automatica all'Upload (`upload.php`)
-- **Obiettivo:** Ogni volta che una nuova immagine viene caricata tramite la Media Gallery admin, `upload.php` deve automaticamente:
-  1. Rilevare se il file caricato è un'immagine (check MIME type: `image/png`, `image/jpeg`, `image/gif`)
-  2. Convertirla in formato **WebP** usando la funzione PHP `imagewebp()` (GD Library, disponibile su hosting condivisi standard) o in alternativa la libreria `Imagick`
-  3. Salvare il file WebP al posto del PNG/JPEG originale, mantenendo il nome originale nel DB ma con estensione `.webp`
-  4. Applicare una **compressione qualità 82** (ottimo compromesso qualità/peso)
-  5. Effettuare anche un **resize massimo** a 1920px di larghezza (mantenendo proporzioni) per evitare upload di immagini 4K non necessari
-- **File da modificare:** `public/api/upload.php`
-- **Nessuna migrazione DB necessaria** — il `filename` nel DB continua a registrare il nome originale caricato dall'utente
-
-#### Parte 2 — Script PHP Batch per Immagini Già Caricate (`optimize_uploads.php`)
-- **Obiettivo:** Script PHP one-shot da caricare temporaneamente in `public/api/`, visitabile da browser dall'admin, che:
-  1. Scansiona l'intera cartella `public/uploads/`
-  2. Per ogni PNG o JPEG trovato: lo converte in WebP, salva il nuovo file `.webp`, aggiorna il record nel DB (`media.file_path` e `media.filename`), elimina il file originale
-  3. Produce un report testuale con: file processati, peso prima/dopo, file saltati (già WebP, SVG, ecc.)
-  4. **Deve essere eliminato dal server dopo l'esecuzione** (pattern sicurezza standard del progetto)
-- **File da creare:** `scripts/optimize_uploads.php` → deployare temporaneamente in `public/api/`
-
-#### Note tecniche
-- Verificare che la GD Library sia abilitata sull'hosting prima di implementare (`phpinfo()` o `extension_loaded('gd')`)
-- Se GD non è disponibile, valutare Imagick come fallback
-- I link `/api/download.php?id=X` esistenti rimangono validi perché leggono dal DB, non dal filesystem direttamente
+**Implementata il 02/04/2026.** `upload.php` converte automaticamente JPEG/PNG in WebP (qualità 82, resize max 1920px) via GD Library. Script batch `scripts/optimize_uploads.php` disponibile per ottimizzare i file già caricati (one-shot, da eliminare dopo l'esecuzione). Vedi [changelog v1.6.3](changelogs/1.6.3.md).
 
 ---
 

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { UploadCloud, Trash2, Copy, FileIcon, Image as ImageIcon, Link as LinkIcon, RefreshCw, CheckCircle2, FileText, File } from 'lucide-react';
+import { UploadCloud, Trash2, Copy, FileIcon, Image as ImageIcon, Link as LinkIcon, RefreshCw, CheckCircle2, FileText, File, CheckSquare, Square, X } from 'lucide-react';
 import { api } from '../../api';
 
 type TabKey = 'immagini' | 'documenti' | 'file';
@@ -33,9 +33,14 @@ export default function MediaGallery() {
     const [successMessage, setSuccessMessage] = useState('');
     const [copiedId, setCopiedId] = useState<number | null>(null);
     const [activeTab, setActiveTab] = useState<TabKey>('immagini');
+    const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+    const [bulkDeleting, setBulkDeleting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => { loadMedia(); }, []);
+
+    // Pulisci selezione quando si cambia tab
+    useEffect(() => { setSelectedIds(new Set()); }, [activeTab]);
 
     const loadMedia = async () => {
         setLoading(true);
@@ -78,11 +83,50 @@ export default function MediaGallery() {
         if (!window.confirm(`Sei sicuro di voler eliminare irrevocabilmente "${filename}" dal server?`)) return;
         try {
             await api.deleteMedia(id);
-            setMediaList(mediaList.filter(m => m.id !== id));
+            setMediaList(prev => prev.filter(m => m.id !== id));
+            setSelectedIds(prev => { const s = new Set(prev); s.delete(id); return s; });
             setSuccessMessage('File eliminato correttamente.');
             setTimeout(() => setSuccessMessage(''), 3000);
         } catch {
             alert('Errore eliminazione file.');
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (selectedIds.size === 0) return;
+        if (!window.confirm(`Sei sicuro di voler eliminare irrevocabilmente ${selectedIds.size} file dal server?`)) return;
+
+        setBulkDeleting(true);
+        const idsToDelete = Array.from(selectedIds);
+        let deleted = 0;
+        for (const id of idsToDelete) {
+            try {
+                await api.deleteMedia(id);
+                deleted++;
+            } catch { /* continua con gli altri */ }
+        }
+        setMediaList(prev => prev.filter(m => !selectedIds.has(m.id)));
+        setSelectedIds(new Set());
+        setBulkDeleting(false);
+        setSuccessMessage(`${deleted} file eliminati correttamente.`);
+        setTimeout(() => setSuccessMessage(''), 3000);
+    };
+
+    const toggleSelect = (id: number) => {
+        setSelectedIds(prev => {
+            const s = new Set(prev);
+            if (s.has(id)) s.delete(id); else s.add(id);
+            return s;
+        });
+    };
+
+    const handleSelectAll = () => {
+        const allIds = filteredMedia.map((m: any) => m.id);
+        const allSelected = allIds.every((id: number) => selectedIds.has(id));
+        if (allSelected) {
+            setSelectedIds(new Set());
+        } else {
+            setSelectedIds(new Set(allIds));
         }
     };
 
@@ -103,6 +147,8 @@ export default function MediaGallery() {
         documenti: mediaList.filter(m => getTab(m.mime_type) === 'documenti').length,
         file: mediaList.filter(m => getTab(m.mime_type) === 'file').length,
     };
+
+    const allCurrentSelected = filteredMedia.length > 0 && filteredMedia.every((m: any) => selectedIds.has(m.id));
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -155,8 +201,33 @@ export default function MediaGallery() {
                 </div>
             )}
 
+            {/* Barra azioni selezione multipla */}
+            {selectedIds.size > 0 && (
+                <div className="flex items-center justify-between gap-4 p-3 bg-zinc-800 border border-zinc-700 rounded-lg">
+                    <div className="flex items-center gap-3">
+                        <span className="text-sm font-medium text-white">
+                            {selectedIds.size} {selectedIds.size === 1 ? 'file selezionato' : 'file selezionati'}
+                        </span>
+                        <button
+                            onClick={() => setSelectedIds(new Set())}
+                            className="text-xs text-zinc-400 hover:text-white transition-colors flex items-center gap-1"
+                        >
+                            <X size={12} /> Deseleziona tutti
+                        </button>
+                    </div>
+                    <button
+                        onClick={handleBulkDelete}
+                        disabled={bulkDeleting}
+                        className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 hover:text-red-300 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+                    >
+                        {bulkDeleting ? <RefreshCw className="animate-spin" size={14} /> : <Trash2 size={14} />}
+                        Elimina selezionati ({selectedIds.size})
+                    </button>
+                </div>
+            )}
+
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-                {/* Tab bar + refresh */}
+                {/* Tab bar + controlli */}
                 <div className="p-4 border-b border-zinc-800 flex items-center justify-between gap-4">
                     <div className="flex gap-1">
                         {TABS.map(tab => (
@@ -177,9 +248,21 @@ export default function MediaGallery() {
                             </button>
                         ))}
                     </div>
-                    <button onClick={loadMedia} className="text-zinc-500 hover:text-white transition-colors" title="Aggiorna Lista">
-                        <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-                    </button>
+                    <div className="flex items-center gap-2">
+                        {filteredMedia.length > 0 && (
+                            <button
+                                onClick={handleSelectAll}
+                                className="flex items-center gap-1.5 text-xs text-zinc-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-zinc-800"
+                                title={allCurrentSelected ? 'Deseleziona tutti' : 'Seleziona tutti'}
+                            >
+                                {allCurrentSelected ? <CheckSquare size={14} className="text-dis-green" /> : <Square size={14} />}
+                                {allCurrentSelected ? 'Deseleziona tutti' : 'Seleziona tutti'}
+                            </button>
+                        )}
+                        <button onClick={loadMedia} className="text-zinc-500 hover:text-white transition-colors" title="Aggiorna Lista">
+                            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+                        </button>
+                    </div>
                 </div>
 
                 {loading && mediaList.length === 0 ? (
@@ -193,8 +276,14 @@ export default function MediaGallery() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
                         {filteredMedia.map((media) => {
                             const isImage = media.mime_type.startsWith('image/');
+                            const isSelected = selectedIds.has(media.id);
                             return (
-                                <div key={media.id} className="bg-zinc-950 border border-zinc-800 rounded-lg overflow-hidden group hover:border-zinc-600 transition-colors flex flex-col">
+                                <div
+                                    key={media.id}
+                                    className={`bg-zinc-950 border rounded-lg overflow-hidden group hover:border-zinc-600 transition-colors flex flex-col ${
+                                        isSelected ? 'border-dis-green/50 ring-1 ring-dis-green/30' : 'border-zinc-800'
+                                    }`}
+                                >
                                     {/* Media Preview Box */}
                                     <div className="h-40 bg-zinc-900 flex items-center justify-center relative overflow-hidden">
                                         {isImage ? (
@@ -205,6 +294,22 @@ export default function MediaGallery() {
                                                 <span className="text-xs font-bold mt-2 uppercase">{media.filename.split('.').pop()}</span>
                                             </div>
                                         )}
+
+                                        {/* Checkbox selezione — sempre visibile in alto a sinistra */}
+                                        <button
+                                            onClick={() => toggleSelect(media.id)}
+                                            className={`absolute top-2 left-2 z-10 p-0.5 rounded transition-colors ${
+                                                isSelected
+                                                    ? 'text-dis-green'
+                                                    : 'text-zinc-500 opacity-0 group-hover:opacity-100'
+                                            }`}
+                                            title={isSelected ? 'Deseleziona' : 'Seleziona'}
+                                        >
+                                            {isSelected
+                                                ? <CheckSquare size={20} className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+                                                : <Square size={20} className="drop-shadow-[0_1px_2px_rgba(0,0,0,0.8)]" />
+                                            }
+                                        </button>
 
                                         {/* Hover Overlay Actions */}
                                         <div className="absolute inset-0 bg-black/60 flex items-center justify-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-[2px]">

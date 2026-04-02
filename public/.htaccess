@@ -1,4 +1,5 @@
 # [v1.6.0] Upload size limits per file di grandi dimensioni (ZIP, archivi)
+
 <IfModule mod_php.c>
   php_value upload_max_filesize 256M
   php_value post_max_size 256M
@@ -10,36 +11,52 @@
   RewriteEngine On
   RewriteBase /
 
-  # Mantiene l'accesso ai file reali (immagini, endpoint php API, css bundles)
+# Mantiene l'accesso ai file reali (immagini, endpoint php API, css bundles)
+
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_URI} !^/api/ [NC]
 
-  # Dirotta tutte le URL puramente virtuali di React sul motore SEO PHP
+# Dirotta tutte le URL puramente virtuali di React sul motore SEO PHP
+
   RewriteRule ^(.*)$ /index.php [L,QSA]
 </IfModule>
 
 # [v1.5.10] Security Headers
+
 <IfModule mod_headers.c>
-  # Impedisce MIME-type sniffing (es. eseguire un file .jpg come script)
+
+# Impedisce MIME-type sniffing (es. eseguire un file .jpg come script)
+
   Header always set X-Content-Type-Options "nosniff"
 
-  # Blocca il sito nell'essere caricato in iframe da altri domini (Clickjacking)
+# Blocca il sito nell'essere caricato in iframe da altri domini (Clickjacking)
+
   Header always set X-Frame-Options "SAMEORIGIN"
 
-  # Limita le informazioni di referrer inviate a siti terzi
+# Limita le informazioni di referrer inviate a siti terzi
+
   Header always set Referrer-Policy "strict-origin-when-cross-origin"
 
-  # Disabilita API hardware non necessarie (camera, microfono, geolocalizzazione)
+# Disabilita API hardware non necessarie (camera, microfono, geolocalizzazione)
+
   Header always set Permissions-Policy "camera=(), microphone=(), geolocation=()"
 
-  # Content Security Policy
-  # script-src 'self': solo bundle Vite locali (nessun inline script in produzione)
-  # style-src 'self' 'unsafe-inline' fonts.googleapis.com: CSS Vite + inline style="" usati da Framer Motion + Google Fonts CSS
-  # font-src 'self' data: fonts.gstatic.com: font locali + Google Fonts binari (woff2)
-  # img-src 'self' data: https:: immagini locali + data URI + immagini esterne (cover articoli CDN)
-  # connect-src 'self': chiamate API solo verso stesso dominio
-  # object-src 'none': blocca plugin Flash/PDF embed (vettore attacco legacy)
-  # frame-ancestors 'self': equivale a X-Frame-Options SAMEORIGIN ma per browser moderni
+# Content Security Policy
+
+# script-src 'self': solo bundle Vite locali (nessun inline script in produzione)
+
+# style-src 'self' 'unsafe-inline' fonts.googleapis.com: CSS Vite + inline style="" usati da Framer Motion + Google Fonts CSS
+
+# font-src 'self' data: fonts.gstatic.com: font locali + Google Fonts binari (woff2)
+
+# img-src 'self' data: https:: immagini locali + data URI + immagini esterne (cover articoli CDN)
+
+# connect-src 'self': chiamate API solo verso stesso dominio
+
+# object-src 'none': blocca plugin Flash/PDF embed (vettore attacco legacy)
+
+# frame-ancestors 'self': equivale a X-Frame-Options SAMEORIGIN ma per browser moderni
+
   Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self'; object-src 'none'; frame-ancestors 'self'; base-uri 'self'"
 </IfModule>
