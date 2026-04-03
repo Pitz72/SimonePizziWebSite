@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Share2, Download, ExternalLink, Tag } from 'lucide-react';
+import { ArrowLeft, Share2, Tag, Calendar } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { api } from '../api';
 import { PortfolioItem } from '../types';
@@ -52,6 +52,7 @@ const SingleArticle: React.FC<SingleArticleProps> = () => {
                         buttonText: found.button_a_label,
                         extraLink: found.button_b_link,
                         extraLinkText: found.button_b_label,
+                        publishedAt: found.published_at,
                         // Feature legacy The Safe Place se i tag la menzionano
                         hasLetter: found.tags && found.tags.toLowerCase().includes('lettera')
                     });
@@ -124,6 +125,12 @@ const SingleArticle: React.FC<SingleArticleProps> = () => {
 
                     {/* Meta Info */}
                     <div className="flex flex-wrap items-center gap-4 mb-6">
+                        {article.publishedAt && (
+                            <span className="flex items-center gap-1.5 text-xs font-bold text-zinc-400 border border-zinc-800 bg-black/40 px-3 py-1.5 rounded-full uppercase tracking-wider">
+                                <Calendar size={12} />
+                                {new Date(article.publishedAt).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' })}
+                            </span>
+                        )}
                         {article.tags.map(tag => (
                             <span key={tag} className="flex items-center gap-1.5 text-xs font-bold text-black bg-dis-green px-3 py-1.5 rounded-full uppercase tracking-wider">
                                 <Tag size={12} />
@@ -168,12 +175,25 @@ const SingleArticle: React.FC<SingleArticleProps> = () => {
                     <div className="flex flex-col md:flex-row items-center justify-between gap-6">
                         <div className="flex-1 text-center md:text-left">
                             <h3 className="text-2xl font-bold text-white mb-2">Ti è piaciuto questo progetto?</h3>
-                            <p className="text-zinc-400">Aiutaci a diffonderlo con la condivisione sui tuoi social.</p>
+                            <p className="text-zinc-400">Sostieni il mio lavoro e Runtime Radio con una donazione, o aiutaci a diffonderlo con la condivisione sui tuoi social.</p>
                         </div>
-                        <button onClick={() => setIsShareModalOpen(true)} className="flex items-center gap-3 w-full md:w-auto px-6 py-4 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-500 hover:bg-zinc-800 transition-all font-medium whitespace-nowrap" title="Condividi">
-                            <Share2 size={20} />
-                            Condividi
-                        </button>
+                        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
+                            <a
+                                href="https://www.paypal.com/paypalme/simonepizzi"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-[#0070BA] text-white hover:bg-[#003087] transition-all font-bold shadow-lg shadow-blue-900/20"
+                            >
+                                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                                    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.946 5.05-4.336 6.73-8.339 6.73h-.69c-.314 0-.58.218-.641.524l-1.24 6.225a.645.645 0 0 1-.641.524h-1.455z" />
+                                </svg>
+                                Dona con PayPal
+                            </a>
+                            <button onClick={() => setIsShareModalOpen(true)} className="flex items-center gap-3 w-full md:w-auto px-6 py-4 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-500 hover:bg-zinc-800 transition-all font-medium whitespace-nowrap" title="Condividi">
+                                <Share2 size={20} />
+                                Condividi
+                            </button>
+                        </div>
                     </div>
 
                     {/* RIGA INFERIORE: Bottoni Custom (Se l'articolo ne possiede almeno uno) */}
@@ -182,14 +202,12 @@ const SingleArticle: React.FC<SingleArticleProps> = () => {
                             {article.link && (
                                 <a href={formatExternalUrl(article.link)} target="_blank" rel="noopener noreferrer" className="flex-1 flex justify-center items-center gap-2 bg-dis-green text-black font-bold px-6 py-4 rounded-xl hover:bg-green-400 transition-colors shadow-[0_0_30px_-5px_rgba(34,197,94,0.4)] hover:shadow-[0_0_40px_-5px_rgba(34,197,94,0.6)]">
                                     {article.buttonText || 'Naviga'}
-                                    <ExternalLink size={18} />
                                 </a>
                             )}
 
                             {article.extraLink && (
                                 <a href={formatExternalUrl(article.extraLink)} download className="flex-1 flex justify-center items-center gap-2 bg-zinc-800 text-white font-bold px-6 py-4 rounded-xl hover:bg-zinc-700 transition-colors border border-zinc-700">
                                     {article.extraLinkText || 'File Aggiuntivo'}
-                                    <Download size={18} />
                                 </a>
                             )}
 

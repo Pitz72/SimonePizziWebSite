@@ -17,7 +17,13 @@ const PortfolioGrid: React.FC = () => {
         if (a.isFeatured && !b.isFeatured) return -1;
         if (!a.isFeatured && b.isFeatured) return 1;
 
-        // 2. A parità di Vetrina (o nessuno dei due), vale l'ID (I più recenti in alto)
+        // 2. A parità di Vetrina (o nessuno dei due), vale la data di pubblicazione (I più recenti in alto)
+        const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+        const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+        
+        if (dateB !== dateA) return dateB - dateA;
+
+        // Fallback all'ID se le date sono uguali
         return b.id - a.id;
     });
 

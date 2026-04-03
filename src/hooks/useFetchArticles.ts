@@ -14,6 +14,7 @@ const mapArticleToPortfolioItem = (article: any): PortfolioItem => {
         category: article.category as Category,
         tags: article.tags ? article.tags.split(',').map((t: string) => t.trim()) : [],
         isFeatured: article.is_featured === 1 || article.is_featured === true,
+        publishedAt: article.published_at,
         // Mapping Bottoni
         link: article.button_a_link || undefined,
         buttonText: article.button_a_label || undefined,

@@ -66,6 +66,10 @@ Visto il focus su "Podcast, Audio e Altro" (Runtime Radio, favole, ecc.):
 
 ---
 
+### ✅ Rafforzamento UI/UX e Integrazione PayPal [COMPLETATA — v1.6.4]
+
+Implementata in v1.6.4: rimozione icone dai pulsanti per estetica minimale, integrazione donazione PayPal contestualizzata negli articoli, logica di ordinamento temporale "In Primo Piano" e visualizzazione date di pubblicazione. Vedi [changelog v1.6.4](changelogs/1.6.4.md).
+
 ### Paginazione (Infinite Scroll o Load More)
 
 - **Problema:** `PortfolioGrid.tsx` e `ArticleArchive.tsx` attualmente mappano tutti gli articoli disponibili.

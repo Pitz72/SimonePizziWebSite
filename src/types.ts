@@ -40,4 +40,5 @@ export interface PortfolioItem {
   hasLetter?: boolean;
   isFeatured?: boolean;
   featuredOrder?: number;
+  publishedAt?: string;
 }

@@ -1,7 +1,7 @@
 # Relazione sullo Stato del Progetto "Simone Pizzi - Portfolio Creativo"
 
-**Data:** 23 Marzo 2026
-**Versione Sotto Analisi:** 1.6.0
+**Data:** 03 Aprile 2026
+**Versione Sotto Analisi:** 1.6.4
 
 ## 1. Panoramica Generale
 
@@ -42,6 +42,13 @@ Verifica puntuale tra le ultime versioni rilasciate e l'ecosistema fisico della 
 
 | Feature Documentata | Versione | Riscontro File System | Esito |
 | :--- | :--- | :--- | :--- |
+| Donazione PayPal in Box CTA Articoli | v1.6.4 | `SingleArticle.tsx` righe 225-240 | CONFORME |
+| Logica Ordinamento Temporale (PublishedAt) | v1.6.4 | `PortfolioGrid.tsx` e `ArticleArchive.tsx` | CONFORME |
+| Visualizzazione Data Pubblicazione Articolo | v1.6.4 | `SingleArticle.tsx` riga 168 | CONFORME |
+| Rimozione Icone e Frecce dai Pulsanti UI | v1.6.4 | `SingleArticle.tsx`, `AllProjects.tsx`, `FeaturedCard.tsx` | CONFORME |
+| Media Gallery: Multi-Selezione e Bulk Delete | v1.6.3 | `MediaGallery.tsx` | CONFORME |
+| Ottimizzazione WebP Automatica Upload | v1.6.3 | `upload.php` GD Library | CONFORME |
+| Media Gallery: Tab e Filtri MIME | v1.6.0 | `MediaGallery.tsx` TABS constant | CONFORME |
 | DOMPurify.sanitize() su article.description in SingleArticle (XSS Stored) | v1.5.10 | `SingleArticle.tsx` riga 157 | CONFORME |
 | Security Headers HTTP: X-Content-Type-Options, X-Frame-Options, CSP, Referrer-Policy | v1.5.10 | `public/.htaccess` righe 15-33 | CONFORME |
 | upload.php: mkdir 0777 → 0755 (permessi directory corretti) | v1.5.10 | `upload.php` riga 50 | CONFORME |

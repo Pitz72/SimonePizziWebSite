@@ -37,7 +37,7 @@ const FeaturedCard: React.FC<FeaturedCardProps> = ({ item, category, isHero = fa
                         <p className="text-zinc-400 text-base md:text-lg leading-relaxed mb-8 line-clamp-4">{item.summary}</p>
                         <div className="mt-auto pt-6 border-t border-zinc-800">
                             <span className="inline-flex items-center gap-3 text-sm font-bold text-white group-hover:text-dis-green transition-colors tracking-wide uppercase">
-                                Leggi Articolo &rarr;
+                                Leggi l'Articolo
                             </span>
                         </div>
                     </div>
@@ -67,7 +67,7 @@ const FeaturedCard: React.FC<FeaturedCardProps> = ({ item, category, isHero = fa
                     <p className="text-zinc-400 text-sm line-clamp-3 mb-6 flex-1 leading-relaxed">{item.summary}</p>
                     <div className="mt-auto pt-4 border-t border-zinc-800">
                         <span className="mt-auto font-bold text-white group-hover:text-dis-green text-sm flex items-center gap-2 transition-colors tracking-wide uppercase">
-                            Scopri di più &rarr;
+                            Scopri di più
                         </span>
                     </div>
                 </div>

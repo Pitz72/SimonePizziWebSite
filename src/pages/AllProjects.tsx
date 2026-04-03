@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { ExternalLink, Download, ArrowRight } from 'lucide-react';
 import { api } from '../api';
 import { Project, Category } from '../types';
 import SEO from '../components/SEO';
@@ -37,20 +36,20 @@ const ProjectButton: React.FC<ProjectButtonProps> = ({ label, url, variant = 'pr
     if (type === 'external') {
         return (
             <a href={url} target="_blank" rel="noopener noreferrer" className={baseClass}>
-                {label} <ExternalLink size={13} />
+                {label}
             </a>
         );
     }
     if (type === 'download') {
         return (
             <a href={url} download className={baseClass}>
-                {label} <Download size={13} />
+                {label}
             </a>
         );
     }
     return (
         <Link to={url} className={baseClass}>
-            {label} <ArrowRight size={13} />
+            {label}
         </Link>
     );
 };

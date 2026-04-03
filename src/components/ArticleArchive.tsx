@@ -53,6 +53,11 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category }) => {
                 const sortedItems = [...items].sort((a, b) => {
                     if (a.isFeatured && !b.isFeatured) return -1;
                     if (!a.isFeatured && b.isFeatured) return 1;
+                    
+                    const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
+                    const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
+                    
+                    if (dateB !== dateA) return dateB - dateA;
                     return b.id - a.id;
                 });
 
@@ -148,7 +153,7 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category }) => {
                                                 ))}
                                                 <div className="flex items-center text-xs text-zinc-500 gap-1 ml-auto">
                                                     <Calendar size={12} />
-                                                    <span>Articolo</span>
+                                                    <span>{item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Articolo'}</span>
                                                 </div>
                                             </div>
 
