@@ -18,16 +18,13 @@ Implementata in v1.6.0 con 3 tab (Immagini / Documenti / File) e contatori per t
 
 Implementata in v1.6.3: checkbox per card, "Seleziona tutti" per tab, barra azioni contestuale, eliminazione in blocco sequenziale. Vedi [changelog v1.6.3](changelogs/1.6.3.md).
 
-### Gestore Categorie e Tag Dinamici
+### ✅ Gestore Categorie e Tag Dinamici [COMPLETATA — v1.6.5]
 
-Attualmente le categorie (Videogiochi, Software, ecc.) sono hard-coded nell'Enum TypeScript.
+Implementata in v1.6.5: tabella `categories` nel DB, API `categories.php` (CRUD), hook `useCategories` con fallback hardcoded, routing React dinamico, nav Header dinamica, componente admin `CategoryManager` (crea/rinomina/elimina/riordina). Vedi [changelog v1.6.5](changelogs/1.6.5.md).
 
-- **Feature:** Permettere all'admin di creare, rinominare o eliminare le categorie principali direttamente dal pannello di controllo, senza toccare il codice.
-- **Impatto:** Richiede la creazione di una tabella `categories` nel database SQLite e la migrazione del routing di React da statico a dinamico basato sulle API.
+### ✅ Dashboard Analitica Avanzata [COMPLETATA — v1.6.5]
 
-### Dashboard Analitica Avanzata
-
-- **Feature:** Arricchire l'attuale pannello di riepilogo con metriche piu dettagliate: visualizzazioni uniche per articolo, statistiche di click sui pulsanti (CTA) e conteggio dei download dalla Media Gallery.
+Implementata in v1.6.5: tabelle `article_views` (dedup IP+giorno) e `cta_clicks`, API `analytics.php`, tracking automatico in `SingleArticle.tsx`, sezione analytics in Dashboard (top 5 articoli, grafico 7 giorni, breakdown click CTA). Vedi [changelog v1.6.5](changelogs/1.6.5.md).
 
 ### Recupero Password e Login via Email
 

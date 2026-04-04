@@ -29,3 +29,9 @@ backup/
 
 # Downloads
 public/downloads/
+
+# Database SQLite (dati di produzione, mai in repo)
+public/api/.data/
+
+# Configurazione database MySQL (credenziali reali, mai in repo)
+public/api/config.php

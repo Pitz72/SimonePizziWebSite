@@ -12,7 +12,10 @@ const dirsToRemove = [
 
 const filesToRemove = [
     path.join(__dirname, 'dist', 'api', 'init_db.php'),
-    path.join(__dirname, 'dist', 'api', 'migrate_rate_limit.php')
+    path.join(__dirname, 'dist', 'api', 'migrate_rate_limit.php'),
+    path.join(__dirname, 'dist', 'api', 'migrate_v165.php'),
+    path.join(__dirname, 'dist', 'api', 'migrate_to_mysql.php'),
+    path.join(__dirname, 'dist', 'api', 'config.php'),
 ];
 
 console.log('🧹 Esecuzione clean-dist.js: Pulizia elementi di sicurezza post-build...');

@@ -2,13 +2,12 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Calendar, ArrowRight } from 'lucide-react';
-import { Category } from '../types';
 import SEO from './SEO';
 import { useFetchArticles } from '../hooks/useFetchArticles';
 
 interface ArticleArchiveProps {
     title: string;
-    category?: Category; // Opzionale per le liste non filtrate (es Blog)
+    category?: string; // Slug categoria (dinamico da DB v1.6.5)
 }
 
 const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category }) => {

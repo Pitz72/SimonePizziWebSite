@@ -57,7 +57,7 @@ try {
         $ip_address = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
         
         // Pulizia vecchi tentativi (più vecchi di 15 minuti)
-        $pdo->exec("DELETE FROM login_attempts WHERE attempt_time < datetime('now', '-15 minutes')");
+        $pdo->exec("DELETE FROM login_attempts WHERE attempt_time < DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
         
         // Controllo quanti tentativi errati nell'ultima finestra temporale
         $stmtLimit = $pdo->prepare("SELECT COUNT(*) FROM login_attempts WHERE ip_address = ?");

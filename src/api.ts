@@ -164,6 +164,58 @@ export const api = {
         return res.json();
     },
 
+    // --- CATEGORIES (v1.6.5) ---
+    getCategories: async () => {
+        const res = await fetch(`${API_URL}/categories.php`, fetchConfig);
+        if (!res.ok) throw new Error('Errore recupero categorie');
+        return res.json();
+    },
+    createCategory: async (data: { name: string; slug: string }) => {
+        const res = await fetch(`${API_URL}/categories.php`, {
+            ...fetchConfig, method: 'POST', body: JSON.stringify(data)
+        });
+        if (!res.ok) { const r = await res.json(); throw new Error(r.error || 'Errore creazione categoria'); }
+        return res.json();
+    },
+    updateCategory: async (id: number, data: { name: string; slug: string; sort_order: number }) => {
+        const res = await fetch(`${API_URL}/categories.php?id=${id}`, {
+            ...fetchConfig, method: 'PUT', body: JSON.stringify({ id, ...data })
+        });
+        if (!res.ok) { const r = await res.json(); throw new Error(r.error || 'Errore aggiornamento categoria'); }
+        return res.json();
+    },
+    deleteCategory: async (id: number) => {
+        const res = await fetch(`${API_URL}/categories.php?id=${id}`, {
+            ...fetchConfig, method: 'DELETE', body: JSON.stringify({ id })
+        });
+        if (!res.ok) throw new Error('Errore cancellazione categoria');
+        return res.json();
+    },
+
+    // --- ANALYTICS (v1.6.5) ---
+    trackView: async (articleId: number) => {
+        // Fire-and-forget: non bloccare l'UI in caso di errore
+        try {
+            await fetch(`${API_URL}/analytics.php`, {
+                ...fetchConfig, method: 'POST',
+                body: JSON.stringify({ type: 'view', article_id: articleId })
+            });
+        } catch { /* silenzioso */ }
+    },
+    trackClick: async (articleId: number, buttonLabel: string) => {
+        try {
+            await fetch(`${API_URL}/analytics.php`, {
+                ...fetchConfig, method: 'POST',
+                body: JSON.stringify({ type: 'click', article_id: articleId, button_label: buttonLabel })
+            });
+        } catch { /* silenzioso */ }
+    },
+    getAnalytics: async () => {
+        const res = await fetch(`${API_URL}/analytics.php`, fetchConfig);
+        if (!res.ok) throw new Error('Errore recupero analytics');
+        return res.json();
+    },
+
     // --- MEDIA ---
     uploadMedia: async (file: File) => {
         const formData = new FormData();

@@ -31,7 +31,7 @@ echo '  <language>it-IT</language>' . "\n";
 try {
     $query = "SELECT title, slug, excerpt, content, cover_image, category, published_at 
               FROM articles 
-              WHERE status = 'published' AND (published_at IS NULL OR published_at = '' OR published_at <= :ita_now)
+              WHERE status = 'published' AND (published_at IS NULL OR published_at <= :ita_now)
               ORDER BY published_at DESC 
               LIMIT " . RSS_FEED_LIMIT;
     

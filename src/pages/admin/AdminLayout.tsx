@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, FileText, Image as ImageIcon, Settings, LogOut, FolderOpen } from 'lucide-react';
+import { LayoutDashboard, FileText, Image as ImageIcon, Settings, LogOut, FolderOpen, Tag } from 'lucide-react';
 import { api } from '../../api';
 
 export default function AdminLayout() {
@@ -32,6 +32,7 @@ export default function AdminLayout() {
         { path: '/admin/dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
         { path: '/admin/articles', icon: <FileText size={20} />, label: 'Articoli (Mini-CMS)' },
         { path: '/admin/projects', icon: <FolderOpen size={20} />, label: 'Tutti i Progetti' },
+        { path: '/admin/categories', icon: <Tag size={20} />, label: 'Categorie' },
         { path: '/admin/media', icon: <ImageIcon size={20} />, label: 'Media Gallery' },
         { path: '/admin/settings', icon: <Settings size={20} />, label: 'Impostazioni' },
     ];

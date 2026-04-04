@@ -105,15 +105,15 @@ export default function ArticlesList() {
                 </div>
 
                 <div className="overflow-x-auto">
-                    <table className="w-full text-left border-collapse">
+                    <table className="w-full text-left border-collapse table-fixed">
                         <thead>
                             <tr className="bg-zinc-950/50 text-zinc-400 text-sm border-b border-zinc-800">
                                 <th className="p-4 font-medium">Titolo</th>
-                                <th className="p-4 font-medium">Categoria</th>
-                                <th className="p-4 font-medium">Stato</th>
-                                <th className="p-4 font-medium">Data</th>
-                                <th className="p-4 font-medium">Vetrina</th>
-                                <th className="p-4 font-medium text-right">Azioni</th>
+                                <th className="p-4 font-medium w-[160px]">Categoria</th>
+                                <th className="p-4 font-medium w-[120px]">Stato</th>
+                                <th className="p-4 font-medium w-[150px]">Data</th>
+                                <th className="p-4 font-medium w-[70px]">Vetrina</th>
+                                <th className="p-4 font-medium w-[110px] text-right">Azioni</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-800/50">
@@ -132,9 +132,9 @@ export default function ArticlesList() {
                             ) : (
                                 filteredArticles.map(article => (
                                     <tr key={article.id} className="hover:bg-zinc-800/30 transition-colors group">
-                                        <td className="p-4">
-                                            <p className="font-medium text-white group-hover:text-dis-green transition-colors">{article.title}</p>
-                                            <p className="text-sm text-zinc-500 mt-1 max-w-md truncate">{article.slug}</p>
+                                        <td className="p-4 min-w-0">
+                                            <p className="font-medium text-white group-hover:text-dis-green transition-colors truncate">{article.title}</p>
+                                            <p className="text-sm text-zinc-500 mt-1 truncate">{article.slug}</p>
                                         </td>
                                         <td className="p-4">
                                             <span className="inline-flex items-center px-2 py-1 rounded bg-zinc-800 text-zinc-300 text-xs font-medium">

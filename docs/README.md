@@ -1,5 +1,5 @@
 # Indice Master della Documentazione
-**Simone Pizzi - Portfolio Creativo (v1.6.3)**
+**Simone Pizzi - Portfolio Creativo (v1.7.0)**
 
 Benvenuto nell'Hub Documentale del progetto. Da qui e possibile rintracciare in modo sistematico l'intera evoluzione della codebase, esplorare le architetture, e recuperare informazioni di sistema o log del passato.
 
@@ -20,8 +20,15 @@ Benvenuto nell'Hub Documentale del progetto. Da qui e possibile rintracciare in 
 
 Per una tracciabilita trasparente dello sviluppo, ogni aggiornamento e documentato nel dettaglio.
 
+### Filone 1.7.x (MySQL & Infrastruttura)
+
+- [v1.7.1 - Hotfix Post-Migrazione: HTTP 500 MySQL strict mode e path immagini WebP](changelogs/1.7.1.md)
+- [v1.7.0 - Migrazione Database SQLite → MySQL](changelogs/1.7.0.md)
+
 ### Filone 1.6.x (Tutti i Progetti & Media Gallery Evoluta)
 
+- [v1.6.5 - Gestore Categorie Dinamiche e Dashboard Analitica Avanzata](changelogs/1.6.5.md)
+- [v1.6.4 - UI cleanup, integrazione PayPal e logica "In Primo Piano"](changelogs/1.6.4.md)
 - [v1.6.3 - Fix Cancellazione Media, Ottimizzazione WebP automatica, Multi-Selezione Gallery](changelogs/1.6.3.md)
 - [v1.6.2 - Hotfix CSP: Google Fonts (Poppins) sbloccato](changelogs/1.6.2.md)
 - [v1.6.1 - Colonna Data articoli admin, Download file con nome originale pulito](changelogs/1.6.1.md)

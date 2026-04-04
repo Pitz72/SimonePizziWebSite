@@ -19,8 +19,9 @@ import ArticleEditor from './pages/admin/ArticleEditor';
 import MediaGallery from './pages/admin/MediaGallery';
 import ProjectsList from './pages/admin/ProjectsList';
 import ProjectEditor from './pages/admin/ProjectEditor';
+import CategoryManager from './pages/admin/CategoryManager';
 import AllProjects from './pages/AllProjects';
-import { Category } from './types';
+import { useCategories } from './hooks/useCategories';
 
 const backgroundStyle = {
   background: 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34, 197, 94, 0.3), rgba(0, 0, 0, 0))',
@@ -38,6 +39,8 @@ const ScrollToTop = () => {
 };
 
 const PublicLayout: React.FC = () => {
+  const { categories } = useCategories();
+
   return (
     <>
       <ScrollToTop />
@@ -54,46 +57,21 @@ const PublicLayout: React.FC = () => {
           <Routes>
             <Route path="/" element={<PortfolioGrid />} />
             <Route path="/tutti-i-progetti" element={<AllProjects />} />
-            <Route
-              path={`/${Category.VIDEOGIOCHI}`}
-              element={<ArticleArchive title="Videogiochi" category={Category.VIDEOGIOCHI} />}
-            />
-            <Route
-              path={`/${Category.VIDEOGIOCHI}/:projectSlug`}
-              element={<SingleArticle />}
-            />
-            <Route
-              path={`/${Category.PROGETTI_SOFTWARE}`}
-              element={<ArticleArchive title="Progetti Software" category={Category.PROGETTI_SOFTWARE} />}
-            />
-            <Route
-              path={`/${Category.PROGETTI_SOFTWARE}/:projectSlug`}
-              element={<SingleArticle />}
-            />
-            <Route
-              path={`/${Category.NARRATIVA_E_PUBBLICAZIONI}`}
-              element={<ArticleArchive title="Narrativa e Pubblicazioni" category={Category.NARRATIVA_E_PUBBLICAZIONI} />}
-            />
-            <Route
-              path={`/${Category.NARRATIVA_E_PUBBLICAZIONI}/:projectSlug`}
-              element={<SingleArticle />}
-            />
-            <Route
-              path={`/${Category.PODCAST_AUDIO_ALTRO}`}
-              element={<ArticleArchive title="Podcast, Audio e Altro" category={Category.PODCAST_AUDIO_ALTRO} />}
-            />
-            <Route
-              path={`/${Category.PODCAST_AUDIO_ALTRO}/:projectSlug`}
-              element={<SingleArticle />}
-            />
-            <Route
-              path={`/${Category.BLOG_E_RIFLESSIONI}`}
-              element={<ArticleArchive title="Blog e Riflessioni" />}
-            />
-            <Route
-              path={`/${Category.BLOG_E_RIFLESSIONI}/:projectSlug`}
-              element={<SingleArticle />}
-            />
+
+            {/* Route dinamiche generate dalle categorie caricate dal DB */}
+            {categories.map(cat => (
+              <React.Fragment key={cat.slug}>
+                <Route
+                  path={`/${cat.slug}`}
+                  element={<ArticleArchive title={cat.name} category={cat.slug} />}
+                />
+                <Route
+                  path={`/${cat.slug}/:projectSlug`}
+                  element={<SingleArticle />}
+                />
+              </React.Fragment>
+            ))}
+
             <Route path="*" element={<div className="min-h-[50vh] flex items-center justify-center text-white text-2xl">404 - Pagina non trovata</div>} />
           </Routes>
         </main>
@@ -121,6 +99,7 @@ const App: React.FC = () => {
             <Route path="projects/new" element={<ProjectEditor />} />
             <Route path="projects/edit/:id" element={<ProjectEditor />} />
             <Route path="media" element={<MediaGallery />} />
+            <Route path="categories" element={<CategoryManager />} />
             <Route index element={<Dashboard />} />
           </Route>
 

@@ -95,7 +95,7 @@ try {
         // Se la chiamata non proviene espressamente dalla dashboard admin, nascondiamo bozze e futuri.
         if (!$is_admin_dashboard) {
            $conditions[] = "status = 'published'"; 
-           $conditions[] = "(published_at IS NULL OR published_at = '' OR published_at <= ?)";
+           $conditions[] = "(published_at IS NULL OR published_at <= ?)";
            $params[] = $ita_now_str;
         }
 
@@ -112,7 +112,7 @@ try {
         // Gli articoli programmati appaiono in cima al feed nel momento in cui si sbloccano,
         // non sepolti nella posizione della data di creazione.
         // Fallback a created_at per articoli senza published_at (legacy o bozze promosse).
-        $query .= " ORDER BY CASE WHEN published_at IS NOT NULL AND published_at != '' THEN published_at ELSE created_at END DESC LIMIT ? OFFSET ?";
+        $query .= " ORDER BY CASE WHEN published_at IS NOT NULL THEN published_at ELSE created_at END DESC LIMIT ? OFFSET ?";
         
         $stmt = $pdo->prepare($query);
         

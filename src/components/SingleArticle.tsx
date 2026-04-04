@@ -38,7 +38,7 @@ const SingleArticle: React.FC<SingleArticleProps> = () => {
                 const found = await api.getArticleBySlug(projectSlug);
 
                 if (found && !found.error) {
-                    setArticle({
+                    const mapped: PortfolioItem = {
                         id: found.id,
                         slug: found.slug,
                         title: found.title,
@@ -55,7 +55,10 @@ const SingleArticle: React.FC<SingleArticleProps> = () => {
                         publishedAt: found.published_at,
                         // Feature legacy The Safe Place se i tag la menzionano
                         hasLetter: found.tags && found.tags.toLowerCase().includes('lettera')
-                    });
+                    };
+                    setArticle(mapped);
+                    // Traccia visualizzazione (fire-and-forget, dedup lato server)
+                    api.trackView(found.id);
                 } else {
                     setError('Articolo non trovato o non più disponibile.');
                 }
@@ -200,13 +203,24 @@ const SingleArticle: React.FC<SingleArticleProps> = () => {
                     {(article.link || article.extraLink || article.hasLetter) && (
                         <div className="pt-6 border-t border-zinc-800/50 flex flex-col sm:flex-row items-stretch justify-center gap-4">
                             {article.link && (
-                                <a href={formatExternalUrl(article.link)} target="_blank" rel="noopener noreferrer" className="flex-1 flex justify-center items-center gap-2 bg-dis-green text-black font-bold px-6 py-4 rounded-xl hover:bg-green-400 transition-colors shadow-[0_0_30px_-5px_rgba(34,197,94,0.4)] hover:shadow-[0_0_40px_-5px_rgba(34,197,94,0.6)]">
+                                <a
+                                    href={formatExternalUrl(article.link)}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    onClick={() => api.trackClick(article.id, article.buttonText || 'Naviga')}
+                                    className="flex-1 flex justify-center items-center gap-2 bg-dis-green text-black font-bold px-6 py-4 rounded-xl hover:bg-green-400 transition-colors shadow-[0_0_30px_-5px_rgba(34,197,94,0.4)] hover:shadow-[0_0_40px_-5px_rgba(34,197,94,0.6)]"
+                                >
                                     {article.buttonText || 'Naviga'}
                                 </a>
                             )}
 
                             {article.extraLink && (
-                                <a href={formatExternalUrl(article.extraLink)} download className="flex-1 flex justify-center items-center gap-2 bg-zinc-800 text-white font-bold px-6 py-4 rounded-xl hover:bg-zinc-700 transition-colors border border-zinc-700">
+                                <a
+                                    href={formatExternalUrl(article.extraLink)}
+                                    download
+                                    onClick={() => api.trackClick(article.id, article.extraLinkText || 'File Aggiuntivo')}
+                                    className="flex-1 flex justify-center items-center gap-2 bg-zinc-800 text-white font-bold px-6 py-4 rounded-xl hover:bg-zinc-700 transition-colors border border-zinc-700"
+                                >
                                     {article.extraLinkText || 'File Aggiuntivo'}
                                 </a>
                             )}

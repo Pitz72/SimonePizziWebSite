@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Category } from '../types';
+import { useCategories } from '../hooks/useCategories';
 
 interface CustomNavLinkProps {
   to: string;
@@ -39,6 +39,7 @@ const CustomNavLink: React.FC<CustomNavLinkProps> = ({ to, children, isDisabled 
 
 const Header: React.FC = () => {
   const [isScrolled, setIsScrolled] = useState(false);
+  const { categories } = useCategories();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -78,21 +79,11 @@ const Header: React.FC = () => {
             <CustomNavLink to="/">
               Home
             </CustomNavLink>
-            <CustomNavLink to={`/${Category.BLOG_E_RIFLESSIONI}`}>
-              Blog e Riflessioni
-            </CustomNavLink>
-            <CustomNavLink to={`/${Category.VIDEOGIOCHI}`}>
-              Videogiochi
-            </CustomNavLink>
-            <CustomNavLink to={`/${Category.PROGETTI_SOFTWARE}`}>
-              Progetti Software
-            </CustomNavLink>
-            <CustomNavLink to={`/${Category.NARRATIVA_E_PUBBLICAZIONI}`}>
-              Narrativa e Pubblicazioni
-            </CustomNavLink>
-            <CustomNavLink to={`/${Category.PODCAST_AUDIO_ALTRO}`}>
-              Podcast, Radio e Altro
-            </CustomNavLink>
+            {categories.map(cat => (
+              <CustomNavLink key={cat.slug} to={`/${cat.slug}`}>
+                {cat.name}
+              </CustomNavLink>
+            ))}
           </div>
           <div className="ml-4">
             <Link

@@ -6,6 +6,14 @@ export enum Category {
   BLOG_E_RIFLESSIONI = 'blog-e-riflessioni'
 }
 
+// Rappresenta una categoria dinamica caricata dal DB (v1.6.5)
+export interface CategoryItem {
+  id: number;
+  name: string;
+  slug: string;
+  sort_order: number;
+}
+
 export interface Project {
   id: number;
   name: string;
