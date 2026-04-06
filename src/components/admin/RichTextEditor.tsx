@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { Bold, Italic, Quote, Link as LinkIcon, List, ListOrdered, AlignLeft, AlignCenter, AlignRight, Type, Eraser } from 'lucide-react';
+import { Bold, Italic, Quote, Link as LinkIcon, List, ListOrdered, AlignLeft, AlignCenter, AlignRight, Type, Eraser, Image as ImageIcon, Loader2 } from 'lucide-react';
 import showdown from 'showdown';
+import { api } from '../../api';
 
 interface RichTextEditorProps {
     value: string;
@@ -15,8 +16,10 @@ const COLORS = [
 
 export function RichTextEditor({ value, onChange, className }: RichTextEditorProps) {
     const editorRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [isFocused, setIsFocused] = useState(false);
     const [showColorPicker, setShowColorPicker] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
 
     // Sync external value changes to editor content only if not focused (to avoid cursor jumps)
     useEffect(() => {
@@ -39,6 +42,13 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
 
         const handleNativePaste = (e: ClipboardEvent) => {
             if (e.clipboardData?.files && e.clipboardData.files.length > 0) {
+                // Se sono file immagine, blocca il paste diretto (base64) e suggerisci l'upload
+                const hasImage = Array.from(e.clipboardData.files).some(f => f.type.startsWith('image/'));
+                if (hasImage) {
+                    e.preventDefault();
+                    alert("Per favore, usa il pulsante 'Immagine' nella barra degli strumenti per caricare le foto. Incollarle direttamente appesantisce troppo l'articolo e impedisce il salvataggio.");
+                    return;
+                }
                 return;
             }
 
@@ -136,6 +146,36 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
         if (sel) sel.value = "p";
     };
 
+    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setIsUploading(true);
+        try {
+            const result = await api.uploadMedia(file);
+            if (result.url) {
+                // Forza il focus sull'editor prima di inserire
+                if (editorRef.current) editorRef.current.focus();
+                
+                const imgHtml = `<img src="${result.url}" alt="${result.name}" class="max-w-full h-auto rounded-xl my-4 shadow-lg border border-zinc-800" />`;
+                try {
+                    document.execCommand('insertHTML', false, imgHtml); // eslint-disable-line @typescript-eslint/no-deprecated
+                } catch {
+                    // Fallback se insertHTML fallisce (raro)
+                    if (editorRef.current) editorRef.current.innerHTML += imgHtml;
+                }
+                
+                if (editorRef.current) onChange(editorRef.current.innerHTML);
+            }
+        } catch (error) {
+            console.error("Errore upload immagine:", error);
+            alert("Errore durante il caricamento dell'immagine. Riprova.");
+        } finally {
+            setIsUploading(false);
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
+    };
+
     return (
         <div className={`border border-zinc-800 rounded-lg overflow-hidden bg-zinc-950 flex flex-col min-h-[500px] ${className || ''}`}>
             <div className="flex flex-wrap items-center gap-1 p-2 bg-zinc-900 border-b border-zinc-800 shrink-0 relative z-20 rounded-t-lg">
@@ -205,6 +245,20 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
                 <ToolbarBtn onClick={promptLink} icon={<LinkIcon size={16} />} title="Inserisci Link" />
                 <ToolbarBtn onClick={removeLink} icon={<LinkIcon size={16} className="text-red-400" />} title="Rimuovi Link" />
+                <div className="w-px h-6 bg-zinc-800 mx-1" />
+                <ToolbarBtn 
+                    onClick={() => fileInputRef.current?.click()} 
+                    icon={isUploading ? <Loader2 size={16} className="animate-spin text-dis-green" /> : <ImageIcon size={16} />} 
+                    title="Carica Immagine" 
+                    disabled={isUploading}
+                />
+                <input 
+                    type="file" 
+                    ref={fileInputRef} 
+                    className="hidden" 
+                    accept="image/*" 
+                    onChange={handleImageUpload} 
+                />
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
                 <ToolbarBtn onClick={() => exec('removeFormat')} icon={<Eraser size={16} className="text-orange-400" />} title="Rimuovi Colore e Formattazione" />
             </div>

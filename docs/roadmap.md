@@ -57,6 +57,10 @@ Visto il focus su "Podcast, Audio e Altro" (Runtime Radio, favole, ecc.):
 
 ## 3. Ottimizzazione e Architettura di Sistema
 
+### ✅ Migrazione Database SQLite → MySQL [COMPLETATA — v1.7.0]
+
+Completata il 04/04/2026. Il database è stato migrato da SQLite (file locale) a MySQL dedicato su `mysql.runtimeradio.it`. Tutti i dati sono stati trasferiti senza perdite (1 utente, 27 articoli, 32 media, 6 progetti, 5 categorie). Contestualmente risolto un bug post-migrazione (HTTP 500 MySQL strict mode su confronti stringa vuota su campi DATETIME) e normalizzati 22 path immagini nel DB (estensioni obsolete .png/.jpg → .webp). Vedi [changelog v1.7.0](changelogs/1.7.0.md) e [v1.7.1](changelogs/1.7.1.md).
+
 ### ✅ Ottimizzazione Automatica delle Immagini [COMPLETATA — v1.6.3]
 
 **Implementata il 02/04/2026.** `upload.php` converte automaticamente JPEG/PNG in WebP (qualità 82, resize max 1920px) via GD Library. Script batch `scripts/optimize_uploads.php` disponibile per ottimizzare i file già caricati (one-shot, da eliminare dopo l'esecuzione). Vedi [changelog v1.6.3](changelogs/1.6.3.md).

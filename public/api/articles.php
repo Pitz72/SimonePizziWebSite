@@ -131,8 +131,15 @@ try {
     elseif ($method === 'POST') {
         Auth::check();
         
-        $data = json_decode(file_get_contents('php://input'), true);
+        $json_input = file_get_contents('php://input');
+        $data = json_decode($json_input, true);
         
+        if ($data === null && !empty($json_input)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Dati JSON malformati o troppo grandi per il server. Verifica i limiti di upload del PHP.']);
+            exit;
+        }
+
         $title = $data['title'] ?? 'Nuovo Articolo';
         $slug = $data['slug'] ?? generateSlug($title, $pdo);
         $content = $data['content'] ?? '';
@@ -156,7 +163,15 @@ try {
     elseif ($method === 'PUT') {
         Auth::check();
         
-        $data = json_decode(file_get_contents('php://input'), true);
+        $json_input = file_get_contents('php://input');
+        $data = json_decode($json_input, true);
+        
+        if ($data === null && !empty($json_input)) {
+            http_response_code(400);
+            echo json_encode(['error' => 'Dati JSON malformati o troppo grandi per il server (es. immagini Base64 troppo pesanti).']);
+            exit;
+        }
+
         $id = $_GET['id'] ?? ($data['id'] ?? null);
         
         if (!$id) {
@@ -164,7 +179,7 @@ try {
         }
 
         $title = $data['title'] ?? 'Senza Titolo';
-        $slug = $data['slug'] ?? generateSlug($title, $pdo);
+        $slug = $data['slug'] ?? ($data['title'] ? generateSlug($data['title'], $pdo) : null);
         $content = $data['content'] ?? '';
         $excerpt = $data['excerpt'] ?? '';
         $cover_image = $data['cover_image'] ?? '';
