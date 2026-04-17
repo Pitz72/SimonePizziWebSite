@@ -29,12 +29,13 @@ echo '  <description>' . htmlspecialchars($site_description) . '</description>' 
 echo '  <language>it-IT</language>' . "\n";
 
 try {
-    $query = "SELECT title, slug, excerpt, content, cover_image, category, published_at 
-              FROM articles 
+    // [v1.7.3] Aggiunto id nella query per generare GUID stabile disaccoppiato dalla URL
+    $query = "SELECT id, title, slug, excerpt, content, cover_image, category, published_at
+              FROM articles
               WHERE status = 'published' AND (published_at IS NULL OR published_at <= :ita_now)
-              ORDER BY published_at DESC 
+              ORDER BY published_at DESC
               LIMIT " . RSS_FEED_LIMIT;
-    
+
     $stmt = $pdo->prepare($query);
     $stmt->execute([':ita_now' => $ita_now_str]);
     $articles = $stmt->fetchAll();
@@ -42,25 +43,31 @@ try {
     foreach ($articles as $article) {
         // Formatta la data secondo rfc822
         $pubDate = date(DATE_RSS, strtotime($article['published_at'] ?? 'now'));
-        
+
         $item_url = $base_url . '/' . rawurlencode($article['category']) . '/' . rawurlencode($article['slug']);
-        
+
+        // [v1.7.3] GUID stabile basato sull'ID numerico del DB, non sulla URL.
+        // isPermaLink="false" segnala ai lettori RSS che il GUID non è un URL navigabile.
+        // Questo evita che un cambio di categoria/slug faccia ri-pubblicare l'articolo
+        // come nuovo contenuto su sistemi di integrazione (es. bot Telegram).
+        $stable_guid = 'urn:simonepizzi:article:' . (int)$article['id'];
+
         echo '  <item>' . "\n";
         echo '    <title>' . htmlspecialchars($article['title']) . '</title>' . "\n";
         echo '    <link>' . htmlspecialchars($item_url) . '</link>' . "\n";
         echo '    <description>' . htmlspecialchars($article['excerpt']) . '</description>' . "\n";
-        
+
         if (!empty($article['cover_image'])) {
             $image_url = (str_starts_with($article['cover_image'], 'http')) ? $article['cover_image'] : $base_url . '/' . ltrim($article['cover_image'], '/');
             echo '    <enclosure url="' . htmlspecialchars($image_url) . '" type="image/jpeg" />' . "\n";
         }
-        
+
         echo '    <pubDate>' . $pubDate . '</pubDate>' . "\n";
-        echo '    <guid>' . htmlspecialchars($item_url) . '</guid>' . "\n";
+        echo '    <guid isPermaLink="false">' . $stable_guid . '</guid>' . "\n";
         echo '  </item>' . "\n";
     }
 } catch (Exception $e) {
-    // Ignoriamo silenti in caso di errore DB nell'RSS
+    // Fallback silenzioso in caso di errore DB nell'RSS
 }
 
 echo '</channel>' . "\n";

@@ -1,5 +1,5 @@
 # Indice Master della Documentazione
-**Simone Pizzi - Portfolio Creativo (v1.7.0)**
+**Simone Pizzi - Portfolio Creativo (v1.7.2)**
 
 Benvenuto nell'Hub Documentale del progetto. Da qui e possibile rintracciare in modo sistematico l'intera evoluzione della codebase, esplorare le architetture, e recuperare informazioni di sistema o log del passato.
 
@@ -10,8 +10,9 @@ Benvenuto nell'Hub Documentale del progetto. Da qui e possibile rintracciare in 
 | Documento | Descrizione |
 | :--- | :--- |
 | **[README Principale](../README.md)** | Start point del progetto: tecnologie, setup locale, istruzioni di build. |
-| **[Stato del Progetto (project_status.md)](project_status.md)** | Diagnostica puntuale e ispezione strutturale dell'ultima release in produzione. |
-| **[Roadmap Futura (roadmap.md)](roadmap.md)** | Pianificazione strategica per l'evoluzione del CMS, UI/UX e architettura di sistema. |
+| **[MASTER PLAN (MASTER_PLAN.md)](MASTER_PLAN.md)** | **Documento unico di verità.** Stato corrente, backlog completo, sprint pianificati, note integrazione. Sostituisce roadmap.md e project_status.md. |
+| **[Roadmap (roadmap.md)](roadmap.md)** | Storico pianificazione — ora consolidata in MASTER_PLAN.md. |
+| **[Stato del Progetto (project_status.md)](project_status.md)** | Snapshot diagnostico v1.6.4 — ora consolidato in MASTER_PLAN.md. |
 | **[Indice Strutturale (structure_index.md)](structure_index.md)** | Mappa delle directory e regole architetturali per agenti e developer. |
 
 ---
@@ -22,6 +23,8 @@ Per una tracciabilita trasparente dello sviluppo, ogni aggiornamento e documenta
 
 ### Filone 1.7.x (MySQL & Infrastruttura)
 
+- [v1.7.3 - Fix Critico SEO/Social: OpenGraph rotto + GUID RSS stabile](changelogs/1.7.3.md)
+- [v1.7.2 - Bugfix Editor Articoli e Caricamento Immagini Contestuale](changelogs/1.7.2.md)
 - [v1.7.1 - Hotfix Post-Migrazione: HTTP 500 MySQL strict mode e path immagini WebP](changelogs/1.7.1.md)
 - [v1.7.0 - Migrazione Database SQLite → MySQL](changelogs/1.7.0.md)
 

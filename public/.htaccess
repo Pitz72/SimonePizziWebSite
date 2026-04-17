@@ -22,6 +22,17 @@
   RewriteRule ^(.*)$ /index.php [L,QSA]
 </IfModule>
 
+# [v1.7.3] Redirect 301 Permanenti — URL articoli riorganizzati
+# Aggiungere qui ogni volta che una URL pubblica di un articolo cambia struttura.
+# IMPORTANTE: non cambiare URL già pubblicate senza aggiungere il redirect corrispondente.
+# Questo protegge SEO, bookmark degli utenti e sistemi di integrazione (es. bot Telegram).
+# Formato: Redirect 301 /vecchio-path /nuovo-path
+#
+# Esempio:
+#   Redirect 301 /articoli/il-mio-articolo /narrativa-e-pubblicazioni/il-mio-articolo
+#
+# (Aggiungere i redirect specifici sotto questa riga quando necessario)
+
 # [v1.5.10] Security Headers
 
 <IfModule mod_headers.c>

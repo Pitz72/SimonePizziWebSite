@@ -1,112 +1,118 @@
 <?php
 /**
- * SIMONE PIZZI PORTFOLIO - SEO ENGINE SERVER-SIDE (v1.4.0)
- * Questo file intercetta le richieste di React Router (grazie ad .htaccess), interroga il database 
- * e popola i metatag HTML primari (OpenGraph/Twitter) prima di passare il raggio a React (SPA).
+ * SIMONE PIZZI PORTFOLIO - SEO ENGINE SERVER-SIDE (v1.7.3)
+ * Questo file intercetta le richieste di React Router (grazie ad .htaccess), interroga il database
+ * e popola i metatag HTML primari (OpenGraph/Twitter) prima di passare il controllo a React (SPA).
+ *
+ * [v1.7.3] FIX CRITICO: migrato da SQLite (obsoleto dalla v1.7.0) a MySQL via db.php.
+ *          Il vecchio approccio file_exists($dbPath) restituiva sempre false in produzione
+ *          causando il fallback permanente ai meta della homepage su qualsiasi condivisione social.
  */
-$dbPath = __DIR__ . '/api/.data/database.sqlite';
 
-// Default Meta (Fallback)
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-$metaTitle = "Simone Pizzi - Videogiochi, Software e Narrativa";
-$metaDescription = "Portfolio Creativo, Game Design, Sviluppo Software e Pubblicazioni";
-$metaImage = $protocol . $_SERVER['HTTP_HOST'] . "/Simone-Pizzi.png"; // Usa l'immagine fallback reale presente in public
+// [v1.7.3] Inclusione del layer DB MySQL (config.php + PDO singleton)
+require_once __DIR__ . '/api/db.php';
+
+// Default Meta (Fallback — usati per homepage e pagine non-articolo)
+$protocol   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
+$metaTitle  = "Simone Pizzi - Videogiochi, Software e Narrativa";
+$metaDesc   = "Portfolio Creativo, Game Design, Sviluppo Software e Pubblicazioni";
+$metaImage  = $protocol . $_SERVER['HTTP_HOST'] . "/Simone-Pizzi.png";
 $currentUrl = $protocol . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+$ogType     = "website";
 
 $slug = null;
 
-// Estrarre l'ultimo segmento dell'URL come potenziale slug di un articolo (Ignora la root category)
+// Estrae l'ultimo segmento dell'URL come potenziale slug articolo
 $request_uri = trim($_SERVER['REQUEST_URI'], '/');
-$uri_parts = explode('/', $request_uri);
+// Rimuove query string dal path (es. ?foo=bar non fa parte dello slug)
+$request_uri = strtok($request_uri, '?');
+$uri_parts   = explode('/', $request_uri);
 
-// Se siamo nell'area di amministrazione, non fare alcun match SEO, lascia che l'SPA parta pulita
+// Area admin: nessun match SEO, lascia partire l'SPA pulita
 if (isset($uri_parts[0]) && $uri_parts[0] === 'admin') {
     $slug = null;
-} else if (count($uri_parts) == 2) { 
-    // Meno probabilità di scontri, assumiamo uri tipo: /videogiochi/mio-slug
-    $slug = end($uri_parts);
-} elseif (count($uri_parts) == 1 && $uri_parts[0] !== '') {
-    // Gestione URL corti (se implementato) /mio-slug
-     $slug = end($uri_parts);
+} elseif (count($uri_parts) === 2 && $uri_parts[1] !== '') {
+    // Pattern standard: /categoria/slug
+    $slug = $uri_parts[1];
+} elseif (count($uri_parts) === 1 && $uri_parts[0] !== '') {
+    // Pattern corto: /slug (gestione futura)
+    $slug = $uri_parts[0];
 }
 
-// 1. TENTA CONNESSIONE AL DATABASE E MATCH DELLA SLUG
-if ($slug && file_exists($dbPath)) {
+// Tenta connessione MySQL e match dello slug
+if ($slug) {
     try {
-        $pdo = new PDO('sqlite:' . $dbPath);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        $pdo = Database::connect();
 
-        // [v1.5.9] Sostituzione FILTER_SANITIZE_STRING (deprecated PHP 8.1+) con strip_tags + trim
         $cleanSlug = strip_tags(trim($slug));
-        
-        $stmt = $pdo->prepare("SELECT title, excerpt, cover_image FROM articles WHERE slug = :slug AND status = 'published' LIMIT 1");
+
+        $stmt = $pdo->prepare(
+            "SELECT title, excerpt, cover_image FROM articles
+             WHERE slug = :slug AND status = 'published'
+             LIMIT 1"
+        );
         $stmt->execute([':slug' => $cleanSlug]);
         $article = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($article) {
-            // MATCH TROVATO! Sovrascriviamo i meta base
+            $ogType    = "article";
             $metaTitle = htmlspecialchars($article['title'], ENT_QUOTES, 'UTF-8') . " | Simone Pizzi";
-            
-            // Per la descrizione, esegui uno strip tag per sicurezza
-            $rawDesc = $article['excerpt'] ? $article['excerpt'] : "Leggi l'articolo completo di Simone Pizzi.";
-            $metaDescription = htmlspecialchars(strip_tags($rawDesc), ENT_QUOTES, 'UTF-8');
-            
+
+            $rawDesc  = $article['excerpt'] ?: "Leggi l'articolo completo sul portfolio di Simone Pizzi.";
+            $metaDesc = htmlspecialchars(strip_tags($rawDesc), ENT_QUOTES, 'UTF-8');
+
             if (!empty($article['cover_image'])) {
-                $metaImage = filter_var($article['cover_image'], FILTER_SANITIZE_URL);
-                if (strpos($metaImage, 'http') !== 0) {
-                     // Rendi la copertina dell'articolo un path assoluto (necessario per Social Bots)
-                     $prefix = (substr($metaImage, 0, 1) !== '/') ? '/' : '';
-                     $metaImage = $protocol . $_SERVER['HTTP_HOST'] . $prefix . $metaImage; 
+                $img = filter_var($article['cover_image'], FILTER_SANITIZE_URL);
+                if (strpos($img, 'http') !== 0) {
+                    $prefix    = (substr($img, 0, 1) !== '/') ? '/' : '';
+                    $img       = $protocol . $_SERVER['HTTP_HOST'] . $prefix . $img;
                 }
+                $metaImage = $img;
             }
         }
-    } catch (PDOException $e) {
-        // Fallback silenzioso: proseguiamo col render dei metas default se il DB crascia.
+    } catch (Exception $e) {
+        // Fallback silenzioso: i meta default sono già impostati
         error_log("SEO Engine DB Error: " . $e->getMessage());
     }
 }
 
-// 2. RECUPERA L'HTML COMPILATO DI VITE
-// Durante `npm run build`, Vite genera index.html, non index.php. 
-// Leggeremo l'index.html finale generato da Vite (dist/index.html fisicamente, ma noi siamo dentro /public/ ora. 
-// A build chiusa tutto `public` e i compilati andranno nella root)
-$htmlFile = __DIR__ . '/index.html'; 
+// Recupera l'HTML compilato da Vite
+$htmlFile = __DIR__ . '/index.html';
 
 if (!file_exists($htmlFile)) {
-    // Fallback disperato per l'ambiente dev o errori di build
     die("Error: Production index.html not found. Assicurati di aver generato la build Vite.");
 }
 
 $htmlContent = file_get_contents($htmlFile);
 
-// 3. INIEZIONE SEO MANUALE NELL'HEAD
-// Sostituiamo il <title> originale di Vite e iniettiamo tutto il pacchetto SEO Dinamico
+// Iniezione SEO nell'<head>
 $seoInjection = "
     <title>{$metaTitle}</title>
     <!-- Primary Meta Tags -->
     <meta name=\"title\" content=\"{$metaTitle}\" />
-    <meta name=\"description\" content=\"{$metaDescription}\" />
+    <meta name=\"description\" content=\"{$metaDesc}\" />
 
-    <!-- Open Graph / Facebook -->
-    <meta property=\"og:type\" content=\"website\" />
+    <!-- Open Graph / Facebook / Telegram -->
+    <meta property=\"og:type\" content=\"{$ogType}\" />
+    <meta property=\"og:site_name\" content=\"Simone Pizzi\" />
+    <meta property=\"og:locale\" content=\"it_IT\" />
     <meta property=\"og:url\" content=\"{$currentUrl}\" />
     <meta property=\"og:title\" content=\"{$metaTitle}\" />
-    <meta property=\"og:description\" content=\"{$metaDescription}\" />
+    <meta property=\"og:description\" content=\"{$metaDesc}\" />
     <meta property=\"og:image\" content=\"{$metaImage}\" />
+    <meta property=\"og:image:width\" content=\"1200\" />
+    <meta property=\"og:image:height\" content=\"630\" />
 
-    <!-- Twitter -->
-    <meta property=\"twitter:card\" content=\"summary_large_image\" />
-    <meta property=\"twitter:url\" content=\"{$currentUrl}\" />
-    <meta property=\"twitter:title\" content=\"{$metaTitle}\" />
-    <meta property=\"twitter:description\" content=\"{$metaDescription}\" />
-    <meta property=\"twitter:image\" content=\"{$metaImage}\" />
+    <!-- Twitter / X -->
+    <meta name=\"twitter:card\" content=\"summary_large_image\" />
+    <meta name=\"twitter:url\" content=\"{$currentUrl}\" />
+    <meta name=\"twitter:title\" content=\"{$metaTitle}\" />
+    <meta name=\"twitter:description\" content=\"{$metaDesc}\" />
+    <meta name=\"twitter:image\" content=\"{$metaImage}\" />
 </head>";
 
-// Operazione chirugica sull'HTML
 $htmlContent = str_replace('</head>', $seoInjection, $htmlContent);
-// Togliamo il title pre-esistente per non averne due.
 $htmlContent = preg_replace('/<title>.*?<\/title>/s', '', $htmlContent, 1);
 
-// Erova la SPA di React con il pacco regalo per i Bot inserito!
 echo $htmlContent;
 ?>
