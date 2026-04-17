@@ -216,6 +216,51 @@ export const api = {
         return res.json();
     },
 
+    // --- NEWSLETTER (v1.7.4) ---
+    newsletterSubscribe: async (data: { email: string; name?: string }) => {
+        const res = await fetch(`${API_URL}/subscribers.php`, {
+            ...fetchConfig,
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+        return res.json();
+    },
+    newsletterConfirm: async (token: string) => {
+        const res = await fetch(`${API_URL}/subscribers.php?action=confirm&token=${encodeURIComponent(token)}`, fetchConfig);
+        return res.json();
+    },
+    newsletterUnsubscribe: async (token: string) => {
+        const res = await fetch(`${API_URL}/subscribers.php?action=unsubscribe&token=${encodeURIComponent(token)}`, fetchConfig);
+        return res.json();
+    },
+    getSubscribers: async () => {
+        const res = await fetch(`${API_URL}/subscribers.php`, fetchConfig);
+        if (!res.ok) throw new Error('Errore recupero iscritti');
+        return res.json();
+    },
+    deleteSubscriber: async (id: number) => {
+        const res = await fetch(`${API_URL}/subscribers.php?id=${id}`, {
+            ...fetchConfig,
+            method: 'DELETE',
+        });
+        if (!res.ok) throw new Error('Errore eliminazione iscritto');
+        return res.json();
+    },
+    sendNewsletter: async (data: { subject: string; body: string }) => {
+        const res = await fetch(`${API_URL}/newsletter_send.php`, {
+            ...fetchConfig,
+            method: 'POST',
+            body: JSON.stringify(data),
+        });
+        if (!res.ok) { const r = await res.json(); throw new Error(r.error || 'Errore invio newsletter'); }
+        return res.json();
+    },
+    getNewsletterHistory: async () => {
+        const res = await fetch(`${API_URL}/newsletter_send.php`, fetchConfig);
+        if (!res.ok) throw new Error('Errore recupero storico');
+        return res.json();
+    },
+
     // --- MEDIA ---
     uploadMedia: async (file: File) => {
         const formData = new FormData();

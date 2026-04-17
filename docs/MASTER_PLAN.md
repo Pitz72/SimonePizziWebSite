@@ -1,7 +1,7 @@
 # MASTER PLAN — Simone Pizzi Portfolio Creativo
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.7.3  
+**Versione corrente:** 1.7.4  
 **Ultimo aggiornamento documento:** 17 Aprile 2026  
 **Sito:** simonepizzi.runtimeradio.it
 
@@ -87,7 +87,7 @@ Le voci sono ordinate per **priorità assoluta**. Ogni voce ha un ID stabile per
 - Aggiungere route in `App.tsx`.
 - **Opzionale admin:** Visualizzare i messaggi ricevuti nella Dashboard admin.
 
-#### [P1-03] Sistema Newsletter — attivazione completa
+#### ✅ [P1-03] Sistema Newsletter — COMPLETATO v1.7.4
 **Area:** Frontend (iscrizione pubblica) + Admin (invio NL)  
 **Problema:** La tabella `subscribers` esiste nello schema ma non c'è nessun endpoint API, nessun form pubblico di iscrizione, nessuna UI admin per gestire gli iscritti o comporre e inviare newsletter. Il dashboard admin mostra `Iscritti Newsletter: 0` come placeholder statico.  
 **Fix richiesto — Fase 1 (Iscrizione):**

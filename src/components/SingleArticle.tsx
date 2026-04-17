@@ -7,6 +7,7 @@ import { PortfolioItem } from '../types';
 import SEO from './SEO';
 import ShareModal from './ShareModal';
 import LetterModal from './LetterModal';
+import NewsletterSignup from './NewsletterSignup';
 
 interface SingleArticleProps {
     /* props riservati per sviluppi futuri */
@@ -234,6 +235,11 @@ const SingleArticle: React.FC<SingleArticleProps> = () => {
                     )}
 
                 </div>
+            </div>
+
+            {/* Newsletter signup — sotto il box CTA */}
+            <div className="max-w-2xl mx-auto mt-10">
+                <NewsletterSignup />
             </div>
 
         </article>

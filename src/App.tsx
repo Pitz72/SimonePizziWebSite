@@ -20,7 +20,10 @@ import MediaGallery from './pages/admin/MediaGallery';
 import ProjectsList from './pages/admin/ProjectsList';
 import ProjectEditor from './pages/admin/ProjectEditor';
 import CategoryManager from './pages/admin/CategoryManager';
+import NewsletterAdmin from './pages/admin/NewsletterAdmin';
 import AllProjects from './pages/AllProjects';
+import NewsletterConfirm from './pages/NewsletterConfirm';
+import NewsletterUnsubscribe from './pages/NewsletterUnsubscribe';
 import { useCategories } from './hooks/useCategories';
 
 const backgroundStyle = {
@@ -57,6 +60,8 @@ const PublicLayout: React.FC = () => {
           <Routes>
             <Route path="/" element={<PortfolioGrid />} />
             <Route path="/tutti-i-progetti" element={<AllProjects />} />
+            <Route path="/newsletter/confermato" element={<NewsletterConfirm />} />
+            <Route path="/newsletter/disiscritto" element={<NewsletterUnsubscribe />} />
 
             {/* Route dinamiche generate dalle categorie caricate dal DB */}
             {categories.map(cat => (
@@ -100,6 +105,7 @@ const App: React.FC = () => {
             <Route path="projects/edit/:id" element={<ProjectEditor />} />
             <Route path="media" element={<MediaGallery />} />
             <Route path="categories" element={<CategoryManager />} />
+            <Route path="newsletter" element={<NewsletterAdmin />} />
             <Route index element={<Dashboard />} />
           </Route>
 

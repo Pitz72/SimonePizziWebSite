@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import NewsletterSignup from './NewsletterSignup';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
@@ -14,6 +15,11 @@ const Footer: React.FC = () => {
   return (
     <footer className="border-t border-gray-800/50 bg-black/20 backdrop-blur-sm mt-12">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 text-center">
+        {/* Widget Newsletter — sempre visibile */}
+        <div className="mb-10 max-w-md mx-auto">
+          <NewsletterSignup />
+        </div>
+
         {!isArticlePage && (
           <div className="mb-8 max-w-2xl mx-auto">
             <h3 className="text-xl font-bold text-white mb-4">Sostieni il Progetto</h3>

@@ -23,9 +23,11 @@ try {
     $stmt_media = $pdo->query("SELECT COUNT(*) FROM media");
     $media_count = $stmt_media->fetchColumn();
 
-    // TODO: Aggiungere logica Iscritti Newsletter quando implementata, per ora usiamo 0
-    // $stmt_sub = $pdo->query("SELECT COUNT(*) FROM subscribers");
+    // [v1.7.4] Newsletter attiva — conta solo gli iscritti confermati
     $subs_count = 0;
+    try {
+        $subs_count = (int)$pdo->query("SELECT COUNT(*) FROM subscribers WHERE status='confirmed'")->fetchColumn();
+    } catch (PDOException $_) { /* tabella non ancora migrata */ }
 
     // Stats Analytics (v1.6.5) — fallback a 0 se le tabelle non esistono ancora
     $total_views  = 0;
