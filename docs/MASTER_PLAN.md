@@ -1,7 +1,7 @@
 # MASTER PLAN — Simone Pizzi Portfolio Creativo
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.7.4  
+**Versione corrente:** 1.7.5  
 **Ultimo aggiornamento documento:** 17 Aprile 2026  
 **Sito:** simonepizzi.runtimeradio.it
 
@@ -208,7 +208,7 @@ Doppio controllo: hash link + hash titolo. Stesso titolo dallo stesso feed = non
 ### ✅ Sprint A — "Fix & Visibilità" — COMPLETATO v1.7.3
 1. ✅ [P0-01] Fix anteprima social / OpenGraph rotta — risolto v1.7.3
 2. ✅ [P0-02] Stabilizzare URL articoli + redirect 301 + GUID RSS stabile — risolto v1.7.3
-3. [P1-01] Pulsante RSS (header + footer + fine articolo)
+3. ✅ [P1-01] Pulsante RSS header — risolto v1.7.5 (footer e fine articolo rimangono nel backlog P3)
 4. [P1-04] Data/ora e categoria nelle anteprime articolo
 
 ### Sprint B — "Contatti & Community"

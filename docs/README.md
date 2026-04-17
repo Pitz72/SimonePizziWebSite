@@ -23,6 +23,7 @@ Per una tracciabilita trasparente dello sviluppo, ogni aggiornamento e documenta
 
 ### Filone 1.7.x (MySQL & Infrastruttura)
 
+- [v1.7.5 - GDPR newsletter, articoli selezionabili in newsletter, RSS header](changelogs/1.7.5.md)
 - [v1.7.4 - Newsletter: implementazione completa (iscrizione, double opt-in, admin, invio)](changelogs/1.7.4.md)
 - [v1.7.3 - Fix Critico SEO/Social: OpenGraph rotto + GUID RSS stabile](changelogs/1.7.3.md)
 - [v1.7.2 - Bugfix Editor Articoli e Caricamento Immagini Contestuale](changelogs/1.7.2.md)

@@ -85,7 +85,20 @@ const Header: React.FC = () => {
               </CustomNavLink>
             ))}
           </div>
-          <div className="ml-4">
+          <div className="flex items-center gap-3 ml-4">
+            {/* RSS Feed */}
+            <a
+              href="/api/rss.php"
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Feed RSS"
+              className="flex items-center justify-center w-9 h-9 rounded-lg border border-gray-700 text-gray-400 hover:text-orange-400 hover:border-orange-500/50 hover:bg-orange-500/10 transition-all duration-200"
+              aria-label="Feed RSS"
+            >
+              <svg viewBox="0 0 24 24" className="w-4 h-4 fill-current" aria-hidden="true">
+                <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19.01 7.38 20 6.18 20C4.98 20 4 19.01 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z"/>
+              </svg>
+            </a>
             <Link
               to="/tutti-i-progetti"
               className="inline-block bg-green-500 text-black font-bold text-sm px-4 py-2 rounded-lg hover:bg-green-400 transition-all duration-300 transform hover:scale-105 shadow-lg shadow-green-500/40 ring-1 ring-green-400/50 hover:ring-white/50"
