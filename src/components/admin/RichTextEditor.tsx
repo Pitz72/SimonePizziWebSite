@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { Bold, Italic, Quote, Link as LinkIcon, List, ListOrdered, AlignLeft, AlignCenter, AlignRight, Type, Eraser, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Bold, Italic, Quote, Link as LinkIcon, List, ListOrdered, AlignLeft, AlignCenter, AlignRight, Type, Eraser, Image as ImageIcon, Loader2, ShieldOff } from 'lucide-react';
 import showdown from 'showdown';
 import { api } from '../../api';
 
@@ -7,6 +7,25 @@ interface RichTextEditorProps {
     value: string;
     onChange: (value: string) => void;
     className?: string;
+}
+
+// Rimuove elementi non-testo (SVG, icone LLM, pulsanti, form) da un documento HTML parsato.
+// Gli elementi in REMOVE_ENTIRELY vengono eliminati con tutto il loro contenuto.
+// Gli elementi in UNWRAP vengono sostituiti col loro testo (se presente).
+const TAGS_REMOVE = ['svg', 'script', 'style', 'iframe', 'canvas', 'noscript', 'video', 'audio', 'object', 'embed'];
+const TAGS_UNWRAP = ['button', 'input', 'select', 'textarea', 'form', 'label'];
+
+function stripForeignElements(doc: Document): void {
+    TAGS_REMOVE.forEach(tag => {
+        doc.querySelectorAll(tag).forEach(el => el.remove());
+    });
+    TAGS_UNWRAP.forEach(tag => {
+        doc.querySelectorAll(tag).forEach(el => {
+            const text = el.textContent?.trim();
+            if (text) el.replaceWith(document.createTextNode(text));
+            else el.remove();
+        });
+    });
 }
 
 const COLORS = [
@@ -77,6 +96,9 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(htmlText, 'text/html');
 
+                // Rimuove SVG, icone, pulsanti, form (es. pulsanti LLM incollati per errore)
+                stripForeignElements(doc);
+
                 const elementsWithStyle = doc.querySelectorAll('[style]');
                 elementsWithStyle.forEach(el => {
                     if (el instanceof HTMLElement) {
@@ -144,6 +166,15 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
         // Reset the select back to paragraph after applying heading
         const sel = document.getElementById('heading-selector') as HTMLSelectElement;
         if (sel) sel.value = "p";
+    };
+
+    const sanitizeContent = () => {
+        if (!editorRef.current) return;
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(editorRef.current.innerHTML, 'text/html');
+        stripForeignElements(doc);
+        editorRef.current.innerHTML = doc.body.innerHTML;
+        onChange(editorRef.current.innerHTML);
     };
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -261,6 +292,7 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                 />
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
                 <ToolbarBtn onClick={() => exec('removeFormat')} icon={<Eraser size={16} className="text-orange-400" />} title="Rimuovi Colore e Formattazione" />
+                <ToolbarBtn onClick={sanitizeContent} icon={<ShieldOff size={16} className="text-red-400" />} title="Ripulisci elementi non-testo (SVG, icone, pulsanti)" />
             </div>
 
             <div
