@@ -9,7 +9,8 @@
  * 4. CANCELLARE il file dal server immediatamente dopo
  */
 
-require_once __DIR__ . '/../public/api/db.php';
+// Il file viene deployato in public/api/ — db.php è nella stessa directory
+require_once __DIR__ . '/db.php';
 
 header('Content-Type: text/plain; charset=utf-8');
 
