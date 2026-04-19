@@ -74,13 +74,13 @@ Le voci sono ordinate per **priorità assoluta**. Ogni voce ha un ID stabile per
 
 ### 🟠 PRIORITÀ 1 — ALTA / FEATURE MANCANTI VISIBILI
 
-#### [P1-01] Pulsante RSS feed permanente
+#### ✅ [P1-01] Pulsante RSS feed permanente — COMPLETATO v1.7.5
 **Area:** Frontend — Header / Footer / Fine articolo  
-**Problema:** Non esiste in nessun punto del sito un link visibile al feed RSS, nonostante `/api/rss.php` sia attivo e funzionante.  
-**Fix richiesto:**
-- Aggiungere icona RSS nell'`Header.tsx` (voce di navigazione o icona standalone).
-- Aggiungere link RSS nel `Footer.tsx`.
-- Aggiungere pulsante/link RSS al termine di ogni articolo in `SingleArticle.tsx` (vicino ai pulsanti CTA).
+**Fix applicato:**
+- `Header.tsx`: icona RSS standalone visibile su tutte le pagine (desktop e menu mobile), link a `/api/rss.php`.
+- `Footer.tsx`: link RSS nel footer globale del sito.
+- `SingleArticle.tsx`: pulsante/link RSS in fondo ad ogni articolo.
+
 
 #### ✅ [P1-02] Pulsante "Contattami" e pagina form contatti — COMPLETATO v1.7.8
 **Area:** Frontend + Backend  
