@@ -20,6 +20,15 @@ const formatExternalUrl = (url?: string) => {
     return `https://${url}`;
 };
 
+/** Formatta "19 apr 2026 · 14:30" da una stringa ISO */
+const formatDateTime = (dateStr: string): string => {
+    const d = new Date(dateStr);
+    const date = d.toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
+    const hh = d.getHours().toString().padStart(2, '0');
+    const mm = d.getMinutes().toString().padStart(2, '0');
+    return `${date} · ${hh}:${mm}`;
+};
+
 const SingleArticle: React.FC<SingleArticleProps> = () => {
     const { projectSlug } = useParams<{ projectSlug: string }>();
     const navigate = useNavigate();
@@ -128,13 +137,21 @@ const SingleArticle: React.FC<SingleArticleProps> = () => {
                     </button>
 
                     {/* Meta Info */}
-                    <div className="flex flex-wrap items-center gap-4 mb-6">
+                    <div className="flex flex-wrap items-center gap-3 mb-6">
+                        {/* Badge categoria */}
+                        {article.category && (
+                            <span className="flex items-center gap-1.5 text-xs font-bold text-white bg-zinc-800/80 border border-zinc-700 backdrop-blur-md px-3 py-1.5 rounded-full uppercase tracking-wider">
+                                {String(article.category).replace(/-/g, ' ')}
+                            </span>
+                        )}
+                        {/* Data + ora */}
                         {article.publishedAt && (
                             <span className="flex items-center gap-1.5 text-xs font-bold text-zinc-400 border border-zinc-800 bg-black/40 px-3 py-1.5 rounded-full uppercase tracking-wider">
                                 <Calendar size={12} />
-                                {new Date(article.publishedAt).toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' })}
+                                {formatDateTime(article.publishedAt)}
                             </span>
                         )}
+                        {/* Tag tematici */}
                         {article.tags.map(tag => (
                             <span key={tag} className="flex items-center gap-1.5 text-xs font-bold text-black bg-dis-green px-3 py-1.5 rounded-full uppercase tracking-wider">
                                 <Tag size={12} />

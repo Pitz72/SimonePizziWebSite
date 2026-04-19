@@ -1,8 +1,8 @@
 # MASTER PLAN — Simone Pizzi Portfolio Creativo
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.7.5  
-**Ultimo aggiornamento documento:** 17 Aprile 2026  
+**Versione corrente:** 1.7.7  
+**Ultimo aggiornamento documento:** 19 Aprile 2026  
 **Sito:** simonepizzi.runtimeradio.it
 
 > Questo documento sostituisce e consolida `roadmap.md` e `project_status.md`.  
@@ -11,7 +11,7 @@
 
 ---
 
-## PARTE I — STATO CORRENTE (v1.7.2)
+## PARTE I — STATO CORRENTE (v1.7.7)
 
 ### Infrastruttura
 | Componente | Stato |
@@ -23,6 +23,13 @@
 | Ottimizzazione immagini WebP automatica (upload) | ✅ Completata v1.6.3 |
 | RSS Feed pubblico | ✅ Attivo |
 | SEO server-side (OpenGraph / TwitterCard via `index.php`) | ✅ Attivo (ma vedere P0 sotto) |
+
+### Storico Versioni
+| Versione | Data | Note |
+|---|---|---|
+| v1.7.7 | 19/04/2026 | Data/ora+categoria anteprime; menu mobile hamburger+drawer |
+| v1.7.6 | 17/04/2026 | Newsletter Footer compact; editor strip SVG + pulsante Ripulisci |
+| v1.7.5 | 17/04/2026 | Icona RSS in Header (sprint A chiuso) |
 
 ### Database — Tabelle
 | Tabella | Stato |
@@ -101,13 +108,12 @@ Le voci sono ordinate per **priorità assoluta**. Ogni voce ha un ID stabile per
 - Endpoint `POST /api/newsletter_send.php` per invio massivo con PHP `mail()` o libreria (PHPMailer/SMTP).
 - Tracciamento invii nella tabella `subscribers` (campo `last_sent_at`).
 
-#### [P1-04] Data/ora e categoria nelle anteprime articolo
+#### ✅ [P1-04] Data/ora e categoria nelle anteprime articolo — COMPLETATO v1.7.7
 **Area:** Frontend — Home, Sezioni, Singolo Articolo  
-**Problema:** Nelle card di anteprima degli articoli (Home: `PortfolioGrid.tsx` e `FeaturedCard.tsx` / Sezioni: `ArticleArchive.tsx`) mancano sia la data/ora di pubblicazione che l'etichetta della categoria. Nell'articolo aperto (`SingleArticle.tsx`) è presente la data ma manca l'ora e l'etichetta della categoria.  
-**Fix richiesto:**
-- `FeaturedCard.tsx` e `PortfolioGrid.tsx`: aggiungere data+ora e badge categoria.
-- `ArticleArchive.tsx` (card di sezione): aggiungere data+ora e badge categoria.
-- `SingleArticle.tsx` (articolo aperto): aggiungere ora di pubblicazione e badge/link categoria.
+**Fix applicato in v1.7.7:**
+- `FeaturedCard.tsx` (hero e grid): aggiunta data+ora con icona Calendar.
+- `ArticleArchive.tsx`: aggiunta data+ora nell'hero item; ora aggiunta ai grid items.
+- `SingleArticle.tsx`: aggiunto badge categoria + ora nella data di pubblicazione.
 
 ---
 
@@ -209,7 +215,8 @@ Doppio controllo: hash link + hash titolo. Stesso titolo dallo stesso feed = non
 1. ✅ [P0-01] Fix anteprima social / OpenGraph rotta — risolto v1.7.3
 2. ✅ [P0-02] Stabilizzare URL articoli + redirect 301 + GUID RSS stabile — risolto v1.7.3
 3. ✅ [P1-01] Pulsante RSS header — risolto v1.7.5 (footer e fine articolo rimangono nel backlog P3)
-4. [P1-04] Data/ora e categoria nelle anteprime articolo
+4. ✅ [P1-04] Data/ora e categoria nelle anteprime articolo — risolto v1.7.7
+5. ✅ Menu mobile (hamburger + drawer) — risolto v1.7.7
 
 ### Sprint B — "Contatti & Community"
 5. [P1-02] Pagina Contattami + form email reale

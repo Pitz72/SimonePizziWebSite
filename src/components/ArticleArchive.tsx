@@ -5,6 +5,15 @@ import { Calendar, ArrowRight } from 'lucide-react';
 import SEO from './SEO';
 import { useFetchArticles } from '../hooks/useFetchArticles';
 
+/** Formatta "19 apr 2026 · 14:30" da una stringa ISO */
+const formatDateTime = (dateStr: string): string => {
+    const d = new Date(dateStr);
+    const date = d.toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' });
+    const hh = d.getHours().toString().padStart(2, '0');
+    const mm = d.getMinutes().toString().padStart(2, '0');
+    return `${date} · ${hh}:${mm}`;
+};
+
 interface ArticleArchiveProps {
     title: string;
     category?: string; // Slug categoria (dinamico da DB v1.6.5)
@@ -96,6 +105,12 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category }) => {
                                         <p className="text-zinc-400 text-base md:text-lg leading-relaxed mb-8 line-clamp-4">
                                             {heroItem.summary || "Continua a leggere questo approfondimento per scoprire i dettagli completi del progetto."}
                                         </p>
+                                        {heroItem.publishedAt && (
+                                            <div className="flex items-center gap-1.5 text-xs text-zinc-500 mb-4">
+                                                <Calendar size={11} />
+                                                <span>{formatDateTime(heroItem.publishedAt)}</span>
+                                            </div>
+                                        )}
                                         <div className="mt-auto pt-6 border-t border-zinc-800">
                                             <span className="inline-flex items-center gap-3 text-sm font-bold text-white group-hover:text-dis-green transition-colors tracking-wide uppercase">
                                                 Leggi l'Articolo
@@ -152,7 +167,7 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category }) => {
                                                 ))}
                                                 <div className="flex items-center text-xs text-zinc-500 gap-1 ml-auto">
                                                     <Calendar size={12} />
-                                                    <span>{item.publishedAt ? new Date(item.publishedAt).toLocaleDateString('it-IT', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Articolo'}</span>
+                                                    <span>{item.publishedAt ? formatDateTime(item.publishedAt) : 'Articolo'}</span>
                                                 </div>
                                             </div>
 
