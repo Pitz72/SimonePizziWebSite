@@ -206,6 +206,19 @@ Doppio controllo: hash link + hash titolo. Stesso titolo dallo stesso feed = non
 
 ---
 
+### SEO & Indicizzazione Google — Rapporto 19/04/2026
+
+**Stato attuale:** Critico (1 solo articolo indicizzato su 30).
+**Documento Analisi:** [indicizzazione.google.md](file:///C:/Users/Utente/Documents/GitHub/SITI-WEB/SimonePizziWebSite/docs/indicizzazione.google.md)
+
+**Punti chiave:**
+- Il sito è una SPA (Client-Side Rendering): Google ha difficoltà a "vedere" i contenuti senza SSR o Prerendering.
+- Necessaria sottomissione manuale in Google Search Console.
+- Strategia consigliata: Implementazione Prerendering statico (Vite plugin) per servire HTML statico ai bot senza cambiare hosting.
+
+
+---
+
 ## PARTE IV — RIEPILOGO ESECUTIVO SPRINT CONSIGLIATI
 
 ### ✅ Sprint A — "Fix & Visibilità" — COMPLETATO v1.7.3
@@ -232,9 +245,10 @@ Doppio controllo: hash link + hash titolo. Stesso titolo dallo stesso feed = non
 14. [P3-04] Backup automatico MySQL
 15. [P3-05] Migrazione execCommand → Selection API
 
-### Sprint E — "Premium Features"
-16. [P3-06] Audio player fluttuante
-17. [P3-07] Dark/Light mode
+### Sprint E — "SEO & Premium Features"
+16. [P1-05] Risoluzione Indexing Google (Prerendering statico)
+17. [P3-06] Audio player fluttuante
+18. [P3-07] Dark/Light mode
 
 ---
 
