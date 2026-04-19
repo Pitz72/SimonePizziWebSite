@@ -114,20 +114,22 @@ Le voci sono ordinate per **priorità assoluta**. Ogni voce ha un ID stabile per
 
 ### 🟡 PRIORITÀ 2 — MEDIA / UX ADMIN E EDITOR
 
-#### [P2-01] Editor articoli — Analisi criticità (RichTextEditor.tsx)
+#### ✅ [P2-01] Editor articoli — Criticità risolte in v1.7.9 + backlog
 **Area:** Admin — Editor WYSIWYG  
 
-| Gravità | Problema | Dettaglio |
+| Gravità | Problema | Stato |
 |---|---|---|
-| 🔴 GRAVISSIMO | Toolbar non sticky — perdita selezione per inserire link | Per inserire un link su testo già selezionato, bisogna scorrere verso l'alto dove si trova la toolbar, perdendo la selezione. La toolbar deve essere `position: sticky; top: 0` all'interno del pannello editor. |
-| 🔴 GRAVISSIMO | Nessuna shortcut da tastiera per link (Ctrl+K) | Standard de facto degli editor moderni. Impossibile inserire link senza toolbar. |
-| 🟠 GRAVE | Nessuna barra di avanzamento / feedback visivo durante salvataggio | L'utente non ha conferma visiva che il salvataggio sia avvenuto. Rischio di chiudere la tab prima che la POST completi. |
-| 🟠 GRAVE | Nessuna anteprima in-place del Markdown renderizzato | Il rendering del contenuto è visibile solo sul sito pubblico o in bozza. Un pannello split (edit/preview) migliorerebbe drasticamente l'esperienza. |
-| 🟡 MEDIO | Nessun contatore parole/caratteri | Utile per stimare lunghezza testo e SEO (meta description ha limite caratteri). |
-| 🟡 MEDIO | Nessuna gestione tabelle nell'editor | Non è possibile inserire tabelle Markdown/HTML dal WYSIWYG. |
-| 🟡 MEDIO | `execCommand` deprecato (nota in v1.5.10) | L'API browser è deprecata. Documentato come "migrazione a Selection API in roadmap" da v1.5.10 — mai realizzata. |
-| 🟢 LIEVE | Nessun drag-and-drop per riordinare immagini nel corpo | Le immagini inserite non sono riposizionabili senza cut/paste manuale. |
-| 🟢 LIEVE | Nessun link interno rapido agli articoli del CMS | Per linkare un altro articolo del sito bisogna copiarne l'URL manualmente dal frontend. |
+| ~~🔴 GRAVISSIMO~~ | ~~Toolbar non sticky — perdita selezione per inserire link~~ | ✅ **RISOLTO v1.7.9** — `sticky top-0 z-30`, rimosso `overflow-hidden` dal wrapper |
+| 🔴 GRAVISSIMO | Nessuna shortcut da tastiera per link (Ctrl+K) | 🔲 backlog |
+| 🟠 GRAVE | Nessuna barra di avanzamento / feedback visivo durante salvataggio | 🔲 backlog |
+| 🟠 GRAVE | Nessuna anteprima in-place del Markdown renderizzato | 🔲 backlog |
+| 🟡 MEDIO | Nessun contatore parole/caratteri | 🔲 backlog |
+| ~~🟡 MEDIO~~ | ~~Nessuna gestione tabelle nell'editor~~ | ✅ **RISOLTO v1.7.9** — pulsante `insertTable()` + stili prose tabelle |
+| 🟡 MEDIO | `execCommand` deprecato (nota in v1.5.10) | 🔲 backlog |
+| 🟢 LIEVE | Nessun drag-and-drop per riordinare immagini nel corpo | 🔲 backlog |
+| 🟢 LIEVE | Nessun link interno rapido agli articoli del CMS | 🔲 backlog |
+
+**Fix extra v1.7.9:** Home page portata a 7 articoli (1 hero + 6 griglia 3×2) — `PortfolioGrid.tsx slice(0,7)`.
 
 #### [P2-02] Lista articoli admin — riequilibrio proporzioni colonne
 **Area:** Admin — `ArticlesList.tsx`  
