@@ -241,8 +241,8 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
     };
 
     return (
-        <div className={`border border-zinc-800 rounded-lg bg-zinc-950 flex flex-col min-h-[500px] ${className || ''}`}>
-            {/* sticky: overflow-hidden rimosso dal wrapper per permettere position:sticky */}
+        <div className={`border border-zinc-800 rounded-lg bg-zinc-950 flex flex-col min-h-[300px] ${className || ''}`}>
+            {/* toolbar: sticky top-0 funziona sia con scroll interno che esterno */}
             <div className="sticky top-0 z-30 flex flex-wrap items-center gap-1 p-2 bg-zinc-900 border-b border-zinc-800 shrink-0 rounded-t-lg">
 
                 {/* HEADINGS */}

@@ -150,7 +150,7 @@ export default function ArticleEditor() {
                             <RichTextEditor
                                 value={formData.content}
                                 onChange={(val) => setFormData(prev => ({ ...prev, content: val }))}
-                                className="h-auto min-h-[500px]"
+                                className="h-[calc(100vh-300px)]"
                             />
                         </div>
                     </div>
