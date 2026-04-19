@@ -22,7 +22,11 @@ const ContactPage: React.FC = () => {
         message: '',
     });
 
+    const [gdprConsent, setGdprConsent] = useState(false); // trattamento dati
+    const [gdprAge, setGdprAge]         = useState(false); // età 16+
     const [feedback, setFeedback] = useState<FeedbackState>({ type: 'idle', message: '' });
+
+    const canSubmit = gdprConsent && gdprAge;
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -30,7 +34,7 @@ const ContactPage: React.FC = () => {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (feedback.type === 'loading') return;
+        if (feedback.type === 'loading' || !canSubmit) return;
 
         setFeedback({ type: 'loading', message: '' });
 
@@ -45,6 +49,8 @@ const ContactPage: React.FC = () => {
             if (res.ok && data.status === 'success') {
                 setFeedback({ type: 'success', message: data.message });
                 setForm({ name: '', email: '', subject: '', message: '' });
+                setGdprConsent(false);
+                setGdprAge(false);
             } else {
                 setFeedback({ type: 'error', message: data.message || 'Si è verificato un errore. Riprova.' });
             }
@@ -184,6 +190,46 @@ const ContactPage: React.FC = () => {
                                 />
                             </div>
 
+                            {/* Informativa GDPR */}
+                            <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-xs text-zinc-500 leading-relaxed space-y-1">
+                                <p className="font-semibold text-zinc-400 uppercase tracking-wide text-[10px] mb-2">Informativa Privacy — Aprile 2026</p>
+                                <p><strong className="text-zinc-400">Titolare:</strong> Simone Pizzi — simonepizzi.1972@proton.me</p>
+                                <p><strong className="text-zinc-400">Finalità:</strong> gestione della richiesta di contatto e risposta alla medesima.</p>
+                                <p><strong className="text-zinc-400">Base giuridica:</strong> consenso dell'interessato (art. 6, par. 1, lett. a) Reg. UE 2016/679 — GDPR).</p>
+                                <p><strong className="text-zinc-400">Conservazione:</strong> i dati vengono conservati per il tempo necessario a evadere la richiesta e per eventuali comunicazioni successive correlate, salvo diversa indicazione.</p>
+                                <p><strong className="text-zinc-400">Diritti:</strong> accesso, rettifica, cancellazione, limitazione, portabilità e opposizione (artt. 15–21 GDPR) scrivendo a simonepizzi.1972@proton.me.</p>
+                                <p><strong className="text-zinc-400">Trasferimento:</strong> i dati non vengono ceduti a terzi né trasferiti fuori dall'UE.</p>
+                            </div>
+
+                            {/* Checkbox consensi GDPR */}
+                            <div className="space-y-3">
+                                <label className="flex items-start gap-3 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        checked={gdprConsent}
+                                        onChange={e => setGdprConsent(e.target.checked)}
+                                        className="mt-0.5 shrink-0 accent-dis-green"
+                                        required
+                                    />
+                                    <span className="text-zinc-400 text-sm leading-relaxed group-hover:text-zinc-300 transition-colors">
+                                        Ho letto l'informativa sulla privacy e acconsento al trattamento dei miei dati personali per la gestione di questa richiesta di contatto. <span className="text-red-400">*</span>
+                                    </span>
+                                </label>
+                                <label className="flex items-start gap-3 cursor-pointer group">
+                                    <input
+                                        type="checkbox"
+                                        checked={gdprAge}
+                                        onChange={e => setGdprAge(e.target.checked)}
+                                        className="mt-0.5 shrink-0 accent-dis-green"
+                                        required
+                                    />
+                                    <span className="text-zinc-400 text-sm leading-relaxed group-hover:text-zinc-300 transition-colors">
+                                        Confermo di avere almeno 16 anni di età (requisito minimo ai sensi del GDPR per esprimere consenso autonomo al trattamento dei dati). <span className="text-red-400">*</span>
+                                    </span>
+                                </label>
+                                <p className="text-zinc-600 text-xs"><span className="text-red-400">*</span> campi obbligatori</p>
+                            </div>
+
                             {/* Feedback errore */}
                             {feedback.type === 'error' && (
                                 <div className="flex items-center gap-3 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
@@ -195,7 +241,7 @@ const ContactPage: React.FC = () => {
                             {/* Submit */}
                             <button
                                 type="submit"
-                                disabled={feedback.type === 'loading'}
+                                disabled={feedback.type === 'loading' || !canSubmit}
                                 className="mt-2 flex items-center justify-center gap-2.5 w-full bg-dis-green text-black font-bold text-sm py-4 rounded-xl hover:bg-green-400 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-green-500/20 hover:shadow-green-500/30 active:scale-[0.98]"
                             >
                                 {feedback.type === 'loading' ? (
