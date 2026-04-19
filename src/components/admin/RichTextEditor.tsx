@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { Bold, Italic, Quote, Link as LinkIcon, List, ListOrdered, AlignLeft, AlignCenter, AlignRight, Type, Eraser, Image as ImageIcon, Loader2, ShieldOff } from 'lucide-react';
+import { Bold, Italic, Quote, Link as LinkIcon, List, ListOrdered, AlignLeft, AlignCenter, AlignRight, Type, Eraser, Image as ImageIcon, Loader2, ShieldOff, Table2 } from 'lucide-react';
 import showdown from 'showdown';
 import { api } from '../../api';
 
@@ -177,6 +177,39 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
         onChange(editorRef.current.innerHTML);
     };
 
+    const insertTable = () => {
+        const tableHtml = `
+<table style="border-collapse:collapse;width:100%;margin:1rem 0;">
+  <thead>
+    <tr>
+      <th style="border:1px solid #3f3f46;padding:8px 12px;background:#27272a;text-align:left;">Intestazione 1</th>
+      <th style="border:1px solid #3f3f46;padding:8px 12px;background:#27272a;text-align:left;">Intestazione 2</th>
+      <th style="border:1px solid #3f3f46;padding:8px 12px;background:#27272a;text-align:left;">Intestazione 3</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="border:1px solid #3f3f46;padding:8px 12px;">Cella 1</td>
+      <td style="border:1px solid #3f3f46;padding:8px 12px;">Cella 2</td>
+      <td style="border:1px solid #3f3f46;padding:8px 12px;">Cella 3</td>
+    </tr>
+    <tr>
+      <td style="border:1px solid #3f3f46;padding:8px 12px;">Cella 4</td>
+      <td style="border:1px solid #3f3f46;padding:8px 12px;">Cella 5</td>
+      <td style="border:1px solid #3f3f46;padding:8px 12px;">Cella 6</td>
+    </tr>
+  </tbody>
+</table><p><br></p>`.trim();
+
+        if (editorRef.current) editorRef.current.focus();
+        try {
+            document.execCommand('insertHTML', false, tableHtml); // eslint-disable-line @typescript-eslint/no-deprecated
+        } catch {
+            if (editorRef.current) editorRef.current.innerHTML += tableHtml;
+        }
+        if (editorRef.current) onChange(editorRef.current.innerHTML);
+    };
+
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
@@ -208,8 +241,9 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
     };
 
     return (
-        <div className={`border border-zinc-800 rounded-lg overflow-hidden bg-zinc-950 flex flex-col min-h-[500px] ${className || ''}`}>
-            <div className="flex flex-wrap items-center gap-1 p-2 bg-zinc-900 border-b border-zinc-800 shrink-0 relative z-20 rounded-t-lg">
+        <div className={`border border-zinc-800 rounded-lg bg-zinc-950 flex flex-col min-h-[500px] ${className || ''}`}>
+            {/* sticky: overflow-hidden rimosso dal wrapper per permettere position:sticky */}
+            <div className="sticky top-0 z-30 flex flex-wrap items-center gap-1 p-2 bg-zinc-900 border-b border-zinc-800 shrink-0 rounded-t-lg">
 
                 {/* HEADINGS */}
                 <select
@@ -291,18 +325,24 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                     onChange={handleImageUpload} 
                 />
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
+                <ToolbarBtn onClick={insertTable} icon={<Table2 size={16} className="text-blue-400" />} title="Inserisci Tabella 3×3" />
+                <div className="w-px h-6 bg-zinc-800 mx-1" />
                 <ToolbarBtn onClick={() => exec('removeFormat')} icon={<Eraser size={16} className="text-orange-400" />} title="Rimuovi Colore e Formattazione" />
                 <ToolbarBtn onClick={sanitizeContent} icon={<ShieldOff size={16} className="text-red-400" />} title="Ripulisci elementi non-testo (SVG, icone, pulsanti)" />
             </div>
 
             <div
                 ref={editorRef}
-                className="p-6 text-zinc-300 prose prose-invert max-w-none flex-1 overflow-y-auto outline-none 
+                className="p-6 text-zinc-300 prose prose-invert max-w-none flex-1 overflow-y-auto outline-none rounded-b-lg
                 [&_a]:text-dis-green [&_a]:underline 
                 [&_blockquote]:border-l-4 [&_blockquote]:border-dis-green/50 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:bg-dis-green/5 [&_blockquote]:py-1 [&_blockquote]:pr-4 [&_blockquote]:rounded-r-lg
                 [&_ul]:list-disc [&_ul]:pl-5 
                 [&_ol]:list-decimal [&_ol]:pl-5 
                 [&_li]:mb-1
+                [&_table]:w-full [&_table]:border-collapse [&_table]:my-4
+                [&_th]:border [&_th]:border-zinc-700 [&_th]:bg-zinc-800 [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:text-zinc-200 [&_th]:font-semibold
+                [&_td]:border [&_td]:border-zinc-700 [&_td]:px-3 [&_td]:py-2 [&_td]:text-zinc-300
+                [&_tr:hover_td]:bg-zinc-800/40
                 focus:bg-zinc-900/30 transition-colors"
                 contentEditable
                 onInput={handleInput}

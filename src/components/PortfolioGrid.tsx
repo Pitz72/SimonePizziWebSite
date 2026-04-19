@@ -27,7 +27,7 @@ const PortfolioGrid: React.FC = () => {
         return b.id - a.id;
     });
 
-    const displayItems = sortedItems.map(item => ({ item, category: item.category })).slice(0, 6); // Limita a 6 elementi totali nella landing page
+    const displayItems = sortedItems.map(item => ({ item, category: item.category })).slice(0, 7); // 1 hero + 6 card griglia 3x2 = layout completo
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
