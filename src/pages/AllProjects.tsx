@@ -63,24 +63,33 @@ const ProjectCard: React.FC<{ project: Project; index: number }> = ({ project, i
             className="group relative w-full rounded-xl overflow-hidden border border-zinc-800 hover:border-zinc-600 transition-all duration-300 hover:shadow-xl hover:shadow-black/40"
         >
             {project.cover_image ? (
-                /* Card con immagine: immagine full-width che sfuma verso il testo in basso */
-                <div className="relative">
-                    <img
-                        src={project.cover_image}
-                        alt={project.name}
-                        className="w-full h-56 sm:h-64 object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    {/* Gradiente che copre la metà inferiore dell'immagine e si estende nel testo */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/70 to-transparent" />
-
-                    {/* Testo sovrapposto in basso sull'immagine sfumata */}
-                    <div className="absolute bottom-0 left-0 right-0 p-6">
-                        <h3 className="text-white font-bold text-xl mb-2 leading-tight drop-shadow">{project.name}</h3>
+                /* Card con immagine: layout flex-col → immagine + pannello testo separato */
+                <div className="flex flex-col">
+                    {/* Immagine con titolo sovrapposto */}
+                    <div className="relative overflow-hidden flex-shrink-0">
+                        <img
+                            src={project.cover_image}
+                            alt={project.name}
+                            className="w-full h-48 sm:h-56 object-cover transition-transform duration-500 group-hover:scale-105"
+                        />
+                        {/* Gradiente scuro sul 60% inferiore dell'immagine per leggibilità titolo */}
+                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
+                        {/* Titolo sovrapposto — solo il titolo, non la descrizione */}
+                        <div className="absolute bottom-0 left-0 right-0 px-5 py-4">
+                            <h3 className="text-white font-bold text-lg sm:text-xl leading-tight drop-shadow-lg">
+                                {project.name}
+                            </h3>
+                        </div>
+                    </div>
+                    {/* Pannello testo e pulsanti — fuori dall'immagine, in flusso normale */}
+                    <div className="bg-zinc-950 px-5 py-4 flex flex-col gap-4">
                         {project.description && (
-                            <p className="text-zinc-300 text-sm leading-relaxed mb-4 max-w-3xl">{project.description}</p>
+                            <p className="text-zinc-300 text-sm leading-relaxed">
+                                {project.description}
+                            </p>
                         )}
                         {(project.button_a_url || project.button_b_url) && (
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-col sm:flex-row gap-2">
                                 {project.button_a_url && project.button_a_label && (
                                     <ProjectButton label={project.button_a_label} url={project.button_a_url} variant="primary" />
                                 )}
@@ -92,14 +101,14 @@ const ProjectCard: React.FC<{ project: Project; index: number }> = ({ project, i
                     </div>
                 </div>
             ) : (
-                /* Card senza immagine: sfondo solido con testo */
-                <div className="bg-zinc-900 p-6">
+                /* Card senza immagine: sfondo solido */
+                <div className="bg-zinc-900 p-5">
                     <h3 className="text-white font-bold text-xl mb-2 leading-tight">{project.name}</h3>
                     {project.description && (
-                        <p className="text-zinc-400 text-sm leading-relaxed mb-4 max-w-3xl">{project.description}</p>
+                        <p className="text-zinc-400 text-sm leading-relaxed mb-4">{project.description}</p>
                     )}
                     {(project.button_a_url || project.button_b_url) && (
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                             {project.button_a_url && project.button_a_label && (
                                 <ProjectButton label={project.button_a_label} url={project.button_a_url} variant="primary" />
                             )}
@@ -113,6 +122,7 @@ const ProjectCard: React.FC<{ project: Project; index: number }> = ({ project, i
         </motion.div>
     );
 };
+
 
 export default function AllProjects() {
     const [projects, setProjects] = useState<Project[]>([]);

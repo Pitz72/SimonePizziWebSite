@@ -22,6 +22,7 @@ import ProjectEditor from './pages/admin/ProjectEditor';
 import CategoryManager from './pages/admin/CategoryManager';
 import NewsletterAdmin from './pages/admin/NewsletterAdmin';
 import AllProjects from './pages/AllProjects';
+import ContactPage from './pages/ContactPage';
 import NewsletterConfirm from './pages/NewsletterConfirm';
 import NewsletterUnsubscribe from './pages/NewsletterUnsubscribe';
 import { useCategories } from './hooks/useCategories';
@@ -60,6 +61,7 @@ const PublicLayout: React.FC = () => {
           <Routes>
             <Route path="/" element={<PortfolioGrid />} />
             <Route path="/tutti-i-progetti" element={<AllProjects />} />
+            <Route path="/contatti" element={<ContactPage />} />
             <Route path="/newsletter/confermato" element={<NewsletterConfirm />} />
             <Route path="/newsletter/disiscritto" element={<NewsletterUnsubscribe />} />
 

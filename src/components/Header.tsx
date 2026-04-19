@@ -126,6 +126,7 @@ const Header: React.FC = () => {
                   {cat.name}
                 </DesktopNavLink>
               ))}
+              <DesktopNavLink to="/contatti">Contatti</DesktopNavLink>
             </div>
 
             {/* ── DESTRA: RSS + CTA + HAMBURGER ── */}
@@ -183,6 +184,7 @@ const Header: React.FC = () => {
                   {cat.name}
                 </MobileNavLink>
               ))}
+              <MobileNavLink to="/contatti" onClick={closeMenu}>Contatti</MobileNavLink>
             </div>
 
             {/* CTA in fondo al drawer */}

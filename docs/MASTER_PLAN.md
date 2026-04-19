@@ -1,7 +1,7 @@
 # MASTER PLAN — Simone Pizzi Portfolio Creativo
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.7.7  
+**Versione corrente:** 1.7.8  
 **Ultimo aggiornamento documento:** 19 Aprile 2026  
 **Sito:** simonepizzi.runtimeradio.it
 
@@ -82,17 +82,12 @@ Le voci sono ordinate per **priorità assoluta**. Ogni voce ha un ID stabile per
 - Aggiungere link RSS nel `Footer.tsx`.
 - Aggiungere pulsante/link RSS al termine di ogni articolo in `SingleArticle.tsx` (vicino ai pulsanti CTA).
 
-#### [P1-02] Pulsante "Contattami" e pagina form contatti
-**Area:** Frontend — Header / Nuova pagina  
-**Problema:** Non esiste un modo per i visitatori di contattare l'autore. Il componente `LetterModal.tsx` (glassmorphism) esiste ma non invia dati reali.  
-**Fix richiesto:**
-- Aggiungere voce "Contattami" nell'`Header.tsx` con link a `/contatti`.
-- Creare una nuova pagina pubblica `/contatti` con form (nome, email, oggetto, messaggio).
-- Creare endpoint backend `POST /api/messages.php` che:
-  1. Salva il messaggio nella tabella `messages` (già nello schema DB).
-  2. Invia una mail reale a `simonepizzi.1972@proton.me` tramite `mail()` PHP (o SMTP se configurato sull'hosting).
-- Aggiungere route in `App.tsx`.
-- **Opzionale admin:** Visualizzare i messaggi ricevuti nella Dashboard admin.
+#### ✅ [P1-02] Pulsante "Contattami" e pagina form contatti — COMPLETATO v1.7.8
+**Area:** Frontend + Backend  
+**Fix applicato in v1.7.8:**
+- `public/api/messages.php`: salva nel DB (tabella `messages`) + email notifica a `simonepizzi.1972@proton.me`.
+- `src/pages/ContactPage.tsx`: form glassmorphism con stati loading/success/error.
+- Route `/contatti` + voce "Contatti" in header desktop e mobile.
 
 #### ✅ [P1-03] Sistema Newsletter — COMPLETATO v1.7.4
 **Area:** Frontend (iscrizione pubblica) + Admin (invio NL)  
@@ -218,9 +213,9 @@ Doppio controllo: hash link + hash titolo. Stesso titolo dallo stesso feed = non
 4. ✅ [P1-04] Data/ora e categoria nelle anteprime articolo — risolto v1.7.7
 5. ✅ Menu mobile (hamburger + drawer) — risolto v1.7.7
 
-### Sprint B — "Contatti & Community"
-5. [P1-02] Pagina Contattami + form email reale
-6. [P1-03] Newsletter — fase 1 (iscrizione pubblica + admin lista)
+### Sprint B — "Contatti & Community" — COMPLETATO v1.7.8
+5. ✅ [P1-02] Pagina Contattami + form email reale — v1.7.8
+6. ✅ [P1-03] Newsletter — fase 1 (iscrizione pubblica + admin lista) — v1.7.4
 
 ### Sprint C — "Admin Power-Up"
 7. [P2-01] Toolbar sticky e Ctrl+K nell'editor
