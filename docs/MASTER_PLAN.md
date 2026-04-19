@@ -1,7 +1,7 @@
 # MASTER PLAN — Simone Pizzi Portfolio Creativo
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.7.8  
+**Versione corrente:** 1.7.9  
 **Ultimo aggiornamento documento:** 19 Aprile 2026  
 **Sito:** simonepizzi.runtimeradio.it
 
@@ -11,7 +11,7 @@
 
 ---
 
-## PARTE I — STATO CORRENTE (v1.7.7)
+## PARTE I — STATO CORRENTE (v1.7.9)
 
 ### Infrastruttura
 | Componente | Stato |
