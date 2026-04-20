@@ -8,8 +8,8 @@ import { aboutMeData } from '../data/aboutMeData';
 import FeaturedCard from './FeaturedCard';
 
 const PortfolioGrid: React.FC = () => {
-    // Caricamento Dinamico Home Page (Sostituisce portfolioData statico)
-    const { items, loading, error } = useFetchArticles();
+    // Caricamento Dinamico Home Page: preleviamo solo i primi 7 articoli per il layout
+    const { items, loading, error } = useFetchArticles(undefined, 7);
 
     // Filtra e Ordina i dati del Database
     const sortedItems = [...items].sort((a, b) => {
@@ -27,7 +27,7 @@ const PortfolioGrid: React.FC = () => {
         return b.id - a.id;
     });
 
-    const displayItems = sortedItems.map(item => ({ item, category: item.category })).slice(0, 7); // 1 hero + 6 card griglia 3x2 = layout completo
+    const displayItems = sortedItems.map(item => ({ item, category: item.category })).slice(0, 7); // Layout completo: 1 hero + 6 card griglia 3x2
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 

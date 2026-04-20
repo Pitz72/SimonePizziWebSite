@@ -20,6 +20,7 @@ import MediaGallery from './pages/admin/MediaGallery';
 import ProjectsList from './pages/admin/ProjectsList';
 import ProjectEditor from './pages/admin/ProjectEditor';
 import CategoryManager from './pages/admin/CategoryManager';
+import TagsList from './pages/admin/TagsList';
 import NewsletterAdmin from './pages/admin/NewsletterAdmin';
 import AllProjects from './pages/AllProjects';
 import ContactPage from './pages/ContactPage';
@@ -107,6 +108,7 @@ const App: React.FC = () => {
             <Route path="projects/edit/:id" element={<ProjectEditor />} />
             <Route path="media" element={<MediaGallery />} />
             <Route path="categories" element={<CategoryManager />} />
+            <Route path="tags" element={<TagsList />} />
             <Route path="newsletter" element={<NewsletterAdmin />} />
             <Route index element={<Dashboard />} />
           </Route>

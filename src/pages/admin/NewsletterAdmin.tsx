@@ -100,8 +100,8 @@ export default function NewsletterAdmin() {
         if (!articlesOpen && articles.length === 0) {
             setArticlesLoading(true);
             try {
-                const data = await api.getArticles(undefined, false);
-                setArticles(data ?? []);
+                const res = await api.getArticles(undefined, false);
+                setArticles(Array.isArray(res) ? res : res.data || []);
             } catch { /* silenzioso */ }
             finally { setArticlesLoading(false); }
         }

@@ -21,7 +21,7 @@ interface ArticleArchiveProps {
 
 const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category }) => {
     const navigate = useNavigate();
-    const { items, loading, error } = useFetchArticles(category);
+    const { items, loading, error, hasMore, loadMore, loadingMore } = useFetchArticles(category, 10);
 
     if (loading) {
         return (
@@ -195,6 +195,18 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category }) => {
                                 );
                             })}
                         </div>
+
+                        {hasMore && (
+                            <div className="mt-16 text-center w-full col-span-full">
+                                <button
+                                    onClick={loadMore}
+                                    disabled={loadingMore}
+                                    className="bg-zinc-900 border border-zinc-800 text-white font-bold px-8 py-4 rounded-xl hover:text-dis-green hover:border-dis-green/50 transition-all shadow-lg hover:shadow-dis-green/10 disabled:opacity-50"
+                                >
+                                    {loadingMore ? 'Caricamento in corso...' : 'Carica Altri'}
+                                </button>
+                            </div>
+                        )}
                     </>
                 );
             })()}

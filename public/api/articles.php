@@ -32,6 +32,50 @@ function generateSlug($title, $pdo) {
     return $slug;
 }
 
+// Helper per i tag dinamici
+function syncArticleTags($pdo, $article_id, $tags_input) {
+    // Pulisci i vecchi tag
+    $stmtDel = $pdo->prepare("DELETE FROM article_tags WHERE article_id = ?");
+    $stmtDel->execute([$article_id]);
+
+    $tags_array = is_array($tags_input) ? $tags_input : (is_string($tags_input) && !empty($tags_input) ? explode(',', $tags_input) : []);
+    if (empty($tags_array)) return;
+
+    // Aggiorniamo pure il campo legacy come "cache sicura" per retrocompatibilità in emergenza (opzionale)
+    $cleanNames = [];
+
+    $stmtFindTag = $pdo->prepare("SELECT id FROM tags WHERE name = ? OR slug = ? limit 1");
+    $stmtInsertTag = $pdo->prepare("INSERT INTO tags (name, slug) VALUES (?, ?)");
+    $stmtInsertLink = $pdo->prepare("INSERT IGNORE INTO article_tags (article_id, tag_id) VALUES (?, ?)");
+
+    foreach ($tags_array as $tagName) {
+        $tagName = trim($tagName);
+        if (empty($tagName)) continue;
+        $cleanNames[] = $tagName;
+
+        $slugObj = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', str_replace(['à','è','é','ì','ò','ù'], ['a','e','e','i','o','u'], $tagName))));
+        
+        $stmtFindTag->execute([$tagName, $slugObj]);
+        $tagId = $stmtFindTag->fetchColumn();
+
+        if (!$tagId) {
+            try {
+                $stmtInsertTag->execute([$tagName, $slugObj]);
+                $tagId = $pdo->lastInsertId();
+            } catch (Exception $e) { $tagId = null; }
+        }
+
+        if ($tagId) {
+            $stmtInsertLink->execute([$article_id, $tagId]);
+        }
+    }
+
+    // Backup sul campo storico 'tags' per sicurezza/legacy
+    $cacheString = implode(', ', $cleanNames);
+    $stmtUpdateLegacy = $pdo->prepare("UPDATE articles SET tags = ? WHERE id = ?");
+    $stmtUpdateLegacy->execute([$cacheString, $article_id]);
+}
+
 try {
     if ($method === 'GET') {
         // Parametri query (es. ?category=blog&limit=10)
@@ -42,9 +86,11 @@ try {
         
         // Modalità GET per singolo articolo (!is_admin = solo pubblicato)
         if (isset($_GET['slug'])) {
-            $stmt = $pdo->prepare("SELECT * FROM articles WHERE slug = ?");
+            $stmt = $pdo->prepare("SELECT a.*, GROUP_CONCAT(t.name SEPARATOR ', ') as dyn_tags FROM articles a LEFT JOIN article_tags at ON a.id = at.article_id LEFT JOIN tags t ON at.tag_id = t.id WHERE a.slug = ? GROUP BY a.id");
             $stmt->execute([$_GET['slug']]);
             $article = $stmt->fetch();
+            if ($article && $article['dyn_tags']) $article['tags'] = $article['dyn_tags']; // Fallback dinamico
+
             
             if ($article) {
                 // Controllo Autorizzazione Visiva
@@ -73,9 +119,11 @@ try {
         // Modalità GET per singolo articolo via ID (usato da React Editor - solo admin)
         if (isset($_GET['id'])) {
             Auth::check();
-            $stmt = $pdo->prepare("SELECT * FROM articles WHERE id = ?");
+            $stmt = $pdo->prepare("SELECT a.*, GROUP_CONCAT(t.name SEPARATOR ', ') as dyn_tags FROM articles a LEFT JOIN article_tags at ON a.id = at.article_id LEFT JOIN tags t ON at.tag_id = t.id WHERE a.id = ? GROUP BY a.id");
             $stmt->execute([$_GET['id']]);
             $article = $stmt->fetch();
+            if ($article && $article['dyn_tags']) $article['tags'] = $article['dyn_tags'];
+
             if ($article) {
                 echo json_encode($article);
             } else {
@@ -86,7 +134,7 @@ try {
         }
 
         // Filtro Categoria
-        $query = "SELECT id, title, slug, content, excerpt, cover_image, category, tags, is_featured, status, published_at, created_at FROM articles";
+        $query = "SELECT a.id, a.title, a.slug, a.content, a.excerpt, a.cover_image, a.category, COALESCE(GROUP_CONCAT(t.name SEPARATOR ', '), a.tags) as tags, a.is_featured, a.status, a.published_at, a.created_at FROM articles a LEFT JOIN article_tags at ON a.id = at.article_id LEFT JOIN tags t ON at.tag_id = t.id";
         $params = [];
         
         $conditions = [];
@@ -94,25 +142,35 @@ try {
 
         // Se la chiamata non proviene espressamente dalla dashboard admin, nascondiamo bozze e futuri.
         if (!$is_admin_dashboard) {
-           $conditions[] = "status = 'published'"; 
-           $conditions[] = "(published_at IS NULL OR published_at <= ?)";
+           $conditions[] = "a.status = 'published'"; 
+           $conditions[] = "(a.published_at IS NULL OR a.published_at <= ?)";
            $params[] = $ita_now_str;
         }
 
         if ($category) {
-            $conditions[] = "category = ?";
+            $conditions[] = "a.category = ?";
             $params[] = $category;
         }
-        
+
+        $whereClause = "";
         if (count($conditions) > 0) {
-            $query .= " WHERE " . implode(" AND ", $conditions);
+            $whereClause = " WHERE " . implode(" AND ", $conditions);
+            $query .= $whereClause;
         }
 
-        // [V1.5.7] Ordinamento per data di pubblicazione effettiva.
-        // Gli articoli programmati appaiono in cima al feed nel momento in cui si sbloccano,
-        // non sepolti nella posizione della data di creazione.
-        // Fallback a created_at per articoli senza published_at (legacy o bozze promosse).
-        $query .= " ORDER BY CASE WHEN published_at IS NOT NULL THEN published_at ELSE created_at END DESC LIMIT ? OFFSET ?";
+        // Paginazione Backend-Driven [P3-01]: Calcoliamo il totale assoluto degli articoli filtrati
+        $countQuery = "SELECT COUNT(*) FROM articles a" . $whereClause;
+        $countStmt = $pdo->prepare($countQuery);
+        foreach ($params as $k => $v) {
+            $countStmt->bindValue($k+1, $v);
+        }
+        $countStmt->execute();
+        $total = (int)$countStmt->fetchColumn();
+
+        // Ordinamento per data di pubblicazione effettiva.
+        // Gli articoli 'in vetrina' vengono portati in cima per coerenza con il frontend.
+        // Raggruppiamo esplicitamente per a.id per evitare bug con GROUP_CONCAT.
+        $query .= " GROUP BY a.id ORDER BY a.is_featured DESC, CASE WHEN a.published_at IS NOT NULL THEN a.published_at ELSE a.created_at END DESC LIMIT ? OFFSET ?";
         
         $stmt = $pdo->prepare($query);
         
@@ -126,7 +184,12 @@ try {
         $stmt->execute();
         $articles = $stmt->fetchAll();
         
-        echo json_encode($articles);
+        echo json_encode([
+            'data' => $articles,
+            'total' => $total,
+            'page' => $page,
+            'limit' => $limit
+        ]);
     } 
     elseif ($method === 'POST') {
         Auth::check();
@@ -146,7 +209,7 @@ try {
         $excerpt = $data['excerpt'] ?? '';
         $cover_image = $data['cover_image'] ?? '';
         $category = $data['category'] ?? 'blog-e-riflessioni';
-        $tags = $data['tags'] ?? '';
+        $tags = $data['tags'] ?? ''; // Raccogllie array o CSV
         $is_featured = isset($data['is_featured']) ? (int)$data['is_featured'] : 0;
         $button_a_label = $data['button_a_label'] ?? '';
         $button_a_link = $data['button_a_link'] ?? '';
@@ -155,10 +218,13 @@ try {
         $status = $data['status'] ?? 'draft';
         $published_at = $data['published_at'] ?? date('Y-m-d H:i:s');
 
-        $stmt = $pdo->prepare("INSERT INTO articles (title, slug, content, excerpt, cover_image, category, tags, is_featured, button_a_label, button_a_link, button_b_label, button_b_link, status, published_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$title, $slug, $content, $excerpt, $cover_image, $category, $tags, $is_featured, $button_a_label, $button_a_link, $button_b_label, $button_b_link, $status, $published_at]);
+        $stmt = $pdo->prepare("INSERT INTO articles (title, slug, content, excerpt, cover_image, category, tags, is_featured, button_a_label, button_a_link, button_b_label, button_b_link, status, published_at) VALUES (?, ?, ?, ?, ?, ?, '', ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$title, $slug, $content, $excerpt, $cover_image, $category, $is_featured, $button_a_label, $button_a_link, $button_b_label, $button_b_link, $status, $published_at]);
         
-        echo json_encode(['status' => 'success', 'id' => $pdo->lastInsertId(), 'slug' => $slug]);
+        $new_id = $pdo->lastInsertId();
+        syncArticleTags($pdo, $new_id, $tags);
+
+        echo json_encode(['status' => 'success', 'id' => $new_id, 'slug' => $slug]);
     }
     elseif ($method === 'PUT') {
         Auth::check();
@@ -184,7 +250,7 @@ try {
         $excerpt = $data['excerpt'] ?? '';
         $cover_image = $data['cover_image'] ?? '';
         $category = $data['category'] ?? 'blog-e-riflessioni';
-        $tags = $data['tags'] ?? '';
+        $tags = $data['tags'] ?? ''; // Puo essere string o array
         $is_featured = isset($data['is_featured']) ? (int)$data['is_featured'] : 0;
         $button_a_label = $data['button_a_label'] ?? '';
         $button_a_link = $data['button_a_link'] ?? '';
@@ -193,9 +259,11 @@ try {
         $status = $data['status'] ?? 'draft';
         $published_at = $data['published_at'] ?? date('Y-m-d H:i:s');
 
-        $stmt = $pdo->prepare("UPDATE articles SET title=?, slug=?, content=?, excerpt=?, cover_image=?, category=?, tags=?, is_featured=?, button_a_label=?, button_a_link=?, button_b_label=?, button_b_link=?, status=?, published_at=? WHERE id=?");
-        $stmt->execute([$title, $slug, $content, $excerpt, $cover_image, $category, $tags, $is_featured, $button_a_label, $button_a_link, $button_b_label, $button_b_link, $status, $published_at, $id]);
+        $stmt = $pdo->prepare("UPDATE articles SET title=?, slug=?, content=?, excerpt=?, cover_image=?, category=?, is_featured=?, button_a_label=?, button_a_link=?, button_b_label=?, button_b_link=?, status=?, published_at=? WHERE id=?");
+        $stmt->execute([$title, $slug, $content, $excerpt, $cover_image, $category, $is_featured, $button_a_label, $button_a_link, $button_b_label, $button_b_link, $status, $published_at, $id]);
         
+        syncArticleTags($pdo, $id, $tags);
+
         echo json_encode(['status' => 'success']);
     }
     elseif ($method === 'DELETE') {

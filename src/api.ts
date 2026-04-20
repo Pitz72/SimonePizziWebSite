@@ -60,10 +60,12 @@ export const api = {
     },
 
     // --- ARTICLES ---
-    getArticles: async (category?: string, admin?: boolean) => {
+    getArticles: async (category?: string, admin?: boolean, page?: number, limit?: number) => {
         const params = new URLSearchParams();
         if (category) params.append('category', category);
         if (admin) params.append('admin', 'true');
+        if (page) params.append('page', page.toString());
+        if (limit) params.append('limit', limit.toString());
 
         const qs = params.toString() ? `?${params.toString()}` : '';
         const res = await fetch(`${API_URL}/articles.php${qs}`, fetchConfig);
@@ -189,6 +191,34 @@ export const api = {
             ...fetchConfig, method: 'DELETE', body: JSON.stringify({ id })
         });
         if (!res.ok) throw new Error('Errore cancellazione categoria');
+        return res.json();
+    },
+
+    // --- TAGS (v1.7.0) ---
+    getTags: async () => {
+        const res = await fetch(`${API_URL}/tags.php`, fetchConfig);
+        if (!res.ok) throw new Error('Errore recupero tag');
+        return res.json();
+    },
+    createTag: async (data: { name: string; slug?: string }) => {
+        const res = await fetch(`${API_URL}/tags.php`, {
+            ...fetchConfig, method: 'POST', body: JSON.stringify(data)
+        });
+        if (!res.ok) { const r = await res.json(); throw new Error(r.error || 'Errore creazione tag'); }
+        return res.json();
+    },
+    updateTag: async (id: number, data: { name: string; slug?: string }) => {
+        const res = await fetch(`${API_URL}/tags.php?id=${id}`, {
+            ...fetchConfig, method: 'PUT', body: JSON.stringify({ id, ...data })
+        });
+        if (!res.ok) { const r = await res.json(); throw new Error(r.error || 'Errore aggiornamento tag'); }
+        return res.json();
+    },
+    deleteTag: async (id: number) => {
+        const res = await fetch(`${API_URL}/tags.php?id=${id}`, {
+            ...fetchConfig, method: 'DELETE', body: JSON.stringify({ id })
+        });
+        if (!res.ok) throw new Error('Errore cancellazione tag');
         return res.json();
     },
 

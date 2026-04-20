@@ -1,7 +1,7 @@
 # MASTER PLAN — Simone Pizzi Portfolio Creativo
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.7.11  
+**Versione corrente:** 1.7.12  
 **Ultimo aggiornamento documento:** 20 Aprile 2026  
 **Sito:** simonepizzi.runtimeradio.it
 
@@ -27,6 +27,7 @@
 ### Storico Versioni
 | Versione | Data | Note |
 |---|---|---|
+| v1.7.12 | 20/04/2026 | Sistema di Tag Dinamici (DB-driven) e Paginazione Backend-driven per articoli |
 | v1.7.11 | 20/04/2026 | Refactoring Admin UI: Shortcut Editor, ridimensionamento colonne lista articoli |
 | v1.7.10 | 20/04/2026 | Sincronizzazione totale categorie dinamiche (Admin + Frontend) |
 | v1.7.7 | 19/04/2026 | Data/ora+categoria anteprime; menu mobile hamburger+drawer |
@@ -94,12 +95,12 @@ Le voci sono ordinate per **priorità assoluta**. Ogni voce ha un ID stabile per
 #### ✅ [P1-03] Sistema Newsletter — COMPLETATO v1.7.4
 **Area:** Frontend (iscrizione pubblica) + Admin (invio NL)  
 **Problema:** La tabella `subscribers` esiste nello schema ma non c'è nessun endpoint API, nessun form pubblico di iscrizione, nessuna UI admin per gestire gli iscritti o comporre e inviare newsletter. Il dashboard admin mostra `Iscritti Newsletter: 0` come placeholder statico.  
-**Fix richiesto — Fase 1 (Iscrizione):**
+**Fix applicato — Fase 1 (Iscrizione):**
 - Creare `POST /api/subscribers.php` per la registrazione email (con double opt-in via link conferma via mail).
 - Aggiungere widget iscrizione newsletter visibile: nel Footer, al termine degli articoli (vicino RSS), in una eventuale pagina dedicata.
 - Dashboard admin: visualizzare lista iscritti, permettere export CSV.  
 
-**Fix richiesto — Fase 2 (Invio Newsletter):**
+**Fix applicato — Fase 2 (Invio Newsletter):**
 - Creare interfaccia admin per comporre una newsletter (titolo, body HTML/Markdown, anteprima).
 - Il compositore deve rispettare stile e grafica del sito (Tailwind dark theme).
 - Endpoint `POST /api/newsletter_send.php` per invio massivo con PHP `mail()` o libreria (PHPMailer/SMTP).
@@ -142,13 +143,13 @@ Le voci sono ordinate per **priorità assoluta**. Ogni voce ha un ID stabile per
 - Le colonne Stato e Data già presenti rimangono (~20% ciascuna).
 - Aggiungere colonna Azioni (Modifica / Elimina) con icone compatte se non già presente.
 
-#### [P2-04] Gestore Tag Dinamici
+#### ✅ [P2-04] Gestore Tag Dinamici — COMPLETATO v1.7.12
 **Area:** Admin + Frontend  
 **Problema:** A differenza delle categorie, i tag sono ancora gestiti tramite un sistema statico (hardcoded) nel codice.
-**Fix richiesto:**
-- Creare tabella `tags` e tabella di relazione `article_tags`.
-- Implementare CRUD per i tag nella dashboard.
-- Rendere dinamico il sistema di tagging nell'editor degli articoli.
+**Fix applicato:**
+- Creata tabella `tags` e tabella di relazione `article_tags`.
+- Implementato CRUD per i tag nella dashboard (`TagsList.tsx`).
+- Reso dinamico il sistema di tagging nell'editor degli articoli (multi-select API-driven).
 
 #### [P2-03] Switch "link web / indirizzo email" nei pulsanti CTA articolo
 **Area:** Admin — `ArticleEditor.tsx` / CTA Box  
@@ -163,10 +164,10 @@ Le voci sono ordinate per **priorità assoluta**. Ogni voce ha un ID stabile per
 
 ### 🔵 PRIORITÀ 3 — BASSA / EVOLUTIVA (già in roadmap, confermata)
 
-#### [P3-01] Paginazione backend-driven
+#### ✅ [P3-01] Paginazione backend-driven — COMPLETATO v1.7.12
 **Area:** Frontend + Backend  
 **Problema:** `PortfolioGrid.tsx` e `ArticleArchive.tsx` caricano tutti gli articoli in un'unica chiamata API. Con l'archivio in crescita, questo degraderà le performance di prima renderizzazione.  
-**Fix richiesto:** Implementare paginazione server-side su `articles.php` (parametri `?page=N&limit=10`). Frontend: pulsante "Carica altri" o Infinite Scroll.
+**Fix applicato:** Implementata paginazione server-side su `articles.php` (parametri `?page=N&limit=10`). Il Frontend è gestito dallo hook `useFetchArticles` con logica in append per il tasto "Carica altri". Sincronizzata in UI su `ArticleArchive` e limitizzata in pre-fetch base a 7 entità su `PortfolioGrid`.
 
 #### [P3-02] Motore di ricerca interno globale
 **Area:** Frontend + Backend  
@@ -245,12 +246,13 @@ Doppio controllo: hash link + hash titolo. Stesso titolo dallo stesso feed = non
 ### Sprint C — "Admin Power-Up"
 7. ✅ [P2-01] Toolbar sticky e Ctrl+K nell'editor — RISOLTO
 8. ✅ [P2-02] Lista articoli admin — colonna categoria — RISOLTO
-9. [P2-03] Switch link/email nei pulsanti CTA
-10. ✅ [P1-03] Newsletter — fase 2 (compositore + invio) — COMPLETATO v1.7.4
+9. ✅ [P2-04] Gestore Tag Dinamici DB-driven — RISOLTO v1.7.12
+10. [P2-03] Switch link/email nei pulsanti CTA
+11. ✅ [P1-03] Newsletter — fase 2 (compositore + invio) — COMPLETATO v1.7.4
 
 ### Sprint D — "Scale & Polish"
-11. [P3-01] Paginazione backend-driven
-12. [P3-02] Motore di ricerca interno
+12. ✅ [P3-01] Paginazione backend-driven — RISOLTO v1.7.12
+13. [P3-02] Motore di ricerca interno
 13. [P3-03] Recupero password via email
 14. [P3-04] Backup automatico MySQL
 15. [P3-05] Migrazione execCommand → Selection API

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { api } from '../api';
 import { PortfolioItem, Category } from '../types';
 
@@ -26,36 +26,62 @@ const mapArticleToPortfolioItem = (article: any): PortfolioItem => {
     };
 };
 
-export const useFetchArticles = (categoryFilter?: string) => {
+export const useFetchArticles = (categoryFilter?: string, limit: number = 10) => {
     const [items, setItems] = useState<PortfolioItem[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
+    const [loadingMore, setLoadingMore] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
+    const [hasMore, setHasMore] = useState<boolean>(false);
+    const pageRef = useRef(1);
+
+    const loadData = async (isLoadMore = false) => {
+        if (isLoadMore) {
+            setLoadingMore(true);
+            pageRef.current += 1;
+        } else {
+            setLoading(true);
+            pageRef.current = 1;
+            setError(null);
+        }
+
+        try {
+            const res = await api.getArticles(categoryFilter, false, pageRef.current, limit);
+            const data = Array.isArray(res) ? res : res.data;
+            const total = !Array.isArray(res) && res.total !== undefined ? res.total : data.length;
+
+            const mappedItems = data.map(mapArticleToPortfolioItem);
+
+            if (isLoadMore) {
+                setItems(prev => {
+                    const existingIds = new Set(prev.map(p => p.id));
+                    const newUnique = mappedItems.filter((i: PortfolioItem) => !existingIds.has(i.id));
+                    return [...prev, ...newUnique];
+                });
+            } else {
+                setItems(mappedItems);
+            }
+
+            setHasMore((isLoadMore ? items.length + mappedItems.length : mappedItems.length) < total);
+            
+        } catch (err: any) {
+            console.error("useFetchArticles error:", err);
+            setError(err.message || 'Errore nel caricamento degli articoli.');
+            if (isLoadMore) pageRef.current -= 1;
+        } finally {
+            if (isLoadMore) setLoadingMore(false);
+            else setLoading(false);
+        }
+    };
 
     useEffect(() => {
-        const fetchArticles = async () => {
-            setLoading(true);
-            try {
-                // Recuperiamo sempre tutti i published. Se passiamo un id categoryFilter lo aggiungiamo.
-                // Poiché non siamo garantiti dall'API pubblica a nascondere le bozze (attualmente le espone tutte), 
-                // dobbiamo filtrarle qui sul frontend, idealmente andrebbe filtrato in articles.php.
-                // Per ora prendiamoli tutti e filtriamo.
-                const data = await api.getArticles(categoryFilter);
+        loadData(false);
+    }, [categoryFilter]); // Ignoriamo volontariamente limit per non ricaricare
 
-                // Filter gestito a monte dal backend per gli utenti non autenticati.
-                // Mappa verso PortfolioItem
-                const mappedItems = data.map(mapArticleToPortfolioItem);
+    const loadMore = useCallback(() => {
+        if (!loadingMore && hasMore) {
+            loadData(true);
+        }
+    }, [loadingMore, hasMore, categoryFilter]);
 
-                setItems(mappedItems);
-            } catch (err: any) {
-                console.error("useFetchArticles error:", err);
-                setError(err.message || 'Errore nel caricamento degli articoli.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchArticles();
-    }, [categoryFilter]);
-
-    return { items, loading, error };
+    return { items, loading, error, hasMore, loadMore, loadingMore };
 };

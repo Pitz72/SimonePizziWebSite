@@ -24,8 +24,8 @@ export default function ArticlesList() {
     const loadArticles = async () => {
         setLoading(true);
         try {
-            const data = await api.getArticles(undefined, true);
-            setArticles(data);
+            const res = await api.getArticles(undefined, true);
+            setArticles(Array.isArray(res) ? res : res.data || []);
         } catch (err) {
             console.error('Failed to load articles', err);
         } finally {

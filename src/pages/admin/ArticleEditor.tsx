@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Save, Image as ImageIcon, LayoutTemplate } from 'lucide-react';
+import { ArrowLeft, Save, Image as ImageIcon, LayoutTemplate, X, Tag as TagIcon } from 'lucide-react';
 import { api } from '../../api';
 import { CategoryItem } from '../../types';
 import { RichTextEditor } from '../../components/admin/RichTextEditor';
@@ -17,6 +17,7 @@ export default function ArticleEditor() {
 
     const [loading, setLoading] = useState(true);
     const [categories, setCategories] = useState<CategoryItem[]>([]);
+    const [availableTags, setAvailableTags] = useState<any[]>([]);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
 
@@ -26,7 +27,7 @@ export default function ArticleEditor() {
         content: '',
         cover_image: '',
         category: '',
-        tags: '',
+        tags: [] as string[],
         is_featured: false,
         status: 'draft',
         published_at: getLocalDatetime(),
@@ -39,13 +40,15 @@ export default function ArticleEditor() {
     useEffect(() => {
         const init = async () => {
             try {
-                const cats = await api.getCategories();
+                const [cats, tags] = await Promise.all([api.getCategories(), api.getTags()]);
                 setCategories(cats);
+                setAvailableTags(tags);
 
                 if (isEditing) {
                     const article = await api.getArticle(Number(id));
                     setFormData({
                         ...article,
+                        tags: article.tags ? (typeof article.tags === 'string' ? article.tags.split(',').map((t: string) => t.trim()) : article.tags) : [],
                         is_featured: article.is_featured === 1 || article.is_featured === true,
                         published_at: article.published_at ? article.published_at.replace(' ', 'T').slice(0, 16) : getLocalDatetime()
                     });
@@ -211,6 +214,45 @@ export default function ArticleEditor() {
                             >
                                 {categories.map(c => <option key={c.id} value={c.slug}>{c.name}</option>)}
                             </select>
+                        </div>
+
+                        <div className="space-y-2 pb-2">
+                            <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                                <TagIcon size={16} />
+                                Tag Dinamici (Premi Invio per aggiungere)
+                            </label>
+                            <div className="flex flex-wrap gap-2 mb-2">
+                                {Array.isArray(formData.tags) && formData.tags.map((tag, i) => (
+                                    <span key={i} className="flex items-center gap-1 bg-zinc-800 text-dis-green px-3 py-1.5 rounded-full text-sm border border-zinc-700">
+                                        {tag}
+                                        <button type="button" onClick={() => setFormData(prev => ({...prev, tags: (prev.tags as string[]).filter((_, idx) => idx !== i)}))} className="text-zinc-400 hover:text-white">
+                                            <X size={14} />
+                                        </button>
+                                    </span>
+                                ))}
+                            </div>
+                            <input
+                                type="text"
+                                placeholder="Aggiungi un tag e premi Invio..."
+                                list="available-tags"
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        e.preventDefault();
+                                        const newTag = e.currentTarget.value.trim();
+                                        if (newTag && !(formData.tags as string[]).includes(newTag)) {
+                                            setFormData(prev => ({ ...prev, tags: [...(prev.tags as string[]), newTag] }));
+                                        }
+                                        e.currentTarget.value = '';
+                                    }
+                                }}
+                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white focus:border-dis-green focus:outline-none placeholder-zinc-700"
+                            />
+                            <datalist id="available-tags">
+                                {availableTags.map(t => (
+                                    <option key={t.id} value={t.name} />
+                                ))}
+                            </datalist>
+                            <p className="text-xs text-zinc-500 mt-1">Se inserisci un tag nuovo non presente a sistema, verrà creato dinamicamente al salvataggio.</p>
                         </div>
 
                         <div className="space-y-2">
