@@ -2,8 +2,10 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Edit2, Trash2, Search, ExternalLink, Calendar } from 'lucide-react';
 import { api } from '../../api';
+import { useCategories } from '../../hooks/useCategories';
 
 export default function ArticlesList() {
+    const { categories } = useCategories();
     const [articles, setArticles] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
@@ -108,12 +110,12 @@ export default function ArticlesList() {
                     <table className="w-full text-left border-collapse table-fixed">
                         <thead>
                             <tr className="bg-zinc-950/50 text-zinc-400 text-sm border-b border-zinc-800">
-                                <th className="p-4 font-medium">Titolo</th>
-                                <th className="p-4 font-medium w-[160px]">Categoria</th>
-                                <th className="p-4 font-medium w-[120px]">Stato</th>
-                                <th className="p-4 font-medium w-[150px]">Data</th>
-                                <th className="p-4 font-medium w-[70px]">Vetrina</th>
-                                <th className="p-4 font-medium w-[110px] text-right">Azioni</th>
+                                <th className="p-4 font-medium w-[35%]">Titolo</th>
+                                <th className="p-4 font-medium w-[18%]">Categoria</th>
+                                <th className="p-4 font-medium w-[15%]">Stato</th>
+                                <th className="p-4 font-medium w-[15%]">Data</th>
+                                <th className="p-4 font-medium w-[7%] text-center">Vetrina</th>
+                                <th className="p-4 font-medium w-[10%] text-right">Azioni</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-800/50">
@@ -137,8 +139,11 @@ export default function ArticlesList() {
                                             <p className="text-sm text-zinc-500 mt-1 truncate">{article.slug}</p>
                                         </td>
                                         <td className="p-4">
-                                            <span className="inline-flex items-center px-2 py-1 rounded bg-zinc-800 text-zinc-300 text-xs font-medium">
-                                                {article.category}
+                                            <span 
+                                                className="inline-flex items-center px-2 py-1 rounded border border-zinc-700 bg-zinc-800 text-dis-green text-xs font-semibold whitespace-nowrap overflow-hidden text-ellipsis max-w-full shadow-sm"
+                                                title={categories.find(c => c.slug === article.category)?.name || article.category}
+                                            >
+                                                {categories.find(c => c.slug === article.category)?.name || article.category}
                                             </span>
                                         </td>
                                         <td className="p-4">
@@ -172,7 +177,7 @@ export default function ArticlesList() {
                                                 );
                                             })()}
                                         </td>
-                                        <td className="p-4">
+                                        <td className="p-4 text-center">
                                             <button
                                                 onClick={() => handleToggleFeatured(article.id, article.is_featured)}
                                                 className="transition-transform hover:scale-125 focus:outline-none focus:ring-0 active:scale-90"

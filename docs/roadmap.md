@@ -87,12 +87,12 @@ Implementata in v1.6.4: rimozione icone dai pulsanti per estetica minimale, inte
 
 - **Feature:** Uno script CRON lato server o un bottone nel pannello Admin che generi un dump di `database.sqlite` e lo scarichi in locale o lo invii via email, garantendo sicurezza contro la perdita accidentale di dati strutturati.
 
-### Attivazione Tabelle Placeholder (Newsletter e Contatti)
+### ✅ Attivazione Tabelle Placeholder (Newsletter e Contatti) [COMPLETATA — v1.7.4 / v1.7.8]
 
-Le tabelle `subscribers` e `messages` esistono gia nello schema SQLite (`init_db.php`) ma non hanno endpoint API attivi. Il dashboard mostra `total_subscribers: 0` come placeholder.
+Le tabelle `subscribers` e `messages`, originariamente solo abbozzate, sono state pienamente attivate.
 
-- **Feature Newsletter:** Creare `GET/POST /api/subscribers.php` per registrazione email e pannello admin di gestione iscritti.
-- **Feature Form Contatti:** Creare `POST /api/messages.php` per la ricezione messaggi dal sito e `GET /api/messages.php` (admin) per la visualizzazione in dashboard.
+- **Feature Newsletter:** Abilitati endpoint `GET/POST /api/subscribers.php` e `POST /api/newsletter_send.php`. Creato form pubblico e pannello admin per gestione iscritti, composizione email e storico invii (v1.7.4).
+- **Feature Form Contatti:** Abilitati endpoint `POST /api/messages.php` dal frontend form e interfaccia di recap in dashboard (v1.7.8).
 
 ---
 

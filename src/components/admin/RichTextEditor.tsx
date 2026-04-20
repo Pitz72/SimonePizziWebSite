@@ -345,6 +345,12 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                 [&_tr:hover_td]:bg-zinc-800/40
                 focus:bg-zinc-900/30 transition-colors"
                 contentEditable
+                onKeyDown={(e) => {
+                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                        e.preventDefault();
+                        promptLink();
+                    }
+                }}
                 onInput={handleInput}
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}

@@ -1,7 +1,7 @@
 # MASTER PLAN — Simone Pizzi Portfolio Creativo
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.7.10  
+**Versione corrente:** 1.7.11  
 **Ultimo aggiornamento documento:** 20 Aprile 2026  
 **Sito:** simonepizzi.runtimeradio.it
 
@@ -27,6 +27,7 @@
 ### Storico Versioni
 | Versione | Data | Note |
 |---|---|---|
+| v1.7.11 | 20/04/2026 | Refactoring Admin UI: Shortcut Editor, ridimensionamento colonne lista articoli |
 | v1.7.10 | 20/04/2026 | Sincronizzazione totale categorie dinamiche (Admin + Frontend) |
 | v1.7.7 | 19/04/2026 | Data/ora+categoria anteprime; menu mobile hamburger+drawer |
 | v1.7.6 | 17/04/2026 | Newsletter Footer compact; editor strip SVG + pulsante Ripulisci |
@@ -41,8 +42,8 @@
 | `categories` | ✅ Attiva |
 | `article_views` | ✅ Attiva (analytics) |
 | `cta_clicks` | ✅ Attiva (analytics) |
-| `subscribers` | ⚠️ Schema presente, endpoint API assente, nessuna UI pubblica |
-| `messages` | ⚠️ Schema presente, endpoint API assente, nessuna UI |
+| `subscribers` | ✅ Attiva (Newsletter form e Admin) |
+| `messages` | ✅ Attiva (Form Contatti e Invio mail) |
 
 ---
 
@@ -121,7 +122,7 @@ Le voci sono ordinate per **priorità assoluta**. Ogni voce ha un ID stabile per
 | Gravità | Problema | Stato |
 |---|---|---|
 | ~~🔴 GRAVISSIMO~~ | ~~Toolbar non sticky — perdita selezione per inserire link~~ | ✅ **RISOLTO v1.7.9** — `sticky top-0 z-30`, rimosso `overflow-hidden` dal wrapper |
-| 🔴 GRAVISSIMO | Nessuna shortcut da tastiera per link (Ctrl+K) | 🔲 backlog |
+| ~~🔴 GRAVISSIMO~~ | ~~Nessuna shortcut da tastiera per link (Ctrl+K)~~ | ✅ **RISOLTO** |
 | 🟠 GRAVE | Nessuna barra di avanzamento / feedback visivo durante salvataggio | 🔲 backlog |
 | 🟠 GRAVE | Nessuna anteprima in-place del Markdown renderizzato | 🔲 backlog |
 | 🟡 MEDIO | Nessun contatore parole/caratteri | 🔲 backlog |
@@ -132,7 +133,7 @@ Le voci sono ordinate per **priorità assoluta**. Ogni voce ha un ID stabile per
 
 **Fix extra v1.7.9:** Home page portata a 7 articoli (1 hero + 6 griglia 3×2) — `PortfolioGrid.tsx slice(0,7)`.
 
-#### [P2-02] Lista articoli admin — riequilibrio proporzioni colonne
+#### ✅ [P2-02] Lista articoli admin — riequilibrio proporzioni colonne (COMPLETATO)
 **Area:** Admin — `ArticlesList.tsx`  
 **Problema:** Quasi tutta la larghezza della tabella articoli è occupata dalla colonna "Titolo". Le informazioni contestuali (categoria, stato pubblicazione, data) sono compresse o assenti.  
 **Fix richiesto:**
@@ -242,10 +243,10 @@ Doppio controllo: hash link + hash titolo. Stesso titolo dallo stesso feed = non
 6. ✅ [P1-03] Newsletter — fase 1 (iscrizione pubblica + admin lista) — v1.7.4
 
 ### Sprint C — "Admin Power-Up"
-7. [P2-01] Toolbar sticky e Ctrl+K nell'editor
-8. [P2-02] Lista articoli admin — colonna categoria
+7. ✅ [P2-01] Toolbar sticky e Ctrl+K nell'editor — RISOLTO
+8. ✅ [P2-02] Lista articoli admin — colonna categoria — RISOLTO
 9. [P2-03] Switch link/email nei pulsanti CTA
-10. [P1-03] Newsletter — fase 2 (compositore + invio)
+10. ✅ [P1-03] Newsletter — fase 2 (compositore + invio) — COMPLETATO v1.7.4
 
 ### Sprint D — "Scale & Polish"
 11. [P3-01] Paginazione backend-driven
