@@ -18,8 +18,16 @@ Implementata in v1.6.0 con 3 tab (Immagini / Documenti / File) e contatori per t
 
 Implementata in v1.6.3: checkbox per card, "Seleziona tutti" per tab, barra azioni contestuale, eliminazione in blocco sequenziale. Vedi [changelog v1.6.3](changelogs/1.6.3.md).
 
-### ✅ Gestore Categorie e Tag Dinamici [COMPLETATA — v1.6.5/v1.7.10]
-Implementata in v1.6.5 (base DB e API) e completata l'integrazione totale in v1.7.10 (Editor Progetti, Editor Articoli, Dashboard e Pagine Pubbliche). Ora ogni componente del sito è sincronizzato con il sistema dinamico. Vedi [changelog v1.7.10](changelogs/1.7.10.md).
+### ✅ Gestore Categorie Dinamiche [COMPLETATA — v1.6.5/v1.7.10]
+Implementata in v1.6.5 (base DB e API) e completata l'integrazione totale in v1.7.10 (Editor Progetti, Editor Articoli, Dashboard e Pagine Pubbliche). Ora ogni componente del sito è sincronizzato con il sistema dinamico delle categorie.
+
+> [!NOTE]
+> Il sistema dei **Tag** rimane attualmente statico (hardcoded) ed è programmato per una futura implementazione dinamica.
+
+### 🔲 Gestore Tag Dinamici [BACKLOG]
+- **Feature:** Permettere la creazione e gestione di tag personalizzati per gli articoli (es. #React, #Horror, #Sperimentale) direttamente dalla dashboard, superando l'attuale sistema fisso.
+- **Logica:** Creazione tabella `tags`, relazione many-to-many con articoli, e UI di gestione tag.
+
 
 ### ✅ Dashboard Analitica Avanzata [COMPLETATA — v1.6.5]
 

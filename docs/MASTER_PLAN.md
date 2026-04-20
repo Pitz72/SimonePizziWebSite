@@ -1,8 +1,8 @@
 # MASTER PLAN — Simone Pizzi Portfolio Creativo
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.7.9  
-**Ultimo aggiornamento documento:** 19 Aprile 2026  
+**Versione corrente:** 1.7.10  
+**Ultimo aggiornamento documento:** 20 Aprile 2026  
 **Sito:** simonepizzi.runtimeradio.it
 
 > Questo documento sostituisce e consolida `roadmap.md` e `project_status.md`.  
@@ -27,6 +27,7 @@
 ### Storico Versioni
 | Versione | Data | Note |
 |---|---|---|
+| v1.7.10 | 20/04/2026 | Sincronizzazione totale categorie dinamiche (Admin + Frontend) |
 | v1.7.7 | 19/04/2026 | Data/ora+categoria anteprime; menu mobile hamburger+drawer |
 | v1.7.6 | 17/04/2026 | Newsletter Footer compact; editor strip SVG + pulsante Ripulisci |
 | v1.7.5 | 17/04/2026 | Icona RSS in Header (sprint A chiuso) |
@@ -139,6 +140,14 @@ Le voci sono ordinate per **priorità assoluta**. Ogni voce ha un ID stabile per
 - Aggiungere colonna **Categoria** (badge colorato, ~15%).
 - Le colonne Stato e Data già presenti rimangono (~20% ciascuna).
 - Aggiungere colonna Azioni (Modifica / Elimina) con icone compatte se non già presente.
+
+#### [P2-04] Gestore Tag Dinamici
+**Area:** Admin + Frontend  
+**Problema:** A differenza delle categorie, i tag sono ancora gestiti tramite un sistema statico (hardcoded) nel codice.
+**Fix richiesto:**
+- Creare tabella `tags` e tabella di relazione `article_tags`.
+- Implementare CRUD per i tag nella dashboard.
+- Rendere dinamico il sistema di tagging nell'editor degli articoli.
 
 #### [P2-03] Switch "link web / indirizzo email" nei pulsanti CTA articolo
 **Area:** Admin — `ArticleEditor.tsx` / CTA Box  
