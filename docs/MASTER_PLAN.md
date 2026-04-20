@@ -100,11 +100,11 @@ Le voci sono ordinate per **priorità assoluta**. Ogni voce ha un ID stabile per
 - Aggiungere widget iscrizione newsletter visibile: nel Footer, al termine degli articoli (vicino RSS), in una eventuale pagina dedicata.
 - Dashboard admin: visualizzare lista iscritti, permettere export CSV.  
 
-**Fix applicato — Fase 2 (Invio Newsletter):**
-- Creare interfaccia admin per comporre una newsletter (titolo, body HTML/Markdown, anteprima).
-- Il compositore deve rispettare stile e grafica del sito (Tailwind dark theme).
-- Endpoint `POST /api/newsletter_send.php` per invio massivo con PHP `mail()` o libreria (PHPMailer/SMTP).
-- Tracciamento invii nella tabella `subscribers` (campo `last_sent_at`).
+**Fix applicato — Fase 2 (Invio Newsletter) ✅ COMPLETATO:**
+- ✅ Creare interfaccia admin per comporre una newsletter (titolo, body HTML/Markdown, anteprima).
+- ✅ Il compositore deve rispettare stile e grafica del sito (Tailwind dark theme).
+- ✅ Endpoint `POST /api/newsletter_send.php` per invio massivo con PHP `mail()` o libreria (PHPMailer/SMTP).
+- ✅ Tracciamento invii nella tabella `subscribers` (campo `last_sent_at`).
 
 #### ✅ [P1-04] Data/ora e categoria nelle anteprime articolo — COMPLETATO v1.7.7
 **Area:** Frontend — Home, Sezioni, Singolo Articolo  
@@ -124,11 +124,11 @@ Le voci sono ordinate per **priorità assoluta**. Ogni voce ha un ID stabile per
 |---|---|---|
 | ~~🔴 GRAVISSIMO~~ | ~~Toolbar non sticky — perdita selezione per inserire link~~ | ✅ **RISOLTO v1.7.9** — `sticky top-0 z-30`, rimosso `overflow-hidden` dal wrapper |
 | ~~🔴 GRAVISSIMO~~ | ~~Nessuna shortcut da tastiera per link (Ctrl+K)~~ | ✅ **RISOLTO** |
-| 🟠 GRAVE | Nessuna barra di avanzamento / feedback visivo durante salvataggio | 🔲 backlog |
-| 🟠 GRAVE | Nessuna anteprima in-place del Markdown renderizzato | 🔲 backlog |
-| 🟡 MEDIO | Nessun contatore parole/caratteri | 🔲 backlog |
+| ~~🟠 GRAVE~~ | ~~Nessuna barra di avanzamento / feedback visivo durante salvataggio~~ | ✅ **RISOLTO** — Overlay progressivo + Check animato |
+| ~~🟠 GRAVE~~ | ~~Nessuna anteprima in-place del Markdown renderizzato~~ | ✅ **RISOLTO/PRESENTE** — Converte istantaneamente in HTML al paste |
+| ~~🟡 MEDIO~~ | ~~Nessun contatore parole/caratteri~~ | ✅ **RISOLTO** — Status bar dinamica a piè di pagina dell'editor |
 | ~~🟡 MEDIO~~ | ~~Nessuna gestione tabelle nell'editor~~ | ✅ **RISOLTO v1.7.9** — pulsante `insertTable()` + stili prose tabelle |
-| 🟡 MEDIO | `execCommand` deprecato (nota in v1.5.10) | 🔲 backlog |
+| 🟢 LIEVE | `execCommand` deprecato (Promemoria Web Standard futuri) | 🔲 da monitorare negli anni |
 | 🟢 LIEVE | Nessun drag-and-drop per riordinare immagini nel corpo | 🔲 backlog |
 | 🟢 LIEVE | Nessun link interno rapido agli articoli del CMS | 🔲 backlog |
 
@@ -151,7 +151,7 @@ Le voci sono ordinate per **priorità assoluta**. Ogni voce ha un ID stabile per
 - Implementato CRUD per i tag nella dashboard (`TagsList.tsx`).
 - Reso dinamico il sistema di tagging nell'editor degli articoli (multi-select API-driven).
 
-#### [P2-03] Switch "link web / indirizzo email" nei pulsanti CTA articolo
+#### ✅ [P2-03] Switch "link web / indirizzo email" nei CTA — COMPLETATO
 **Area:** Admin — `ArticleEditor.tsx` / CTA Box  
 **Problema:** Il box CTA a fondo articolo (pulsanti configurabili dall'editor) accetta un campo URL per il link, ma non distingue tra un URL web (`https://...`) e un indirizzo email (`mailto:...`). Un'email inserita senza prefisso `mailto:` non funziona come link corretto.  
 **Fix richiesto:**
@@ -182,10 +182,10 @@ Le voci sono ordinate per **priorità assoluta**. Ogni voce ha un ID stabile per
 **Area:** Admin / Server  
 **Feature:** Pulsante nel pannello Admin o CRON lato server che genera un dump MySQL e lo invia via email o lo rende scaricabile. Priorità aumentata dopo migrazione a MySQL (il backup non è più automatico come con file SQLite).
 
-#### [P3-05] Migrazione `execCommand` → Selection API nell'editor
+#### [P3-05] Monitoraggio `execCommand` (Debito a lunghissimo termine)
 **Area:** Admin — `RichTextEditor.tsx`  
-**Fonte:** Annotato come TODO tecnico in v1.5.10.  
-**Feature:** Sostituire l'API browser `document.execCommand()` (deprecata) con un'implementazione basata su `Selection` e `Range` API per le operazioni di formattazione testo.
+**Cosa succede:** Il W3C ha deprecato l'uso di `document.execCommand()`, il motore "nativo" che l'editor usa gratis ora per formattare il testo.
+**Orizzonte:** Nessuna azione richiesta oggi. Continuerà a funzionare per anni. È segnato qui in modo che se, in futuro lontano, si dovessero notare corruzioni dell'HTML prodotto, si saprà che l'editor andrà buttato e sostituito con librerie pronte e blindate come *Tiptap* o simili. Non riscriverlo a mano!
 
 #### [P3-06] Audio Player nativo fluttuante
 **Area:** Frontend  

@@ -39,11 +39,24 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
     const [isFocused, setIsFocused] = useState(false);
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
+    const [wordCount, setWordCount] = useState(0);
+    const [charCount, setCharCount] = useState(0);
+
+    const updateCounts = () => {
+        if (!editorRef.current) return;
+        const text = editorRef.current.innerText || '';
+        // innerText a volte aggiunge newline fittizi alla fine, lo puliamo per un conteggio fedele
+        const cleanText = text.replace(/[\n\r]+$/, '');
+        setCharCount(cleanText.length);
+        const words = cleanText.trim() ? cleanText.trim().split(/\s+/).length : 0;
+        setWordCount(words);
+    };
 
     // Sync external value changes to editor content only if not focused (to avoid cursor jumps)
     useEffect(() => {
         if (editorRef.current && !isFocused && editorRef.current.innerHTML !== value) {
             editorRef.current.innerHTML = value;
+            updateCounts();
         }
     }, [value, isFocused]);
 
@@ -138,6 +151,7 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
 
     const handleInput = () => {
         if (editorRef.current) onChange(editorRef.current.innerHTML);
+        updateCounts();
     };
 
     const promptLink = () => {
@@ -208,6 +222,7 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
             if (editorRef.current) editorRef.current.innerHTML += tableHtml;
         }
         if (editorRef.current) onChange(editorRef.current.innerHTML);
+        updateCounts();
     };
 
     const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -333,7 +348,7 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
 
             <div
                 ref={editorRef}
-                className="p-6 text-zinc-300 prose prose-invert max-w-none flex-1 overflow-y-auto outline-none rounded-b-lg
+                className="p-6 text-zinc-300 prose prose-invert max-w-none flex-1 overflow-y-auto outline-none
                 [&_a]:text-dis-green [&_a]:underline 
                 [&_blockquote]:border-l-4 [&_blockquote]:border-dis-green/50 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:bg-dis-green/5 [&_blockquote]:py-1 [&_blockquote]:pr-4 [&_blockquote]:rounded-r-lg
                 [&_ul]:list-disc [&_ul]:pl-5 
@@ -355,6 +370,20 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
             />
+
+            {/* STATUS BAR FOOTER */}
+            <div className="flex items-center justify-between px-4 py-2 bg-[#121214] border-t border-zinc-800 shrink-0 rounded-b-lg select-none">
+                <div className="flex items-center gap-6 text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">
+                    <span className="flex items-center gap-1.5" title="Conteggio Parole">
+                        <span className="w-1.5 h-1.5 rounded-full bg-dis-green/60"></span>
+                        {wordCount} {wordCount === 1 ? 'parola' : 'parole'}
+                    </span>
+                    <span className="flex items-center gap-1.5" title="Conteggio Caratteri">
+                        <span className="w-1.5 h-1.5 rounded-full bg-blue-500/60"></span>
+                        {charCount} {charCount === 1 ? 'carattere' : 'caratteri'}
+                    </span>
+                </div>
+            </div>
         </div>
     );
 }
