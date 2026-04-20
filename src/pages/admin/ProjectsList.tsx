@@ -2,21 +2,12 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Plus, Pencil, Trash2, Eye, EyeOff, ChevronUp, ChevronDown } from 'lucide-react';
 import { api } from '../../api';
-import { Project } from '../../types';
-import { Category } from '../../types';
-
-const CATEGORY_LABELS: Record<string, string> = {
-    [Category.VIDEOGIOCHI]: 'Videogiochi',
-    [Category.PROGETTI_SOFTWARE]: 'Progetti Software',
-    [Category.NARRATIVA_E_PUBBLICAZIONI]: 'Narrativa e Pubblicazioni',
-    [Category.PODCAST_AUDIO_ALTRO]: 'Podcast, Audio e Altro',
-    [Category.BLOG_E_RIFLESSIONI]: 'Blog e Riflessioni',
-};
-
-const ALL_CATEGORIES = Object.keys(CATEGORY_LABELS);
+import { Project, CategoryItem } from '../../types';
+import { useCategories } from '../../hooks/useCategories';
 
 export default function ProjectsList() {
     const [projects, setProjects] = useState<Project[]>([]);
+    const { categories, loading: catsLoading } = useCategories();
     const [loading, setLoading] = useState(true);
     const [filterCategory, setFilterCategory] = useState<string>('');
     const [error, setError] = useState('');
@@ -82,16 +73,22 @@ export default function ProjectsList() {
         }
     };
 
-    // Raggruppa per categoria nell'ordine corretto
-    const grouped: Record<string, Project[]> = {};
-    ALL_CATEGORIES.forEach(cat => {
+    // Raggruppa per categoria nell'ordine definito dal database
+    const grouped: { cat: CategoryItem, projects: Project[] }[] = [];
+    
+    categories.forEach(cat => {
         const catProjects = projects
-            .filter(p => p.category === cat)
+            .filter(p => p.category === cat.slug)
             .sort((a, b) => a.sort_order - b.sort_order);
-        if (catProjects.length > 0 || !filterCategory) {
-            grouped[cat] = catProjects;
+        
+        // Se c'è un filtro attivo, mostriamo solo quella categoria. 
+        // Altrimenti mostriamo tutte le categorie che hanno progetti.
+        if (filterCategory === cat.slug || (!filterCategory && catProjects.length > 0)) {
+            grouped.push({ cat, projects: catProjects });
         }
     });
+
+    const isLoading = loading || catsLoading;
 
     return (
         <div>
@@ -116,19 +113,19 @@ export default function ProjectsList() {
                     className="bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-dis-green"
                 >
                     <option value="">Tutte le categorie</option>
-                    {ALL_CATEGORIES.map(cat => (
-                        <option key={cat} value={cat}>{CATEGORY_LABELS[cat]}</option>
+                    {categories.map(cat => (
+                        <option key={cat.id} value={cat.slug}>{cat.name}</option>
                     ))}
                 </select>
             </div>
 
             {error && <p className="text-red-400 mb-4">{error}</p>}
-            {loading && <p className="text-zinc-400">Caricamento...</p>}
+            {isLoading && <p className="text-zinc-400">Caricamento...</p>}
 
-            {!loading && Object.entries(grouped).map(([cat, catProjects]) => (
-                <div key={cat} className="mb-8">
+            {!isLoading && grouped.map(({ cat, projects: catProjects }) => (
+                <div key={cat.id} className="mb-8">
                     <h2 className="text-lg font-semibold text-dis-green border-b border-zinc-800 pb-2 mb-4">
-                        {CATEGORY_LABELS[cat]} <span className="text-zinc-500 text-sm font-normal">({catProjects.length})</span>
+                        {cat.name} <span className="text-zinc-500 text-sm font-normal">({catProjects.length})</span>
                     </h2>
 
                     {catProjects.length === 0 ? (

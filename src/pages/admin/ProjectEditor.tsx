@@ -2,15 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Save } from 'lucide-react';
 import { api } from '../../api';
-import { Category } from '../../types';
-
-const CATEGORY_OPTIONS = [
-    { value: Category.VIDEOGIOCHI, label: 'Videogiochi' },
-    { value: Category.PROGETTI_SOFTWARE, label: 'Progetti Software' },
-    { value: Category.NARRATIVA_E_PUBBLICAZIONI, label: 'Narrativa e Pubblicazioni' },
-    { value: Category.PODCAST_AUDIO_ALTRO, label: 'Podcast, Audio e Altro' },
-    { value: Category.BLOG_E_RIFLESSIONI, label: 'Blog e Riflessioni' },
-];
+import { CategoryItem } from '../../types';
 
 interface FormData {
     name: string;
@@ -26,7 +18,7 @@ interface FormData {
 
 const EMPTY_FORM: FormData = {
     name: '',
-    category: Category.PROGETTI_SOFTWARE,
+    category: '', // Sarà impostata al caricamento delle categorie
     description: '',
     cover_image: '',
     button_a_label: 'Scopri',
@@ -42,28 +34,46 @@ export default function ProjectEditor() {
     const isEdit = Boolean(id);
 
     const [form, setForm] = useState<FormData>(EMPTY_FORM);
-    const [loading, setLoading] = useState(isEdit);
+    const [categories, setCategories] = useState<CategoryItem[]>([]);
+    const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
 
     useEffect(() => {
-        if (!isEdit) return;
-        api.getProject(Number(id))
-            .then((p: any) => {
-                setForm({
-                    name: p.name || '',
-                    category: p.category || Category.PROGETTI_SOFTWARE,
-                    description: p.description || '',
-                    cover_image: p.cover_image || '',
-                    button_a_label: p.button_a_label || 'Scopri',
-                    button_a_url: p.button_a_url || '',
-                    button_b_label: p.button_b_label || '',
-                    button_b_url: p.button_b_url || '',
-                    is_visible: Boolean(p.is_visible),
-                });
-            })
-            .catch(e => setError('Errore caricamento: ' + e.message))
-            .finally(() => setLoading(false));
+        const loadData = async () => {
+            try {
+                // Carica categorie e progetto in parallelo
+                const [catData, projData] = await Promise.all([
+                    api.getCategories(),
+                    isEdit ? api.getProject(Number(id)) : Promise.resolve(null)
+                ]);
+
+                setCategories(catData);
+
+                if (projData) {
+                    setForm({
+                        name: projData.name || '',
+                        category: projData.category || '',
+                        description: projData.description || '',
+                        cover_image: projData.cover_image || '',
+                        button_a_label: projData.button_a_label || 'Scopri',
+                        button_a_url: projData.button_a_url || '',
+                        button_b_label: projData.button_b_label || '',
+                        button_b_url: projData.button_b_url || '',
+                        is_visible: Boolean(projData.is_visible),
+                    });
+                } else if (catData.length > 0) {
+                    // Default alla prima categoria per i nuovi progetti
+                    setForm(prev => ({ ...prev, category: catData[0].slug }));
+                }
+            } catch (e: any) {
+                setError('Errore caricamento dati: ' + e.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        loadData();
     }, [id, isEdit]);
 
     const set = (field: keyof FormData, value: string | boolean) => {
@@ -141,8 +151,8 @@ export default function ProjectEditor() {
                         onChange={e => set('category', e.target.value)}
                         className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-dis-green"
                     >
-                        {CATEGORY_OPTIONS.map(opt => (
-                            <option key={opt.value} value={opt.value}>{opt.label}</option>
+                        {categories.map(c => (
+                            <option key={c.id} value={c.slug}>{c.name}</option>
                         ))}
                     </select>
                 </div>

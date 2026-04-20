@@ -18,9 +18,8 @@ Implementata in v1.6.0 con 3 tab (Immagini / Documenti / File) e contatori per t
 
 Implementata in v1.6.3: checkbox per card, "Seleziona tutti" per tab, barra azioni contestuale, eliminazione in blocco sequenziale. Vedi [changelog v1.6.3](changelogs/1.6.3.md).
 
-### ✅ Gestore Categorie e Tag Dinamici [COMPLETATA — v1.6.5]
-
-Implementata in v1.6.5: tabella `categories` nel DB, API `categories.php` (CRUD), hook `useCategories` con fallback hardcoded, routing React dinamico, nav Header dinamica, componente admin `CategoryManager` (crea/rinomina/elimina/riordina). Vedi [changelog v1.6.5](changelogs/1.6.5.md).
+### ✅ Gestore Categorie e Tag Dinamici [COMPLETATA — v1.6.5/v1.7.10]
+Implementata in v1.6.5 (base DB e API) e completata l'integrazione totale in v1.7.10 (Editor Progetti, Editor Articoli, Dashboard e Pagine Pubbliche). Ora ogni componente del sito è sincronizzato con il sistema dinamico. Vedi [changelog v1.7.10](changelogs/1.7.10.md).
 
 ### ✅ Dashboard Analitica Avanzata [COMPLETATA — v1.6.5]
 

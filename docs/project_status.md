@@ -1,7 +1,7 @@
 # Relazione sullo Stato del Progetto "Simone Pizzi - Portfolio Creativo"
 
-**Data:** 03 Aprile 2026
-**Versione Sotto Analisi:** 1.6.4
+**Data:** 20 Aprile 2026
+**Versione Sotto Analisi:** 1.7.10
 
 ## 1. Panoramica Generale
 
@@ -42,6 +42,7 @@ Verifica puntuale tra le ultime versioni rilasciate e l'ecosistema fisico della 
 
 | Feature Documentata | Versione | Riscontro File System | Esito |
 | :--- | :--- | :--- | :--- |
+| Sincronizzazione Categorie Dinamiche (Admin + Frontend) | v1.7.10 | `ProjectEditor.tsx`, `ArticleEditor.tsx`, `AllProjects.tsx`, `ProjectsList.tsx` | CONFORME |
 | Donazione PayPal in Box CTA Articoli | v1.6.4 | `SingleArticle.tsx` righe 225-240 | CONFORME |
 | Logica Ordinamento Temporale (PublishedAt) | v1.6.4 | `PortfolioGrid.tsx` e `ArticleArchive.tsx` | CONFORME |
 | Visualizzazione Data Pubblicazione Articolo | v1.6.4 | `SingleArticle.tsx` riga 168 | CONFORME |

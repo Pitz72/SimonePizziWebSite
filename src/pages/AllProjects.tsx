@@ -2,16 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { api } from '../api';
-import { Project, Category } from '../types';
+import { Project } from '../types';
 import SEO from '../components/SEO';
-
-const CATEGORIES: { key: Category; label: string }[] = [
-    { key: Category.VIDEOGIOCHI, label: 'Videogiochi' },
-    { key: Category.PROGETTI_SOFTWARE, label: 'Progetti Software' },
-    { key: Category.NARRATIVA_E_PUBBLICAZIONI, label: 'Narrativa e Pubblicazioni' },
-    { key: Category.PODCAST_AUDIO_ALTRO, label: 'Podcast, Audio e Altro' },
-    { key: Category.BLOG_E_RIFLESSIONI, label: 'Blog e Riflessioni' },
-];
+import { useCategories } from '../hooks/useCategories';
 
 // Determina il tipo di URL per il rendering del pulsante
 function detectUrlType(url: string): 'external' | 'download' | 'internal' {
@@ -123,20 +116,22 @@ const ProjectCard: React.FC<{ project: Project; index: number }> = ({ project, i
     );
 };
 
-
 export default function AllProjects() {
     const [projects, setProjects] = useState<Project[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { categories: categoryList, loading: categoriesLoading } = useCategories();
+    const [projectsLoading, setProjectsLoading] = useState(true);
 
     useEffect(() => {
         api.getProjects()
             .then(setProjects)
             .catch(console.error)
-            .finally(() => setLoading(false));
+            .finally(() => setProjectsLoading(false));
     }, []);
 
-    const getProjectsByCategory = (cat: Category) =>
-        projects.filter(p => p.category === cat).sort((a, b) => a.sort_order - b.sort_order);
+    const loading = categoriesLoading || projectsLoading;
+
+    const getProjectsByCategory = (catSlug: string) =>
+        projects.filter(p => p.category === catSlug).sort((a, b) => a.sort_order - b.sort_order);
 
     return (
         <>
@@ -166,19 +161,19 @@ export default function AllProjects() {
 
                 {!loading && (
                     <div className="space-y-16">
-                        {CATEGORIES.map(({ key, label }) => {
-                            const catProjects = getProjectsByCategory(key);
+                        {categoryList.map((cat) => {
+                            const catProjects = getProjectsByCategory(cat.slug);
                             if (catProjects.length === 0) return null;
 
                             return (
-                                <section key={key}>
+                                <section key={cat.id}>
                                     <motion.div
                                         initial={{ opacity: 0, x: -20 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ duration: 0.4 }}
                                         className="flex items-center gap-4 mb-8"
                                     >
-                                        <h2 className="text-xl md:text-2xl font-bold text-green-400">{label}</h2>
+                                        <h2 className="text-xl md:text-2xl font-bold text-green-400">{cat.name}</h2>
                                         <div className="flex-1 h-px bg-gradient-to-r from-green-500/30 to-transparent" />
                                     </motion.div>
 

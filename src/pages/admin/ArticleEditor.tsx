@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Save, Image as ImageIcon, LayoutTemplate } from 'lucide-react';
 import { api } from '../../api';
+import { CategoryItem } from '../../types';
 import { RichTextEditor } from '../../components/admin/RichTextEditor';
 
 const getLocalDatetime = () => {
@@ -9,20 +10,13 @@ const getLocalDatetime = () => {
     return (new Date(Date.now() - tzoffset)).toISOString().slice(0, 16);
 };
 
-const CATEGORIES = [
-    { id: 'videogiochi', label: 'Videogiochi' },
-    { id: 'progetti-software', label: 'Progetti Software' },
-    { id: 'narrativa-e-pubblicazioni', label: 'Narrativa e Pubblicazioni' },
-    { id: 'podcast-audio-altro', label: 'Podcast, Audio e Altro' },
-    { id: 'blog-e-riflessioni', label: 'Blog e Riflessioni' }
-];
-
 export default function ArticleEditor() {
     const { id } = useParams();
     const navigate = useNavigate();
     const isEditing = !!id;
 
-    const [loading, setLoading] = useState(isEditing);
+    const [loading, setLoading] = useState(true);
+    const [categories, setCategories] = useState<CategoryItem[]>([]);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
 
@@ -31,7 +25,7 @@ export default function ArticleEditor() {
         excerpt: '',
         content: '',
         cover_image: '',
-        category: 'videogiochi',
+        category: '',
         tags: '',
         is_featured: false,
         status: 'draft',
@@ -43,25 +37,29 @@ export default function ArticleEditor() {
     });
 
     useEffect(() => {
-        if (isEditing) {
-            loadArticle();
-        }
-    }, [id]);
+        const init = async () => {
+            try {
+                const cats = await api.getCategories();
+                setCategories(cats);
 
-    const loadArticle = async () => {
-        try {
-            const article = await api.getArticle(Number(id));
-            setFormData({
-                ...article,
-                is_featured: article.is_featured === 1 || article.is_featured === true,
-                published_at: article.published_at ? article.published_at.replace(' ', 'T').slice(0, 16) : getLocalDatetime()
-            });
-        } catch (err: any) {
-            setError('Impossibile caricare l\'articolo.');
-        } finally {
-            setLoading(false);
-        }
-    };
+                if (isEditing) {
+                    const article = await api.getArticle(Number(id));
+                    setFormData({
+                        ...article,
+                        is_featured: article.is_featured === 1 || article.is_featured === true,
+                        published_at: article.published_at ? article.published_at.replace(' ', 'T').slice(0, 16) : getLocalDatetime()
+                    });
+                } else if (cats.length > 0) {
+                    setFormData(prev => ({ ...prev, category: cats[0].slug }));
+                }
+            } catch (err: any) {
+                setError('Impossibile caricare i dati: ' + err.message);
+            } finally {
+                setLoading(false);
+            }
+        };
+        init();
+    }, [id, isEditing]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -211,7 +209,7 @@ export default function ArticleEditor() {
                                 onChange={handleChange}
                                 className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white focus:border-dis-green focus:outline-none"
                             >
-                                {CATEGORIES.map(c => <option key={c.id} value={c.id}>{c.label}</option>)}
+                                {categories.map(c => <option key={c.id} value={c.slug}>{c.name}</option>)}
                             </select>
                         </div>
 
