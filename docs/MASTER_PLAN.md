@@ -1,4 +1,5 @@
 # MASTER PLAN — Simone Pizzi Portfolio Creativo
+
 ## Documento Unico di Verità
 
 **Versione corrente:** 1.7.17  
@@ -13,8 +14,9 @@
 ## PARTE I — STATO CORRENTE
 
 ### Infrastruttura
+
 | Componente | Stato |
-|---|---|
+| :--- | :--- |
 | Frontend React 19 + TypeScript 5 + Vite 7 + Tailwind v4 | ✅ Produzione |
 | Backend PHP 8 + MySQL su `mysql.runtimeradio.it` | ✅ Produzione |
 | Migrazione SQLite → MySQL | ✅ Completata v1.7.0 |
@@ -24,8 +26,9 @@
 | SEO server-side (OpenGraph / TwitterCard via `index.php`) | ✅ Attivo |
 
 ### Database — Tabelle
+
 | Tabella | Stato |
-|---|---|
+| :--- | :--- |
 | `users` | ✅ Attiva |
 | `articles` | ✅ Attiva |
 | `projects` | ✅ Attiva |
@@ -65,16 +68,20 @@ Elenco sintetico delle funzionalità core e miglioramenti completati:
 Voci attive ordinate per priorità.
 
 ### 🟠 PRIORITÀ ALTA
+
 #### [P1-05] Risoluzione Indexing Google (SEO)
+
 - **Problema:** Solo 1 articolo su 30 è indicizzato. Google ha difficoltà con il Client-Side Rendering della SPA.
 - **Soluzione:** Implementazione **Prerendering statico** (tramite plugin Vite come `vite-plugin-prerender` o `vite-ssg`) per generare HTML statico per i bot dei motori di ricerca.
 - **Analisi completa:** Vedere [indicizzazione.google.md](file:///C:/Users/Utente/Documents/GitHub/SITI-WEB/SimonePizziWebSite/docs/indicizzazione.google.md).
 
 #### [P3-03] Recupero password / login via email
+
 - **Feature:** Flusso "Password Dimenticata" con invio link di ripristino sicuro via email.
 - **Database:** Richiede aggiunta colonna `email` in tabella `users`.
 
 ### 🔵 PRIORITÀ BASSA / DEBITO TECNICO
+
 #### [P3-05] Monitoraggio `execCommand` (Lungo termine)
 - **Cosa succede:** Il W3C ha deprecato `document.execCommand()`.
 - **Orizzonte:** Monitorare eventuali corruzioni HTML. Se necessario in futuro, sostituire l'editor con librerie moderne (es. Tiptap). **Non riscrivere a mano!**
@@ -93,6 +100,7 @@ Funzionalità rimosse dalla pianificazione perché non coerenti con la visione d
 ## PARTE V — NOTE DI INTEGRAZIONE ESTERNA
 
 ### Titan Desktop (Bot Telegram)
+
 - **Stato:** Sincronizzato. GUID RSS stabile garantisce che il bot non pubblichi duplicati anche in caso di cambio URL.
 - **Regola:** Non modificare URL di articoli già pubblicati. In caso di refactor, usare redirect 301 in `.htaccess`.
 
@@ -101,6 +109,7 @@ Funzionalità rimosse dalla pianificazione perché non coerenti con la visione d
 ## PARTE VI — GESTIONE CRISI E ROLLBACK
 
 ### Incidente Restyling v1.8.x (21 Aprile 2026)
+
 - **Evento:** Fallimento tentativo di reskin totale con perdita di contenuti bio e testi legali.
 - **Azione:** Rollback al commit `87cb0c` (v1.7.13).
 - **Stato:** Ripristinata stabilità al 100%. Ogni futuro restyling dovrà proteggere i contenuti dinamici e le biografie statiche.
