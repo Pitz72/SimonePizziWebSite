@@ -265,3 +265,28 @@ Doppio controllo: hash link + hash titolo. Stesso titolo dallo stesso feed = non
 ---
 
 *Documento mantenuto da Simone Pizzi. Aggiornare questo file ad ogni sprint completato, marcando le voci con ✅ e aggiornando la versione.*
+
+---
+
+## PARTE V — GESTIONE CRISI E ROLLBACK (21 Aprile 2026)
+
+### Incidente Restyling v1.8.x
+**Data:** 21 Aprile 2026
+**Evento:** Tentativo di "Reskin" totale del frontend (v1.8.0).
+**Problemi riscontrati:**
+1. **Perdita Contenuti:** Il nuovo template ha sovrascritto testi storici e bio originali con testi generici/hardcoded (Hero, Newsletter, Footer).
+2. **Corruzione Tecnica:** Errori sistematici di compilazione TypeScript e JSX causati da tentativi di modifica automatizzata dei file sorgente complessi (PortfolioGrid.tsx).
+3. **Regressione Privacy:** Il modulo Newsletter ha perso la piena conformità HDPR originale (checkbox obbligatori e informativa dettagliata).
+4. **Instabilità Build:** Fallimento ripetuto della pipeline di build a causa di errori sintattici nei componenti core.
+
+### Azione Correttiva: Rollback Strategico
+**Decisione:** Abbandono immediato del ramo v1.8.x per preservare l'integrità del brand e dei contenuti originali.
+**Esecuzione:**
+- Reset forzato del repository al commit 87cb0c (v1.7.13).
+- Ripristino totale del vecchio tema grafico e di tutti i testi originali.
+- Rigenerazione build di produzione stabile e verificata.
+
+### Stato Attuale
+- **Versione:** 1.7.13 (RESTORED)
+- **Stabilità:** 100% verificata via build.
+- **Nota per il futuro:** Ogni futuro tentativo di restyling dovrà essere preceduto da un mapping rigoroso dei contenuti dinamici vs statici per evitare la sovrascrittura di biografie e testi legali.
