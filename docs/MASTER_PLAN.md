@@ -83,6 +83,7 @@ Voci attive ordinate per priorità.
 ### 🔵 PRIORITÀ BASSA / DEBITO TECNICO
 
 #### [P3-05] Monitoraggio `execCommand` (Lungo termine)
+
 - **Cosa succede:** Il W3C ha deprecato `document.execCommand()`.
 - **Orizzonte:** Monitorare eventuali corruzioni HTML. Se necessario in futuro, sostituire l'editor con librerie moderne (es. Tiptap). **Non riscrivere a mano!**
 
