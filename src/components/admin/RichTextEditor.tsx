@@ -1,7 +1,10 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { Bold, Italic, Quote, Link as LinkIcon, List, ListOrdered, AlignLeft, AlignCenter, AlignRight, Type, Eraser, Image as ImageIcon, Loader2, ShieldOff, Table2 } from 'lucide-react';
 import showdown from 'showdown';
-import { api } from '../../api';
+import { InternalLinkSelector } from './InternalLinkSelector';
+import { MediaSelectorModal } from './MediaSelectorModal';
+
+
 
 interface RichTextEditorProps {
     value: string;
@@ -35,12 +38,16 @@ const COLORS = [
 
 export function RichTextEditor({ value, onChange, className }: RichTextEditorProps) {
     const editorRef = useRef<HTMLDivElement>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
     const [isFocused, setIsFocused] = useState(false);
     const [showColorPicker, setShowColorPicker] = useState(false);
-    const [isUploading, setIsUploading] = useState(false);
+    const isUploading = false; // Gestito internamente dalla modale ora
     const [wordCount, setWordCount] = useState(0);
     const [charCount, setCharCount] = useState(0);
+    const [showLinkPicker, setShowLinkPicker] = useState(false);
+    const [showMediaModal, setShowMediaModal] = useState(false);
+    const [savedRange, setSavedRange] = useState<Range | null>(null);
+
+
 
     const updateCounts = () => {
         if (!editorRef.current) return;
@@ -155,21 +162,30 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
     };
 
     const promptLink = () => {
-        // Salvataggio esplicito della selezione prima dell'apertura del prompt (che rimuove il focus)
+        // Salvataggio esplicito della selezione prima dell'apertura del picker
         const selection = window.getSelection();
-        const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0).cloneRange() : null;
-
-        const url = prompt('Inserisci URL:');
-
-        if (url) {
-            // Ripristina la selezione salvata se esiste
-            if (range && selection) {
-                selection.removeAllRanges();
-                selection.addRange(range);
-            }
-            exec('createLink', url);
+        if (selection && selection.rangeCount > 0) {
+            setSavedRange(selection.getRangeAt(0).cloneRange());
+        } else {
+            setSavedRange(null);
         }
+        
+        setShowLinkPicker(true);
     };
+
+    const handleInternalLinkSelect = (url: string) => {
+        // Ripristina la selezione salvata se esiste
+        const selection = window.getSelection();
+        if (savedRange && selection) {
+            selection.removeAllRanges();
+            selection.addRange(savedRange);
+        }
+        
+        exec('createLink', url);
+        setShowLinkPicker(false);
+        setSavedRange(null);
+    };
+
 
     const removeLink = () => {
         exec('unlink');
@@ -225,34 +241,38 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
         updateCounts();
     };
 
-    const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
-
-        setIsUploading(true);
-        try {
-            const result = await api.uploadMedia(file);
-            if (result.url) {
-                // Forza il focus sull'editor prima di inserire
-                if (editorRef.current) editorRef.current.focus();
-                
-                const imgHtml = `<img src="${result.url}" alt="${result.name}" class="max-w-full h-auto rounded-xl my-4 shadow-lg border border-zinc-800" />`;
-                try {
-                    document.execCommand('insertHTML', false, imgHtml); // eslint-disable-line @typescript-eslint/no-deprecated
-                } catch {
-                    // Fallback se insertHTML fallisce (raro)
-                    if (editorRef.current) editorRef.current.innerHTML += imgHtml;
-                }
-                
-                if (editorRef.current) onChange(editorRef.current.innerHTML);
+    const handleMediaSelect = (url: string) => {
+        if (editorRef.current) {
+            editorRef.current.focus();
+            
+            // Se avevamo salvato una posizione, la ripristiniamo
+            const selection = window.getSelection();
+            if (savedRange && selection) {
+                selection.removeAllRanges();
+                selection.addRange(savedRange);
             }
-        } catch (error) {
-            console.error("Errore upload immagine:", error);
-            alert("Errore durante il caricamento dell'immagine. Riprova.");
-        } finally {
-            setIsUploading(false);
-            if (fileInputRef.current) fileInputRef.current.value = '';
+
+            const imgHtml = `<img src="${url}" class="max-w-full h-auto rounded-xl my-4 shadow-lg border border-zinc-800" />`;
+            try {
+                document.execCommand('insertHTML', false, imgHtml); // eslint-disable-line @typescript-eslint/no-deprecated
+            } catch {
+                if (editorRef.current) editorRef.current.innerHTML += imgHtml;
+            }
         }
+        setShowMediaModal(false);
+        setSavedRange(null);
+        if (editorRef.current) onChange(editorRef.current.innerHTML);
+    };
+
+    const openMediaModal = () => {
+        // Salvataggio della posizione corrente prima che la modale prenda il focus
+        const selection = window.getSelection();
+        if (selection && selection.rangeCount > 0) {
+            setSavedRange(selection.getRangeAt(0).cloneRange());
+        } else {
+            setSavedRange(null);
+        }
+        setShowMediaModal(true);
     };
 
     return (
@@ -282,6 +302,32 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                 <ToolbarBtn onClick={() => exec('strikeThrough')} icon={<span className="line-through font-bold">S</span>} title="Barrato" />
 
                 {/* Color Picker Custom Implementation */}
+                {/* AZIONI MEDIA */}
+                <div className="flex items-center">
+                    <button
+                        type="button"
+                        onClick={openMediaModal}
+                        disabled={isUploading}
+                        className="p-1.5 sm:p-2 text-zinc-400 hover:text-dis-green hover:bg-zinc-800 rounded transition-colors group relative"
+                        title="Inserisci Immagine"
+                    >
+                        {isUploading ? <Loader2 size={18} className="animate-spin" /> : <ImageIcon size={18} />}
+                        <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-zinc-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
+                            Immagine
+                        </span>
+                    </button>
+                    <button
+                        type="button"
+                        onClick={insertTable}
+                        className="p-1.5 sm:p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-colors group relative border-l border-zinc-800 ml-1 pl-3"
+                        title="Inserisci Tabella"
+                    >
+                        <Table2 size={18} />
+                        <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-zinc-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
+                            Tabella
+                        </span>
+                    </button>
+                </div>
                 <div className="relative">
                     <button
                         type="button"
@@ -326,25 +372,11 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                 <ToolbarBtn onClick={promptLink} icon={<LinkIcon size={16} />} title="Inserisci Link" />
                 <ToolbarBtn onClick={removeLink} icon={<LinkIcon size={16} className="text-red-400" />} title="Rimuovi Link" />
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
-                <ToolbarBtn 
-                    onClick={() => fileInputRef.current?.click()} 
-                    icon={isUploading ? <Loader2 size={16} className="animate-spin text-dis-green" /> : <ImageIcon size={16} />} 
-                    title="Carica Immagine" 
-                    disabled={isUploading}
-                />
-                <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    className="hidden" 
-                    accept="image/*" 
-                    onChange={handleImageUpload} 
-                />
-                <div className="w-px h-6 bg-zinc-800 mx-1" />
-                <ToolbarBtn onClick={insertTable} icon={<Table2 size={16} className="text-blue-400" />} title="Inserisci Tabella 3×3" />
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
                 <ToolbarBtn onClick={() => exec('removeFormat')} icon={<Eraser size={16} className="text-orange-400" />} title="Rimuovi Colore e Formattazione" />
                 <ToolbarBtn onClick={sanitizeContent} icon={<ShieldOff size={16} className="text-red-400" />} title="Ripulisci elementi non-testo (SVG, icone, pulsanti)" />
             </div>
+
 
             <div
                 ref={editorRef}
@@ -384,7 +416,25 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                     </span>
                 </div>
             </div>
+
+            {showLinkPicker && (
+                <InternalLinkSelector 
+                    onSelect={handleInternalLinkSelect} 
+                    onClose={() => setShowLinkPicker(false)} 
+                />
+            )}
+
+            {showMediaModal && (
+                <MediaSelectorModal
+                    onSelect={handleMediaSelect}
+                    onClose={() => setShowMediaModal(false)}
+                    onlyImages={true}
+                />
+            )}
         </div>
+
+
+
     );
 }
 
