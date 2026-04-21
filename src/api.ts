@@ -52,6 +52,36 @@ export const api = {
         return res.json();
     },
 
+    // --- APP SETTINGS & BACKUP ---
+    getAppSettings: async () => {
+        const res = await fetch(`${API_URL}/settings.php`, fetchConfig);
+        if (!res.ok) throw new Error('Errore recupero impostazioni');
+        return res.json();
+    },
+    updateAppSettings: async (data: any) => {
+        const res = await fetch(`${API_URL}/settings.php`, {
+            ...fetchConfig,
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        if (!res.ok) throw new Error('Errore aggiornamento impostazioni');
+        return res.json();
+    },
+    getBackupStatus: async () => {
+        const res = await fetch(`${API_URL}/backup.php?action=status`, fetchConfig);
+        if (!res.ok) throw new Error('Errore recupero stato backup');
+        return res.json();
+    },
+    downloadBackup: () => {
+        // Usa window.location per il download diretto del file generato
+        window.location.href = `${API_URL}/backup.php?action=download`;
+    },
+    runBackupCron: async () => {
+        const res = await fetch(`${API_URL}/backup.php?action=cron`, fetchConfig);
+        if (!res.ok) throw new Error('Errore esecuzione backup manuale');
+        return res.json();
+    },
+
     // --- SYSTEM STATS ---
     getStats: async () => {
         const res = await fetch(`${API_URL}/stats.php`, fetchConfig);

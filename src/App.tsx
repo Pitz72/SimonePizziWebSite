@@ -10,6 +10,7 @@ import SingleArticle from './components/SingleArticle';
 import SEO from './components/SEO';
 import ScrollProgress from './components/ScrollProgress';
 import BackToTop from './components/BackToTop';
+import SearchModal from './components/SearchModal';
 import Login from './pages/admin/Login';
 import AdminLayout from './pages/admin/AdminLayout';
 import Dashboard from './pages/admin/Dashboard';
@@ -45,6 +46,18 @@ const ScrollToTop = () => {
 
 const PublicLayout: React.FC = () => {
   const { categories } = useCategories();
+  const [isSearchOpen, setIsSearchOpen] = React.useState(false);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <>
@@ -56,7 +69,8 @@ const PublicLayout: React.FC = () => {
         <ParticleBackground />
         <div className="absolute inset-0 h-full w-full bg-black bg-[linear-gradient(to_right,#161616_1px,transparent_1px),linear-gradient(to_bottom,#161616_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_0%,#000_70%,transparent_100%)] -z-10"></div>
 
-        <Header />
+        <Header onOpenSearch={() => setIsSearchOpen(true)} />
+        <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
         <main className="px-4 sm:px-6 lg:px-8">
           <Routes>

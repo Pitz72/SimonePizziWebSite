@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Search } from 'lucide-react';
 import { useCategories } from '../hooks/useCategories';
+
+interface HeaderProps {
+  onOpenSearch?: () => void;
+}
 
 interface MobileNavLinkProps {
   to: string;
@@ -50,7 +54,7 @@ const DesktopNavLink: React.FC<DesktopNavLinkProps> = ({ to, children }) => (
   </NavLink>
 );
 
-const Header: React.FC = () => {
+const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { categories } = useCategories();
@@ -144,6 +148,19 @@ const Header: React.FC = () => {
                   <path d="M6.18 15.64a2.18 2.18 0 0 1 2.18 2.18C8.36 19.01 7.38 20 6.18 20C4.98 20 4 19.01 4 17.82a2.18 2.18 0 0 1 2.18-2.18M4 4.44A15.56 15.56 0 0 1 19.56 20h-2.83A12.73 12.73 0 0 0 4 7.27V4.44m0 5.66a9.9 9.9 0 0 1 9.9 9.9h-2.83A7.07 7.07 0 0 0 4 12.93V10.1z" />
                 </svg>
               </a>
+
+              {/* Tasto Ricerca */}
+              <button
+                onClick={onOpenSearch}
+                className="flex items-center justify-center gap-2 px-3 h-9 rounded-lg border border-gray-700 text-gray-400 hover:text-green-400 hover:border-green-500/50 hover:bg-green-500/10 transition-all duration-200 group"
+                aria-label="Cerca"
+              >
+                <Search size={16} />
+                <span className="hidden lg:flex items-center gap-1.5 ml-1">
+                  <span className="text-[10px] font-medium opacity-50 uppercase tracking-tighter">Cerca</span>
+                  <kbd className="text-[9px] font-mono border border-white/20 px-1 rounded bg-white/5 group-hover:border-green-500/30">Ctrl K</kbd>
+                </span>
+              </button>
 
               {/* CTA "Tutti i Progetti" — solo desktop */}
               <Link

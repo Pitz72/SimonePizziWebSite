@@ -1,8 +1,8 @@
 # MASTER PLAN — Simone Pizzi Portfolio Creativo
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.7.14  
-**Ultimo aggiornamento documento:** 21 Aprile 2026  
+**Versione corrente:** 1.7.17  
+**Ultimo aggiornamento documento:** 22 Aprile 2026  
 **Sito:** simonepizzi.runtimeradio.it
 
 > Questo documento è la fonte autoritativa per lo stato del progetto, le promesse di sviluppo e la pianificazione futura.  
@@ -54,6 +54,8 @@ Elenco sintetico delle funzionalità core e miglioramenti completati:
 - ✅ **[P2-03]** Switch Link/Email nei CTA (Article & Project Editor)
 - ✅ **[P2-04]** Gestore Tag Dinamici (Database-driven)
 - ✅ **[P3-01]** Paginazione backend-driven (Load More)
+- ✅ **[P3-02]** Motore di ricerca interno globale (Ctrl+K)
+- ✅ **[P3-04]** Sistema di backup automatico e manuale (MySQL)
 - ✅ **Menu Mobile:** Hamburger e drawer ottimizzato
 
 ---
@@ -68,18 +70,9 @@ Voci attive ordinate per priorità.
 - **Soluzione:** Implementazione **Prerendering statico** (tramite plugin Vite come `vite-plugin-prerender` o `vite-ssg`) per generare HTML statico per i bot dei motori di ricerca.
 - **Analisi completa:** Vedere [indicizzazione.google.md](file:///C:/Users/Utente/Documents/GitHub/SITI-WEB/SimonePizziWebSite/docs/indicizzazione.google.md).
 
-### 🟡 PRIORITÀ MEDIA
-#### [P3-02] Motore di ricerca interno globale
-- **Feature:** Barra di ricerca (shortcut `Ctrl+K`) per trovare articoli e progetti tramite keyword.
-- **Backend:** Nuovo endpoint `search.php` con query SQL `LIKE` su titolo e contenuto.
-- **Frontend:** Modal di ricerca floating con anteprime rapide.
-
 #### [P3-03] Recupero password / login via email
 - **Feature:** Flusso "Password Dimenticata" con invio link di ripristino sicuro via email.
 - **Database:** Richiede aggiunta colonna `email` in tabella `users`.
-
-#### [P3-04] Sistema di backup automatico MySQL
-- **Feature:** Script (CRON o pulsante Admin) che genera un dump MySQL e lo invia via email o lo rende scaricabile. Indispensabile dopo la migrazione a MySQL.
 
 ### 🔵 PRIORITÀ BASSA / DEBITO TECNICO
 #### [P3-05] Monitoraggio `execCommand` (Lungo termine)

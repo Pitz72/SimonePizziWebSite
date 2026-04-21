@@ -15,6 +15,8 @@ const filesToRemove = [
     path.join(__dirname, 'dist', 'api', 'migrate_rate_limit.php'),
     path.join(__dirname, 'dist', 'api', 'migrate_v165.php'),
     path.join(__dirname, 'dist', 'api', 'migrate_to_mysql.php'),
+    path.join(__dirname, 'dist', 'api', 'migrate_tags.php'),
+    path.join(__dirname, 'dist', 'api', 'migrate_app_settings.php'),
     path.join(__dirname, 'dist', 'api', 'config.php'),
 ];
 
