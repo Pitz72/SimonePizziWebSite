@@ -30,7 +30,7 @@ export function InternalLinkSelector({ onSelect, onClose }: InternalLinkSelector
             setLoading(true);
             try {
                 // Fetch articoli (admin: true per avere tutto)
-                const articlesData = await api.getArticles(undefined, true);
+                const articlesData = await api.getArticles({ admin: true });
                 
                 // Fix: articlesData.data invece di articlesData.items
                 const rawArticles = Array.isArray(articlesData) ? articlesData : (articlesData.data || articlesData.items || []);

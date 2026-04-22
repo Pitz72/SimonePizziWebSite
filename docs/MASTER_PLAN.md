@@ -2,7 +2,7 @@
 
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.8.4  
+**Versione corrente:** 1.8.5  
 **Ultimo aggiornamento documento:** 22 Aprile 2026  
 **Sito:** simonepizzi.runtimeradio.it
 
@@ -66,6 +66,7 @@ Elenco sintetico delle funzionalità core e miglioramenti completati:
 - ✅ **[P3-04]** Sistema di backup automatico e manuale (MySQL)
 - ✅ **[P3-05]** Migrazione Editor a Tiptap (v1.8.1)
 - ✅ **[P3-08]** Dirty State Warning & Router Refactor (createBrowserRouter) (v1.8.4)
+- ✅ **[P3-09]** Paginazione e Ricerca Avanzata nel Backend (v1.8.5)
 
 
 - ✅ **Menu Mobile:** Hamburger e drawer ottimizzato
@@ -85,7 +86,25 @@ Voci attive ordinate per priorità.
 - **Analisi completa:** Vedere [indicizzazione.google.md](file:///C:/Users/Utente/Documents/GitHub/SITI-WEB/SimonePizziWebSite/docs/indicizzazione.google.md).
 
 
-### 🔵 PRIORITÀ BASSA / DEBITO TECNICO
+### 🟡 PRIORITÀ MEDIA (Performance & Debito Tecnico)
+
+#### [P2-05] Ottimizzazione Bundle & Code Splitting
+- **Obiettivo:** Ridurre la dimensione dei chunk JS (attualmente > 500kB) tramite `React.lazy` e suddivisione manuale dei moduli pesanti (es. Tiptap).
+
+#### [P2-06] Refactor Data Loaders (React Router 7)
+- **Obiettivo:** Migrare il fetching dei dati dai `useEffect` ai `Loaders` nativi di `createBrowserRouter` per eliminare layout shift e caricamenti a freddo.
+
+
+### 🔵 PRIORITÀ BASSA / LUNGO TERMINE
+
+#### [P3-10] Dashboard Analytics Visuale
+- **Obiettivo:** Creare una sezione Admin con grafici (Chart.js) basata sui dati già raccolti in `article_views` e `cta_clicks`.
+
+#### [P3-11] Auto-Save & Draft System
+- **Obiettivo:** Implementare il salvataggio automatico in background per gli editor per prevenire perdite accidentali di dati oltre al Dirty State Warning.
+
+#### [P3-12] Transizioni Fluide tra Pagine
+- **Obiettivo:** Migliorare la UX premium con transizioni animate tra le rotte sfruttando le API di React Router.
 
 
 

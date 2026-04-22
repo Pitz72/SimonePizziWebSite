@@ -111,12 +111,16 @@ export const api = {
     },
 
     // --- ARTICLES ---
-    getArticles: async (category?: string, admin?: boolean, page?: number, limit?: number) => {
+    getArticles: async (params_obj: { category?: string, admin?: boolean, page?: number, limit?: number, tag?: string, startDate?: string, endDate?: string, q?: string } = {}) => {
         const params = new URLSearchParams();
-        if (category) params.append('category', category);
-        if (admin) params.append('admin', 'true');
-        if (page) params.append('page', page.toString());
-        if (limit) params.append('limit', limit.toString());
+        if (params_obj.category) params.append('category', params_obj.category);
+        if (params_obj.admin) params.append('admin', 'true');
+        if (params_obj.page) params.append('page', params_obj.page.toString());
+        if (params_obj.limit) params.append('limit', params_obj.limit.toString());
+        if (params_obj.tag) params.append('tag', params_obj.tag);
+        if (params_obj.startDate) params.append('start_date', params_obj.startDate);
+        if (params_obj.endDate) params.append('end_date', params_obj.endDate);
+        if (params_obj.q) params.append('q', params_obj.q);
 
         const qs = params.toString() ? `?${params.toString()}` : '';
         const res = await fetch(`${API_URL}/articles.php${qs}`, fetchConfig);

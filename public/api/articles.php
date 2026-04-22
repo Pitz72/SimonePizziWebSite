@@ -78,36 +78,32 @@ function syncArticleTags($pdo, $article_id, $tags_input) {
 
 try {
     if ($method === 'GET') {
-        // Parametri query (es. ?category=blog&limit=10)
+        // Parametri query avanzati (v1.8.5)
         $category = $_GET['category'] ?? null;
+        $tag      = $_GET['tag'] ?? null;
+        $startDate = $_GET['start_date'] ?? null;
+        $endDate   = $_GET['end_date'] ?? null;
+        $q         = $_GET['q'] ?? null;
+        
         $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 100;
         $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         $offset = ($page - 1) * $limit;
         
         // Modalità GET per singolo articolo (!is_admin = solo pubblicato)
         if (isset($_GET['slug'])) {
-            $stmt = $pdo->prepare("SELECT a.*, GROUP_CONCAT(t.name SEPARATOR ', ') as dyn_tags FROM articles a LEFT JOIN article_tags at ON a.id = at.article_id LEFT JOIN tags t ON at.tag_id = t.id WHERE a.slug = ? GROUP BY a.id");
+            $stmt = $pdo->prepare("SELECT a.*, (SELECT GROUP_CONCAT(t2.name SEPARATOR ', ') FROM article_tags at2 JOIN tags t2 ON at2.tag_id = t2.id WHERE at2.article_id = a.id) as dyn_tags FROM articles a WHERE a.slug = ?");
             $stmt->execute([$_GET['slug']]);
             $article = $stmt->fetch();
-            if ($article && $article['dyn_tags']) $article['tags'] = $article['dyn_tags']; // Fallback dinamico
-
+            if ($article && $article['dyn_tags']) $article['tags'] = $article['dyn_tags'];
             
             if ($article) {
-                // Controllo Autorizzazione Visiva
                 $is_admin = isset($_SESSION['user_id']);
-                
-                // Un articolo si definisce "pubblico" se il suo status è 'published' E la data di uscita è nel passato/presente.
-                $is_published = $article['status'] === 'published' && 
-                                (empty($article['published_at']) || strtotime($article['published_at']) <= $ita_now_time);
-                
-                // Se NON è admin e l'articolo NON è pubblico (bozza o programmato futuro), negare fingendo il 404.
+                $is_published = $article['status'] === 'published' && (empty($article['published_at']) || strtotime($article['published_at']) <= $ita_now_time);
                 if (!$is_admin && !$is_published) {
                     http_response_code(404);
-                    echo json_encode(['error' => 'Articolo non trovato (Bozza/Privato)']);
+                    echo json_encode(['error' => 'Articolo non trovato']);
                     exit;
                 }
-                
-                // Altrimenti, consegna l'articolo per la lettura
                 echo json_encode($article);
             } else {
                 http_response_code(404);
@@ -116,31 +112,27 @@ try {
             exit;
         }
 
-        // Modalità GET per singolo articolo via ID (usato da React Editor - solo admin)
         if (isset($_GET['id'])) {
             Auth::check();
-            $stmt = $pdo->prepare("SELECT a.*, GROUP_CONCAT(t.name SEPARATOR ', ') as dyn_tags FROM articles a LEFT JOIN article_tags at ON a.id = at.article_id LEFT JOIN tags t ON at.tag_id = t.id WHERE a.id = ? GROUP BY a.id");
+            $stmt = $pdo->prepare("SELECT a.*, (SELECT GROUP_CONCAT(t2.name SEPARATOR ', ') FROM article_tags at2 JOIN tags t2 ON at2.tag_id = t2.id WHERE at2.article_id = a.id) as dyn_tags FROM articles a WHERE a.id = ?");
             $stmt->execute([$_GET['id']]);
             $article = $stmt->fetch();
             if ($article && $article['dyn_tags']) $article['tags'] = $article['dyn_tags'];
-
-            if ($article) {
-                echo json_encode($article);
-            } else {
-                http_response_code(404);
-                echo json_encode(['error' => 'Articolo non trovato']);
-            }
+            if ($article) echo json_encode($article);
+            else { http_response_code(404); echo json_encode(['error' => 'Articolo non trovato']); }
             exit;
         }
 
-        // Filtro Categoria
-        $query = "SELECT a.id, a.title, a.slug, a.content, a.excerpt, a.cover_image, a.category, COALESCE(GROUP_CONCAT(t.name SEPARATOR ', '), a.tags) as tags, a.is_featured, a.status, a.published_at, a.created_at FROM articles a LEFT JOIN article_tags at ON a.id = at.article_id LEFT JOIN tags t ON at.tag_id = t.id";
-        $params = [];
+        // [MODIFICA v1.8.5] Supporto Ricerca Avanzata
+        $query = "SELECT a.id, a.title, a.slug, a.content, a.excerpt, a.cover_image, a.category, 
+                  (SELECT GROUP_CONCAT(t2.name SEPARATOR ', ') FROM article_tags at2 JOIN tags t2 ON at2.tag_id = t2.id WHERE at2.article_id = a.id) as tags, 
+                  a.is_featured, a.status, a.published_at, a.created_at 
+                  FROM articles a";
         
+        $params = [];
         $conditions = [];
         $is_admin_dashboard = isset($_SESSION['user_id']) && isset($_GET['admin']) && $_GET['admin'] === 'true';
 
-        // Se la chiamata non proviene espressamente dalla dashboard admin, nascondiamo bozze e futuri.
         if (!$is_admin_dashboard) {
            $conditions[] = "a.status = 'published'"; 
            $conditions[] = "(a.published_at IS NULL OR a.published_at <= ?)";
@@ -150,6 +142,28 @@ try {
         if ($category) {
             $conditions[] = "a.category = ?";
             $params[] = $category;
+        }
+
+        if ($tag) {
+            $conditions[] = "a.id IN (SELECT article_id FROM article_tags at_f JOIN tags t_f ON at_f.tag_id = t_f.id WHERE t_f.name = ?)";
+            $params[] = $tag;
+        }
+
+        if ($startDate) {
+            $conditions[] = "a.published_at >= ?";
+            $params[] = $startDate . ' 00:00:00';
+        }
+
+        if ($endDate) {
+            $conditions[] = "a.published_at <= ?";
+            $params[] = $endDate . ' 23:59:59';
+        }
+
+        if ($q) {
+            $conditions[] = "(a.title LIKE ? OR a.content LIKE ? OR a.excerpt LIKE ?)";
+            $params[] = "%$q%";
+            $params[] = "%$q%";
+            $params[] = "%$q%";
         }
 
         $whereClause = "";

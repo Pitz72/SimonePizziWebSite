@@ -1,14 +1,30 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Search, ExternalLink, Calendar } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, ExternalLink, Calendar, ChevronLeft, ChevronRight, Filter, X } from 'lucide-react';
 import { api } from '../../api';
 import { useCategories } from '../../hooks/useCategories';
 
 export default function ArticlesList() {
     const { categories } = useCategories();
     const [articles, setArticles] = useState<any[]>([]);
+    const [tags, setTags] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
+    
+    // Stato Filtri (v1.8.5)
+    const [filters, setFilters] = useState({
+        q: '',
+        category: '',
+        tag: '',
+        startDate: '',
+        endDate: ''
+    });
+
+    // Stato Paginazione
+    const [pagination, setPagination] = useState({
+        page: 1,
+        limit: 10,
+        total: 0
+    });
 
     const formatDate = (dateStr: string | null | undefined) => {
         if (!dateStr) return '—';
@@ -18,19 +34,49 @@ export default function ArticlesList() {
     };
 
     useEffect(() => {
-        loadArticles();
+        const loadTags = async () => {
+            try {
+                const res = await api.getTags();
+                setTags(res);
+            } catch (err) { console.error(err); }
+        };
+        loadTags();
     }, []);
+
+    useEffect(() => {
+        loadArticles();
+    }, [filters, pagination.page]);
 
     const loadArticles = async () => {
         setLoading(true);
         try {
-            const res = await api.getArticles(undefined, true);
-            setArticles(Array.isArray(res) ? res : res.data || []);
+            const res = await api.getArticles({
+                admin: true,
+                page: pagination.page,
+                limit: pagination.limit,
+                q: filters.q,
+                category: filters.category,
+                tag: filters.tag,
+                startDate: filters.startDate,
+                endDate: filters.endDate
+            });
+            
+            if (res.data) {
+                setArticles(res.data);
+                setPagination(prev => ({ ...prev, total: res.total || 0 }));
+            } else {
+                setArticles(Array.isArray(res) ? res : []);
+            }
         } catch (err) {
             console.error('Failed to load articles', err);
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleFilterChange = (name: string, value: string) => {
+        setFilters(prev => ({ ...prev, [name]: value }));
+        setPagination(prev => ({ ...prev, page: 1 }));
     };
 
     const handleDelete = async (id: number, title: string) => {
@@ -45,23 +91,18 @@ export default function ArticlesList() {
 
     const handleToggleFeatured = async (id: number, currentStatus: number | boolean) => {
         const newStatus = currentStatus ? 0 : 1;
-
-        // Optimistic UI Update per percezione di reattività immediata
         setArticles(articles.map(a => a.id === id ? { ...a, is_featured: newStatus } : a));
-
         try {
             await api.toggleFeatured(id, !!newStatus);
         } catch (err) {
             alert('Errore durante l\'aggiornamento dello stato vetrina sul server.');
-            // Revert the pessimistic state back on error
             setArticles(articles.map(a => a.id === id ? { ...a, is_featured: currentStatus } : a));
         }
     };
 
-    const filteredArticles = articles.filter(a =>
-        a.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        a.category.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const totalPages = Math.ceil(pagination.total / pagination.limit);
+    const hasFilters = filters.q || filters.category || filters.tag || filters.startDate || filters.endDate;
+
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -92,17 +133,75 @@ export default function ArticlesList() {
                 </div>
             </header>
 
-            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden">
-                <div className="p-4 border-b border-zinc-800">
-                    <div className="relative max-w-md">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-5 h-5" />
-                        <input
-                            type="text"
-                            placeholder="Cerca per titolo o categoria..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-zinc-950 border border-zinc-800 py-2 pl-10 pr-4 rounded-lg text-white placeholder-zinc-500 focus:outline-none focus:border-dis-green"
-                        />
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl">
+                {/* Search & Filters Bar */}
+                <div className="p-4 border-b border-zinc-800 bg-zinc-900/50 space-y-4">
+                    <div className="flex flex-col md:flex-row gap-4 items-center">
+                        <div className="relative flex-1 w-full">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4" />
+                            <input
+                                type="text"
+                                placeholder="Cerca nel titolo o nel testo..."
+                                value={filters.q}
+                                onChange={(e) => handleFilterChange('q', e.target.value)}
+                                className="w-full bg-zinc-950 border border-zinc-800 py-2 pl-9 pr-4 rounded-lg text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-dis-green transition-colors"
+                            />
+                        </div>
+                        
+                        <div className="flex items-center gap-2 w-full md:w-auto">
+                            <select 
+                                value={filters.category}
+                                onChange={(e) => handleFilterChange('category', e.target.value)}
+                                className="bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-dis-green w-full md:w-40"
+                            >
+                                <option value="">Tutte le Categorie</option>
+                                {categories.map(c => <option key={c.id} value={c.slug}>{c.name}</option>)}
+                            </select>
+
+                            <select 
+                                value={filters.tag}
+                                onChange={(e) => handleFilterChange('tag', e.target.value)}
+                                className="bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-dis-green w-full md:w-40"
+                            >
+                                <option value="">Tutti i Tag</option>
+                                {tags.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
+                            </select>
+
+                            {hasFilters && (
+                                <button 
+                                    onClick={() => setFilters({ q: '', category: '', tag: '', startDate: '', endDate: '' })}
+                                    className="p-2 text-zinc-500 hover:text-white transition-colors"
+                                    title="Pulisci Filtri"
+                                >
+                                    <X size={18} />
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* Date Range Filters */}
+                    <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-zinc-800/50">
+                        <div className="flex items-center gap-2">
+                            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Dal:</label>
+                            <input 
+                                type="date" 
+                                value={filters.startDate}
+                                onChange={(e) => handleFilterChange('startDate', e.target.value)}
+                                className="bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs rounded px-2 py-1 focus:outline-none focus:border-dis-green [color-scheme:dark]"
+                            />
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Al:</label>
+                            <input 
+                                type="date" 
+                                value={filters.endDate}
+                                onChange={(e) => handleFilterChange('endDate', e.target.value)}
+                                className="bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs rounded px-2 py-1 focus:outline-none focus:border-dis-green [color-scheme:dark]"
+                            />
+                        </div>
+                        <div className="ml-auto text-[10px] text-zinc-600 font-medium italic">
+                            Trovati {pagination.total} articoli
+                        </div>
                     </div>
                 </div>
 
@@ -121,18 +220,24 @@ export default function ArticlesList() {
                         <tbody className="divide-y divide-zinc-800/50">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={6} className="p-8 text-center text-zinc-500">
-                                        Caricamento articoli in corso...
+                                    <td colSpan={6} className="p-12 text-center">
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className="w-8 h-8 border-2 border-dis-green border-t-transparent rounded-full animate-spin" />
+                                            <span className="text-zinc-500 text-sm font-medium">Sincronizzazione dati...</span>
+                                        </div>
                                     </td>
                                 </tr>
-                            ) : filteredArticles.length === 0 ? (
+                            ) : articles.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="p-8 text-center text-zinc-500">
-                                        Nessun articolo trovato.
+                                    <td colSpan={6} className="p-12 text-center">
+                                        <div className="flex flex-col items-center gap-2 opacity-40">
+                                            <Filter size={32} className="text-zinc-600" />
+                                            <span className="text-zinc-500 text-sm">Nessun articolo corrisponde ai filtri selezionati.</span>
+                                        </div>
                                     </td>
                                 </tr>
                             ) : (
-                                filteredArticles.map(article => (
+                                articles.map(article => (
                                     <tr key={article.id} className="hover:bg-zinc-800/30 transition-colors group">
                                         <td className="p-4 min-w-0">
                                             <p className="font-medium text-white group-hover:text-dis-green transition-colors truncate">{article.title}</p>
@@ -209,6 +314,52 @@ export default function ArticlesList() {
                         </tbody>
                     </table>
                 </div>
+
+                {/* Pagination Controls */}
+                {totalPages > 1 && (
+                    <div className="p-4 border-t border-zinc-800 bg-zinc-950/30 flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div className="text-xs text-zinc-500">
+                            Pagina <span className="text-white font-bold">{pagination.page}</span> di <span className="text-white font-bold">{totalPages}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
+                                disabled={pagination.page === 1 || loading}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-xs font-bold text-zinc-400 hover:text-white hover:border-dis-green disabled:opacity-30 disabled:hover:text-zinc-400 disabled:hover:border-zinc-800 transition-all"
+                            >
+                                <ChevronLeft size={14} /> Precedente
+                            </button>
+                            
+                            <div className="flex gap-1">
+                                {[...Array(totalPages)].map((_, i) => {
+                                    const p = i + 1;
+                                    // Mostra solo alcune pagine se sono troppe
+                                    if (totalPages > 7 && Math.abs(p - pagination.page) > 2 && p !== 1 && p !== totalPages) {
+                                        if (p === 2 || p === totalPages - 1) return <span key={p} className="text-zinc-600 px-1">...</span>;
+                                        return null;
+                                    }
+                                    return (
+                                        <button
+                                            key={p}
+                                            onClick={() => setPagination(prev => ({ ...prev, page: p }))}
+                                            className={`w-8 h-8 rounded text-xs font-bold transition-all ${pagination.page === p ? 'bg-dis-green text-black shadow-[0_0_10px_rgba(34,197,94,0.3)]' : 'text-zinc-500 hover:text-white hover:bg-zinc-800'}`}
+                                        >
+                                            {p}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            <button
+                                onClick={() => setPagination(prev => ({ ...prev, page: Math.min(totalPages, prev.page + 1) }))}
+                                disabled={pagination.page === totalPages || loading}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-xs font-bold text-zinc-400 hover:text-white hover:border-dis-green disabled:opacity-30 disabled:hover:text-zinc-400 disabled:hover:border-zinc-800 transition-all"
+                            >
+                                Successivo <ChevronRight size={14} />
+                            </button>
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

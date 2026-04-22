@@ -45,7 +45,12 @@ export const useFetchArticles = (categoryFilter?: string, limit: number = 10) =>
         }
 
         try {
-            const res = await api.getArticles(categoryFilter, false, pageRef.current, limit);
+            const res = await api.getArticles({
+                category: categoryFilter,
+                admin: false,
+                page: pageRef.current,
+                limit
+            });
             const data = Array.isArray(res) ? res : res.data;
             const total = !Array.isArray(res) && res.total !== undefined ? res.total : data.length;
 
