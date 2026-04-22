@@ -16,7 +16,7 @@ try {
     if ($method === 'POST') {
         $data = json_decode(file_get_contents('php://input'), true);
         
-        // Modalità GET / Check Auth bypassata con un action param (o via GET preferibile, ma gestiamo qui)
+        // Modalità GET / Check Auth bypassata con un action param
         if (isset($data['action']) && $data['action'] === 'check') {
              if (isset($_SESSION['user_id'])) {
                  echo json_encode(['status' => 'success', 'user' => $_SESSION['username']]);
@@ -29,7 +29,6 @@ try {
 
         // Logout
         if (isset($data['action']) && $data['action'] === 'logout') {
-            // [v1.5.8] Logout completo: svuota i dati, invalida il cookie client, distrugge la sessione
             $_SESSION = [];
             if (ini_get('session.use_cookies')) {
                 $params = session_get_cookie_params();
@@ -43,9 +42,79 @@ try {
             exit;
         }
 
+        // [v1.7.18] Richiesta recupero password
+        if (isset($data['action']) && $data['action'] === 'request-recovery') {
+            $identifier = trim($data['identifier'] ?? '');
+            if (empty($identifier)) {
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Inserisci username o email']);
+                exit;
+            }
+
+            $stmt = $pdo->prepare("SELECT id, username, email FROM users WHERE username = ? OR email = ?");
+            $stmt->execute([$identifier, $identifier]);
+            $user = $stmt->fetch();
+
+            if (!$user || empty($user['email'])) {
+                // Messaggio generico per sicurezza
+                echo json_encode(['status' => 'success', 'message' => 'Se l\'account esiste ed è associato a una mail, riceverai le istruzioni a breve.']);
+                exit;
+            }
+
+            $token = bin2hex(random_bytes(32));
+            $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
+
+            $pdo->prepare("INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)")
+                ->execute([$user['id'], $token, $expires]);
+
+            if (sendRecoveryEmail($user['email'], $user['username'], $token)) {
+                echo json_encode(['status' => 'success', 'message' => 'Email di recupero inviata correttamente.']);
+            } else {
+                http_response_code(500);
+                echo json_encode(['status' => 'error', 'message' => 'Errore nell\'invio dell\'email.']);
+            }
+            exit;
+        }
+
+        // [v1.7.18] Reset password effettivo
+        if (isset($data['action']) && $data['action'] === 'reset-password') {
+            $token = $data['token'] ?? '';
+            $newPassword = $data['password'] ?? '';
+
+            if (empty($token) || empty($newPassword)) {
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Dati mancanti']);
+                exit;
+            }
+
+            $stmt = $pdo->prepare("
+                SELECT user_id FROM password_resets 
+                WHERE token = ? AND expires_at > NOW()
+            ");
+            $stmt->execute([$token]);
+            $reset = $stmt->fetch();
+
+            if (!$reset) {
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'Token non valido o scaduto']);
+                exit;
+            }
+
+            $hash = password_hash($newPassword, PASSWORD_DEFAULT);
+            $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?")
+                ->execute([$hash, $reset['user_id']]);
+
+            $pdo->prepare("DELETE FROM password_resets WHERE token = ?")
+                ->execute([$token]);
+
+            echo json_encode(['status' => 'success', 'message' => 'Password aggiornata con successo!']);
+            exit;
+        }
+
         // Login Standard
         $username = $data['username'] ?? '';
         $password = $data['password'] ?? '';
+
 
         if (empty($username) || empty($password)) {
             http_response_code(400);
@@ -104,4 +173,40 @@ try {
     http_response_code(500);
     echo json_encode(['status' => 'error', 'message' => 'Errore DB: ' . $e->getMessage()]);
 }
+
+/**
+ * [v1.7.18] Invia email di recupero password
+ */
+function sendRecoveryEmail($to, $username, $token) {
+    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    $host = $_SERVER['HTTP_HOST'];
+    $link = "{$protocol}://{$host}/admin/reset-password/{$token}";
+    
+    $subject = "Recupero Password — Simone Pizzi";
+    $subjectEncoded = '=?UTF-8?B?' . base64_encode($subject) . '?=';
+    
+    $from = 'noreply@' . $host;
+    $replyTo = 'simonepizzi.1972@proton.me';
+
+    $html = "<!DOCTYPE html><html><body style='background:#0a0a0a; color:#fff; font-family:sans-serif; padding:40px;'>";
+    $html .= "<div style='max-width:600px; margin:0 auto; background:#111; border:1px solid #222; border-radius:12px; padding:30px;'>";
+    $html .= "<h2 style='color:#22c55e;'>Recupero Password</h2>";
+    $html .= "<p>Ciao <strong>{$username}</strong>,</p>";
+    $html .= "<p>Hai richiesto il ripristino della password per il tuo accesso al Pannello di Controllo di simonepizzi.it.</p>";
+    $html .= "<p>Clicca sul pulsante qui sotto per procedere (il link scadrà tra un'ora):</p>";
+    $html .= "<div style='text-align:center; margin:30px 0;'>";
+    $html .= "<a href='{$link}' style='background:#22c55e; color:#000; padding:12px 24px; border-radius:8px; text-decoration:none; font-weight:bold; display:inline-block;'>Ripristina Password</a>";
+    $html .= "</div>";
+    $html .= "<p style='font-size:12px; color:#666;'>Se non hai richiesto tu questo reset, ignora pure questa email.</p>";
+    $html .= "</div></body></html>";
+
+    $headers  = "MIME-Version: 1.0\r\n";
+    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
+    $headers .= "From: Simone Pizzi <{$from}>\r\n";
+    $headers .= "Reply-To: {$replyTo}\r\n";
+    $headers .= "X-Mailer: PHP/" . phpversion();
+
+    return mail($to, $subjectEncoded, $html, $headers);
+}
 ?>
+

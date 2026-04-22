@@ -12,7 +12,10 @@ import ScrollProgress from './components/ScrollProgress';
 import BackToTop from './components/BackToTop';
 import SearchModal from './components/SearchModal';
 import Login from './pages/admin/Login';
+import RecoveryRequest from './pages/admin/RecoveryRequest';
+import ResetPassword from './pages/admin/ResetPassword';
 import AdminLayout from './pages/admin/AdminLayout';
+
 import Dashboard from './pages/admin/Dashboard';
 import Settings from './pages/admin/Settings';
 import ArticlesList from './pages/admin/ArticlesList';
@@ -111,7 +114,10 @@ const App: React.FC = () => {
         <Routes>
           {/* Rotte del Pannello di Controllo */}
           <Route path="/admin/login" element={<Login />} />
+          <Route path="/admin/recovery" element={<RecoveryRequest />} />
+          <Route path="/admin/reset-password/:token" element={<ResetPassword />} />
           <Route path="/admin" element={<AdminLayout />}>
+
             <Route path="dashboard" element={<Dashboard />} />
             <Route path="settings" element={<Settings />} />
             <Route path="articles" element={<ArticlesList />} />

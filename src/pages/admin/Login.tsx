@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { Lock, User } from 'lucide-react';
+
 import { api } from '../../api';
 
 export default function Login() {
@@ -59,7 +60,15 @@ export default function Login() {
                     </div>
 
                     <div className="space-y-2">
-                        <label className="text-sm font-medium text-zinc-300">Password</label>
+                        <div className="flex justify-between items-center">
+                            <label className="text-sm font-medium text-zinc-300">Password</label>
+                            <Link 
+                                to="/admin/recovery" 
+                                className="text-xs text-dis-green hover:text-green-400 transition-colors"
+                            >
+                                Password dimenticata?
+                            </Link>
+                        </div>
                         <div className="relative">
                             <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-500 w-5 h-5" />
                             <input
@@ -72,6 +81,7 @@ export default function Login() {
                             />
                         </div>
                     </div>
+
 
                     <button
                         type="submit"

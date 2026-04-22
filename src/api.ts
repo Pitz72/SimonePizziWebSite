@@ -39,6 +39,27 @@ export const api = {
         if (!res.ok) throw new Error('Non loggato');
         return res.json();
     },
+    requestRecovery: async (identifier: string) => {
+        const res = await fetch(`${API_URL}/auth.php`, {
+            ...fetchConfig,
+            method: 'POST',
+            body: JSON.stringify({ action: 'request-recovery', identifier })
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.message || 'Errore durante la richiesta');
+        return result;
+    },
+    resetPassword: async (data: any) => {
+        const res = await fetch(`${API_URL}/auth.php`, {
+            ...fetchConfig,
+            method: 'POST',
+            body: JSON.stringify({ action: 'reset-password', ...data })
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.message || 'Errore durante il reset');
+        return result;
+    },
+
     changePassword: async (passwords: any) => {
         const res = await fetch(`${API_URL}/settings.php`, {
             ...fetchConfig,

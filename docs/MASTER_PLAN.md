@@ -2,7 +2,7 @@
 
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.7.17  
+**Versione corrente:** 1.8.0  
 **Ultimo aggiornamento documento:** 22 Aprile 2026  
 **Sito:** simonepizzi.runtimeradio.it
 
@@ -24,6 +24,8 @@
 | Ottimizzazione immagini WebP automatica (upload) | ✅ Completata v1.6.3 |
 | RSS Feed pubblico | ✅ Attivo |
 | SEO server-side (OpenGraph / TwitterCard via `index.php`) | ✅ Attivo |
+| Recupero password via Email | ✅ Attivo v1.8.0 |
+
 
 ### Database — Tabelle
 
@@ -39,6 +41,8 @@
 | `cta_clicks` | ✅ Attiva (analytics) |
 | `subscribers` | ✅ Attiva (Newsletter) |
 | `messages` | ✅ Attiva (Contatti) |
+| `password_resets` | ✅ Attiva (v1.8.0) |
+
 
 ---
 
@@ -58,7 +62,9 @@ Elenco sintetico delle funzionalità core e miglioramenti completati:
 - ✅ **[P2-04]** Gestore Tag Dinamici (Database-driven)
 - ✅ **[P3-01]** Paginazione backend-driven (Load More)
 - ✅ **[P3-02]** Motore di ricerca interno globale (Ctrl+K)
+- ✅ **[P3-03]** Recupero password / login via email (v1.8.0)
 - ✅ **[P3-04]** Sistema di backup automatico e manuale (MySQL)
+
 - ✅ **Menu Mobile:** Hamburger e drawer ottimizzato
 
 ---
@@ -75,10 +81,6 @@ Voci attive ordinate per priorità.
 - **Soluzione:** Implementazione **Prerendering statico** (tramite plugin Vite come `vite-plugin-prerender` o `vite-ssg`) per generare HTML statico per i bot dei motori di ricerca.
 - **Analisi completa:** Vedere [indicizzazione.google.md](file:///C:/Users/Utente/Documents/GitHub/SITI-WEB/SimonePizziWebSite/docs/indicizzazione.google.md).
 
-#### [P3-03] Recupero password / login via email
-
-- **Feature:** Flusso "Password Dimenticata" con invio link di ripristino sicuro via email.
-- **Database:** Richiede aggiunta colonna `email` in tabella `users`.
 
 ### 🔵 PRIORITÀ BASSA / DEBITO TECNICO
 
