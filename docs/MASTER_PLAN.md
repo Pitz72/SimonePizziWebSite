@@ -64,6 +64,8 @@ Elenco sintetico delle funzionalità core e miglioramenti completati:
 - ✅ **[P3-02]** Motore di ricerca interno globale (Ctrl+K)
 - ✅ **[P3-03]** Recupero password / login via email (v1.8.0)
 - ✅ **[P3-04]** Sistema di backup automatico e manuale (MySQL)
+- ✅ **[P3-05]** Migrazione Editor a Tiptap (v1.8.1)
+
 
 - ✅ **Menu Mobile:** Hamburger e drawer ottimizzato
 
@@ -84,10 +86,7 @@ Voci attive ordinate per priorità.
 
 ### 🔵 PRIORITÀ BASSA / DEBITO TECNICO
 
-#### [P3-05] Monitoraggio `execCommand` (Lungo termine)
 
-- **Cosa succede:** Il W3C ha deprecato `document.execCommand()`.
-- **Orizzonte:** Monitorare eventuali corruzioni HTML. Se necessario in futuro, sostituire l'editor con librerie moderne (es. Tiptap). **Non riscrivere a mano!**
 
 ---
 
