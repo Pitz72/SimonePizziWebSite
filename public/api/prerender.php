@@ -84,14 +84,18 @@ try {
         exit;
     }
 
-    // Leggi il contenuto del file index.html
-    $indexHtml = file_get_contents($indexHtmlPath);
+    // Rimuoviamo la lettura statica di index.html qui sopra, lo faremo dinamicamente nel loop
     $created = 0;
     $skipped = 0;
     $errors = [];
 
     // La root del sito è il distPath
     $distPath = $rootPath;
+    $indexPhpPath = dirname(__DIR__) . '/index.php';
+
+    if (!file_exists($indexPhpPath)) {
+        throw new Exception("File index.php non trovato in: $indexPhpPath");
+    }
 
     // Crea un file index.html per ogni route
     foreach ($routes as $route) {
@@ -107,14 +111,33 @@ try {
                 }
             }
 
-            // Se il file esiste già, salta
-            if (file_exists($filePath)) {
+            // Se il file esiste già e non è la root, potremmo volerlo saltare o sovrascrivere.
+            // In questo caso, lo sovrascriviamo per assicurarci che sia aggiornato con i nuovi meta.
+            // Ma saltiamo la root per evitare loop se lo script è in esecuzione (anche se improbabile)
+            if ($route === '/' && file_exists($filePath)) {
                 $skipped++;
                 continue;
             }
 
+            // --- CATTURA OUTPUT SEO DA index.php ---
+            // Simuliamo la richiesta impostando l'URI corretto
+            $originalUri = $_SERVER['REQUEST_URI'] ?? '/';
+            $_SERVER['REQUEST_URI'] = $route;
+            
+            ob_start();
+            // Includiamo index.php che farà il lavoro di fetching DB e iniezione Meta
+            include $indexPhpPath;
+            $renderedHtml = ob_get_clean();
+
+            // Ripristiniamo l'URI originale
+            $_SERVER['REQUEST_URI'] = $originalUri;
+
+            if (empty($renderedHtml)) {
+                throw new Exception("L'output di index.php per la route '$route' è vuoto.");
+            }
+
             // Scrivi il file
-            if (!file_put_contents($filePath, $indexHtml)) {
+            if (!file_put_contents($filePath, $renderedHtml)) {
                 throw new Exception("Impossibile scrivere file: $filePath");
             }
 
@@ -128,7 +151,7 @@ try {
     http_response_code(200);
     echo json_encode([
         'status' => 'success',
-        'message' => 'Prerendering completato',
+        'message' => 'Prerendering con iniezione SEO completato',
         'stats' => [
             'total_routes' => count($routes),
             'files_created' => $created,

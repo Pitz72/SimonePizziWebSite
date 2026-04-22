@@ -2,8 +2,8 @@
 
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.9.0  
-**Ultimo aggiornamento documento:** 22 Aprile 2026  
+**Versione corrente:** 1.9.1  
+**Ultimo aggiornamento documento:** 22 Aprile 2026 (Bundle Optimization)  
 **Sito:** simonepizzi.runtimeradio.it
 
 > Questo documento è la fonte autoritativa per lo stato del progetto, le promesse di sviluppo e la pianificazione futura.  
@@ -67,7 +67,8 @@ Elenco sintetico delle funzionalità core e miglioramenti completati:
 - ✅ **[P3-05]** Migrazione Editor a Tiptap (v1.8.1)
 - ✅ **[P3-08]** Dirty State Warning & Router Refactor (createBrowserRouter) (v1.8.4)
 - ✅ **[P3-09]** Paginazione e Ricerca Avanzata nel Backend (v1.8.5)
-- ✅ **[P1-05]** Prerendering Statico per Google Indexing (v1.8.6 in progress)
+- ✅ **[P1-05]** Prerendering Statico con Iniezione SEO (v1.9.0)
+- ✅ **[P2-05]** Ottimizzazione Bundle & Code Splitting (v1.9.1)
 
 - ✅ **Menu Mobile:** Hamburger e drawer ottimizzato
 
@@ -87,8 +88,8 @@ Voci attive ordinate per priorità.
 - **Come funziona:**
   1. Admin accede a `/api/prerender.php` (protetto da autenticazione)
   2. Lo script recupera tutte le categorie e articoli dal database MySQL
-  3. Genera un file `index.html` statico per ogni route in `dist/`
-  4. Es: `/dist/videogiochi/titolo-articolo/index.html` contiene HTML pre-renderizzato
+  3. Cattura l'output di `index.php` per ogni rotta e lo salva in un file `index.html` dedicato.
+  4. Es: `/videogiochi/titolo-articolo/index.html` contiene l'HTML pre-renderizzato con Meta Tag dinamici.
 - **Effetto:** Google trova HTML statico con metadati già pronti, non javascript CSR. Indicizzazione garantita.
 - **Flusso:**
   - Build locale: `npm run build` (senza prerendering, veloce)
@@ -106,7 +107,7 @@ Voci attive ordinate per priorità.
 (Nessuna nuova priorità alta al momento. La Q2 2026 è focalizzata su SEO tramite prerendering e performance optimization.)
 
 #### [P2-05] Ottimizzazione Bundle & Code Splitting
-- **Obiettivo:** Ridurre la dimensione dei chunk JS (attualmente > 500kB) tramite `React.lazy` e suddivisione manuale dei moduli pesanti (es. Tiptap).
+- **STATO:** COMPLETATO ✅ (v1.9.1)
 
 #### [P2-06] Refactor Data Loaders (React Router 7)
 - **Obiettivo:** Migrare il fetching dei dati dai `useEffect` ai `Loaders` nativi di `createBrowserRouter` per eliminare layout shift e caricamenti a freddo.
@@ -176,7 +177,7 @@ npm run build
 ```
 URL: https://simonepizzi.runtimeradio.it/api/prerender.php
 Prerequisito: Devi essere loggato all'admin
-Direi: Response JSON con stats (routes create, skipped)
+Risultato: Response JSON con "Prerendering con iniezione SEO completato"
 ```
 
 **3. Verifica risultato:**

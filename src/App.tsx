@@ -11,25 +11,28 @@ import SEO from './components/SEO';
 import ScrollProgress from './components/ScrollProgress';
 import BackToTop from './components/BackToTop';
 import SearchModal from './components/SearchModal';
-import Login from './pages/admin/Login';
-import RecoveryRequest from './pages/admin/RecoveryRequest';
-import ResetPassword from './pages/admin/ResetPassword';
-import AdminLayout from './pages/admin/AdminLayout';
+import Loader from './components/Loader';
 
-import Dashboard from './pages/admin/Dashboard';
-import Settings from './pages/admin/Settings';
-import ArticlesList from './pages/admin/ArticlesList';
-import ArticleEditor from './pages/admin/ArticleEditor';
-import MediaGallery from './pages/admin/MediaGallery';
-import ProjectsList from './pages/admin/ProjectsList';
-import ProjectEditor from './pages/admin/ProjectEditor';
-import CategoryManager from './pages/admin/CategoryManager';
-import TagsList from './pages/admin/TagsList';
-import NewsletterAdmin from './pages/admin/NewsletterAdmin';
-import AllProjects from './pages/AllProjects';
-import ContactPage from './pages/ContactPage';
-import NewsletterConfirm from './pages/NewsletterConfirm';
-import NewsletterUnsubscribe from './pages/NewsletterUnsubscribe';
+// Lazy imports per ottimizzazione bundle (Code Splitting)
+const Login = React.lazy(() => import('./pages/admin/Login'));
+const RecoveryRequest = React.lazy(() => import('./pages/admin/RecoveryRequest'));
+const ResetPassword = React.lazy(() => import('./pages/admin/ResetPassword'));
+const AdminLayout = React.lazy(() => import('./pages/admin/AdminLayout'));
+const Dashboard = React.lazy(() => import('./pages/admin/Dashboard'));
+const Settings = React.lazy(() => import('./pages/admin/Settings'));
+const ArticlesList = React.lazy(() => import('./pages/admin/ArticlesList'));
+const ArticleEditor = React.lazy(() => import('./pages/admin/ArticleEditor'));
+const MediaGallery = React.lazy(() => import('./pages/admin/MediaGallery'));
+const ProjectsList = React.lazy(() => import('./pages/admin/ProjectsList'));
+const ProjectEditor = React.lazy(() => import('./pages/admin/ProjectEditor'));
+const CategoryManager = React.lazy(() => import('./pages/admin/CategoryManager'));
+const TagsList = React.lazy(() => import('./pages/admin/TagsList'));
+const NewsletterAdmin = React.lazy(() => import('./pages/admin/NewsletterAdmin'));
+
+const AllProjects = React.lazy(() => import('./pages/AllProjects'));
+const ContactPage = React.lazy(() => import('./pages/ContactPage'));
+const NewsletterConfirm = React.lazy(() => import('./pages/NewsletterConfirm'));
+const NewsletterUnsubscribe = React.lazy(() => import('./pages/NewsletterUnsubscribe'));
 import { useCategories } from './hooks/useCategories';
 
 const backgroundStyle = {
@@ -157,7 +160,9 @@ const router = createBrowserRouter([
 const App: React.FC = () => {
   return (
     <HelmetProvider>
-      <RouterProvider router={router} />
+      <React.Suspense fallback={<Loader />}>
+        <RouterProvider router={router} />
+      </React.Suspense>
     </HelmetProvider>
   );
 };
