@@ -2,7 +2,7 @@
 
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.8.0  
+**Versione corrente:** 1.8.1  
 **Ultimo aggiornamento documento:** 22 Aprile 2026  
 **Sito:** simonepizzi.runtimeradio.it
 

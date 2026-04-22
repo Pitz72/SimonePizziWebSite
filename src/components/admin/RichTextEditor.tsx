@@ -1,10 +1,27 @@
-import { useState, useRef, useEffect, useMemo } from 'react';
-import { Bold, Italic, Quote, Link as LinkIcon, List, ListOrdered, AlignLeft, AlignCenter, AlignRight, Type, Eraser, Image as ImageIcon, Loader2, ShieldOff, Table2 } from 'lucide-react';
-import showdown from 'showdown';
+import { useState, useEffect } from 'react';
+import { useEditor, EditorContent } from '@tiptap/react';
+import StarterKit from '@tiptap/starter-kit';
+import { Link } from '@tiptap/extension-link';
+import { Image } from '@tiptap/extension-image';
+import { Color } from '@tiptap/extension-color';
+import { TextStyle } from '@tiptap/extension-text-style';
+import { Underline } from '@tiptap/extension-underline';
+import { TextAlign } from '@tiptap/extension-text-align';
+import { Table } from '@tiptap/extension-table';
+import { TableRow } from '@tiptap/extension-table-row';
+import { TableHeader } from '@tiptap/extension-table-header';
+import { TableCell } from '@tiptap/extension-table-cell';
+
+
+import { 
+    Bold, Italic, Link as LinkIcon, List, ListOrdered, 
+    AlignLeft, AlignCenter, AlignRight, Type, Eraser, 
+    Image as ImageIcon, Table2, Strikethrough, Underline as UnderlineIcon
+} from 'lucide-react';
+
+
 import { InternalLinkSelector } from './InternalLinkSelector';
 import { MediaSelectorModal } from './MediaSelectorModal';
-
-
 
 interface RichTextEditorProps {
     value: string;
@@ -12,398 +29,294 @@ interface RichTextEditorProps {
     className?: string;
 }
 
-// Rimuove elementi non-testo (SVG, icone LLM, pulsanti, form) da un documento HTML parsato.
-// Gli elementi in REMOVE_ENTIRELY vengono eliminati con tutto il loro contenuto.
-// Gli elementi in UNWRAP vengono sostituiti col loro testo (se presente).
-const TAGS_REMOVE = ['svg', 'script', 'style', 'iframe', 'canvas', 'noscript', 'video', 'audio', 'object', 'embed'];
-const TAGS_UNWRAP = ['button', 'input', 'select', 'textarea', 'form', 'label'];
-
-function stripForeignElements(doc: Document): void {
-    TAGS_REMOVE.forEach(tag => {
-        doc.querySelectorAll(tag).forEach(el => el.remove());
-    });
-    TAGS_UNWRAP.forEach(tag => {
-        doc.querySelectorAll(tag).forEach(el => {
-            const text = el.textContent?.trim();
-            if (text) el.replaceWith(document.createTextNode(text));
-            else el.remove();
-        });
-    });
-}
-
 const COLORS = [
-    '#ffffff', '#000000', '#22c55e', '#ef4444', '#3b82f6', '#eab308',
-    '#a855f7', '#f97316', '#64748b', '#71717a', '#78350f', '#0f172a'
+    '#ffffff', '#000000', '#22c55e', '#16a34a', '#15803d', // Verdi
+    '#ef4444', '#dc2626', '#b91c1c', // Rossi
+    '#3b82f6', '#2563eb', '#1d4ed8', // Blu
+    '#eab308', '#ca8a04', '#a16207', // Gialli/Oro
+    '#a855f7', '#9333ea', '#7e22ce', // Viola
+    '#f97316', '#ea580c', '#c2410c', // Arancio
+    '#06b6d4', '#0891b2', '#0e7490', // Cyan
+    '#64748b', '#475569', '#334155', // Slate
+    '#71717a', '#52525b', '#3f3f46', // Zinc
+    '#78350f', '#451a03', '#0f172a'  // Brown/Dark
 ];
 
 export function RichTextEditor({ value, onChange, className }: RichTextEditorProps) {
-    const editorRef = useRef<HTMLDivElement>(null);
-    const [isFocused, setIsFocused] = useState(false);
     const [showColorPicker, setShowColorPicker] = useState(false);
-    const isUploading = false; // Gestito internamente dalla modale ora
-    const [wordCount, setWordCount] = useState(0);
-    const [charCount, setCharCount] = useState(0);
     const [showLinkPicker, setShowLinkPicker] = useState(false);
     const [showMediaModal, setShowMediaModal] = useState(false);
-    const [savedRange, setSavedRange] = useState<Range | null>(null);
+    const [wordCount, setWordCount] = useState(0);
+    const [charCount, setCharCount] = useState(0);
 
+    const editor = useEditor({
+        extensions: [
+            StarterKit.configure({
+                heading: {
+                    levels: [1, 2, 3, 4],
+                },
+            }),
+            Underline,
+            Link.configure({
+                openOnClick: false,
+                HTMLAttributes: {
+                    class: 'text-dis-green underline cursor-pointer',
+                },
+            }),
+            Image.configure({
+                HTMLAttributes: {
+                    class: 'max-w-full h-auto rounded-xl my-4 shadow-lg border border-zinc-800',
+                },
+            }),
+            TextStyle,
+            Color,
+            TextAlign.configure({
+                types: ['heading', 'paragraph'],
+            }),
+            Table.configure({
+                resizable: true,
+                HTMLAttributes: {
+                    class: 'w-full border-collapse my-4',
+                },
+            }),
+            TableRow,
+            TableHeader.configure({
+                HTMLAttributes: {
+                    class: 'border border-zinc-700 bg-zinc-800 px-3 py-2 text-left text-zinc-200 font-semibold',
+                },
+            }),
+            TableCell.configure({
+                HTMLAttributes: {
+                    class: 'border border-zinc-700 px-3 py-2 text-zinc-300',
+                },
+            }),
+        ],
+        content: value,
+        onUpdate: ({ editor }) => {
+            const html = editor.getHTML();
+            onChange(html);
+            
+            // Update counts
+            const text = editor.getText();
+            setCharCount(text.length);
+            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+            setWordCount(words);
+        },
+        editorProps: {
+            attributes: {
+                class: 'p-6 text-zinc-300 prose prose-invert max-w-none outline-none min-h-[250px]',
+            },
+        },
+    });
 
-
-    const updateCounts = () => {
-        if (!editorRef.current) return;
-        const text = editorRef.current.innerText || '';
-        // innerText a volte aggiunge newline fittizi alla fine, lo puliamo per un conteggio fedele
-        const cleanText = text.replace(/[\n\r]+$/, '');
-        setCharCount(cleanText.length);
-        const words = cleanText.trim() ? cleanText.trim().split(/\s+/).length : 0;
-        setWordCount(words);
-    };
-
-    // Sync external value changes to editor content only if not focused (to avoid cursor jumps)
+    // Sync external value changes
     useEffect(() => {
-        if (editorRef.current && !isFocused && editorRef.current.innerHTML !== value) {
-            editorRef.current.innerHTML = value;
-            updateCounts();
+        if (editor && value !== editor.getHTML()) {
+            editor.commands.setContent(value);
         }
-    }, [value, isFocused]);
+    }, [value, editor]);
 
-    const mdConverter = useMemo(() => new showdown.Converter({
-        tables: true,
-        strikethrough: true,
-        tasklists: true,
-        simpleLineBreaks: true,
-        requireSpaceBeforeHeadingText: false
-    }), []);
-
-    useEffect(() => {
-        const editor = editorRef.current;
-        if (!editor) return;
-
-        const handleNativePaste = (e: ClipboardEvent) => {
-            if (e.clipboardData?.files && e.clipboardData.files.length > 0) {
-                // Se sono file immagine, blocca il paste diretto (base64) e suggerisci l'upload
-                const hasImage = Array.from(e.clipboardData.files).some(f => f.type.startsWith('image/'));
-                if (hasImage) {
-                    e.preventDefault();
-                    alert("Per favore, usa il pulsante 'Immagine' nella barra degli strumenti per caricare le foto. Incollarle direttamente appesantisce troppo l'articolo e impedisce il salvataggio.");
-                    return;
-                }
-                return;
-            }
-
-            const plainText = e.clipboardData?.getData('text/plain') || '';
-            const htmlText = e.clipboardData?.getData('text/html') || '';
-
-            const hasMarkdownHeaders = /^#{1,6}\s+.+/m.test(plainText);
-            const hasMarkdownBold = /\*\*.*?\*\*/.test(plainText);
-            const hasMarkdownLinks = /\[.+?\]\(.+?\)/.test(plainText);
-            const hasMarkdownLists = /^\s*[-*+]\s+.+/m.test(plainText);
-            const isExplicitMarkdown = hasMarkdownHeaders || hasMarkdownBold || hasMarkdownLinks;
-
-            if (isExplicitMarkdown || (!htmlText && hasMarkdownLists)) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const mdHtml = mdConverter.makeHtml(plainText);
-                try { document.execCommand('insertHTML', false, mdHtml); } catch { /* fallback silenzioso */ } // eslint-disable-line @typescript-eslint/no-deprecated
-                return;
-            }
-
-            if (htmlText) {
-                e.preventDefault();
-                e.stopPropagation();
-
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(htmlText, 'text/html');
-
-                // Rimuove SVG, icone, pulsanti, form (es. pulsanti LLM incollati per errore)
-                stripForeignElements(doc);
-
-                const elementsWithStyle = doc.querySelectorAll('[style]');
-                elementsWithStyle.forEach(el => {
-                    if (el instanceof HTMLElement) {
-                        el.style.backgroundColor = '';
-                        el.style.background = '';
-                        el.style.color = '';
-                    }
-                });
-
-                // Rimuovi eventuali classi CSS nemiche esportate da word o wikipedia
-                const allEls = doc.querySelectorAll('*');
-                allEls.forEach(el => { if (el instanceof HTMLElement) el.removeAttribute('class'); });
-
-                try { document.execCommand('insertHTML', false, doc.body.innerHTML); } catch { /* fallback silenzioso */ } // eslint-disable-line @typescript-eslint/no-deprecated
-                return;
-            }
-        };
-
-        editor.addEventListener('paste', handleNativePaste, true);
-        return () => {
-            editor.removeEventListener('paste', handleNativePaste, true);
-        };
-    }, [mdConverter]);
-
-    // [v1.5.10] document.execCommand è deprecated ma ancora supportato da tutti i browser nel 2026.
-    // Migrazione completa a Selection/Range API tracciata in roadmap come task futuro.
-    // try-catch aggiunto per robustezza anticipatoria.
-    const exec = (command: string, value: string | undefined = undefined) => {
-        try {
-            document.execCommand(command, false, value); // eslint-disable-line @typescript-eslint/no-deprecated
-        } catch {
-            console.warn(`[RichTextEditor] execCommand '${command}' non supportato in questo browser.`);
-        }
-        if (editorRef.current) onChange(editorRef.current.innerHTML);
-        setShowColorPicker(false);
-    };
-
-    const handleInput = () => {
-        if (editorRef.current) onChange(editorRef.current.innerHTML);
-        updateCounts();
-    };
-
-    const promptLink = () => {
-        // Salvataggio esplicito della selezione prima dell'apertura del picker
-        const selection = window.getSelection();
-        if (selection && selection.rangeCount > 0) {
-            setSavedRange(selection.getRangeAt(0).cloneRange());
-        } else {
-            setSavedRange(null);
-        }
-        
-        setShowLinkPicker(true);
-    };
+    if (!editor) {
+        return <div className="p-8 text-zinc-500 animate-pulse bg-zinc-950 border border-zinc-800 rounded-lg">Inizializzazione Editor...</div>;
+    }
 
     const handleInternalLinkSelect = (url: string) => {
-        // Ripristina la selezione salvata se esiste
-        const selection = window.getSelection();
-        if (savedRange && selection) {
-            selection.removeAllRanges();
-            selection.addRange(savedRange);
-        }
-        
-        exec('createLink', url);
+        editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
         setShowLinkPicker(false);
-        setSavedRange(null);
-    };
-
-
-    const removeLink = () => {
-        exec('unlink');
-    };
-
-    const formatBlock = (tag: string) => {
-        exec('formatBlock', tag);
-        // Reset the select back to paragraph after applying heading
-        const sel = document.getElementById('heading-selector') as HTMLSelectElement;
-        if (sel) sel.value = "p";
-    };
-
-    const sanitizeContent = () => {
-        if (!editorRef.current) return;
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(editorRef.current.innerHTML, 'text/html');
-        stripForeignElements(doc);
-        editorRef.current.innerHTML = doc.body.innerHTML;
-        onChange(editorRef.current.innerHTML);
-    };
-
-    const insertTable = () => {
-        const tableHtml = `
-<table style="border-collapse:collapse;width:100%;margin:1rem 0;">
-  <thead>
-    <tr>
-      <th style="border:1px solid #3f3f46;padding:8px 12px;background:#27272a;text-align:left;">Intestazione 1</th>
-      <th style="border:1px solid #3f3f46;padding:8px 12px;background:#27272a;text-align:left;">Intestazione 2</th>
-      <th style="border:1px solid #3f3f46;padding:8px 12px;background:#27272a;text-align:left;">Intestazione 3</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td style="border:1px solid #3f3f46;padding:8px 12px;">Cella 1</td>
-      <td style="border:1px solid #3f3f46;padding:8px 12px;">Cella 2</td>
-      <td style="border:1px solid #3f3f46;padding:8px 12px;">Cella 3</td>
-    </tr>
-    <tr>
-      <td style="border:1px solid #3f3f46;padding:8px 12px;">Cella 4</td>
-      <td style="border:1px solid #3f3f46;padding:8px 12px;">Cella 5</td>
-      <td style="border:1px solid #3f3f46;padding:8px 12px;">Cella 6</td>
-    </tr>
-  </tbody>
-</table><p><br></p>`.trim();
-
-        if (editorRef.current) editorRef.current.focus();
-        try {
-            document.execCommand('insertHTML', false, tableHtml); // eslint-disable-line @typescript-eslint/no-deprecated
-        } catch {
-            if (editorRef.current) editorRef.current.innerHTML += tableHtml;
-        }
-        if (editorRef.current) onChange(editorRef.current.innerHTML);
-        updateCounts();
     };
 
     const handleMediaSelect = (url: string) => {
-        if (editorRef.current) {
-            editorRef.current.focus();
-            
-            // Se avevamo salvato una posizione, la ripristiniamo
-            const selection = window.getSelection();
-            if (savedRange && selection) {
-                selection.removeAllRanges();
-                selection.addRange(savedRange);
-            }
-
-            const imgHtml = `<img src="${url}" class="max-w-full h-auto rounded-xl my-4 shadow-lg border border-zinc-800" />`;
-            try {
-                document.execCommand('insertHTML', false, imgHtml); // eslint-disable-line @typescript-eslint/no-deprecated
-            } catch {
-                if (editorRef.current) editorRef.current.innerHTML += imgHtml;
-            }
-        }
+        editor.chain().focus().setImage({ src: url }).run();
         setShowMediaModal(false);
-        setSavedRange(null);
-        if (editorRef.current) onChange(editorRef.current.innerHTML);
     };
 
-    const openMediaModal = () => {
-        // Salvataggio della posizione corrente prima che la modale prenda il focus
-        const selection = window.getSelection();
-        if (selection && selection.rangeCount > 0) {
-            setSavedRange(selection.getRangeAt(0).cloneRange());
-        } else {
-            setSavedRange(null);
-        }
-        setShowMediaModal(true);
+    const insertTable = () => {
+        editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
     };
 
     return (
         <div className={`border border-zinc-800 rounded-lg bg-zinc-950 flex flex-col min-h-[300px] ${className || ''}`}>
-            {/* toolbar: sticky top-0 funziona sia con scroll interno che esterno */}
+            {/* Toolbar */}
             <div className="sticky top-0 z-30 flex flex-wrap items-center gap-1 p-2 bg-zinc-900 border-b border-zinc-800 shrink-0 rounded-t-lg">
-
-                {/* HEADINGS */}
+                
+                {/* Heading Selector */}
                 <select
-                    id="heading-selector"
                     className="bg-zinc-950 border border-zinc-800 rounded text-xs text-zinc-300 p-1.5 h-8 mr-2 focus:ring-1 focus:ring-dis-green outline-none hover:border-zinc-700 transition-colors"
-                    onChange={(e) => formatBlock(e.target.value)}
-                    defaultValue="p"
+                    onChange={(e) => {
+                        const val = e.target.value;
+                        if (val === 'p') editor.chain().focus().setParagraph().run();
+                        else if (val === 'h2') editor.chain().focus().toggleHeading({ level: 2 }).run();
+                        else if (val === 'h3') editor.chain().focus().toggleHeading({ level: 3 }).run();
+                        else if (val === 'h4') editor.chain().focus().toggleHeading({ level: 4 }).run();
+                        else if (val === 'blockquote') editor.chain().focus().toggleBlockquote().run();
+                        e.target.value = 'p'; // Reset selector
+                    }}
+                    value={
+                        editor.isActive('heading', { level: 2 }) ? 'h2' :
+                        editor.isActive('heading', { level: 3 }) ? 'h3' :
+                        editor.isActive('heading', { level: 4 }) ? 'h4' :
+                        editor.isActive('blockquote') ? 'blockquote' : 'p'
+                    }
                 >
                     <option value="p">Testo Normale</option>
                     <option value="h2">Titolo Principale (H2)</option>
                     <option value="h3">Titolo Secondario (H3)</option>
                     <option value="h4">Titoletto (H4)</option>
                     <option value="blockquote">Citazione / Blockquote</option>
-                    <option value="pre">Blocco di Codice</option>
                 </select>
 
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
 
-                <ToolbarBtn onClick={() => exec('bold')} icon={<Bold size={16} />} title="Grassetto" />
-                <ToolbarBtn onClick={() => exec('italic')} icon={<Italic size={16} />} title="Corsivo" />
-                <ToolbarBtn onClick={() => exec('strikeThrough')} icon={<span className="line-through font-bold">S</span>} title="Barrato" />
+                <ToolbarBtn 
+                    onClick={() => editor.chain().focus().toggleBold().run()} 
+                    active={editor.isActive('bold')}
+                    icon={<Bold size={16} />} 
+                    title="Grassetto" 
+                />
+                <ToolbarBtn 
+                    onClick={() => editor.chain().focus().toggleItalic().run()} 
+                    active={editor.isActive('italic')}
+                    icon={<Italic size={16} />} 
+                    title="Corsivo" 
+                />
+                <ToolbarBtn 
+                    onClick={() => editor.chain().focus().toggleUnderline().run()} 
+                    active={editor.isActive('underline')}
+                    icon={<UnderlineIcon size={16} />} 
+                    title="Sottolineato" 
+                />
+                <ToolbarBtn 
+                    onClick={() => editor.chain().focus().toggleStrike().run()} 
+                    active={editor.isActive('strike')}
+                    icon={<Strikethrough size={16} />} 
+                    title="Barrato" 
+                />
 
-                {/* Color Picker Custom Implementation */}
-                {/* AZIONI MEDIA */}
-                <div className="flex items-center">
+                {/* Color Picker (Moved here) */}
+                <div className="relative mx-1">
                     <button
                         type="button"
-                        onClick={openMediaModal}
-                        disabled={isUploading}
-                        className="p-1.5 sm:p-2 text-zinc-400 hover:text-dis-green hover:bg-zinc-800 rounded transition-colors group relative"
-                        title="Inserisci Immagine"
-                    >
-                        {isUploading ? <Loader2 size={18} className="animate-spin" /> : <ImageIcon size={18} />}
-                        <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-zinc-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
-                            Immagine
-                        </span>
-                    </button>
-                    <button
-                        type="button"
-                        onClick={insertTable}
-                        className="p-1.5 sm:p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-colors group relative border-l border-zinc-800 ml-1 pl-3"
-                        title="Inserisci Tabella"
-                    >
-                        <Table2 size={18} />
-                        <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-zinc-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 pointer-events-none whitespace-nowrap z-50">
-                            Tabella
-                        </span>
-                    </button>
-                </div>
-                <div className="relative">
-                    <button
-                        type="button"
-                        onMouseDown={(e) => e.preventDefault()}
                         onClick={() => setShowColorPicker(!showColorPicker)}
-                        className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-colors flex flex-col items-center justify-center gap-[2px]"
+                        className={`p-1.5 rounded transition-colors flex flex-col items-center justify-center gap-[2px] ${showColorPicker ? 'bg-zinc-800' : 'hover:bg-zinc-800'}`}
                         title="Colore Testo"
                     >
-                        <Type size={14} />
+                        <Type size={14} className={editor.getAttributes('textStyle').color ? '' : 'text-zinc-400'} style={{ color: editor.getAttributes('textStyle').color }} />
                         <div className="w-4 h-1 bg-gradient-to-r from-red-500 via-green-500 to-blue-500 rounded-full"></div>
                     </button>
 
                     {showColorPicker && (
                         <>
                             <div className="fixed inset-0 z-40" onClick={() => setShowColorPicker(false)}></div>
-                            <div className="absolute top-full left-0 z-50 mt-2 w-48 bg-zinc-950 border border-zinc-800 rounded-lg shadow-2xl p-2 grid grid-cols-4 gap-1">
+                            <div className="absolute top-full left-0 z-50 mt-2 w-64 bg-zinc-950 border border-zinc-800 rounded-lg shadow-2xl p-3 grid grid-cols-6 gap-1 animate-in zoom-in-95 duration-150">
                                 {COLORS.map(color => (
                                     <button
                                         key={color}
                                         type="button"
                                         className="w-8 h-8 rounded border border-zinc-700 hover:scale-110 transition-transform shadow-md"
                                         style={{ backgroundColor: color }}
-                                        onClick={() => exec('foreColor', color)}
+                                        onClick={() => {
+                                            editor.chain().focus().setColor(color).run();
+                                            setShowColorPicker(false);
+                                        }}
                                         title={color}
                                     />
                                 ))}
+                                <button
+                                    type="button"
+                                    className="col-span-6 text-[10px] text-zinc-500 hover:text-white py-1.5 mt-1 border-t border-zinc-800"
+                                    onClick={() => {
+                                        editor.chain().focus().unsetColor().run();
+                                        setShowColorPicker(false);
+                                    }}
+                                >
+                                    Rimuovi Colore
+                                </button>
                             </div>
                         </>
                     )}
                 </div>
 
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
-                <ToolbarBtn onClick={() => exec('justifyLeft')} icon={<AlignLeft size={16} />} title="Allinea a Sinistra" />
-                <ToolbarBtn onClick={() => exec('justifyCenter')} icon={<AlignCenter size={16} />} title="Allinea al Centro" />
-                <ToolbarBtn onClick={() => exec('justifyRight')} icon={<AlignRight size={16} />} title="Allinea a Destra" />
+
+
+                <ToolbarBtn 
+                    onClick={() => editor.chain().focus().setTextAlign('left').run()} 
+                    active={editor.isActive({ textAlign: 'left' })}
+                    icon={<AlignLeft size={16} />} 
+                    title="Allinea a Sinistra" 
+                />
+                <ToolbarBtn 
+                    onClick={() => editor.chain().focus().setTextAlign('center').run()} 
+                    active={editor.isActive({ textAlign: 'center' })}
+                    icon={<AlignCenter size={16} />} 
+                    title="Allinea al Centro" 
+                />
+                <ToolbarBtn 
+                    onClick={() => editor.chain().focus().setTextAlign('right').run()} 
+                    active={editor.isActive({ textAlign: 'right' })}
+                    icon={<AlignRight size={16} />} 
+                    title="Allinea a Destra" 
+                />
+
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
-                <ToolbarBtn onClick={() => exec('insertUnorderedList')} icon={<List size={16} />} title="Elenco Puntato" />
-                <ToolbarBtn onClick={() => exec('insertOrderedList')} icon={<ListOrdered size={16} />} title="Elenco Numerato" />
+
+                <ToolbarBtn 
+                    onClick={() => editor.chain().focus().toggleBulletList().run()} 
+                    active={editor.isActive('bulletList')}
+                    icon={<List size={16} />} 
+                    title="Elenco Puntato" 
+                />
+                <ToolbarBtn 
+                    onClick={() => editor.chain().focus().toggleOrderedList().run()} 
+                    active={editor.isActive('orderedList')}
+                    icon={<ListOrdered size={16} />} 
+                    title="Elenco Numerato" 
+                />
+
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
-                <ToolbarBtn onClick={() => formatBlock('blockquote')} icon={<Quote size={16} />} title="Citazione (Blockquote)" />
+
+                <ToolbarBtn 
+                    onClick={() => setShowMediaModal(true)} 
+                    icon={<ImageIcon size={16} />} 
+                    title="Inserisci Immagine" 
+                />
+                <ToolbarBtn 
+                    onClick={insertTable} 
+                    icon={<Table2 size={16} />} 
+                    title="Inserisci Tabella" 
+                />
+
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
-                <ToolbarBtn onClick={promptLink} icon={<LinkIcon size={16} />} title="Inserisci Link" />
-                <ToolbarBtn onClick={removeLink} icon={<LinkIcon size={16} className="text-red-400" />} title="Rimuovi Link" />
+
+                <ToolbarBtn 
+                    onClick={() => setShowLinkPicker(true)} 
+                    active={editor.isActive('link')}
+                    icon={<LinkIcon size={16} />} 
+                    title="Inserisci Link" 
+                />
+                {editor.isActive('link') && (
+                    <ToolbarBtn 
+                        onClick={() => editor.chain().focus().unsetLink().run()} 
+                        icon={<LinkIcon size={16} className="text-red-400" />} 
+                        title="Rimuovi Link" 
+                    />
+                )}
+
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
-                <div className="w-px h-6 bg-zinc-800 mx-1" />
-                <ToolbarBtn onClick={() => exec('removeFormat')} icon={<Eraser size={16} className="text-orange-400" />} title="Rimuovi Colore e Formattazione" />
-                <ToolbarBtn onClick={sanitizeContent} icon={<ShieldOff size={16} className="text-red-400" />} title="Ripulisci elementi non-testo (SVG, icone, pulsanti)" />
+
+                <ToolbarBtn 
+                    onClick={() => editor.chain().focus().unsetAllMarks().clearNodes().run()} 
+                    icon={<Eraser size={16} className="text-orange-400" />} 
+                    title="Cancella Formattazione" 
+                />
             </div>
 
+            {/* Editor Content */}
+            <div className="flex-1 overflow-y-auto">
+                <EditorContent editor={editor} />
+            </div>
 
-            <div
-                ref={editorRef}
-                className="p-6 text-zinc-300 prose prose-invert max-w-none flex-1 overflow-y-auto outline-none
-                [&_a]:text-dis-green [&_a]:underline 
-                [&_blockquote]:border-l-4 [&_blockquote]:border-dis-green/50 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:bg-dis-green/5 [&_blockquote]:py-1 [&_blockquote]:pr-4 [&_blockquote]:rounded-r-lg
-                [&_ul]:list-disc [&_ul]:pl-5 
-                [&_ol]:list-decimal [&_ol]:pl-5 
-                [&_li]:mb-1
-                [&_table]:w-full [&_table]:border-collapse [&_table]:my-4
-                [&_th]:border [&_th]:border-zinc-700 [&_th]:bg-zinc-800 [&_th]:px-3 [&_th]:py-2 [&_th]:text-left [&_th]:text-zinc-200 [&_th]:font-semibold
-                [&_td]:border [&_td]:border-zinc-700 [&_td]:px-3 [&_td]:py-2 [&_td]:text-zinc-300
-                [&_tr:hover_td]:bg-zinc-800/40
-                focus:bg-zinc-900/30 transition-colors"
-                contentEditable
-                onKeyDown={(e) => {
-                    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-                        e.preventDefault();
-                        promptLink();
-                    }
-                }}
-                onInput={handleInput}
-                onFocus={() => setIsFocused(true)}
-                onBlur={() => setIsFocused(false)}
-            />
-
-            {/* STATUS BAR FOOTER */}
+            {/* Footer Stats */}
             <div className="flex items-center justify-between px-4 py-2 bg-[#121214] border-t border-zinc-800 shrink-0 rounded-b-lg select-none">
                 <div className="flex items-center gap-6 text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest">
                     <span className="flex items-center gap-1.5" title="Conteggio Parole">
@@ -414,6 +327,9 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                         <span className="w-1.5 h-1.5 rounded-full bg-blue-500/60"></span>
                         {charCount} {charCount === 1 ? 'carattere' : 'caratteri'}
                     </span>
+                </div>
+                <div className="text-[10px] font-bold text-zinc-600 uppercase tracking-tighter">
+                    Tiptap Editor v2
                 </div>
             </div>
 
@@ -432,18 +348,15 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                 />
             )}
         </div>
-
-
-
     );
 }
 
-const ToolbarBtn = ({ onClick, icon, title }: any) => (
+const ToolbarBtn = ({ onClick, icon, title, active }: any) => (
     <button
         type="button"
         onMouseDown={(e) => e.preventDefault()}
         onClick={(e) => { e.preventDefault(); onClick(); }}
-        className="p-1.5 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded transition-colors"
+        className={`p-1.5 rounded transition-colors ${active ? 'bg-dis-green text-black' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'}`}
         title={title}
     >
         {icon}
