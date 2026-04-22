@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useLoaderData } from 'react-router-dom';
 import { api } from '../../api';
 import { KeyRound, ShieldAlert, Database, Download, Save, History } from 'lucide-react';
 
 export default function Settings() {
+    const initialSettings = useLoaderData() as any;
     // Password states
     const [currentPassword, setCurrentPassword] = useState('');
     const [newPassword, setNewPassword] = useState('');
@@ -11,24 +13,18 @@ export default function Settings() {
     const [loading, setLoading] = useState(false);
 
     // Backup states
-    const [backupAuto, setBackupAuto] = useState(false);
-    const [backupFrequency, setBackupFrequency] = useState('weekly');
-    const [lastRun, setLastRun] = useState('');
+    const [backupAuto, setBackupAuto] = useState(initialSettings?.backup_auto === '1');
+    const [backupFrequency, setBackupFrequency] = useState(initialSettings?.backup_frequency || 'weekly');
+    const [lastRun, setLastRun] = useState(initialSettings?.backup_last_run || '');
     const [saveLoading, setSaveLoading] = useState(false);
 
     useEffect(() => {
-        const fetchSettings = async () => {
-            try {
-                const settings = await api.getAppSettings();
-                setBackupAuto(settings.backup_auto === '1');
-                setBackupFrequency(settings.backup_frequency || 'weekly');
-                setLastRun(settings.backup_last_run || '');
-            } catch (err) {
-                console.error('Errore caricamento impostazioni:', err);
-            }
-        };
-        fetchSettings();
-    }, []);
+        if (initialSettings) {
+            setBackupAuto(initialSettings.backup_auto === '1');
+            setBackupFrequency(initialSettings.backup_frequency || 'weekly');
+            setLastRun(initialSettings.backup_last_run || '');
+        }
+    }, [initialSettings]);
 
     const handlePasswordSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

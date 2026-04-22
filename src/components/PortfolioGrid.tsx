@@ -2,32 +2,28 @@ import React, { useState } from 'react';
 import Hero from './Hero';
 import Modal from './Modal'; // Import Modal component
 import SEO from './SEO';
-import { useFetchArticles } from '../hooks/useFetchArticles';
+import { useLoaderData } from 'react-router-dom';
+import { PortfolioItem } from '../types';
 import { aboutMeData } from '../data/aboutMeData';
-
 import FeaturedCard from './FeaturedCard';
 
 const PortfolioGrid: React.FC = () => {
-    // Caricamento Dinamico Home Page: preleviamo solo i primi 7 articoli per il layout
-    const { items, loading, error } = useFetchArticles(undefined, 7);
+    // Caricamento via Loader (Code Splitting & Parallel Fetching)
+    const items = useLoaderData() as PortfolioItem[];
 
-    // Filtra e Ordina i dati del Database
+    // Filtra e Ordina i dati
     const sortedItems = [...items].sort((a, b) => {
-        // 1. Quelli in vetrina vanno SEMPRE in alto
         if (a.isFeatured && !b.isFeatured) return -1;
         if (!a.isFeatured && b.isFeatured) return 1;
 
-        // 2. A parità di Vetrina (o nessuno dei due), vale la data di pubblicazione (I più recenti in alto)
         const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
         const dateB = b.publishedAt ? new Date(b.publishedAt).getTime() : 0;
         
         if (dateB !== dateA) return dateB - dateA;
-
-        // Fallback all'ID se le date sono uguali
         return b.id - a.id;
     });
 
-    const displayItems = sortedItems.map(item => ({ item, category: item.category })).slice(0, 7); // Layout completo: 1 hero + 6 card griglia 3x2
+    const displayItems = sortedItems.map(item => ({ item, category: item.category })).slice(0, 7);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -45,14 +41,7 @@ const PortfolioGrid: React.FC = () => {
                     <p className="text-lg text-gray-400 mt-2">Le modifiche o le pubblicazioni più recenti dei miei progetti.</p>
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 min-h-[400px]">
-                    {loading ? (
-                        <div className="col-span-full flex flex-col items-center justify-center text-zinc-500 py-20">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-dis-green mb-4"></div>
-                            <p>Caricamento griglia portfolio...</p>
-                        </div>
-                    ) : error ? (
-                        <div className="col-span-full text-center text-red-400 py-10 bg-red-500/10 rounded-xl border border-red-500/20">{error}</div>
-                    ) : displayItems.length === 0 ? (
+                    {displayItems.length === 0 ? (
                         <div className="col-span-full text-center text-zinc-500 py-10">Nessun progetto o articolo pubblicato al momento.</div>
                     ) : (
                         <>

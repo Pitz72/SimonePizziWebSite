@@ -1,7 +1,5 @@
 import { Activity, FileText, Image as ImageIcon, Users, Eye, MousePointerClick, TrendingUp } from 'lucide-react';
-import { useEffect, useState } from 'react';
-import { api } from '../../api';
-import { Link } from 'react-router-dom';
+import { useLoaderData, Link } from 'react-router-dom';
 
 interface AnalyticsData {
     total_views: number;
@@ -12,44 +10,23 @@ interface AnalyticsData {
 }
 
 export default function Dashboard() {
-    const [stats, setStats] = useState({
-        articles: '...',
-        media: '...',
-        subs: '...',
-        total_views: '...',
-        total_clicks: '...',
-        status: 'Online'
-    });
-    const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
-    const [analyticsError, setAnalyticsError] = useState(false);
+    const { stats: rawStats, analytics } = useLoaderData() as { stats: any, analytics: AnalyticsData };
 
-    useEffect(() => {
-        api.getStats().then(data => {
-            setStats({
-                articles: data.total_articles.toString(),
-                media: data.total_media.toString(),
-                subs: data.total_subscribers.toString(),
-                total_views: (data.total_views ?? 0).toString(),
-                total_clicks: (data.total_clicks ?? 0).toString(),
-                status: data.system_status
-            });
-        }).catch(err => {
-            console.error('Errore caricamento statistiche:', err);
-            setStats(prev => ({ ...prev, status: 'Errore API' }));
-        });
-
-        api.getAnalytics().then(data => {
-            setAnalytics(data);
-        }).catch(() => {
-            setAnalyticsError(true);
-        });
-    }, []);
+    const stats = {
+        articles: rawStats.total_articles.toString(),
+        media: rawStats.total_media.toString(),
+        subs: rawStats.total_subscribers.toString(),
+        total_views: (rawStats.total_views ?? 0).toString(),
+        total_clicks: (rawStats.total_clicks ?? 0).toString(),
+        status: rawStats.system_status
+    };
 
     const formatDate = (dateStr: string) => {
         return new Date(dateStr).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
     };
 
     const maxWeeklyCount = analytics?.weekly_views?.reduce((max, d) => Math.max(max, d.count), 1) ?? 1;
+    const analyticsError = !analytics;
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">

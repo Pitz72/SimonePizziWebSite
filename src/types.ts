@@ -50,3 +50,23 @@ export interface PortfolioItem {
   featuredOrder?: number;
   publishedAt?: string;
 }
+
+export interface Article {
+  id: number;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt: string;
+  cover_image: string;
+  category: string;
+  tags: string;
+  is_featured: number | boolean;
+  status: 'draft' | 'published';
+  published_at: string;
+  created_at: string;
+  updated_at: string;
+  button_a_label?: string;
+  button_a_link?: string;
+  button_b_label?: string;
+  button_b_link?: string;
+}

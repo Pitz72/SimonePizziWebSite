@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Calendar, ArrowRight } from 'lucide-react';
 import SEO from './SEO';
 import { useFetchArticles } from '../hooks/useFetchArticles';
+import { PortfolioItem } from '../types';
 
 /** Formatta "19 apr 2026 · 14:30" da una stringa ISO */
 const formatDateTime = (dateStr: string): string => {
@@ -17,11 +18,12 @@ const formatDateTime = (dateStr: string): string => {
 interface ArticleArchiveProps {
     title: string;
     category?: string; // Slug categoria (dinamico da DB v1.6.5)
+    initialItems?: PortfolioItem[];
 }
 
-const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category }) => {
+const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category, initialItems }) => {
     const navigate = useNavigate();
-    const { items, loading, error, hasMore, loadMore, loadingMore } = useFetchArticles(category, 10);
+    const { items, loading, error, hasMore, loadMore, loadingMore } = useFetchArticles(category, 10, initialItems);
 
     if (loading) {
         return (

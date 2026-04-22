@@ -110,8 +110,7 @@ Voci attive ordinate per priorità.
 - **STATO:** COMPLETATO ✅ (v1.9.1)
 
 #### [P2-06] Refactor Data Loaders (React Router 7)
-- **Obiettivo:** Migrare il fetching dei dati dai `useEffect` ai `Loaders` nativi di `createBrowserRouter` per eliminare layout shift e caricamenti a freddo.
-
+- **STATO:** COMPLETATO ✅
 
 ### 🔵 PRIORITÀ BASSA / LUNGO TERMINE
 

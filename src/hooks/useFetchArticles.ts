@@ -1,34 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { api } from '../api';
-import { PortfolioItem, Category } from '../types';
+import { PortfolioItem } from '../types';
 
-// Funzione Helper per mappare il record del DB (Article) nel pre-esistente type PortfolioItem
-const mapArticleToPortfolioItem = (article: any): PortfolioItem => {
-    return {
-        id: article.id,
-        slug: article.slug,
-        title: article.title,
-        summary: article.excerpt || '',
-        description: article.content, // Verrà renderizzato da showdown altrove o passato nativamente se HTML
-        imageUrl: article.cover_image || '/api/placeholder/800/600', // Placeholder fallback
-        category: article.category as Category,
-        tags: article.tags ? article.tags.split(',').map((t: string) => t.trim()) : [],
-        isFeatured: article.is_featured === 1 || article.is_featured === true,
-        publishedAt: article.published_at,
-        // Mapping Bottoni
-        link: article.button_a_link || undefined,
-        buttonText: article.button_a_label || undefined,
-        extraLink: article.button_b_link || undefined,
-        extraLinkText: article.button_b_label || undefined,
-        // Campi legacy non gestiti dal db CMS per ora, ma necessari al type
-        isVisible: true,
-        hasLetter: false
-    };
-};
+import { mapArticleToPortfolioItem } from '../utils/mappers';
 
-export const useFetchArticles = (categoryFilter?: string, limit: number = 10) => {
-    const [items, setItems] = useState<PortfolioItem[]>([]);
-    const [loading, setLoading] = useState<boolean>(true);
+export const useFetchArticles = (categoryFilter?: string, limit: number = 10, initialItems?: PortfolioItem[]) => {
+    const [items, setItems] = useState<PortfolioItem[]>(initialItems || []);
+    const [loading, setLoading] = useState<boolean>(!initialItems);
     const [loadingMore, setLoadingMore] = useState<boolean>(false);
     const [error, setError] = useState<string | null>(null);
     const [hasMore, setHasMore] = useState<boolean>(false);

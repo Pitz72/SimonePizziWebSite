@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { useLoaderData } from 'react-router-dom';
 import { UploadCloud, Trash2, Copy, FileIcon, Image as ImageIcon, Link as LinkIcon, RefreshCw, CheckCircle2, FileText, File, CheckSquare, Square, X } from 'lucide-react';
 import { api } from '../../api';
 
@@ -25,8 +26,9 @@ const formatBytes = (bytes: number) => {
 };
 
 export default function MediaGallery() {
-    const [mediaList, setMediaList] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const initialMedia = useLoaderData() as any[];
+    const [mediaList, setMediaList] = useState<any[]>(initialMedia || []);
+    const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
     const [uploadProgress, setUploadProgress] = useState(0);
     const [error, setError] = useState('');
@@ -37,7 +39,11 @@ export default function MediaGallery() {
     const [bulkDeleting, setBulkDeleting] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    useEffect(() => { loadMedia(); }, []);
+    useEffect(() => {
+        if (initialMedia) {
+            setMediaList(initialMedia);
+        }
+    }, [initialMedia]);
 
     // Pulisci selezione quando si cambia tab
     useEffect(() => { setSelectedIds(new Set()); }, [activeTab]);

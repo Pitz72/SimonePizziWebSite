@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useLoaderData, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Share2, Tag, Calendar } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { api } from '../api';
@@ -30,81 +30,21 @@ const formatDateTime = (dateStr: string): string => {
 };
 
 const SingleArticle: React.FC<SingleArticleProps> = () => {
-    const { projectSlug } = useParams<{ projectSlug: string }>();
+    const article = useLoaderData() as PortfolioItem;
     const navigate = useNavigate();
 
-    const [article, setArticle] = useState<PortfolioItem | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
-    const [isShareModalOpen, setIsShareModalOpen] = useState(false);
-    const [isLetterModalOpen, setIsLetterModalOpen] = useState(false);
+    const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
+    const [isLetterModalOpen, setIsLetterModalOpen] = React.useState(false);
 
-    useEffect(() => {
-        const fetchArticle = async () => {
-            if (!projectSlug) return;
-            setLoading(true);
-            try {
-                // Recuperiamo dal DB passando lo slug esatto pescato dalla URL
-                const found = await api.getArticleBySlug(projectSlug);
+    React.useEffect(() => {
+        if (article) {
+            // Traccia visualizzazione (fire-and-forget)
+            api.trackView(article.id);
+            window.scrollTo(0, 0);
+        }
+    }, [article.id]);
 
-                if (found && !found.error) {
-                    const mapped: PortfolioItem = {
-                        id: found.id,
-                        slug: found.slug,
-                        title: found.title,
-                        summary: found.excerpt || '',
-                        description: found.content,
-                        imageUrl: found.cover_image || '/api/placeholder/1200/800',
-                        category: found.category,
-                        tags: found.tags ? found.tags.split(',').map((t: string) => t.trim()) : [],
-                        isFeatured: found.is_featured === 1,
-                        link: found.button_a_link,
-                        buttonText: found.button_a_label,
-                        extraLink: found.button_b_link,
-                        extraLinkText: found.button_b_label,
-                        publishedAt: found.published_at,
-                        // Feature legacy The Safe Place se i tag la menzionano
-                        hasLetter: found.tags && found.tags.toLowerCase().includes('lettera')
-                    };
-                    setArticle(mapped);
-                    // Traccia visualizzazione (fire-and-forget, dedup lato server)
-                    api.trackView(found.id);
-                } else {
-                    setError('Articolo non trovato o non più disponibile.');
-                }
-            } catch (err: any) {
-                setError('Errore di connessione al database.');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchArticle();
-        window.scrollTo(0, 0); // Scroll in cima all'apertura dell'articolo
-    }, [projectSlug]);
-
-    if (loading) {
-        return (
-            <div className="min-h-screen flex flex-col justify-center items-center text-zinc-500">
-                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-dis-green mb-6"></div>
-                <p>Apertura Lettore...</p>
-            </div>
-        );
-    }
-
-    if (error || !article) {
-        return (
-            <div className="min-h-screen flex flex-col justify-center items-center p-8 text-center animate-in fade-in zoom-in duration-500">
-                <div className="max-w-md bg-zinc-900 border border-zinc-800 p-8 rounded-3xl shadow-2xl">
-                    <h2 className="text-2xl font-bold text-white mb-4">Articolo Smarrito</h2>
-                    <p className="text-zinc-400 mb-8">{error || 'Impossibile caricare il testo.'}</p>
-                    <button onClick={() => navigate(-1)} className="px-6 py-3 bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 transition">
-                        Torna all'Elenco
-                    </button>
-                </div>
-            </div>
-        );
-    }
+    if (!article) return null;
 
     return (
         <article className="min-h-[100vh] pb-32 w-full animate-in fade-in duration-[1000ms]">

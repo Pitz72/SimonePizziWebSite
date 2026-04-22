@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import React from 'react';
+import { useLoaderData, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { api } from '../api';
-import { Project } from '../types';
+import { Project, CategoryItem } from '../types';
 import SEO from '../components/SEO';
-import { useCategories } from '../hooks/useCategories';
 
 // Determina il tipo di URL per il rendering del pulsante
 function detectUrlType(url: string): 'external' | 'download' | 'internal' {
@@ -117,18 +115,7 @@ const ProjectCard: React.FC<{ project: Project; index: number }> = ({ project, i
 };
 
 export default function AllProjects() {
-    const [projects, setProjects] = useState<Project[]>([]);
-    const { categories: categoryList, loading: categoriesLoading } = useCategories();
-    const [projectsLoading, setProjectsLoading] = useState(true);
-
-    useEffect(() => {
-        api.getProjects()
-            .then(setProjects)
-            .catch(console.error)
-            .finally(() => setProjectsLoading(false));
-    }, []);
-
-    const loading = categoriesLoading || projectsLoading;
+    const { projects, categories: categoryList } = useLoaderData() as { projects: Project[], categories: CategoryItem[] };
 
     const getProjectsByCategory = (catSlug: string) =>
         projects.filter(p => p.category === catSlug).sort((a, b) => a.sort_order - b.sort_order);
@@ -155,12 +142,7 @@ export default function AllProjects() {
                     </p>
                 </motion.div>
 
-                {loading && (
-                    <div className="text-center text-zinc-500 py-20">Caricamento...</div>
-                )}
-
-                {!loading && (
-                    <div className="space-y-16">
+                <div className="space-y-16">
                         {categoryList.map((cat) => {
                             const catProjects = getProjectsByCategory(cat.slug);
                             if (catProjects.length === 0) return null;
@@ -189,8 +171,7 @@ export default function AllProjects() {
                         {projects.length === 0 && (
                             <p className="text-center text-zinc-600 py-20">Nessun progetto disponibile al momento.</p>
                         )}
-                    </div>
-                )}
+                </div>
             </div>
         </>
     );

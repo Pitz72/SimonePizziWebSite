@@ -1,30 +1,23 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLoaderData, useSearchParams } from 'react-router-dom';
 import { Plus, Pencil, Trash2, Eye, EyeOff, ChevronUp, ChevronDown } from 'lucide-react';
 import { api } from '../../api';
 import { Project, CategoryItem } from '../../types';
-import { useCategories } from '../../hooks/useCategories';
 
 export default function ProjectsList() {
-    const [projects, setProjects] = useState<Project[]>([]);
-    const { categories, loading: catsLoading } = useCategories();
-    const [loading, setLoading] = useState(true);
-    const [filterCategory, setFilterCategory] = useState<string>('');
-    const [error, setError] = useState('');
+    const loaderData = useLoaderData() as { projects: Project[], categories: CategoryItem[] };
+    const [searchParams, setSearchParams] = useSearchParams();
+    
+    const [projects, setProjects] = useState<Project[]>(loaderData.projects || []);
+    const categories = loaderData.categories || [];
+    
+    const filterCategory = searchParams.get('category') || '';
 
-    const load = async () => {
-        try {
-            setLoading(true);
-            const data = await api.getProjects(filterCategory || undefined);
-            setProjects(data);
-        } catch (e: any) {
-            setError(e.message);
-        } finally {
-            setLoading(false);
+    useEffect(() => {
+        if (loaderData.projects) {
+            setProjects(loaderData.projects);
         }
-    };
-
-    useEffect(() => { load(); }, [filterCategory]);
+    }, [loaderData.projects]);
 
     const handleDelete = async (id: number, name: string) => {
         if (!confirm(`Eliminare il progetto "${name}"? L'operazione è irreversibile.`)) return;
@@ -88,8 +81,6 @@ export default function ProjectsList() {
         }
     });
 
-    const isLoading = loading || catsLoading;
-
     return (
         <div>
             <div className="flex items-center justify-between mb-8">
@@ -109,7 +100,14 @@ export default function ProjectsList() {
             <div className="mb-6">
                 <select
                     value={filterCategory}
-                    onChange={e => setFilterCategory(e.target.value)}
+                    onChange={e => {
+                        const val = e.target.value;
+                        setSearchParams(prev => {
+                            if (val) prev.set('category', val);
+                            else prev.delete('category');
+                            return prev;
+                        });
+                    }}
                     className="bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-2 text-sm focus:outline-none focus:border-dis-green"
                 >
                     <option value="">Tutte le categorie</option>
@@ -119,10 +117,7 @@ export default function ProjectsList() {
                 </select>
             </div>
 
-            {error && <p className="text-red-400 mb-4">{error}</p>}
-            {isLoading && <p className="text-zinc-400">Caricamento...</p>}
-
-            {!isLoading && grouped.map(({ cat, projects: catProjects }) => (
+            {grouped.map(({ cat, projects: catProjects }) => (
                 <div key={cat.id} className="mb-8">
                     <h2 className="text-lg font-semibold text-dis-green border-b border-zinc-800 pb-2 mb-4">
                         {cat.name} <span className="text-zinc-500 text-sm font-normal">({catProjects.length})</span>

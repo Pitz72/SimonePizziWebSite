@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link, useLoaderData } from 'react-router-dom';
 import { ArrowLeft, Save, Loader2, Check, Link as LinkIcon, Mail } from 'lucide-react';
 import { NavigationBlocker } from '../../components/admin/NavigationBlocker';
 import { api } from '../../api';
-import { CategoryItem } from '../../types';
+import { CategoryItem, Project } from '../../types';
 
 interface FormData {
     name: string;
@@ -33,10 +33,9 @@ export default function ProjectEditor() {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
     const isEdit = Boolean(id);
+    const { project: projData, categories } = useLoaderData() as { project: Project | null, categories: CategoryItem[] };
 
     const [form, setForm] = useState<FormData>(EMPTY_FORM);
-    const [categories, setCategories] = useState<CategoryItem[]>([]);
-    const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
     const [error, setError] = useState('');
@@ -45,48 +44,29 @@ export default function ProjectEditor() {
     const [initialData, setInitialData] = useState<FormData | null>(null);
 
     useEffect(() => {
-        const loadData = async () => {
-            try {
-                // Carica categorie e progetto in parallelo
-                const [catData, projData] = await Promise.all([
-                    api.getCategories(),
-                    isEdit ? api.getProject(Number(id)) : Promise.resolve(null)
-                ]);
+        if (projData) {
+            if ((projData.button_a_url || '').startsWith('mailto:')) setBtnAType('email');
+            if ((projData.button_b_url || '').startsWith('mailto:')) setBtnBType('email');
 
-                setCategories(catData);
-
-                if (projData) {
-                    if ((projData.button_a_url || '').startsWith('mailto:')) setBtnAType('email');
-                    if ((projData.button_b_url || '').startsWith('mailto:')) setBtnBType('email');
-
-                    const loadedForm = {
-                        name: projData.name || '',
-                        category: projData.category || '',
-                        description: projData.description || '',
-                        cover_image: projData.cover_image || '',
-                        button_a_label: projData.button_a_label || 'Scopri',
-                        button_a_url: (projData.button_a_url || '').startsWith('mailto:') ? (projData.button_a_url || '').replace('mailto:', '') : (projData.button_a_url || ''),
-                        button_b_label: projData.button_b_label || '',
-                        button_b_url: (projData.button_b_url || '').startsWith('mailto:') ? (projData.button_b_url || '').replace('mailto:', '') : (projData.button_b_url || ''),
-                        is_visible: Boolean(projData.is_visible),
-                    };
-                    setForm(loadedForm);
-                    setInitialData(loadedForm);
-                } else if (catData.length > 0) {
-                    // Default alla prima categoria per i nuovi progetti
-                    const newForm = { ...form, category: catData[0].slug };
-                    setForm(newForm);
-                    setInitialData(newForm);
-                }
-            } catch (e: any) {
-                setError('Errore caricamento dati: ' + e.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        loadData();
-    }, [id, isEdit]);
+            const loadedForm = {
+                name: projData.name || '',
+                category: projData.category || '',
+                description: projData.description || '',
+                cover_image: projData.cover_image || '',
+                button_a_label: projData.button_a_label || 'Scopri',
+                button_a_url: (projData.button_a_url || '').startsWith('mailto:') ? (projData.button_a_url || '').replace('mailto:', '') : (projData.button_a_url || ''),
+                button_b_label: projData.button_b_label || '',
+                button_b_url: (projData.button_b_url || '').startsWith('mailto:') ? (projData.button_b_url || '').replace('mailto:', '') : (projData.button_b_url || ''),
+                is_visible: Boolean(projData.is_visible),
+            };
+            setForm(loadedForm);
+            setInitialData(loadedForm);
+        } else if (categories.length > 0) {
+            const newForm = { ...EMPTY_FORM, category: categories[0].slug };
+            setForm(newForm);
+            setInitialData(newForm);
+        }
+    }, [projData, categories]);
 
     const set = (field: keyof FormData, value: string | boolean) => {
         setForm(prev => ({ ...prev, [field]: value }));
@@ -140,7 +120,6 @@ export default function ProjectEditor() {
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
     }, [isDirty]);
 
-    if (loading) return <p className="text-zinc-400">Caricamento progetto...</p>;
 
     return (
         <div className="max-w-2xl mx-auto relative">

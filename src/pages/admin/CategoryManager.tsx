@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useLoaderData } from 'react-router-dom';
 import { Plus, Pencil, Trash2, Check, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { api } from '../../api';
 import { CategoryItem } from '../../types';
 
 export default function CategoryManager() {
-    const [categories, setCategories] = useState<CategoryItem[]>([]);
-    const [loading, setLoading] = useState(true);
+    const initialCategories = useLoaderData() as CategoryItem[];
+    const [categories, setCategories] = useState<CategoryItem[]>(initialCategories || []);
     const [error, setError] = useState<string | null>(null);
 
     // Stato form nuova categoria
@@ -24,12 +25,14 @@ export default function CategoryManager() {
             setCategories(data);
         } catch {
             setError('Errore caricamento categorie.');
-        } finally {
-            setLoading(false);
         }
     };
 
-    useEffect(() => { load(); }, []);
+    useEffect(() => {
+        if (initialCategories) {
+            setCategories(initialCategories);
+        }
+    }, [initialCategories]);
 
     // Auto-genera slug dal nome (solo per la creazione)
     const handleNameChange = (value: string) => {
@@ -110,12 +113,6 @@ export default function CategoryManager() {
             await load(); // Ripristina in caso di errore
         }
     };
-
-    if (loading) return (
-        <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-dis-green"></div>
-        </div>
-    );
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">

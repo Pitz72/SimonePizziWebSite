@@ -1,30 +1,34 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLoaderData, useSearchParams } from 'react-router-dom';
 import { Plus, Edit2, Trash2, Search, ExternalLink, Calendar, ChevronLeft, ChevronRight, Filter, X } from 'lucide-react';
 import { api } from '../../api';
 import { useCategories } from '../../hooks/useCategories';
 
 export default function ArticlesList() {
     const { categories } = useCategories();
-    const [articles, setArticles] = useState<any[]>([]);
-    const [tags, setTags] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const loaderData = useLoaderData() as { data: any[], total: number };
+    const [searchParams, setSearchParams] = useSearchParams();
     
-    // Stato Filtri (v1.8.5)
-    const [filters, setFilters] = useState({
-        q: '',
-        category: '',
-        tag: '',
-        startDate: '',
-        endDate: ''
-    });
+    // Sincronizziamo dati dal loader
+    const [articles, setArticles] = useState<any[]>(loaderData.data || []);
+    const [total, setTotal] = useState<number>(loaderData.total || 0);
+    const [tags, setTags] = useState<any[]>([]);
+    
+    // Valori correnti dai SearchParams
+    const q = searchParams.get('q') || '';
+    const category = searchParams.get('category') || '';
+    const tag = searchParams.get('tag') || '';
+    const startDate = searchParams.get('startDate') || '';
+    const endDate = searchParams.get('endDate') || '';
+    const page = parseInt(searchParams.get('page') || '1');
+    const limit = 10;
 
-    // Stato Paginazione
-    const [pagination, setPagination] = useState({
-        page: 1,
-        limit: 10,
-        total: 0
-    });
+    useEffect(() => {
+        if (loaderData) {
+            setArticles(loaderData.data || []);
+            setTotal(loaderData.total || 0);
+        }
+    }, [loaderData]);
 
     const formatDate = (dateStr: string | null | undefined) => {
         if (!dateStr) return '—';
@@ -43,40 +47,21 @@ export default function ArticlesList() {
         loadTags();
     }, []);
 
-    useEffect(() => {
-        loadArticles();
-    }, [filters, pagination.page]);
-
-    const loadArticles = async () => {
-        setLoading(true);
-        try {
-            const res = await api.getArticles({
-                admin: true,
-                page: pagination.page,
-                limit: pagination.limit,
-                q: filters.q,
-                category: filters.category,
-                tag: filters.tag,
-                startDate: filters.startDate,
-                endDate: filters.endDate
-            });
-            
-            if (res.data) {
-                setArticles(res.data);
-                setPagination(prev => ({ ...prev, total: res.total || 0 }));
-            } else {
-                setArticles(Array.isArray(res) ? res : []);
-            }
-        } catch (err) {
-            console.error('Failed to load articles', err);
-        } finally {
-            setLoading(false);
+    const handleFilterChange = (name: string, value: string) => {
+        const newParams = new URLSearchParams(searchParams);
+        if (value) {
+            newParams.set(name, value);
+        } else {
+            newParams.delete(name);
         }
+        newParams.set('page', '1'); // Reset paginazione su cambio filtro
+        setSearchParams(newParams);
     };
 
-    const handleFilterChange = (name: string, value: string) => {
-        setFilters(prev => ({ ...prev, [name]: value }));
-        setPagination(prev => ({ ...prev, page: 1 }));
+    const handlePageChange = (newPage: number) => {
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set('page', newPage.toString());
+        setSearchParams(newParams);
     };
 
     const handleDelete = async (id: number, title: string) => {
@@ -84,6 +69,7 @@ export default function ArticlesList() {
         try {
             await api.deleteArticle(id);
             setArticles(articles.filter(a => a.id !== id));
+            setTotal(prev => prev - 1);
         } catch (err) {
             alert('Errore eliminazione articolo');
         }
@@ -100,8 +86,9 @@ export default function ArticlesList() {
         }
     };
 
-    const totalPages = Math.ceil(pagination.total / pagination.limit);
-    const hasFilters = filters.q || filters.category || filters.tag || filters.startDate || filters.endDate;
+    const totalPages = Math.ceil(total / limit);
+    const hasFilters = q || category || tag || startDate || endDate;
+    const loading = false; // Il caricamento è gestito dal router ora
 
 
     return (
@@ -134,7 +121,6 @@ export default function ArticlesList() {
             </header>
 
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl overflow-hidden shadow-xl">
-                {/* Search & Filters Bar */}
                 <div className="p-4 border-b border-zinc-800 bg-zinc-900/50 space-y-4">
                     <div className="flex flex-col md:flex-row gap-4 items-center">
                         <div className="relative flex-1 w-full">
@@ -142,7 +128,7 @@ export default function ArticlesList() {
                             <input
                                 type="text"
                                 placeholder="Cerca nel titolo o nel testo..."
-                                value={filters.q}
+                                value={q}
                                 onChange={(e) => handleFilterChange('q', e.target.value)}
                                 className="w-full bg-zinc-950 border border-zinc-800 py-2 pl-9 pr-4 rounded-lg text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-dis-green transition-colors"
                             />
@@ -150,7 +136,7 @@ export default function ArticlesList() {
                         
                         <div className="flex items-center gap-2 w-full md:w-auto">
                             <select 
-                                value={filters.category}
+                                value={category}
                                 onChange={(e) => handleFilterChange('category', e.target.value)}
                                 className="bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-dis-green w-full md:w-40"
                             >
@@ -159,7 +145,7 @@ export default function ArticlesList() {
                             </select>
 
                             <select 
-                                value={filters.tag}
+                                value={tag}
                                 onChange={(e) => handleFilterChange('tag', e.target.value)}
                                 className="bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs rounded-lg px-3 py-2 focus:outline-none focus:border-dis-green w-full md:w-40"
                             >
@@ -169,7 +155,7 @@ export default function ArticlesList() {
 
                             {hasFilters && (
                                 <button 
-                                    onClick={() => setFilters({ q: '', category: '', tag: '', startDate: '', endDate: '' })}
+                                    onClick={() => setSearchParams(new URLSearchParams())}
                                     className="p-2 text-zinc-500 hover:text-white transition-colors"
                                     title="Pulisci Filtri"
                                 >
@@ -179,13 +165,12 @@ export default function ArticlesList() {
                         </div>
                     </div>
 
-                    {/* Date Range Filters */}
                     <div className="flex flex-wrap items-center gap-4 pt-2 border-t border-zinc-800/50">
                         <div className="flex items-center gap-2">
                             <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Dal:</label>
                             <input 
                                 type="date" 
-                                value={filters.startDate}
+                                value={startDate}
                                 onChange={(e) => handleFilterChange('startDate', e.target.value)}
                                 className="bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs rounded px-2 py-1 focus:outline-none focus:border-dis-green [color-scheme:dark]"
                             />
@@ -194,13 +179,13 @@ export default function ArticlesList() {
                             <label className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Al:</label>
                             <input 
                                 type="date" 
-                                value={filters.endDate}
+                                value={endDate}
                                 onChange={(e) => handleFilterChange('endDate', e.target.value)}
                                 className="bg-zinc-950 border border-zinc-800 text-zinc-300 text-xs rounded px-2 py-1 focus:outline-none focus:border-dis-green [color-scheme:dark]"
                             />
                         </div>
                         <div className="ml-auto text-[10px] text-zinc-600 font-medium italic">
-                            Trovati {pagination.total} articoli
+                            Trovati {total} articoli
                         </div>
                     </div>
                 </div>
@@ -315,16 +300,16 @@ export default function ArticlesList() {
                     </table>
                 </div>
 
-                {/* Pagination Controls */}
+                {/* Pagination Control */}
                 {totalPages > 1 && (
                     <div className="p-4 border-t border-zinc-800 bg-zinc-950/30 flex flex-col sm:flex-row justify-between items-center gap-4">
                         <div className="text-xs text-zinc-500">
-                            Pagina <span className="text-white font-bold">{pagination.page}</span> di <span className="text-white font-bold">{totalPages}</span>
+                            Pagina <span className="text-white font-bold">{page}</span> di <span className="text-white font-bold">{totalPages}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <button
-                                onClick={() => setPagination(prev => ({ ...prev, page: Math.max(1, prev.page - 1) }))}
-                                disabled={pagination.page === 1 || loading}
+                                onClick={() => handlePageChange(Math.max(1, page - 1))}
+                                disabled={page === 1 || loading}
                                 className="flex items-center gap-1 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-xs font-bold text-zinc-400 hover:text-white hover:border-dis-green disabled:opacity-30 disabled:hover:text-zinc-400 disabled:hover:border-zinc-800 transition-all"
                             >
                                 <ChevronLeft size={14} /> Precedente
@@ -334,25 +319,25 @@ export default function ArticlesList() {
                                 {[...Array(totalPages)].map((_, i) => {
                                     const p = i + 1;
                                     // Mostra solo alcune pagine se sono troppe
-                                    if (totalPages > 7 && Math.abs(p - pagination.page) > 2 && p !== 1 && p !== totalPages) {
+                                    if (totalPages > 7 && Math.abs(p - page) > 2 && p !== 1 && p !== totalPages) {
                                         if (p === 2 || p === totalPages - 1) return <span key={p} className="text-zinc-600 px-1">...</span>;
                                         return null;
                                     }
                                     return (
                                         <button
                                             key={p}
-                                            onClick={() => setPagination(prev => ({ ...prev, page: p }))}
-                                            className={`w-8 h-8 rounded text-xs font-bold transition-all ${pagination.page === p ? 'bg-dis-green text-black shadow-[0_0_10px_rgba(34,197,94,0.3)]' : 'text-zinc-500 hover:text-white hover:bg-zinc-800'}`}
+                                            onClick={() => handlePageChange(p)}
+                                            className={`w-8 h-8 rounded text-xs font-bold transition-all ${page === p ? 'bg-dis-green text-black shadow-[0_0_10px_rgba(34,197,94,0.3)]' : 'text-zinc-500 hover:text-white hover:bg-zinc-800'}`}
                                         >
                                             {p}
                                         </button>
                                     );
                                 })}
                             </div>
-
-                            <button
-                                onClick={() => setPagination(prev => ({ ...prev, page: Math.min(totalPages, prev.page + 1) }))}
-                                disabled={pagination.page === totalPages || loading}
+ 
+                             <button
+                                onClick={() => handlePageChange(Math.min(totalPages, page + 1))}
+                                disabled={page === totalPages || loading}
                                 className="flex items-center gap-1 px-3 py-1.5 bg-zinc-900 border border-zinc-800 rounded text-xs font-bold text-zinc-400 hover:text-white hover:border-dis-green disabled:opacity-30 disabled:hover:text-zinc-400 disabled:hover:border-zinc-800 transition-all"
                             >
                                 Successivo <ChevronRight size={14} />

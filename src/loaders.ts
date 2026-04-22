@@ -1,0 +1,150 @@
+import { LoaderFunctionArgs, redirect } from 'react-router-dom';
+import { api } from './api';
+import { mapArticleToPortfolioItem } from './utils/mappers';
+import { CategoryItem } from './types';
+
+/**
+ * Loader per la protezione delle rotte Admin.
+ * Verifica la sessione prima di caricare qualsiasi dato.
+ */
+export const adminAuthLoader = async () => {
+    try {
+        const session = await api.checkSession();
+        if (!session || !session.user) {
+            return redirect('/admin/login');
+        }
+        return session;
+    } catch {
+        return redirect('/admin/login');
+    }
+};
+
+// --- PUBLIC LOADERS ---
+
+export const portfolioLoader = async () => {
+    const res = await api.getArticles({ limit: 40 });
+    const data = Array.isArray(res) ? res : res.data;
+    return data.map(mapArticleToPortfolioItem);
+};
+
+export const allProjectsLoader = async () => {
+    const [projects, categories] = await Promise.all([
+        api.getProjects(),
+        api.getCategories()
+    ]);
+    return { projects, categories };
+};
+
+export const categoryArticlesLoader = async ({ params }: LoaderFunctionArgs) => {
+    const { categorySlug } = params;
+    if (!categorySlug) throw new Error("Categoria non specificata");
+    
+    // Recuperiamo le categorie per trovare il nome corretto
+    const categories: CategoryItem[] = await api.getCategories();
+    const category = categories.find(c => c.slug === categorySlug);
+    
+    if (!category) {
+        throw new Response("Categoria non trovata", { status: 404 });
+    }
+
+    const res = await api.getArticles({ category: categorySlug, limit: 100 });
+    const data = Array.isArray(res) ? res : res.data;
+    const articles = data.map(mapArticleToPortfolioItem);
+    
+    return { category, articles };
+};
+
+export const singleArticleLoader = async ({ params }: LoaderFunctionArgs) => {
+    const { projectSlug } = params;
+    if (!projectSlug) throw new Error("Slug non specificato");
+    
+    const article = await api.getArticleBySlug(projectSlug);
+    if (!article) {
+        throw new Response("Articolo non trovato", { status: 404 });
+    }
+    
+    return mapArticleToPortfolioItem(article);
+};
+
+// --- ADMIN LOADERS ---
+
+export const adminDashboardLoader = async () => {
+    await adminAuthLoader();
+    const [stats, analytics] = await Promise.all([
+        api.getStats(),
+        api.getAnalytics()
+    ]);
+    return { stats, analytics };
+};
+
+export const adminArticlesLoader = async ({ request }: LoaderFunctionArgs) => {
+    await adminAuthLoader();
+    const url = new URL(request.url);
+    const page = parseInt(url.searchParams.get('page') || '1');
+    const q = url.searchParams.get('q') || '';
+    const category = url.searchParams.get('category') || '';
+    const tag = url.searchParams.get('tag') || '';
+    const startDate = url.searchParams.get('startDate') || '';
+    const endDate = url.searchParams.get('endDate') || '';
+    
+    return await api.getArticles({ admin: true, page, limit: 10, q, category, tag, startDate, endDate });
+};
+
+export const adminArticleEditLoader = async ({ params }: LoaderFunctionArgs) => {
+    await adminAuthLoader();
+    const { id } = params;
+    
+    const [article, categories, tags] = await Promise.all([
+        id ? api.getArticle(parseInt(id)) : Promise.resolve(null),
+        api.getCategories(),
+        api.getTags()
+    ]);
+    
+    return { article, categories, tags };
+};
+
+export const adminProjectsLoader = async ({ request }: LoaderFunctionArgs) => {
+    await adminAuthLoader();
+    const url = new URL(request.url);
+    const category = url.searchParams.get('category') || '';
+    
+    const [projects, categories] = await Promise.all([
+        api.getProjects(category || undefined),
+        api.getCategories()
+    ]);
+    
+    return { projects, categories };
+};
+
+export const adminProjectEditLoader = async ({ params }: LoaderFunctionArgs) => {
+    await adminAuthLoader();
+    const { id } = params;
+    const [project, categories] = await Promise.all([
+        id ? api.getProject(parseInt(id)) : Promise.resolve(null),
+        api.getCategories()
+    ]);
+    return { project, categories };
+};
+
+export const adminCategoriesLoader = async () => {
+    await adminAuthLoader();
+    return await api.getCategories();
+};
+
+export const adminTagsLoader = async () => {
+    await adminAuthLoader();
+    return await api.getTags();
+};
+
+export const adminNewsletterLoader = async () => {
+    await adminAuthLoader();
+    const subscribers = await api.getSubscribers();
+    const history = await api.getNewsletterHistory();
+    const articles = await api.getArticles({ limit: 10 });
+    return { subscribers, history, articles: Array.isArray(articles) ? articles : articles.data };
+};
+
+export const adminSettingsLoader = async () => {
+    await adminAuthLoader();
+    return await api.getAppSettings();
+};

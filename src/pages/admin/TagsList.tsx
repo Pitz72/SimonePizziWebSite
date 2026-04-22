@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import { useLoaderData } from 'react-router-dom';
 import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
 import { api } from '../../api';
 
 export default function TagsList() {
-    const [tags, setTags] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const initialTags = useLoaderData() as any[];
+    const [tags, setTags] = useState<any[]>(initialTags || []);
     const [error, setError] = useState<string | null>(null);
 
     // Stato form nuovo tag
@@ -23,12 +24,14 @@ export default function TagsList() {
             setTags(data);
         } catch {
             setError('Errore caricamento tags.');
-        } finally {
-            setLoading(false);
         }
     };
 
-    useEffect(() => { load(); }, []);
+    useEffect(() => {
+        if (initialTags) {
+            setTags(initialTags);
+        }
+    }, [initialTags]);
 
     const handleNameChange = (value: string) => {
         setNewName(value);
@@ -90,11 +93,6 @@ export default function TagsList() {
         }
     };
 
-    if (loading) return (
-        <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-dis-green"></div>
-        </div>
-    );
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">

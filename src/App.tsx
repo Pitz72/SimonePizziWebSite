@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
-import { createBrowserRouter, RouterProvider, useLocation, Outlet, useParams } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, useLocation, Outlet, useLoaderData } from 'react-router-dom';
+import { PortfolioItem, CategoryItem } from './types';
 import { HelmetProvider } from 'react-helmet-async';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -33,7 +34,6 @@ const AllProjects = React.lazy(() => import('./pages/AllProjects'));
 const ContactPage = React.lazy(() => import('./pages/ContactPage'));
 const NewsletterConfirm = React.lazy(() => import('./pages/NewsletterConfirm'));
 const NewsletterUnsubscribe = React.lazy(() => import('./pages/NewsletterUnsubscribe'));
-import { useCategories } from './hooks/useCategories';
 
 const backgroundStyle = {
   background: 'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34, 197, 94, 0.3), rgba(0, 0, 0, 0))',
@@ -50,18 +50,11 @@ const ScrollToTop = () => {
   return null;
 };
 
-// Wrapper per caricare l'archivio basandosi sullo slug nella URL (per createBrowserRouter)
+// Wrapper per caricare l'archivio basandosi sui dati caricati dal loader
 const DynamicArchiveWrapper = () => {
-  const { categorySlug } = useParams<{ categorySlug: string }>();
-  const { categories } = useCategories();
-  const category = categories.find(c => c.slug === categorySlug);
+  const { category, articles } = useLoaderData() as { category: CategoryItem, articles: PortfolioItem[] };
 
-  if (!category) {
-      // Potrebbe essere un 404 o un caricamento
-      return <div className="min-h-[50vh] flex items-center justify-center text-white text-2xl">Caricamento categoria...</div>;
-  }
-
-  return <ArticleArchive title={category.name} category={category.slug} />;
+  return <ArticleArchive title={category.name} category={category.slug} initialItems={articles} />;
 };
 
 const PublicLayout: React.FC = () => {
@@ -101,6 +94,14 @@ const PublicLayout: React.FC = () => {
   );
 };
 
+import { 
+  portfolioLoader, allProjectsLoader, categoryArticlesLoader, singleArticleLoader,
+  adminDashboardLoader, adminArticlesLoader, adminArticleEditLoader, 
+  adminProjectsLoader, adminProjectEditLoader, adminCategoriesLoader, 
+  adminTagsLoader, adminNewsletterLoader, adminSettingsLoader,
+  adminAuthLoader
+} from './loaders';
+
 // Definizione del router con createBrowserRouter (Richiesto per useBlocker in RR7)
 const router = createBrowserRouter([
   {
@@ -113,20 +114,21 @@ const router = createBrowserRouter([
       {
         path: "",
         element: <AdminLayout />,
+        loader: adminAuthLoader,
         children: [
-          { index: true, element: <Dashboard /> },
-          { path: "dashboard", element: <Dashboard /> },
-          { path: "settings", element: <Settings /> },
-          { path: "articles", element: <ArticlesList /> },
-          { path: "articles/new", element: <ArticleEditor /> },
-          { path: "articles/edit/:id", element: <ArticleEditor /> },
-          { path: "projects", element: <ProjectsList /> },
-          { path: "projects/new", element: <ProjectEditor /> },
-          { path: "projects/edit/:id", element: <ProjectEditor /> },
+          { index: true, element: <Dashboard />, loader: adminDashboardLoader },
+          { path: "dashboard", element: <Dashboard />, loader: adminDashboardLoader },
+          { path: "settings", element: <Settings />, loader: adminSettingsLoader },
+          { path: "articles", element: <ArticlesList />, loader: adminArticlesLoader },
+          { path: "articles/new", element: <ArticleEditor />, loader: adminArticleEditLoader },
+          { path: "articles/edit/:id", element: <ArticleEditor />, loader: adminArticleEditLoader },
+          { path: "projects", element: <ProjectsList />, loader: adminProjectsLoader },
+          { path: "projects/new", element: <ProjectEditor />, loader: adminProjectEditLoader },
+          { path: "projects/edit/:id", element: <ProjectEditor />, loader: adminProjectEditLoader },
           { path: "media", element: <MediaGallery /> },
-          { path: "categories", element: <CategoryManager /> },
-          { path: "tags", element: <TagsList /> },
-          { path: "newsletter", element: <NewsletterAdmin /> },
+          { path: "categories", element: <CategoryManager />, loader: adminCategoriesLoader },
+          { path: "tags", element: <TagsList />, loader: adminTagsLoader },
+          { path: "newsletter", element: <NewsletterAdmin />, loader: adminNewsletterLoader },
         ]
       }
     ]
@@ -136,8 +138,8 @@ const router = createBrowserRouter([
     path: "/",
     element: <PublicLayout />,
     children: [
-      { index: true, element: <PortfolioGrid /> },
-      { path: "tutti-i-progetti", element: <AllProjects /> },
+      { index: true, element: <PortfolioGrid />, loader: portfolioLoader },
+      { path: "tutti-i-progetti", element: <AllProjects />, loader: allProjectsLoader },
       { path: "contatti", element: <ContactPage /> },
       { path: "newsletter/confermato", element: <NewsletterConfirm /> },
       { path: "newsletter/disiscritto", element: <NewsletterUnsubscribe /> },
@@ -145,11 +147,13 @@ const router = createBrowserRouter([
       // Gestione dinamica delle categorie (Fallback su slugs)
       {
           path: ":categorySlug",
-          element: <DynamicArchiveWrapper />
+          element: <DynamicArchiveWrapper />,
+          loader: categoryArticlesLoader
       },
       {
           path: ":categorySlug/:projectSlug",
-          element: <SingleArticle />
+          element: <SingleArticle />,
+          loader: singleArticleLoader
       },
 
       { path: "*", element: <div className="min-h-[50vh] flex items-center justify-center text-white text-2xl">404 - Pagina non trovata</div>}

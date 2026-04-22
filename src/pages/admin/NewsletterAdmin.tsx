@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, ReactElement } from 'react';
+import { useLoaderData } from 'react-router-dom';
 import { Users, Send, Trash2, Download, CheckCircle, Clock, XCircle, Loader2, AlertCircle, FileText, ChevronDown, ChevronUp } from 'lucide-react';
 import { api } from '../../api';
 
@@ -61,11 +62,11 @@ function buildArticleHtml(article: Article, siteBase: string): string {
 }
 
 export default function NewsletterAdmin() {
+    const initialData = useLoaderData() as { subscribers: any, history: HistoryItem[] };
     const [tab, setTab]                 = useState<Tab>('subscribers');
-    const [stats, setStats]             = useState<Stats | null>(null);
-    const [subscribers, setSubscribers] = useState<Subscriber[]>([]);
-    const [history, setHistory]         = useState<HistoryItem[]>([]);
-    const [loading, setLoading]         = useState(true);
+    const [stats, setStats]             = useState<Stats | null>(initialData?.subscribers?.stats || null);
+    const [subscribers, setSubscribers] = useState<Subscriber[]>(initialData?.subscribers?.subscribers || []);
+    const [history, setHistory]         = useState<HistoryItem[]>(initialData?.history || []);
 
     // Compositore
     const [subject, setSubject]         = useState('');
@@ -80,7 +81,6 @@ export default function NewsletterAdmin() {
     const [articlesLoading, setArticlesLoading] = useState(false);
 
     const loadData = useCallback(async () => {
-        setLoading(true);
         try {
             const [subData, histData] = await Promise.all([
                 api.getSubscribers(),
@@ -90,10 +90,15 @@ export default function NewsletterAdmin() {
             setSubscribers(subData.subscribers ?? []);
             setHistory(histData ?? []);
         } catch { /* silenzioso */ }
-        finally { setLoading(false); }
     }, []);
 
-    useEffect(() => { loadData(); }, [loadData]);
+    useEffect(() => {
+        if (initialData) {
+            setStats(initialData.subscribers?.stats || null);
+            setSubscribers(initialData.subscribers?.subscribers || []);
+            setHistory(initialData.history || []);
+        }
+    }, [initialData]);
 
     // Carica articoli quando si apre la sezione
     const handleToggleArticles = async () => {
@@ -218,11 +223,7 @@ export default function NewsletterAdmin() {
                         </button>
                     </div>
 
-                    {loading ? (
-                        <div className="flex items-center justify-center py-12 text-zinc-500">
-                            <Loader2 size={24} className="animate-spin mr-2"/>Caricamento…
-                        </div>
-                    ) : subscribers.length === 0 ? (
+                    {subscribers.length === 0 ? (
                         <div className="text-center py-12 text-zinc-500">
                             <Users size={40} className="mx-auto mb-3 opacity-30"/>
                             <p>Nessun iscritto ancora.</p>

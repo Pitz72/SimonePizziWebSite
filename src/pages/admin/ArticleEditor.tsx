@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate, useParams, Link } from 'react-router-dom';
+import { useNavigate, useParams, Link, useLoaderData } from 'react-router-dom';
 import { ArrowLeft, Save, Image as ImageIcon, LayoutTemplate, X, Tag as TagIcon, Loader2, Check, Link as LinkIcon, Mail } from 'lucide-react';
 import { api } from '../../api';
 import { CategoryItem } from '../../types';
@@ -15,10 +15,8 @@ export default function ArticleEditor() {
     const { id } = useParams();
     const navigate = useNavigate();
     const isEditing = !!id;
+    const { article, categories, tags: availableTags } = useLoaderData() as { article: any, categories: CategoryItem[], tags: any[] };
 
-    const [loading, setLoading] = useState(true);
-    const [categories, setCategories] = useState<CategoryItem[]>([]);
-    const [availableTags, setAvailableTags] = useState<any[]>([]);
     const [saving, setSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
     const [error, setError] = useState('');
@@ -31,7 +29,7 @@ export default function ArticleEditor() {
         excerpt: '',
         content: '',
         cover_image: '',
-        category: '',
+        category: categories[0]?.slug || '',
         tags: [] as string[],
         is_featured: false,
         status: 'draft',
@@ -43,44 +41,33 @@ export default function ArticleEditor() {
     });
 
     useEffect(() => {
-        const init = async () => {
-            try {
-                const [cats, tags] = await Promise.all([api.getCategories(), api.getTags()]);
-                setCategories(cats);
-                setAvailableTags(tags);
+        if (article) {
+            const linkA = article.button_a_link || '';
+            const linkB = article.button_b_link || '';
+            
+            if (linkA.startsWith('mailto:')) setBtnAType('email');
+            if (linkB.startsWith('mailto:')) setBtnBType('email');
 
-                if (isEditing) {
-                    const article = await api.getArticle(Number(id));
-                    
-                    const linkA = article.button_a_link || '';
-                    const linkB = article.button_b_link || '';
-                    
-                    if (linkA.startsWith('mailto:')) setBtnAType('email');
-                    if (linkB.startsWith('mailto:')) setBtnBType('email');
-
-                    const loadedData = {
-                        ...article,
-                        button_a_link: linkA.startsWith('mailto:') ? linkA.replace('mailto:', '') : linkA,
-                        button_b_link: linkB.startsWith('mailto:') ? linkB.replace('mailto:', '') : linkB,
-                        tags: article.tags ? (typeof article.tags === 'string' ? article.tags.split(',').map((t: string) => t.trim()) : article.tags) : [],
-                        is_featured: article.is_featured === 1 || article.is_featured === true,
-                        published_at: article.published_at ? article.published_at.replace(' ', 'T').slice(0, 16) : getLocalDatetime()
-                    };
-                    setFormData(loadedData);
-                    setInitialData(loadedData);
-                } else if (cats.length > 0) {
-                    const newData = { ...formData, category: cats[0].slug };
-                    setFormData(newData);
-                    setInitialData(newData);
-                }
-            } catch (err: any) {
-                setError('Impossibile caricare i dati: ' + err.message);
-            } finally {
-                setLoading(false);
-            }
-        };
-        init();
-    }, [id, isEditing]);
+            const loadedData = {
+                ...article,
+                button_a_link: linkA.startsWith('mailto:') ? linkA.replace('mailto:', '') : linkA,
+                button_b_link: linkB.startsWith('mailto:') ? linkB.replace('mailto:', '') : linkB,
+                tags: article.tags ? (typeof article.tags === 'string' ? article.tags.split(',').map((t: string) => t.trim()) : article.tags) : [],
+                is_featured: article.is_featured === 1 || article.is_featured === true,
+                published_at: article.published_at ? article.published_at.replace(' ', 'T').slice(0, 16) : getLocalDatetime()
+            };
+            setFormData(loadedData);
+            setInitialData(loadedData);
+        } else {
+            // Per i nuovi articoli, resettiamo lo stato iniziale
+            const freshData = {
+                ...formData,
+                category: categories[0]?.slug || ''
+            };
+            setFormData(freshData);
+            setInitialData(freshData);
+        }
+    }, [article, categories]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -141,7 +128,6 @@ export default function ArticleEditor() {
         return () => window.removeEventListener('beforeunload', handleBeforeUnload);
     }, [isDirty]);
 
-    if (loading) return <div className="text-zinc-500 animate-pulse p-8">Caricamento editor...</div>;
 
     return (
         <div className="max-w-6xl mx-auto space-y-6 pb-20 active-in fade-in duration-500 relative">
