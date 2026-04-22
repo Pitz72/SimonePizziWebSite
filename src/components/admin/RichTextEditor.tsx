@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import { Link } from '@tiptap/extension-link';
 import { Image } from '@tiptap/extension-image';
 import { Color } from '@tiptap/extension-color';
 import { TextStyle } from '@tiptap/extension-text-style';
-import { Underline } from '@tiptap/extension-underline';
 import { TextAlign } from '@tiptap/extension-text-align';
 import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
@@ -56,13 +54,6 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                     levels: [1, 2, 3, 4],
                 },
             }),
-            Underline,
-            Link.configure({
-                openOnClick: false,
-                HTMLAttributes: {
-                    class: 'text-dis-green underline cursor-pointer',
-                },
-            }),
             Image.configure({
                 HTMLAttributes: {
                     class: 'max-w-full h-auto rounded-xl my-4 shadow-lg border border-zinc-800',
@@ -104,7 +95,7 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
         },
         editorProps: {
             attributes: {
-                class: 'p-6 text-zinc-300 prose prose-invert max-w-none outline-none min-h-[250px]',
+                class: 'p-6 prose prose-invert max-w-none outline-none min-h-[250px]',
             },
         },
     });
@@ -212,6 +203,7 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                                     <button
                                         key={color}
                                         type="button"
+                                        onMouseDown={(e) => e.preventDefault()}
                                         className="w-8 h-8 rounded border border-zinc-700 hover:scale-110 transition-transform shadow-md"
                                         style={{ backgroundColor: color }}
                                         onClick={() => {

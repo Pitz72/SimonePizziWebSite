@@ -2,7 +2,7 @@
 
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.8.1  
+**Versione corrente:** 1.8.4  
 **Ultimo aggiornamento documento:** 22 Aprile 2026  
 **Sito:** simonepizzi.runtimeradio.it
 
@@ -65,6 +65,7 @@ Elenco sintetico delle funzionalità core e miglioramenti completati:
 - ✅ **[P3-03]** Recupero password / login via email (v1.8.0)
 - ✅ **[P3-04]** Sistema di backup automatico e manuale (MySQL)
 - ✅ **[P3-05]** Migrazione Editor a Tiptap (v1.8.1)
+- ✅ **[P3-08]** Dirty State Warning & Router Refactor (createBrowserRouter) (v1.8.4)
 
 
 - ✅ **Menu Mobile:** Hamburger e drawer ottimizzato

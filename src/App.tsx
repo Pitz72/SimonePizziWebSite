@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, useLocation, Outlet, useParams } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -47,8 +47,21 @@ const ScrollToTop = () => {
   return null;
 };
 
-const PublicLayout: React.FC = () => {
+// Wrapper per caricare l'archivio basandosi sullo slug nella URL (per createBrowserRouter)
+const DynamicArchiveWrapper = () => {
+  const { categorySlug } = useParams<{ categorySlug: string }>();
   const { categories } = useCategories();
+  const category = categories.find(c => c.slug === categorySlug);
+
+  if (!category) {
+      // Potrebbe essere un 404 o un caricamento
+      return <div className="min-h-[50vh] flex items-center justify-center text-white text-2xl">Caricamento categoria...</div>;
+  }
+
+  return <ArticleArchive title={category.name} category={category.slug} />;
+};
+
+const PublicLayout: React.FC = () => {
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
 
   useEffect(() => {
@@ -76,29 +89,7 @@ const PublicLayout: React.FC = () => {
         <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
         <main className="px-4 sm:px-6 lg:px-8">
-          <Routes>
-            <Route path="/" element={<PortfolioGrid />} />
-            <Route path="/tutti-i-progetti" element={<AllProjects />} />
-            <Route path="/contatti" element={<ContactPage />} />
-            <Route path="/newsletter/confermato" element={<NewsletterConfirm />} />
-            <Route path="/newsletter/disiscritto" element={<NewsletterUnsubscribe />} />
-
-            {/* Route dinamiche generate dalle categorie caricate dal DB */}
-            {categories.map(cat => (
-              <React.Fragment key={cat.slug}>
-                <Route
-                  path={`/${cat.slug}`}
-                  element={<ArticleArchive title={cat.name} category={cat.slug} />}
-                />
-                <Route
-                  path={`/${cat.slug}/:projectSlug`}
-                  element={<SingleArticle />}
-                />
-              </React.Fragment>
-            ))}
-
-            <Route path="*" element={<div className="min-h-[50vh] flex items-center justify-center text-white text-2xl">404 - Pagina non trovata</div>} />
-          </Routes>
+          <Outlet />
         </main>
 
         <Footer />
@@ -107,36 +98,66 @@ const PublicLayout: React.FC = () => {
   );
 };
 
+// Definizione del router con createBrowserRouter (Richiesto per useBlocker in RR7)
+const router = createBrowserRouter([
+  {
+    // Rotte Admin (Fuori dal PublicLayout)
+    path: "/admin",
+    children: [
+      { path: "login", element: <Login /> },
+      { path: "recovery", element: <RecoveryRequest /> },
+      { path: "reset-password/:token", element: <ResetPassword /> },
+      {
+        path: "",
+        element: <AdminLayout />,
+        children: [
+          { index: true, element: <Dashboard /> },
+          { path: "dashboard", element: <Dashboard /> },
+          { path: "settings", element: <Settings /> },
+          { path: "articles", element: <ArticlesList /> },
+          { path: "articles/new", element: <ArticleEditor /> },
+          { path: "articles/edit/:id", element: <ArticleEditor /> },
+          { path: "projects", element: <ProjectsList /> },
+          { path: "projects/new", element: <ProjectEditor /> },
+          { path: "projects/edit/:id", element: <ProjectEditor /> },
+          { path: "media", element: <MediaGallery /> },
+          { path: "categories", element: <CategoryManager /> },
+          { path: "tags", element: <TagsList /> },
+          { path: "newsletter", element: <NewsletterAdmin /> },
+        ]
+      }
+    ]
+  },
+  {
+    // Rotte Pubbliche (Dentro PublicLayout)
+    path: "/",
+    element: <PublicLayout />,
+    children: [
+      { index: true, element: <PortfolioGrid /> },
+      { path: "tutti-i-progetti", element: <AllProjects /> },
+      { path: "contatti", element: <ContactPage /> },
+      { path: "newsletter/confermato", element: <NewsletterConfirm /> },
+      { path: "newsletter/disiscritto", element: <NewsletterUnsubscribe /> },
+      
+      // Gestione dinamica delle categorie (Fallback su slugs)
+      {
+          path: ":categorySlug",
+          element: <DynamicArchiveWrapper />
+      },
+      {
+          path: ":categorySlug/:projectSlug",
+          element: <SingleArticle />
+      },
+
+      { path: "*", element: <div className="min-h-[50vh] flex items-center justify-center text-white text-2xl">404 - Pagina non trovata</div>}
+    ]
+  }
+]);
+
 const App: React.FC = () => {
   return (
     <HelmetProvider>
-      <Router>
-        <Routes>
-          {/* Rotte del Pannello di Controllo */}
-          <Route path="/admin/login" element={<Login />} />
-          <Route path="/admin/recovery" element={<RecoveryRequest />} />
-          <Route path="/admin/reset-password/:token" element={<ResetPassword />} />
-          <Route path="/admin" element={<AdminLayout />}>
-
-            <Route path="dashboard" element={<Dashboard />} />
-            <Route path="settings" element={<Settings />} />
-            <Route path="articles" element={<ArticlesList />} />
-            <Route path="articles/new" element={<ArticleEditor />} />
-            <Route path="articles/edit/:id" element={<ArticleEditor />} />
-            <Route path="projects" element={<ProjectsList />} />
-            <Route path="projects/new" element={<ProjectEditor />} />
-            <Route path="projects/edit/:id" element={<ProjectEditor />} />
-            <Route path="media" element={<MediaGallery />} />
-            <Route path="categories" element={<CategoryManager />} />
-            <Route path="tags" element={<TagsList />} />
-            <Route path="newsletter" element={<NewsletterAdmin />} />
-            <Route index element={<Dashboard />} />
-          </Route>
-
-          {/* Rotte Pubbliche */}
-          <Route path="/*" element={<PublicLayout />} />
-        </Routes>
-      </Router>
+      <RouterProvider router={router} />
     </HelmetProvider>
   );
 };

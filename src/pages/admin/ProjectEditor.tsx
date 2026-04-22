@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Save, Loader2, Check, Link as LinkIcon, Mail } from 'lucide-react';
+import { NavigationBlocker } from '../../components/admin/NavigationBlocker';
 import { api } from '../../api';
 import { CategoryItem } from '../../types';
 
@@ -41,6 +42,7 @@ export default function ProjectEditor() {
     const [error, setError] = useState('');
     const [btnAType, setBtnAType] = useState<'url' | 'email'>('url');
     const [btnBType, setBtnBType] = useState<'url' | 'email'>('url');
+    const [initialData, setInitialData] = useState<FormData | null>(null);
 
     useEffect(() => {
         const loadData = async () => {
@@ -57,7 +59,7 @@ export default function ProjectEditor() {
                     if ((projData.button_a_url || '').startsWith('mailto:')) setBtnAType('email');
                     if ((projData.button_b_url || '').startsWith('mailto:')) setBtnBType('email');
 
-                    setForm({
+                    const loadedForm = {
                         name: projData.name || '',
                         category: projData.category || '',
                         description: projData.description || '',
@@ -67,10 +69,14 @@ export default function ProjectEditor() {
                         button_b_label: projData.button_b_label || '',
                         button_b_url: (projData.button_b_url || '').startsWith('mailto:') ? (projData.button_b_url || '').replace('mailto:', '') : (projData.button_b_url || ''),
                         is_visible: Boolean(projData.is_visible),
-                    });
+                    };
+                    setForm(loadedForm);
+                    setInitialData(loadedForm);
                 } else if (catData.length > 0) {
                     // Default alla prima categoria per i nuovi progetti
-                    setForm(prev => ({ ...prev, category: catData[0].slug }));
+                    const newForm = { ...form, category: catData[0].slug };
+                    setForm(newForm);
+                    setInitialData(newForm);
                 }
             } catch (e: any) {
                 setError('Errore caricamento dati: ' + e.message);
@@ -109,6 +115,7 @@ export default function ProjectEditor() {
             }
             
             setSaveSuccess(true);
+            setInitialData(form); // Reset dirty state
             setTimeout(() => {
                 navigate('/admin/projects');
             }, 1200);
@@ -118,10 +125,26 @@ export default function ProjectEditor() {
         }
     };
 
+    // Calcolo stato Dirty
+    const isDirty = !!(initialData && JSON.stringify(form) !== JSON.stringify(initialData));
+
+    // Blocco chiusura Tab/Browser
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isDirty) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isDirty]);
+
     if (loading) return <p className="text-zinc-400">Caricamento progetto...</p>;
 
     return (
         <div className="max-w-2xl mx-auto relative">
+            <NavigationBlocker isDirty={isDirty && !saveSuccess} />
             <style>{`
                 @keyframes pb-indeterminate {
                     0% { transform: translateX(-100%); }

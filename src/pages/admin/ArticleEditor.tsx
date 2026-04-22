@@ -4,6 +4,7 @@ import { ArrowLeft, Save, Image as ImageIcon, LayoutTemplate, X, Tag as TagIcon,
 import { api } from '../../api';
 import { CategoryItem } from '../../types';
 import { RichTextEditor } from '../../components/admin/RichTextEditor';
+import { NavigationBlocker } from '../../components/admin/NavigationBlocker';
 
 const getLocalDatetime = () => {
     const tzoffset = (new Date()).getTimezoneOffset() * 60000;
@@ -23,6 +24,7 @@ export default function ArticleEditor() {
     const [error, setError] = useState('');
     const [btnAType, setBtnAType] = useState<'url' | 'email'>('url');
     const [btnBType, setBtnBType] = useState<'url' | 'email'>('url');
+    const [initialData, setInitialData] = useState<any>(null);
 
     const [formData, setFormData] = useState({
         title: '',
@@ -56,16 +58,20 @@ export default function ArticleEditor() {
                     if (linkA.startsWith('mailto:')) setBtnAType('email');
                     if (linkB.startsWith('mailto:')) setBtnBType('email');
 
-                    setFormData({
+                    const loadedData = {
                         ...article,
                         button_a_link: linkA.startsWith('mailto:') ? linkA.replace('mailto:', '') : linkA,
                         button_b_link: linkB.startsWith('mailto:') ? linkB.replace('mailto:', '') : linkB,
                         tags: article.tags ? (typeof article.tags === 'string' ? article.tags.split(',').map((t: string) => t.trim()) : article.tags) : [],
                         is_featured: article.is_featured === 1 || article.is_featured === true,
                         published_at: article.published_at ? article.published_at.replace(' ', 'T').slice(0, 16) : getLocalDatetime()
-                    });
+                    };
+                    setFormData(loadedData);
+                    setInitialData(loadedData);
                 } else if (cats.length > 0) {
-                    setFormData(prev => ({ ...prev, category: cats[0].slug }));
+                    const newData = { ...formData, category: cats[0].slug };
+                    setFormData(newData);
+                    setInitialData(newData);
                 }
             } catch (err: any) {
                 setError('Impossibile caricare i dati: ' + err.message);
@@ -107,7 +113,10 @@ export default function ArticleEditor() {
                 await api.createArticle(payload);
             }
             
+            
             setSaveSuccess(true);
+            setInitialData(formData); // Resetta lo stato dirty dopo il salvataggio
+            
             setTimeout(() => {
                 navigate('/admin/articles');
             }, 1200);
@@ -117,10 +126,26 @@ export default function ArticleEditor() {
         }
     };
 
+    // Calcolo stato Dirty
+    const isDirty = !!(initialData && JSON.stringify(formData) !== JSON.stringify(initialData));
+
+    // Blocco chiusura Tab/Browser
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isDirty) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isDirty]);
+
     if (loading) return <div className="text-zinc-500 animate-pulse p-8">Caricamento editor...</div>;
 
     return (
         <div className="max-w-6xl mx-auto space-y-6 pb-20 active-in fade-in duration-500 relative">
+            <NavigationBlocker isDirty={isDirty && !saveSuccess} />
             <style>{`
                 @keyframes pb-indeterminate {
                     0% { transform: translateX(-100%); }
