@@ -1,7 +1,8 @@
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
 import { LayoutDashboard, FileText, Image as ImageIcon, Settings, LogOut, FolderOpen, Tag, Mail, Hash } from 'lucide-react';
 import { api } from '../../api';
+import Loader from '../../components/Loader';
 
 export default function AdminLayout() {
     const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -23,7 +24,7 @@ export default function AdminLayout() {
     };
 
     if (loading) {
-        return <div className="min-h-screen bg-zinc-950 flex items-center justify-center text-dis-green">Caricamento cruscotto...</div>;
+        return <Loader />;
     }
 
     if (!isAuthenticated) return null;
@@ -84,7 +85,9 @@ export default function AdminLayout() {
             {/* Main Content Area */}
             <main className="flex-1 overflow-auto bg-zinc-950/50">
                 <div className="p-8">
-                    <Outlet />
+                    <React.Suspense fallback={<Loader />}>
+                        <Outlet />
+                    </React.Suspense>
                 </div>
             </main>
         </div>

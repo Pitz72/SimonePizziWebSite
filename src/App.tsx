@@ -85,7 +85,9 @@ const PublicLayout: React.FC = () => {
         <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
         <main className="px-4 sm:px-6 lg:px-8">
-          <Outlet />
+          <React.Suspense fallback={<Loader />}>
+            <Outlet />
+          </React.Suspense>
         </main>
 
         <Footer />
@@ -115,6 +117,7 @@ const router = createBrowserRouter([
         path: "",
         element: <AdminLayout />,
         loader: adminAuthLoader,
+        HydrateFallback: Loader,
         children: [
           { index: true, element: <Dashboard />, loader: adminDashboardLoader },
           { path: "dashboard", element: <Dashboard />, loader: adminDashboardLoader },
@@ -137,6 +140,7 @@ const router = createBrowserRouter([
     // Rotte Pubbliche (Dentro PublicLayout)
     path: "/",
     element: <PublicLayout />,
+    HydrateFallback: Loader,
     children: [
       { index: true, element: <PortfolioGrid />, loader: portfolioLoader },
       { path: "tutti-i-progetti", element: <AllProjects />, loader: allProjectsLoader },

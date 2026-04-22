@@ -1,12 +1,12 @@
 # Simone Pizzi - Portfolio Creativo
 
-![Version](https://img.shields.io/badge/version-1.9.0-green.svg)
+![Version](https://img.shields.io/badge/version-1.9.2-green.svg)
 ![React](https://img.shields.io/badge/react-v19.2.4-blue.svg)
 ![TypeScript](https://img.shields.io/badge/typescript-v5.2.2-blue.svg)
 ![Vite](https://img.shields.io/badge/vite-v7.3.1-646cff.svg)
 ![Tailwind](https://img.shields.io/badge/tailwindcss-v4.2.1-38bdf8.svg)
 
-Una Single Page Application (SPA) moderna con Mini-CMS integrato, sviluppata con **React 19** e **Tailwind CSS v4**, con backend **PHP/MySQL** per la gestione dinamica dei contenuti. Il sito funge da portfolio e hub personale, raccontando i progetti creativi dell'autore con un'architettura ibrida frontend/backend. **v1.9.0**: Prerendering statico per indicizzazione Google completa.
+Una Single Page Application (SPA) moderna con Mini-CMS integrato, sviluppata con **React 19** e **Tailwind CSS v4**, con backend **PHP/MySQL** per la gestione dinamica dei contenuti. Il sito funge da portfolio e hub personale, raccontando i progetti creativi dell'autore con un'architettura ibrida frontend/backend. **v1.9.2**: Integrazione statistiche visuali interattive con Chart.js e fix critici sull'idratazione.
 
 Per la documentazione completa: **[Master Index della Documentazione](docs/README.md)**.
 
@@ -26,7 +26,7 @@ Per la documentazione completa: **[Master Index della Documentazione](docs/READM
 
 **Backend:**
 - PHP con layer REST API in `/public/api/`
-- SQLite via PDO (`public/api/.data/database.sqlite`)
+- MySQL su host `mysql.runtimeradio.it` (Migrazione completata v1.7.0)
 - `public/index.php`: router SEO server-side (OpenGraph, TwitterCard)
 - `public/.htaccess`: Apache rewrite rules per BrowserRouter
 
@@ -82,7 +82,7 @@ Per la documentazione completa: **[Master Index della Documentazione](docs/READM
 - Editor articoli WYSIWYG con preview Markdown in real-time
 - Scheduling articoli con data di pubblicazione programmabile
 - Gestione Media Gallery (upload drag&drop, multi-formato: immagini, PDF, ZIP)
-- Dashboard con statistiche di sistema
+- Dashboard con statistiche visuali interattive (Chart.js)
 - Gestione password
 
 ---
@@ -92,7 +92,7 @@ Per la documentazione completa: **[Master Index della Documentazione](docs/READM
 ### Prerequisiti
 
 - Node.js v18+
-- PHP 8.x con estensione SQLite abilitata
+- PHP 8.x con estensione MySQL (pdo_mysql) abilitata
 - Server locale (es. MAMP, Laragon, XAMPP) puntato sulla root del progetto (porta 8888 o configurabile in `src/api.ts`)
 
 ### Installazione

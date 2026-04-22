@@ -1,5 +1,7 @@
 import { Activity, FileText, Image as ImageIcon, Users, Eye, MousePointerClick, TrendingUp } from 'lucide-react';
 import { useLoaderData, Link } from 'react-router-dom';
+import { Line, Doughnut } from 'react-chartjs-2';
+import { chartColors, commonOptions } from '../../utils/chartConfig';
 
 interface AnalyticsData {
     total_views: number;
@@ -25,8 +27,55 @@ export default function Dashboard() {
         return new Date(dateStr).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
     };
 
-    const maxWeeklyCount = analytics?.weekly_views?.reduce((max, d) => Math.max(max, d.count), 1) ?? 1;
     const analyticsError = !analytics;
+
+    // Configurazione Dati per Grafico Visualizzazioni (Line Area)
+    const viewsChartData = {
+        labels: analytics?.weekly_views?.map(d => formatDate(d.view_date)) || [],
+        datasets: [{
+            label: 'Visualizzazioni',
+            data: analytics?.weekly_views?.map(d => d.count) || [],
+            borderColor: chartColors.green,
+            backgroundColor: chartColors.greenTransparent,
+            fill: true,
+            tension: 0.4,
+            pointBackgroundColor: chartColors.green,
+            pointBorderColor: '#fff',
+            pointHoverRadius: 6,
+            pointRadius: 4
+        }]
+    };
+
+    // Configurazione Dati per Grafico Click CTA (Doughnut)
+    const clicksChartData = {
+        labels: analytics?.clicks_by_button?.map(b => b.button_label) || [],
+        datasets: [{
+            data: analytics?.clicks_by_button?.map(b => b.count) || [],
+            backgroundColor: [
+                chartColors.green,
+                chartColors.cyan,
+                chartColors.purple,
+                chartColors.orange,
+                '#4ade80',
+                '#2dd4bf'
+            ],
+            borderColor: chartColors.bg,
+            borderWidth: 2,
+            hoverOffset: 15
+        }]
+    };
+
+    const doughnutOptions = {
+        ...commonOptions,
+        cutout: '70%',
+        plugins: {
+            ...commonOptions.plugins,
+            legend: {
+                ...commonOptions.plugins.legend,
+                position: 'right' as const,
+            }
+        }
+    };
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500">
@@ -93,41 +142,33 @@ export default function Dashboard() {
                             <Eye size={18} className="text-cyan-400" />
                             <h2 className="text-white font-semibold">Visualizzazioni Ultimi 7 Giorni</h2>
                         </div>
-                        {analytics?.weekly_views && analytics.weekly_views.length > 0 ? (
-                            <div className="flex items-end gap-2 h-28">
-                                {analytics.weekly_views.map(day => (
-                                    <div key={day.view_date} className="flex-1 flex flex-col items-center gap-1">
-                                        <span className="text-zinc-500 text-[10px] font-mono">{day.count}</span>
-                                        <div
-                                            className="w-full bg-cyan-400/20 border border-cyan-400/30 rounded-sm transition-all"
-                                            style={{ height: `${Math.max(4, (day.count / maxWeeklyCount) * 80)}px` }}
-                                        ></div>
-                                        <span className="text-zinc-600 text-[9px]">{formatDate(day.view_date)}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p className="text-zinc-600 text-sm">Nessuna visualizzazione negli ultimi 7 giorni.</p>
-                        )}
+                        <div className="h-64 w-full">
+                            {analytics?.weekly_views && analytics.weekly_views.length > 0 ? (
+                                <Line data={viewsChartData} options={commonOptions} />
+                            ) : (
+                                <div className="h-full flex items-center justify-center border border-dashed border-zinc-800 rounded-lg">
+                                    <p className="text-zinc-600 text-sm">Nessuna visualizzazione negli ultimi 7 giorni.</p>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Click CTA per Bottone */}
-                    {analytics?.clicks_by_button && analytics.clicks_by_button.length > 0 && (
-                        <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 lg:col-span-2">
-                            <div className="flex items-center gap-2 mb-5">
-                                <MousePointerClick size={18} className="text-orange-400" />
-                                <h2 className="text-white font-semibold">Click sui Pulsanti CTA</h2>
-                            </div>
-                            <div className="flex flex-wrap gap-3">
-                                {analytics.clicks_by_button.map(btn => (
-                                    <div key={btn.button_label} className="bg-zinc-800 border border-zinc-700 px-4 py-2 rounded-lg flex items-center gap-2">
-                                        <span className="text-zinc-300 text-sm">{btn.button_label}</span>
-                                        <span className="text-orange-400 font-bold text-sm">{btn.count}</span>
-                                    </div>
-                                ))}
-                            </div>
+                    <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                        <div className="flex items-center gap-2 mb-5">
+                            <MousePointerClick size={18} className="text-orange-400" />
+                            <h2 className="text-white font-semibold">Distribuzione Click CTA</h2>
                         </div>
-                    )}
+                        <div className="h-64 w-full">
+                            {analytics?.clicks_by_button && analytics.clicks_by_button.length > 0 ? (
+                                <Doughnut data={clicksChartData} options={doughnutOptions} />
+                            ) : (
+                                <div className="h-full flex items-center justify-center border border-dashed border-zinc-800 rounded-lg">
+                                    <p className="text-zinc-600 text-sm">Nessun click registrato sui pulsanti.</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
                 </div>
             )}
 
