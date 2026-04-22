@@ -89,7 +89,6 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category, initia
                                             src={heroItem.imageUrl}
                                             alt={heroItem.title}
                                             className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105"
-                                            loading="lazy"
                                         />
                                     </div>
                                     <div className="w-full md:w-2/5 lg:w-1/3 p-8 md:p-12 flex flex-col justify-center relative z-20 bg-zinc-900 shadow-[-20px_0_30px_rgba(9,9,11,1)]">
@@ -155,7 +154,6 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category, initia
                                                 src={item.imageUrl}
                                                 alt={item.title}
                                                 className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-                                                loading="lazy"
                                             />
                                         </div>
 

@@ -2,8 +2,8 @@
 
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.9.2  
-**Ultimo aggiornamento documento:** 22 Aprile 2026 (Chart.js Integration)  
+**Versione corrente:** 1.9.3  
+**Ultimo aggiornamento documento:** 22 Aprile 2026 (Performance & MySQL Optimization)  
 **Sito:** simonepizzi.runtimeradio.it
 
 > Questo documento è la fonte autoritativa per lo stato del progetto, le promesse di sviluppo e la pianificazione futura.  
@@ -70,6 +70,7 @@ Elenco sintetico delle funzionalità core e miglioramenti completati:
 - ✅ **[P1-05]** Prerendering Statico con Iniezione SEO (v1.9.0)
 - ✅ **[P2-05]** Ottimizzazione Bundle & Code Splitting (v1.9.1)
 - ✅ **[P3-10]** Dashboard Analytics Visuale con Chart.js (v1.9.2)
+- ✅ **[P4-01]** Ottimizzazioni Forensi delle Performance (v1.9.3)
 
 - ✅ **Menu Mobile:** Hamburger e drawer ottimizzato
 
