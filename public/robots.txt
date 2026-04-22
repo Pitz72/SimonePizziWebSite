@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://simonepizzi.runtimeradio.it/sitemap.xml

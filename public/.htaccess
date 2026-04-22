@@ -17,6 +17,10 @@
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_URI} !^/api/ [NC]
 
+# [v1.9.4] Mappatura dinamica Sitemap e Robots
+  RewriteRule ^sitemap\.xml$ sitemap.php [L]
+  RewriteRule ^robots\.txt$ robots.php [L]
+
 # Dirotta tutte le URL puramente virtuali di React sul motore SEO PHP
 
   RewriteRule ^(.*)$ /index.php [L,QSA]

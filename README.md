@@ -1,12 +1,12 @@
 # Simone Pizzi - Portfolio Creativo
 
-![Version](https://img.shields.io/badge/version-1.9.3-green.svg)
+![Version](https://img.shields.io/badge/version-1.9.4-green.svg)
 ![React](https://img.shields.io/badge/react-v19.2.4-blue.svg)
 ![TypeScript](https://img.shields.io/badge/typescript-v5.2.2-blue.svg)
 ![Vite](https://img.shields.io/badge/vite-v7.3.1-646cff.svg)
 ![Tailwind](https://img.shields.io/badge/tailwindcss-v4.2.1-38bdf8.svg)
 
-Una Single Page Application (SPA) moderna con Mini-CMS integrato, sviluppata con **React 19** e **Tailwind CSS v4**, con backend **PHP/MySQL** per la gestione dinamica dei contenuti. Il sito funge da portfolio e hub personale, raccontando i progetti creativi dell'autore con un'architettura ibrida frontend/backend. **v1.9.3**: Ottimizzazioni forensi delle performance, parallelizzazione loader e indici MySQL analytics.
+Una Single Page Application (SPA) moderna con Mini-CMS integrato, sviluppata con **React 19** e **Tailwind CSS v4**, con backend **PHP/MySQL** per la gestione dinamica dei contenuti. Il sito funge da portfolio e hub personale, raccontando i progetti creativi dell'autore con un'architettura ibrida frontend/backend. **v1.9.4**: Implementazione Sitemap e Robots dinamici via PHP con mappatura .htaccess.
 
 Per la documentazione completa: **[Master Index della Documentazione](docs/README.md)**.
 
