@@ -2,7 +2,7 @@
 
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.8.5  
+**Versione corrente:** 1.9.0  
 **Ultimo aggiornamento documento:** 22 Aprile 2026  
 **Sito:** simonepizzi.runtimeradio.it
 
@@ -67,7 +67,7 @@ Elenco sintetico delle funzionalità core e miglioramenti completati:
 - ✅ **[P3-05]** Migrazione Editor a Tiptap (v1.8.1)
 - ✅ **[P3-08]** Dirty State Warning & Router Refactor (createBrowserRouter) (v1.8.4)
 - ✅ **[P3-09]** Paginazione e Ricerca Avanzata nel Backend (v1.8.5)
-
+- ✅ **[P1-05]** Prerendering Statico per Google Indexing (v1.8.6 in progress)
 
 - ✅ **Menu Mobile:** Hamburger e drawer ottimizzato
 
@@ -77,16 +77,33 @@ Elenco sintetico delle funzionalità core e miglioramenti completati:
 
 Voci attive ordinate per priorità.
 
-### 🟠 PRIORITÀ ALTA
+### ✅ COMPLETATE RECENTEMENTE (v1.8.6)
 
 #### [P1-05] Risoluzione Indexing Google (SEO)
 
-- **Problema:** Solo 1 articolo su 30 è indicizzato. Google ha difficoltà con il Client-Side Rendering della SPA.
-- **Soluzione:** Implementazione **Prerendering statico** (tramite plugin Vite come `vite-plugin-prerender` o `vite-ssg`) per generare HTML statico per i bot dei motori di ricerca.
+**COMPLETATO** — Implementazione Prerendering Statico (22 Aprile 2026)
+
+- **Soluzione implementata:** Script PHP `/api/prerender.php` che genera HTML statico per tutte le route.
+- **Come funziona:**
+  1. Admin accede a `/api/prerender.php` (protetto da autenticazione)
+  2. Lo script recupera tutte le categorie e articoli dal database MySQL
+  3. Genera un file `index.html` statico per ogni route in `dist/`
+  4. Es: `/dist/videogiochi/titolo-articolo/index.html` contiene HTML pre-renderizzato
+- **Effetto:** Google trova HTML statico con metadati già pronti, non javascript CSR. Indicizzazione garantita.
+- **Flusso:**
+  - Build locale: `npm run build` (senza prerendering, veloce)
+  - Deploy: Carica `dist/` su FTP
+  - Post-deploy: Esegui `/api/prerender.php` dal browser (5 minuti per generare ~30+ HTML)
+- **File creati:**
+  - `public/api/prerender.php` — Script di generazione
+  - `prerender-routes.js`, `prerender.js` — Helper Node per sviluppatori (opzionali, per uso locale)
 - **Analisi completa:** Vedere [indicizzazione.google.md](file:///C:/Users/Utente/Documents/GitHub/SITI-WEB/SimonePizziWebSite/docs/indicizzazione.google.md).
 
+---
 
-### 🟡 PRIORITÀ MEDIA (Performance & Debito Tecnico)
+### 🟠 PRIORITÀ ALTA
+
+(Nessuna nuova priorità alta al momento. La Q2 2026 è focalizzata su SEO tramite prerendering e performance optimization.)
 
 #### [P2-05] Ottimizzazione Bundle & Code Splitting
 - **Obiettivo:** Ridurre la dimensione dei chunk JS (attualmente > 500kB) tramite `React.lazy` e suddivisione manuale dei moduli pesanti (es. Tiptap).
@@ -135,6 +152,45 @@ Funzionalità rimosse dalla pianificazione perché non coerenti con la visione d
 - **Evento:** Fallimento tentativo di reskin totale con perdita di contenuti bio e testi legali.
 - **Azione:** Rollback al commit `87cb0c` (v1.7.13).
 - **Stato:** Ripristinata stabilità al 100%. Ogni futuro restyling dovrà proteggere i contenuti dinamici e le biografie statiche.
+
+---
+
+## PARTE VII — GUIDA OPERAZIONALE: PRERENDERING SEO
+
+### Workflow Prerendering (Post-Deploy)
+
+Il prerendering **NON avviene durante il build locale** bensì **dopo il deploy**:
+- Backend PHP deve essere online e raggiungibile
+- Richiede accesso ai dati MySQL del sito live
+- Genera file HTML da ~30+ articoli (tempo: ~30-60 secondi)
+
+### Procedura Step-by-Step
+
+**1. Build e deploy normale:**
+```bash
+npm run build
+# Upload dist/ su FTP → simonepizzi.runtimeradio.it/
+```
+
+**2. Accedi da browser e triggera il prerendering:**
+```
+URL: https://simonepizzi.runtimeradio.it/api/prerender.php
+Prerequisito: Devi essere loggato all'admin
+Direi: Response JSON con stats (routes create, skipped)
+```
+
+**3. Verifica risultato:**
+- File system: `/dist/videogiochi/`, `/dist/progetti-software/`, ecc. contengono `index.html` statici
+- Google: `site:simonepizzi.runtimeradio.it` per verificare indexing
+- Search Console: Monitora nuova sitemap
+
+### File di Sistema
+
+| File | Ruolo |
+|---|---|
+| `public/api/prerender.php` | Script PHP principale (ESEGUIBILE DAL BROWSER) |
+| `prerender-routes.js` | Helper Node scoperta route (opzionale) |
+| `prerender.js` | Helper Node generazione file (opzionale) |
 
 ---
 *Documento mantenuto da Simone Pizzi.*
