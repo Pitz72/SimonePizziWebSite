@@ -12,14 +12,16 @@
   RewriteBase /
 
 # [v1.9.4] Mappatura dinamica Sitemap e Robots
-  RewriteRule ^sitemap\.xml$ sitemap.php [L]
-  RewriteRule ^robots\.txt$ robots.php [L]
+  RewriteRule ^sitemap\.xml$ sitemap.php [L,NC]
+  RewriteRule ^robots\.txt$ robots.php [L,NC]
 
 # Mantiene l'accesso ai file reali (immagini, endpoint php API, css bundles)
 
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_URI} !^/api/ [NC]
+  RewriteCond %{REQUEST_URI} !^/robots\.txt$ [NC]
+  RewriteCond %{REQUEST_URI} !^/sitemap\.xml$ [NC]
 
 # Dirotta tutte le URL puramente virtuali di React sul motore SEO PHP
 
