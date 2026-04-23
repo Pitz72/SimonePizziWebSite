@@ -2,8 +2,8 @@
 
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.9.5  
-**Ultimo aggiornamento documento:** 23 Aprile 2026 (SEO Routing Hotfix)  
+**Versione corrente:** 1.9.6  
+**Ultimo aggiornamento documento:** 23 Aprile 2026 (SEO Core Files Generation)  
 **Sito:** simonepizzi.runtimeradio.it
 
 > Questo documento è la fonte autoritativa per lo stato del progetto, le promesse di sviluppo e la pianificazione futura.  
@@ -73,6 +73,7 @@ Elenco sintetico delle funzionalità core e miglioramenti completati:
 - ✅ **[P4-01]** Ottimizzazioni Forensi delle Performance (v1.9.3)
 - ✅ **[P4-02]** Sitemap & Robots Dinamici via PHP (v1.9.4)
 - ✅ **[P4-03]** Hotfix Routing SEO & Stabilizzazione .htaccess (v1.9.5)
+- ✅ **[P4-04]** Generazione fisica robots.txt e sitemap.xml via Prerender (v1.9.6)
 
 - ✅ **Menu Mobile:** Hamburger e drawer ottimizzato
 
@@ -155,7 +156,14 @@ Funzionalità rimosse dalla pianificazione perché non coerenti con la visione d
 
 - **Evento:** Fallimento tentativo di reskin totale con perdita di contenuti bio e testi legali.
 - **Azione:** Rollback al commit `87cb0c` (v1.7.13).
-- **Stato:** Ripristinata stabilità al 100%. Ogni futuro restyling dovrà proteggere i contenuti dinamici e le biografie statiche.
+---
+
+### Incidente SEO Robots v1.9.6 (23 Aprile 2026)
+
+- **Evento:** Nonostante la generazione fisica e lo smart-fallback, `robots.txt` continua a restituire 404 (React), mentre `sitemap.xml` funziona correttamente.
+- **Diagnosi Live:** Confermata tramite browser agent. Il server ignora selettivamente il rewrite/file fisico per robots.
+- **Stato:** Investigazione aperta. Documentazione dettagliata in `docs/changelogs/v1.9.6.md`.
+- **Mitigazione:** Implementato `ErrorBoundary` (RootBoundary) per gestire i fallimenti con una UI personalizzata.
 
 ---
 
@@ -167,6 +175,7 @@ Il prerendering **NON avviene durante il build locale** bensì **dopo il deploy*
 - Backend PHP deve essere online e raggiungibile
 - Richiede accesso ai dati MySQL del sito live
 - Genera file HTML da ~30+ articoli (tempo: ~30-60 secondi)
+- **Genera file fisici robots.txt e sitemap.xml nella root**
 
 ### Procedura Step-by-Step
 

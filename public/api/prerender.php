@@ -9,6 +9,9 @@
 require_once 'db.php';
 require_once 'auth_helper.php';
 
+// Definizione costante per evitare l'invio di header dai file inclusi (robots, sitemap)
+define('IS_PRERENDERING', true);
+
 header('Content-Type: application/json');
 set_time_limit(300); // 5 minuti di timeout
 
@@ -147,13 +150,47 @@ try {
         }
     }
 
+    // --- GENERAZIONE FILE SEO STATICI (robots.txt e sitemap.xml) ---
+    // Questo assicura che Google trovi i file fisici senza dipendere solo dal rewrite .htaccess
+    $seoFiles = [
+        ['src' => '/robots.php', 'dest' => '/robots.txt'],
+        ['src' => '/sitemap.php', 'dest' => '/sitemap.xml']
+    ];
+
+    foreach ($seoFiles as $seoFile) {
+        try {
+            $srcPath = dirname(__DIR__) . $seoFile['src'];
+            $destPath = $rootPath . $seoFile['dest'];
+
+            if (file_exists($srcPath)) {
+                // Impostiamo l'URI per coerenza se i file usano $_SERVER['REQUEST_URI']
+                $_SERVER['REQUEST_URI'] = $seoFile['dest'];
+                
+                ob_start();
+                include $srcPath;
+                $content = ob_get_clean();
+
+                if (!empty($content)) {
+                    if (file_put_contents($destPath, $content)) {
+                        $created++;
+                    } else {
+                        throw new Exception("Impossibile scrivere il file: " . $seoFile['dest']);
+                    }
+                }
+            }
+        } catch (Exception $e) {
+            $errors[] = "SEO File '{$seoFile['dest']}': " . $e->getMessage();
+        }
+    }
+
     // Risposta di successo
     http_response_code(200);
     echo json_encode([
         'status' => 'success',
-        'message' => 'Prerendering con iniezione SEO completato',
+        'message' => 'Prerendering con iniezione SEO e generazione file core completata',
         'stats' => [
             'total_routes' => count($routes),
+            'seo_files' => count($seoFiles),
             'files_created' => $created,
             'files_skipped' => $skipped,
             'errors' => $errors

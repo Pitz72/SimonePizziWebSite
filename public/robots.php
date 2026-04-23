@@ -3,7 +3,10 @@
  * GENERATORE DINAMICO ROBOTS.TXT v1.0.0
  * Fornisce le direttive ai motori di ricerca e punta alla sitemap dinamica.
  */
-header("Content-Type: text/plain; charset=utf-8");
+// Invia header solo se richiesto direttamente, non durante il prerendering
+if (!defined('IS_PRERENDERING')) {
+    header("Content-Type: text/plain; charset=utf-8");
+}
 
 $baseUrl = "https://simonepizzi.runtimeradio.it";
 

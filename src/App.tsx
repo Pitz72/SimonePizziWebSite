@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { createBrowserRouter, RouterProvider, useLocation, Outlet, useLoaderData } from 'react-router-dom';
+import { createBrowserRouter, RouterProvider, useLocation, Outlet, useLoaderData, isRouteErrorResponse, useRouteError } from 'react-router-dom';
 import { PortfolioItem, CategoryItem } from './types';
 import { HelmetProvider } from 'react-helmet-async';
 import Header from './components/Header';
@@ -55,6 +55,31 @@ const DynamicArchiveWrapper = () => {
   const { category, articles } = useLoaderData() as { category: CategoryItem, articles: PortfolioItem[] };
 
   return <ArticleArchive title={category.name} category={category.slug} initialItems={articles} />;
+};
+
+// Componente per gestire gli errori in modo elegante (UX Premium)
+const RootBoundary = () => {
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error)) {
+    if (error.status === 404) {
+      return (
+        <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
+          <h1 className="text-6xl font-bold text-green-500 mb-4">404</h1>
+          <p className="text-xl text-gray-400 mb-8 text-center max-w-md">La pagina che cerchi è svanita nel vuoto digitale o non è mai esistita.</p>
+          <a href="/" className="px-8 py-3 bg-green-600 hover:bg-green-500 rounded-full transition-all font-medium">Torna in superficie</a>
+        </div>
+      );
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4">
+      <h1 className="text-4xl font-bold text-red-500 mb-4">Errore di Sistema</h1>
+      <p className="text-xl text-gray-400 mb-8 text-center max-w-md">Si è verificato un problema tecnico durante il recupero dei dati.</p>
+      <button onClick={() => window.location.reload()} className="px-8 py-3 bg-red-600 hover:bg-red-500 rounded-full transition-all font-medium">Riavvia Moduli</button>
+    </div>
+  );
 };
 
 const PublicLayout: React.FC = () => {
@@ -140,6 +165,7 @@ const router = createBrowserRouter([
     // Rotte Pubbliche (Dentro PublicLayout)
     path: "/",
     element: <PublicLayout />,
+    errorElement: <RootBoundary />,
     HydrateFallback: Loader,
     children: [
       { index: true, element: <PortfolioGrid />, loader: portfolioLoader },

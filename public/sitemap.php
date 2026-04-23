@@ -5,8 +5,10 @@
  */
 require_once 'api/db.php';
 
-// Imposta l'header come XML
-header("Content-type: text/xml; charset=utf-8");
+// Imposta l'header come XML solo se non in fase di prerendering
+if (!defined('IS_PRERENDERING')) {
+    header("Content-type: text/xml; charset=utf-8");
+}
 
 $pdo = Database::connect();
 $baseUrl = "https://simonepizzi.runtimeradio.it";

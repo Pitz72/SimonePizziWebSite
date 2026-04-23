@@ -11,11 +11,16 @@
   RewriteEngine On
   RewriteBase /
 
-# [v1.9.4] Mappatura dinamica Sitemap e Robots
+# [v1.9.6] Smart Fallback per Sitemap e Robots
+# Se il file fisico (.xml o .txt) non esiste, usa il generatore PHP
+  RewriteCond %{REQUEST_FILENAME} !-f
   RewriteRule ^sitemap\.xml$ sitemap.php [L,NC]
+
+  RewriteCond %{REQUEST_FILENAME} !-f
   RewriteRule ^robots\.txt$ robots.php [L,NC]
 
 # Mantiene l'accesso ai file reali (immagini, endpoint php API, css bundles)
+# Se il file index.html esiste nella sottocartella (prerendering), lo serviamo direttamente.
 
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
@@ -23,8 +28,7 @@
   RewriteCond %{REQUEST_URI} !^/robots\.txt$ [NC]
   RewriteCond %{REQUEST_URI} !^/sitemap\.xml$ [NC]
 
-# Dirotta tutte le URL puramente virtuali di React sul motore SEO PHP
-
+# Dirotta tutte le URL virtuali di React sul motore SEO PHP se non esiste un file statico
   RewriteRule ^(.*)$ /index.php [L,QSA]
 </IfModule>
 
