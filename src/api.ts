@@ -234,14 +234,14 @@ export const api = {
         if (!res.ok) throw new Error('Errore recupero categorie');
         return res.json();
     },
-    createCategory: async (data: { name: string; slug: string }) => {
+    createCategory: async (data: { name: string; slug: string; parent_id?: number | null }) => {
         const res = await fetch(`${API_URL}/categories.php`, {
             ...fetchConfig, method: 'POST', body: JSON.stringify(data)
         });
         if (!res.ok) { const r = await res.json(); throw new Error(r.error || 'Errore creazione categoria'); }
         return res.json();
     },
-    updateCategory: async (id: number, data: { name: string; slug: string; sort_order: number }) => {
+    updateCategory: async (id: number, data: { name: string; slug: string; sort_order: number; parent_id?: number | null }) => {
         const res = await fetch(`${API_URL}/categories.php?id=${id}`, {
             ...fetchConfig, method: 'PUT', body: JSON.stringify({ id, ...data })
         });

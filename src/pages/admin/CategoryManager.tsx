@@ -12,12 +12,38 @@ export default function CategoryManager() {
     // Stato form nuova categoria
     const [newName, setNewName] = useState('');
     const [newSlug, setNewSlug] = useState('');
+    const [newParentId, setNewParentId] = useState<number | null>(null);
     const [creating, setCreating] = useState(false);
 
     // Stato modifica inline
     const [editingId, setEditingId] = useState<number | null>(null);
     const [editName, setEditName] = useState('');
     const [editSlug, setEditSlug] = useState('');
+    const [editParentId, setEditParentId] = useState<number | null>(null);
+
+    // Costruisce l'albero per la visualizzazione gerarchica
+    const buildTree = (items: CategoryItem[], parentId: number | null = null): CategoryItem[] => {
+        return items
+            .filter(c => (c.parent_id === parentId || (!c.parent_id && !parentId)))
+            .map(c => ({
+                ...c,
+                subcategories: buildTree(items, c.id)
+            }));
+    };
+
+    // Appiattisce l'albero per il rendering sequenziale con indentazione
+    const flattenTree = (tree: CategoryItem[], level = 0): (CategoryItem & { level: number })[] => {
+        let result: (CategoryItem & { level: number })[] = [];
+        tree.forEach(node => {
+            result.push({ ...node, level });
+            if (node.subcategories) {
+                result = [...result, ...flattenTree(node.subcategories, level + 1)];
+            }
+        });
+        return result;
+    };
+
+    const displayList = flattenTree(buildTree(categories));
 
     const load = async () => {
         try {
@@ -51,9 +77,14 @@ export default function CategoryManager() {
         if (!newName.trim() || !newSlug.trim()) return;
         setCreating(true);
         try {
-            await api.createCategory({ name: newName.trim(), slug: newSlug.trim() });
+            await api.createCategory({ 
+                name: newName.trim(), 
+                slug: newSlug.trim(),
+                parent_id: newParentId 
+            });
             setNewName('');
             setNewSlug('');
+            setNewParentId(null);
             await load();
         } catch (e: any) {
             setError(e.message);
@@ -66,18 +97,25 @@ export default function CategoryManager() {
         setEditingId(cat.id);
         setEditName(cat.name);
         setEditSlug(cat.slug);
+        setEditParentId(cat.parent_id || null);
     };
 
     const cancelEdit = () => {
         setEditingId(null);
         setEditName('');
         setEditSlug('');
+        setEditParentId(null);
     };
 
     const saveEdit = async (cat: CategoryItem) => {
         if (!editName.trim() || !editSlug.trim()) return;
         try {
-            await api.updateCategory(cat.id, { name: editName.trim(), slug: editSlug.trim(), sort_order: cat.sort_order });
+            await api.updateCategory(cat.id, { 
+                name: editName.trim(), 
+                slug: editSlug.trim(), 
+                sort_order: cat.sort_order,
+                parent_id: editParentId
+            });
             cancelEdit();
             await load();
         } catch (e: any) {
@@ -134,21 +172,25 @@ export default function CategoryManager() {
                     <h2 className="text-white font-semibold">Categorie Attive ({categories.length})</h2>
                 </div>
                 <ul className="divide-y divide-zinc-800">
-                    {categories.map((cat, index) => (
-                        <li key={cat.id} className="px-6 py-4 flex items-center gap-4">
+                    {displayList.map((cat) => (
+                        <li 
+                            key={cat.id} 
+                            className="px-6 py-4 flex items-center gap-4 hover:bg-white/[0.02] transition-colors"
+                            style={{ paddingLeft: `${1.5 + (cat.level * 2)}rem` }}
+                        >
                             {/* Pulsanti Ordine */}
                             <div className="flex flex-col gap-0.5">
                                 <button
-                                    onClick={() => moveOrder(index, 'up')}
-                                    disabled={index === 0}
+                                    onClick={() => moveOrder(categories.findIndex(c => c.id === cat.id), 'up')}
+                                    disabled={categories.findIndex(c => c.id === cat.id) === 0}
                                     className="p-1 text-zinc-600 hover:text-white disabled:opacity-20 transition-colors"
                                     title="Sposta su"
                                 >
                                     <ArrowUp size={14} />
                                 </button>
                                 <button
-                                    onClick={() => moveOrder(index, 'down')}
-                                    disabled={index === categories.length - 1}
+                                    onClick={() => moveOrder(categories.findIndex(c => c.id === cat.id), 'down')}
+                                    disabled={categories.findIndex(c => c.id === cat.id) === categories.length - 1}
                                     className="p-1 text-zinc-600 hover:text-white disabled:opacity-20 transition-colors"
                                     title="Sposta giù"
                                 >
@@ -158,22 +200,44 @@ export default function CategoryManager() {
 
                             {editingId === cat.id ? (
                                 // Modalità modifica
-                                <div className="flex-1 flex flex-col sm:flex-row gap-2">
-                                    <input
-                                        type="text"
-                                        value={editName}
-                                        onChange={e => setEditName(e.target.value)}
-                                        placeholder="Nome categoria"
-                                        className="flex-1 bg-zinc-800 border border-zinc-600 text-white px-3 py-1.5 rounded-lg text-sm focus:outline-none focus:border-dis-green"
-                                    />
-                                    <input
-                                        type="text"
-                                        value={editSlug}
-                                        onChange={e => setEditSlug(e.target.value)}
-                                        placeholder="slug-url"
-                                        className="flex-1 bg-zinc-800 border border-zinc-600 text-zinc-300 font-mono px-3 py-1.5 rounded-lg text-sm focus:outline-none focus:border-dis-green"
-                                    />
-                                    <div className="flex gap-2">
+                                <div className="flex-1 flex flex-col sm:flex-row gap-2 items-end">
+                                    <div className="flex-1 w-full space-y-1">
+                                        <label className="text-[10px] text-zinc-500 uppercase font-bold">Nome</label>
+                                        <input
+                                            type="text"
+                                            value={editName}
+                                            onChange={e => setEditName(e.target.value)}
+                                            placeholder="Nome categoria"
+                                            className="w-full bg-zinc-800 border border-zinc-600 text-white px-3 py-1.5 rounded-lg text-sm focus:outline-none focus:border-dis-green"
+                                        />
+                                    </div>
+                                    <div className="flex-1 w-full space-y-1">
+                                        <label className="text-[10px] text-zinc-500 uppercase font-bold">Slug</label>
+                                        <input
+                                            type="text"
+                                            value={editSlug}
+                                            onChange={e => setEditSlug(e.target.value)}
+                                            placeholder="slug-url"
+                                            className="w-full bg-zinc-800 border border-zinc-600 text-zinc-300 font-mono px-3 py-1.5 rounded-lg text-sm focus:outline-none focus:border-dis-green"
+                                        />
+                                    </div>
+                                    <div className="flex-1 w-full space-y-1">
+                                        <label className="text-[10px] text-zinc-500 uppercase font-bold">Padre</label>
+                                        <select
+                                            value={editParentId || ''}
+                                            onChange={e => setEditParentId(e.target.value ? Number(e.target.value) : null)}
+                                            className="w-full bg-zinc-800 border border-zinc-600 text-white px-3 py-1.5 rounded-lg text-sm focus:outline-none focus:border-dis-green"
+                                        >
+                                            <option value="">Nessuno (Principale)</option>
+                                            {categories
+                                                .filter(c => c.id !== cat.id) // Non può essere padre di se stesso
+                                                .map(c => (
+                                                    <option key={c.id} value={c.id}>{c.name}</option>
+                                                ))
+                                            }
+                                        </select>
+                                    </div>
+                                    <div className="flex gap-2 pb-0.5">
                                         <button
                                             onClick={() => saveEdit(cat)}
                                             className="p-2 bg-dis-green/10 border border-dis-green/30 text-dis-green rounded-lg hover:bg-dis-green/20 transition-colors"
@@ -193,9 +257,15 @@ export default function CategoryManager() {
                             ) : (
                                 // Modalità visualizzazione
                                 <div className="flex-1 flex items-center justify-between">
-                                    <div>
-                                        <p className="text-white font-medium">{cat.name}</p>
-                                        <p className="text-zinc-500 text-xs font-mono mt-0.5">/{cat.slug}</p>
+                                    <div className="flex items-center gap-3">
+                                        {cat.level > 0 && <div className="w-4 h-px bg-zinc-700" />}
+                                        <div>
+                                            <p className="text-white font-medium flex items-center gap-2">
+                                                {cat.name}
+                                                {cat.level > 0 && <span className="text-[10px] bg-zinc-800 text-zinc-500 px-1.5 py-0.5 rounded border border-zinc-700 uppercase">Sotto</span>}
+                                            </p>
+                                            <p className="text-zinc-500 text-xs font-mono mt-0.5">/{cat.slug}</p>
+                                        </div>
                                     </div>
                                     <div className="flex gap-2">
                                         <button
@@ -223,7 +293,7 @@ export default function CategoryManager() {
             {/* Form Nuova Categoria */}
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
                 <h2 className="text-white font-semibold mb-4">Aggiungi Nuova Categoria</h2>
-                <div className="flex flex-col sm:flex-row gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div className="flex-1">
                         <label className="block text-xs text-zinc-500 mb-1 uppercase tracking-wider">Nome visualizzato</label>
                         <input
@@ -244,11 +314,24 @@ export default function CategoryManager() {
                             className="w-full bg-zinc-800 border border-zinc-700 text-zinc-300 font-mono px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-dis-green"
                         />
                     </div>
+                    <div className="flex-1">
+                        <label className="block text-xs text-zinc-500 mb-1 uppercase tracking-wider">Categoria Genitore</label>
+                        <select
+                            value={newParentId || ''}
+                            onChange={e => setNewParentId(e.target.value ? Number(e.target.value) : null)}
+                            className="w-full bg-zinc-800 border border-zinc-700 text-white px-3 py-2 rounded-lg text-sm focus:outline-none focus:border-dis-green"
+                        >
+                            <option value="">Nessuna (Principale)</option>
+                            {categories.map(c => (
+                                <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                        </select>
+                    </div>
                     <div className="flex items-end">
                         <button
                             onClick={handleCreate}
                             disabled={creating || !newName.trim() || !newSlug.trim()}
-                            className="flex items-center gap-2 px-5 py-2 bg-dis-green text-black font-bold rounded-lg hover:bg-green-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
+                            className="w-full flex items-center justify-center gap-2 px-5 py-2 bg-dis-green text-black font-bold rounded-lg hover:bg-green-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed whitespace-nowrap"
                         >
                             <Plus size={16} />
                             {creating ? 'Aggiunta...' : 'Aggiungi'}

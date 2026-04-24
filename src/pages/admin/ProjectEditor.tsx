@@ -43,6 +43,24 @@ export default function ProjectEditor() {
     const [btnBType, setBtnBType] = useState<'url' | 'email'>('url');
     const [initialData, setInitialData] = useState<FormData | null>(null);
 
+    // Helper per mostrare le categorie indentate nel select
+    const getHierarchicalCategories = (items: CategoryItem[]) => {
+        const build = (parentId: number | null = null, level = 0): (CategoryItem & { display: string })[] => {
+            let result: any[] = [];
+            items
+                .filter(c => (c.parent_id === parentId || (!c.parent_id && !parentId)))
+                .sort((a, b) => a.sort_order - b.sort_order)
+                .forEach(c => {
+                    result.push({ ...c, display: level > 0 ? `${'—'.repeat(level)} ${c.name}` : c.name });
+                    result = [...result, ...build(c.id, level + 1)];
+                });
+            return result;
+        };
+        return build();
+    };
+
+    const hierarchicalCategories = getHierarchicalCategories(categories);
+
     useEffect(() => {
         if (projData) {
             if ((projData.button_a_url || '').startsWith('mailto:')) setBtnAType('email');
@@ -215,8 +233,8 @@ export default function ProjectEditor() {
                         onChange={e => set('category', e.target.value)}
                         className="w-full bg-zinc-800 border border-zinc-700 text-white rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:border-dis-green"
                     >
-                        {categories.map(c => (
-                            <option key={c.id} value={c.slug}>{c.name}</option>
+                        {hierarchicalCategories.map(c => (
+                            <option key={c.id} value={c.slug}>{c.display}</option>
                         ))}
                     </select>
                 </div>

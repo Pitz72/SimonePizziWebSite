@@ -120,6 +120,52 @@ export default function AllProjects() {
     const getProjectsByCategory = (catSlug: string) =>
         projects.filter(p => p.category === catSlug).sort((a, b) => a.sort_order - b.sort_order);
 
+    // Costruisce l'albero per la visualizzazione gerarchica
+    const buildTree = (items: CategoryItem[], parentId: number | null = null): CategoryItem[] => {
+        return items
+            .filter(c => (c.parent_id === parentId || (!c.parent_id && !parentId)))
+            .map(c => ({
+                ...c,
+                subcategories: buildTree(items, c.id)
+            }));
+    };
+
+    const categoryTree = buildTree(categoryList);
+
+    const renderCategory = (cat: CategoryItem, level: number = 0) => {
+        const catProjects = getProjectsByCategory(cat.slug);
+        const subTree = cat.subcategories || [];
+        const hasProjects = catProjects.length > 0;
+        const hasChildrenWithContent = subTree.some(sub => getProjectsByCategory(sub.slug).length > 0 || (sub.subcategories && sub.subcategories.length > 0));
+
+        if (!hasProjects && !hasChildrenWithContent) return null;
+
+        return (
+            <section key={cat.id} className={level > 0 ? 'mt-12' : ''}>
+                <motion.div
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.4 }}
+                    className={`flex items-center gap-4 ${level === 0 ? 'mb-8' : 'mb-6'}`}
+                >
+                    <h2 className={`${level === 0 ? 'text-xl md:text-2xl font-bold' : 'text-lg md:text-xl font-semibold opacity-80'} text-green-400 flex items-center gap-3`}>
+                        {level > 0 && <span className="w-6 h-px bg-green-500/30" />}
+                        {cat.name}
+                    </h2>
+                    <div className="flex-1 h-px bg-gradient-to-r from-green-500/20 to-transparent" />
+                </motion.div>
+
+                <div className={`flex flex-col gap-5 ${level > 0 ? 'ml-6 md:ml-10 border-l border-zinc-800/50 pl-6' : ''}`}>
+                    {hasProjects && catProjects.map((project, idx) => (
+                        <ProjectCard key={project.id} project={project} index={idx} />
+                    ))}
+                    
+                    {subTree.length > 0 && subTree.map(sub => renderCategory(sub, level + 1))}
+                </div>
+            </section>
+        );
+    };
+
     return (
         <>
             <SEO
@@ -142,31 +188,8 @@ export default function AllProjects() {
                     </p>
                 </motion.div>
 
-                <div className="space-y-16">
-                        {categoryList.map((cat) => {
-                            const catProjects = getProjectsByCategory(cat.slug);
-                            if (catProjects.length === 0) return null;
-
-                            return (
-                                <section key={cat.id}>
-                                    <motion.div
-                                        initial={{ opacity: 0, x: -20 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ duration: 0.4 }}
-                                        className="flex items-center gap-4 mb-8"
-                                    >
-                                        <h2 className="text-xl md:text-2xl font-bold text-green-400">{cat.name}</h2>
-                                        <div className="flex-1 h-px bg-gradient-to-r from-green-500/30 to-transparent" />
-                                    </motion.div>
-
-                                    <div className="flex flex-col gap-5">
-                                        {catProjects.map((project, idx) => (
-                                            <ProjectCard key={project.id} project={project} index={idx} />
-                                        ))}
-                                    </div>
-                                </section>
-                            );
-                        })}
+                <div className="space-y-20">
+                        {categoryTree.map((cat) => renderCategory(cat))}
 
                         {projects.length === 0 && (
                             <p className="text-center text-zinc-600 py-20">Nessun progetto disponibile al momento.</p>

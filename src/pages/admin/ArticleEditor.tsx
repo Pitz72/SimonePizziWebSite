@@ -24,6 +24,24 @@ export default function ArticleEditor() {
     const [btnBType, setBtnBType] = useState<'url' | 'email'>('url');
     const [initialData, setInitialData] = useState<any>(null);
 
+    // Helper per mostrare le categorie indentate nel select
+    const getHierarchicalCategories = (items: CategoryItem[]) => {
+        const build = (parentId: number | null = null, level = 0): (CategoryItem & { display: string })[] => {
+            let result: any[] = [];
+            items
+                .filter(c => (c.parent_id === parentId || (!c.parent_id && !parentId)))
+                .sort((a, b) => a.sort_order - b.sort_order)
+                .forEach(c => {
+                    result.push({ ...c, display: level > 0 ? `${'—'.repeat(level)} ${c.name}` : c.name });
+                    result = [...result, ...build(c.id, level + 1)];
+                });
+            return result;
+        };
+        return build();
+    };
+
+    const hierarchicalCategories = getHierarchicalCategories(categories);
+
     const [formData, setFormData] = useState({
         title: '',
         excerpt: '',
@@ -296,7 +314,7 @@ export default function ArticleEditor() {
                                 onChange={handleChange}
                                 className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white focus:border-dis-green focus:outline-none"
                             >
-                                {categories.map(c => <option key={c.id} value={c.slug}>{c.name}</option>)}
+                                {hierarchicalCategories.map(c => <option key={c.id} value={c.slug}>{c.display}</option>)}
                             </select>
                         </div>
 
