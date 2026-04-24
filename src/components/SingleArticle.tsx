@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLoaderData, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Share2, Tag, Calendar } from 'lucide-react';
+import { ArrowLeft, Share2, Tag, Calendar, Heart } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { api } from '../api';
 import { PortfolioItem } from '../types';
@@ -128,69 +128,81 @@ const SingleArticle: React.FC<SingleArticleProps> = () => {
                 </div>
             </div>
 
-            {/* CALL TO ACTION GLASSMORPHIC FLOAT (Fondo Pagina) */}
+            {/* CALL TO ACTION PREMIUM (Fondo Pagina) */}
             <div className="max-w-4xl mx-auto px-6 md:px-10">
-                <div className="bg-zinc-900/60 backdrop-blur-2xl border border-zinc-800/80 rounded-3xl p-8 md:p-10 shadow-2xl flex flex-col gap-8">
-
-                    {/* RIGA SUPERIORE: Testo a sinistra, Condividi a destra */}
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-                        <div className="flex-1 text-center md:text-left">
-                            <h3 className="text-2xl font-bold text-white mb-2">Ti è piaciuto questo progetto?</h3>
-                            <p className="text-zinc-400">Sostieni il mio lavoro e Runtime Radio con una donazione, o aiutaci a diffonderlo con la condivisione sui tuoi social.</p>
-                        </div>
-                        <div className="flex flex-col sm:flex-row gap-4 w-full md:w-auto">
-                            <a
-                                href="https://www.paypal.com/paypalme/simonepizzi"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="flex items-center justify-center gap-3 px-6 py-4 rounded-xl bg-[#0070BA] text-white hover:bg-[#003087] transition-all font-bold shadow-lg shadow-blue-900/20"
-                            >
-                                <svg className="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                                    <path d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944.901C5.026.382 5.474 0 5.998 0h7.46c2.57 0 4.578.543 5.69 1.81 1.01 1.15 1.304 2.42 1.012 4.287-.023.143-.047.288-.077.437-.946 5.05-4.336 6.73-8.339 6.73h-.69c-.314 0-.58.218-.641.524l-1.24 6.225a.645.645 0 0 1-.641.524h-1.455z" />
-                                </svg>
-                                Dona con PayPal
-                            </a>
-                            <button onClick={() => setIsShareModalOpen(true)} className="flex items-center gap-3 w-full md:w-auto px-6 py-4 rounded-xl bg-zinc-900 border border-zinc-800 text-zinc-300 hover:text-white hover:border-zinc-500 hover:bg-zinc-800 transition-all font-medium whitespace-nowrap" title="Condividi">
-                                <Share2 size={20} />
-                                Condividi
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* RIGA INFERIORE: Bottoni Custom (Se l'articolo ne possiede almeno uno) */}
-                    {(article.link || article.extraLink || article.hasLetter) && (
-                        <div className="pt-6 border-t border-zinc-800/50 flex flex-col sm:flex-row items-stretch justify-center gap-4">
-                            {article.link && (
+                <div className="relative group bg-zinc-900/40 backdrop-blur-2xl border border-zinc-800/80 rounded-3xl p-8 md:p-12 shadow-2xl overflow-hidden">
+                    {/* Effetto luce soffusa in background */}
+                    <div className="absolute -top-24 -right-24 w-64 h-64 bg-dis-green/5 rounded-full blur-3xl group-hover:bg-dis-green/10 transition-colors duration-700"></div>
+                    
+                    <div className="relative z-10 flex flex-col gap-10">
+                        {/* RIGA SUPERIORE: Testo e Bottoni Principali */}
+                        <div className="flex flex-col lg:flex-row items-center justify-between gap-8">
+                            <div className="flex-1 text-center lg:text-left">
+                                <h3 className="text-3xl font-black text-white mb-3 tracking-tight">Ti è piaciuto il progetto?</h3>
+                                <p className="text-zinc-400 leading-relaxed max-w-xl">
+                                    Sostieni il mio lavoro e la struttura di <span className="text-white font-medium">Runtime Radio</span> con una donazione, oppure aiutami a diffonderlo condividendo questa pagina.
+                                </p>
+                            </div>
+                            
+                            <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
                                 <a
-                                    href={formatExternalUrl(article.link)}
+                                    href="https://www.paypal.com/paypalme/simonepizzi"
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    onClick={() => api.trackClick(article.id, article.buttonText || 'Naviga')}
-                                    className="flex-1 flex justify-center items-center gap-2 bg-dis-green text-black font-bold px-6 py-4 rounded-xl hover:bg-green-400 transition-colors shadow-[0_0_30px_-5px_rgba(34,197,94,0.4)] hover:shadow-[0_0_40px_-5px_rgba(34,197,94,0.6)]"
+                                    className="flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-[#0070BA] text-white hover:bg-[#003087] transition-all font-bold shadow-lg shadow-blue-900/20 hover:scale-[1.02] active:scale-95"
                                 >
-                                    {article.buttonText || 'Naviga'}
+                                    <Heart size={20} fill="currentColor" />
+                                    Dona con PayPal
                                 </a>
-                            )}
-
-                            {article.extraLink && (
-                                <a
-                                    href={formatExternalUrl(article.extraLink)}
-                                    download
-                                    onClick={() => api.trackClick(article.id, article.extraLinkText || 'File Aggiuntivo')}
-                                    className="flex-1 flex justify-center items-center gap-2 bg-zinc-800 text-white font-bold px-6 py-4 rounded-xl hover:bg-zinc-700 transition-colors border border-zinc-700"
+                                <button 
+                                    onClick={() => setIsShareModalOpen(true)} 
+                                    className="flex items-center justify-center gap-3 px-8 py-4 rounded-2xl bg-zinc-800/50 border border-zinc-700/50 text-zinc-300 hover:text-white hover:border-zinc-500 hover:bg-zinc-800 transition-all font-bold hover:scale-[1.02] active:scale-95"
                                 >
-                                    {article.extraLinkText || 'File Aggiuntivo'}
-                                </a>
-                            )}
-
-                            {article.hasLetter && (
-                                <button onClick={() => setIsLetterModalOpen(true)} className="flex-1 flex justify-center items-center gap-2 bg-purple-600/20 text-purple-400 font-bold px-6 py-4 rounded-xl hover:bg-purple-600/30 transition-colors border border-purple-500/30">
-                                    Leggi Lettera
+                                    <Share2 size={20} />
+                                    Condividi
                                 </button>
-                            )}
+                            </div>
                         </div>
-                    )}
 
+                        {/* RIGA INFERIORE: Bottoni Funzionali Dinamici */}
+                        {(article.link || article.extraLink || article.hasLetter) && (
+                            <div className="pt-10 border-t border-zinc-800/50">
+                                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                                    {article.link && (
+                                        <a
+                                            href={formatExternalUrl(article.link)}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            onClick={() => api.trackClick(article.id, article.buttonText || 'Naviga')}
+                                            className="flex justify-center items-center gap-3 bg-dis-green text-black font-black px-6 py-4 rounded-2xl hover:bg-green-400 transition-all shadow-[0_0_40px_-10px_rgba(34,197,94,0.3)] hover:shadow-[0_0_50px_-5px_rgba(34,197,94,0.5)] hover:scale-[1.02] active:scale-95"
+                                        >
+                                            {article.buttonText || 'Naviga'}
+                                        </a>
+                                    )}
+
+                                    {article.extraLink && (
+                                        <a
+                                            href={formatExternalUrl(article.extraLink)}
+                                            download
+                                            onClick={() => api.trackClick(article.id, article.extraLinkText || 'File Aggiuntivo')}
+                                            className="flex justify-center items-center gap-3 bg-zinc-800 text-white font-bold px-6 py-4 rounded-2xl hover:bg-zinc-700 transition-all border border-zinc-700 hover:scale-[1.02] active:scale-95"
+                                        >
+                                            {article.extraLinkText || 'File Aggiuntivo'}
+                                        </a>
+                                    )}
+
+                                    {article.hasLetter && (
+                                        <button 
+                                            onClick={() => setIsLetterModalOpen(true)} 
+                                            className="flex justify-center items-center gap-3 bg-purple-600/10 text-purple-400 font-bold px-6 py-4 rounded-2xl hover:bg-purple-600/20 transition-all border border-purple-500/20 hover:scale-[1.02] active:scale-95"
+                                        >
+                                            Leggi Lettera
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
 

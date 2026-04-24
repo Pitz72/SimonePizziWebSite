@@ -52,9 +52,9 @@ if ($method === 'GET') {
             );
             $upd->execute([':id' => $row['id']]);
             echo json_encode(['status' => 'success', 'message' => 'Iscrizione confermata!']);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => 'Errore server.']);
+            echo json_encode(['status' => 'error', 'message' => 'Errore server: ' . $e->getMessage()]);
         }
         exit;
     }
@@ -82,9 +82,9 @@ if ($method === 'GET') {
             $upd = $pdo->prepare("UPDATE subscribers SET status='unsubscribed' WHERE id=:id");
             $upd->execute([':id' => $row['id']]);
             echo json_encode(['status' => 'success', 'message' => 'Disiscrizione effettuata.']);
-        } catch (Exception $e) {
+        } catch (Throwable $e) {
             http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => 'Errore server.']);
+            echo json_encode(['status' => 'error', 'message' => 'Errore server: ' . $e->getMessage()]);
         }
         exit;
     }
@@ -108,9 +108,9 @@ if ($method === 'GET') {
             'stats' => compact('total', 'confirmed', 'pending', 'unsub'),
             'subscribers' => $rows,
         ]);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         http_response_code(500);
-        echo json_encode(['error' => $e->getMessage()]);
+        echo json_encode(['error' => 'Errore server: ' . $e->getMessage()]);
     }
     exit;
 }
@@ -173,9 +173,9 @@ if ($method === 'POST') {
             'status'  => 'success',
             'message' => 'Quasi fatto! Controlla la tua email e clicca il link per confermare l\'iscrizione.',
         ]);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         http_response_code(500);
-        echo json_encode(['status' => 'error', 'message' => 'Errore server. Riprova più tardi.']);
+        echo json_encode(['status' => 'error', 'message' => 'Errore server: ' . $e->getMessage()]);
     }
     exit;
 }
@@ -196,9 +196,9 @@ if ($method === 'DELETE') {
         $pdo = Database::connect();
         $pdo->prepare("DELETE FROM subscribers WHERE id=:id")->execute([':id' => $id]);
         echo json_encode(['status' => 'success']);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         http_response_code(500);
-        echo json_encode(['error' => $e->getMessage()]);
+        echo json_encode(['error' => 'Errore server: ' . $e->getMessage()]);
     }
     exit;
 }

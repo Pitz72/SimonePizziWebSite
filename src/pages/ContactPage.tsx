@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Send, User, Mail, MessageSquare, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Send, User, Mail, MessageSquare, CheckCircle, AlertCircle, Loader2, Facebook, Instagram, Github, Heart } from 'lucide-react';
 import SEO from '../components/SEO';
+import NewsletterSignup from '../components/NewsletterSignup';
 
 interface FormState {
     name: string;
@@ -60,7 +61,7 @@ const ContactPage: React.FC = () => {
     };
 
     const inputClass = `
-        w-full bg-zinc-900/60 border border-zinc-700/80 rounded-xl px-4 py-3 text-white
+        w-full bg-zinc-900/60 border border-zinc-800/80 rounded-2xl px-4 py-3 text-white
         placeholder-zinc-500 text-sm
         focus:outline-none focus:border-dis-green/60 focus:bg-zinc-900 focus:ring-1 focus:ring-dis-green/30
         transition-all duration-200
@@ -73,207 +74,161 @@ const ContactPage: React.FC = () => {
                 description="Hai un'idea, un progetto o vuoi semplicemente dire ciao? Scrivimi direttamente dal sito."
             />
 
-            <section className="max-w-2xl mx-auto py-16 sm:py-24 px-0 animate-in fade-in duration-500">
-
-                {/* Header */}
-                <div className="mb-12 text-center md:text-left relative">
-                    <div className="absolute -top-10 -left-10 w-40 h-40 bg-dis-green/8 rounded-full blur-3xl pointer-events-none" />
-                    <h1 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-4 relative z-10">
-                        Contattami
+            <section className="container mx-auto py-16 sm:py-24 px-4 sm:px-6 lg:px-8 animate-in fade-in duration-700">
+                
+                {/* Header Integrato */}
+                <div className="max-w-4xl mx-auto text-center mb-16 relative">
+                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-40 h-40 bg-dis-green/10 rounded-full blur-3xl pointer-events-none" />
+                    <h1 className="text-5xl md:text-6xl font-black text-white tracking-tighter mb-4 relative z-10">
+                        Restiamo in <span className="text-dis-green">Contatto</span>
                     </h1>
-                    <p className="text-zinc-400 text-lg leading-relaxed relative z-10">
-                        Hai un'idea, un progetto in mente, o vuoi semplicemente scambiare due parole sui miei lavori?
-                        Compila il form e ti rispondo al più presto.
+                    <p className="text-zinc-400 text-lg leading-relaxed max-w-2xl mx-auto relative z-10">
+                        Hai un'idea brillante, un progetto in mente o semplicemente vuoi scambiare due parole sui miei lavori? Scrivimi pure qui sotto.
                     </p>
-                    <div className="h-1 w-16 bg-dis-green rounded-full mt-6 md:mx-0 mx-auto relative z-10" />
                 </div>
 
-                {/* Form */}
-                <div className="bg-zinc-900/50 backdrop-blur-md border border-zinc-800/80 rounded-3xl p-8 md:p-10 shadow-2xl relative">
-                    <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-dis-green/3 to-transparent pointer-events-none" />
-
-                    {feedback.type === 'success' ? (
-                        /* Stato di successo */
-                        <div className="flex flex-col items-center justify-center text-center py-12 gap-5">
-                            <div className="w-16 h-16 rounded-full bg-dis-green/10 border border-dis-green/30 flex items-center justify-center">
-                                <CheckCircle size={32} className="text-dis-green" />
-                            </div>
-                            <div>
-                                <h2 className="text-2xl font-bold text-white mb-2">Messaggio inviato!</h2>
-                                <p className="text-zinc-400">{feedback.message}</p>
-                            </div>
-                            <button
-                                onClick={() => setFeedback({ type: 'idle', message: '' })}
-                                className="mt-2 px-6 py-2.5 bg-zinc-800 border border-zinc-700 text-zinc-300 rounded-xl hover:bg-zinc-700 hover:text-white text-sm font-medium transition-all duration-200"
-                            >
-                                Invia un altro messaggio
-                            </button>
-                        </div>
-                    ) : (
-                        <form onSubmit={handleSubmit} className="flex flex-col gap-5 relative z-10" noValidate>
-
-                            {/* Nome */}
-                            <div className="flex flex-col gap-1.5">
-                                <label htmlFor="contact-name" className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                                    <User size={11} />
-                                    Nome *
-                                </label>
-                                <input
-                                    id="contact-name"
-                                    name="name"
-                                    type="text"
-                                    required
-                                    autoComplete="name"
-                                    placeholder="Il tuo nome"
-                                    value={form.name}
-                                    onChange={handleChange}
-                                    disabled={feedback.type === 'loading'}
-                                    className={inputClass}
-                                />
-                            </div>
-
-                            {/* Email */}
-                            <div className="flex flex-col gap-1.5">
-                                <label htmlFor="contact-email" className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                                    <Mail size={11} />
-                                    Email *
-                                </label>
-                                <input
-                                    id="contact-email"
-                                    name="email"
-                                    type="email"
-                                    required
-                                    autoComplete="email"
-                                    placeholder="la.tua@email.com"
-                                    value={form.email}
-                                    onChange={handleChange}
-                                    disabled={feedback.type === 'loading'}
-                                    className={inputClass}
-                                />
-                            </div>
-
-                            {/* Oggetto */}
-                            <div className="flex flex-col gap-1.5">
-                                <label htmlFor="contact-subject" className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                                    <MessageSquare size={11} />
-                                    Oggetto
-                                </label>
-                                <input
-                                    id="contact-subject"
-                                    name="subject"
-                                    type="text"
-                                    autoComplete="off"
-                                    placeholder="Di cosa vuoi parlare?"
-                                    value={form.subject}
-                                    onChange={handleChange}
-                                    disabled={feedback.type === 'loading'}
-                                    className={inputClass}
-                                />
-                            </div>
-
-                            {/* Messaggio */}
-                            <div className="flex flex-col gap-1.5">
-                                <label htmlFor="contact-message" className="text-xs font-bold text-zinc-400 uppercase tracking-wider flex items-center gap-1.5">
-                                    <Send size={11} />
-                                    Messaggio *
-                                </label>
-                                <textarea
-                                    id="contact-message"
-                                    name="message"
-                                    required
-                                    rows={6}
-                                    placeholder="Scrivimi pure qui. Rispondo entro 24–48 ore."
-                                    value={form.message}
-                                    onChange={handleChange}
-                                    disabled={feedback.type === 'loading'}
-                                    className={`${inputClass} resize-none`}
-                                />
-                            </div>
-
-                            {/* Informativa GDPR */}
-                            <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-xs text-zinc-500 leading-relaxed space-y-1">
-                                <p className="font-semibold text-zinc-400 uppercase tracking-wide text-[10px] mb-2">Informativa Privacy — Aprile 2026</p>
-                                <p><strong className="text-zinc-400">Titolare:</strong> Simone Pizzi — simonepizzi.1972@proton.me</p>
-                                <p><strong className="text-zinc-400">Finalità:</strong> gestione della richiesta di contatto e risposta alla medesima.</p>
-                                <p><strong className="text-zinc-400">Base giuridica:</strong> consenso dell'interessato (art. 6, par. 1, lett. a) Reg. UE 2016/679 — GDPR).</p>
-                                <p><strong className="text-zinc-400">Conservazione:</strong> i dati vengono conservati per il tempo necessario a evadere la richiesta e per eventuali comunicazioni successive correlate, salvo diversa indicazione.</p>
-                                <p><strong className="text-zinc-400">Diritti:</strong> accesso, rettifica, cancellazione, limitazione, portabilità e opposizione (artt. 15–21 GDPR) scrivendo a simonepizzi.1972@proton.me.</p>
-                                <p><strong className="text-zinc-400">Trasferimento:</strong> i dati non vengono ceduti a terzi né trasferiti fuori dall'UE.</p>
-                            </div>
-
-                            {/* Checkbox consensi GDPR */}
-                            <div className="space-y-3">
-                                <label className="flex items-start gap-3 cursor-pointer group">
-                                    <input
-                                        type="checkbox"
-                                        checked={gdprConsent}
-                                        onChange={e => setGdprConsent(e.target.checked)}
-                                        className="mt-0.5 shrink-0 accent-dis-green"
-                                        required
-                                    />
-                                    <span className="text-zinc-400 text-sm leading-relaxed group-hover:text-zinc-300 transition-colors">
-                                        Ho letto l'informativa sulla privacy e acconsento al trattamento dei miei dati personali per la gestione di questa richiesta di contatto. <span className="text-red-400">*</span>
-                                    </span>
-                                </label>
-                                <label className="flex items-start gap-3 cursor-pointer group">
-                                    <input
-                                        type="checkbox"
-                                        checked={gdprAge}
-                                        onChange={e => setGdprAge(e.target.checked)}
-                                        className="mt-0.5 shrink-0 accent-dis-green"
-                                        required
-                                    />
-                                    <span className="text-zinc-400 text-sm leading-relaxed group-hover:text-zinc-300 transition-colors">
-                                        Confermo di avere almeno 16 anni di età (requisito minimo ai sensi del GDPR per esprimere consenso autonomo al trattamento dei dati). <span className="text-red-400">*</span>
-                                    </span>
-                                </label>
-                                <p className="text-zinc-600 text-xs"><span className="text-red-400">*</span> campi obbligatori</p>
-                            </div>
-
-                            {/* Feedback errore */}
-                            {feedback.type === 'error' && (
-                                <div className="flex items-center gap-3 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-sm">
-                                    <AlertCircle size={16} className="flex-shrink-0" />
-                                    <span>{feedback.message}</span>
+                <div className="grid lg:grid-cols-12 gap-12 max-w-6xl mx-auto items-start">
+                    
+                    {/* COLONNA SINISTRA: Form Messaggi */}
+                    <div className="lg:col-span-7">
+                        <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/80 rounded-3xl p-8 md:p-10 shadow-2xl relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gradient-to-br from-dis-green/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+                            
+                            <h2 className="text-2xl font-bold text-white mb-8 flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-xl bg-dis-green/10 flex items-center justify-center text-dis-green">
+                                    <Send size={18} />
                                 </div>
+                                Inviami un Messaggio
+                            </h2>
+
+                            {feedback.type === 'success' ? (
+                                <div className="flex flex-col items-center justify-center text-center py-16 gap-6">
+                                    <div className="w-20 h-20 rounded-full bg-dis-green/10 border border-dis-green/30 flex items-center justify-center animate-bounce">
+                                        <CheckCircle size={40} className="text-dis-green" />
+                                    </div>
+                                    <div>
+                                        <h3 className="text-3xl font-black text-white mb-3">Ricevuto!</h3>
+                                        <p className="text-zinc-400 text-lg">{feedback.message}</p>
+                                    </div>
+                                    <button
+                                        onClick={() => setFeedback({ type: 'idle', message: '' })}
+                                        className="px-8 py-3 bg-zinc-800 border border-zinc-700 text-zinc-300 rounded-2xl hover:bg-zinc-700 hover:text-white font-bold transition-all"
+                                    >
+                                        Scrivi un altro messaggio
+                                    </button>
+                                </div>
+                            ) : (
+                                <form onSubmit={handleSubmit} className="flex flex-col gap-6 relative z-10" noValidate>
+                                    <div className="grid md:grid-cols-2 gap-6">
+                                        <div className="space-y-2">
+                                            <label htmlFor="contact-name" className="text-xs font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                                                <User size={12} /> Nome *
+                                            </label>
+                                            <input id="contact-name" name="name" type="text" required placeholder="Il tuo nome" value={form.name} onChange={handleChange} disabled={feedback.type === 'loading'} className={inputClass} />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label htmlFor="contact-email" className="text-xs font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                                                <Mail size={12} /> Email *
+                                            </label>
+                                            <input id="contact-email" name="email" type="email" required placeholder="la.tua@email.com" value={form.email} onChange={handleChange} disabled={feedback.type === 'loading'} className={inputClass} />
+                                        </div>
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label htmlFor="contact-subject" className="text-xs font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                                            <MessageSquare size={12} /> Oggetto
+                                        </label>
+                                        <input id="contact-subject" name="subject" type="text" placeholder="Di cosa vuoi parlare?" value={form.subject} onChange={handleChange} disabled={feedback.type === 'loading'} className={inputClass} />
+                                    </div>
+
+                                    <div className="space-y-2">
+                                        <label htmlFor="contact-message" className="text-xs font-black text-zinc-500 uppercase tracking-widest flex items-center gap-2">
+                                            <Send size={12} /> Messaggio *
+                                        </label>
+                                        <textarea id="contact-message" name="message" required rows={6} placeholder="Scrivimi pure qui. Rispondo in tempi brevi." value={form.message} onChange={handleChange} disabled={feedback.type === 'loading'} className={`${inputClass} resize-none`} />
+                                    </div>
+
+                                    {/* Informativa GDPR */}
+                                    <div className="rounded-2xl border border-zinc-800 bg-zinc-900/50 p-5 text-[10px] text-zinc-500 leading-relaxed space-y-2">
+                                        <p className="font-black text-zinc-400 uppercase tracking-widest mb-2 border-b border-zinc-800 pb-2">Privacy Policy — Contatti</p>
+                                        <p><strong className="text-zinc-400">Titolare:</strong> Simone Pizzi. <strong className="text-zinc-400">Finalità:</strong> gestione della richiesta di contatto. <strong className="text-zinc-400">Diritti:</strong> Accesso, rettifica, cancellazione via mail.</p>
+                                    </div>
+
+                                    {/* Checkbox GDPR */}
+                                    <div className="space-y-3">
+                                        <label className="flex items-start gap-3 cursor-pointer group">
+                                            <input type="checkbox" checked={gdprConsent} onChange={e => setGdprConsent(e.target.checked)} className="mt-1 shrink-0 accent-dis-green w-4 h-4 rounded" required />
+                                            <span className="text-zinc-400 text-xs leading-relaxed group-hover:text-zinc-300 transition-colors">
+                                                Acconsento al trattamento dei dati personali per questa richiesta. <span className="text-red-500">*</span>
+                                            </span>
+                                        </label>
+                                        <label className="flex items-start gap-3 cursor-pointer group">
+                                            <input type="checkbox" checked={gdprAge} onChange={e => setGdprAge(e.target.checked)} className="mt-1 shrink-0 accent-dis-green w-4 h-4 rounded" required />
+                                            <span className="text-zinc-400 text-xs leading-relaxed group-hover:text-zinc-300 transition-colors">
+                                                Confermo di avere almeno 16 anni di età. <span className="text-red-500">*</span>
+                                            </span>
+                                        </label>
+                                    </div>
+
+                                    {feedback.type === 'error' && (
+                                        <div className="flex items-center gap-3 px-4 py-3 bg-red-500/10 border border-red-500/30 rounded-xl text-red-400 text-xs">
+                                            <AlertCircle size={14} className="shrink-0" />
+                                            <span>{feedback.message}</span>
+                                        </div>
+                                    )}
+
+                                    <button type="submit" disabled={feedback.type === 'loading' || !canSubmit} className="flex items-center justify-center gap-3 bg-dis-green text-black font-black py-4 rounded-2xl hover:bg-green-400 transition-all disabled:opacity-50 shadow-lg shadow-green-500/20 active:scale-95">
+                                        {feedback.type === 'loading' ? <Loader2 size={18} className="animate-spin" /> : <><Send size={18} /> Invia Messaggio</>}
+                                    </button>
+                                </form>
                             )}
+                        </div>
+                    </div>
 
-                            {/* Submit */}
-                            <button
-                                type="submit"
-                                disabled={feedback.type === 'loading' || !canSubmit}
-                                className="mt-2 flex items-center justify-center gap-2.5 w-full bg-dis-green text-black font-bold text-sm py-4 rounded-xl hover:bg-green-400 transition-all duration-300 disabled:opacity-60 disabled:cursor-not-allowed shadow-lg shadow-green-500/20 hover:shadow-green-500/30 active:scale-[0.98]"
-                            >
-                                {feedback.type === 'loading' ? (
-                                    <>
-                                        <Loader2 size={16} className="animate-spin" />
-                                        Invio in corso...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Send size={16} />
-                                        Invia il Messaggio
-                                    </>
-                                )}
-                            </button>
+                    {/* COLONNA DESTRA: Hub Community, Social & Donazioni */}
+                    <div className="lg:col-span-5 space-y-8">
+                        
+                        {/* Newsletter Card */}
+                        <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/80 rounded-3xl p-8 shadow-xl">
+                            <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-3">
+                                <div className="w-8 h-8 rounded-lg bg-dis-green/10 flex items-center justify-center text-dis-green">
+                                    <Mail size={16} />
+                                </div>
+                                Newsletter Creativa
+                            </h3>
+                            <p className="text-zinc-500 text-sm mb-6">Ricevi aggiornamenti su articoli e progetti direttamente nella tua inbox.</p>
+                            <NewsletterSignup />
+                        </div>
 
-                            <p className="text-center text-xs text-zinc-600 mt-1">
-                                * Campi obbligatori. Niente spam, promesso.
-                            </p>
-                        </form>
-                    )}
+                        {/* Social & Support Card */}
+                        <div className="bg-zinc-900/40 backdrop-blur-xl border border-zinc-800/80 rounded-3xl p-8 shadow-xl">
+                            <h3 className="text-xl font-bold text-white mb-6">Social & Supporto</h3>
+                            <div className="grid grid-cols-2 gap-4 mb-8">
+                                <a href="https://www.facebook.com/simonepizzi72" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl hover:border-blue-500 transition-all text-zinc-400 hover:text-white">
+                                    <Facebook size={18} /> <span className="text-sm font-medium">Facebook</span>
+                                </a>
+                                <a href="https://www.instagram.com/pizzisimone1972/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl hover:border-pink-500 transition-all text-zinc-400 hover:text-white">
+                                    <Instagram size={18} /> <span className="text-sm font-medium">Instagram</span>
+                                </a>
+                                <a href="https://t.me/simonepizzi72" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl hover:border-blue-400 transition-all text-zinc-400 hover:text-white">
+                                    <Send size={18} /> <span className="text-sm font-medium">Telegram</span>
+                                </a>
+                                <a href="https://github.com/Pitz72" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 p-3 bg-zinc-800/50 border border-zinc-700/50 rounded-xl hover:border-zinc-300 transition-all text-zinc-400 hover:text-white">
+                                    <Github size={18} /> <span className="text-sm font-medium">GitHub</span>
+                                </a>
+                            </div>
+
+                            <a href="https://www.paypal.com/paypalme/simonepizzi" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 w-full bg-[#0070BA] text-white font-bold py-4 rounded-2xl hover:bg-[#003087] transition-all shadow-lg shadow-blue-900/20 active:scale-95">
+                                <Heart size={18} fill="currentColor" /> Sostieni con PayPal
+                            </a>
+                        </div>
+
+                    </div>
                 </div>
 
-                {/* Contatto diretto */}
-                <div className="mt-8 text-center">
-                    <p className="text-zinc-500 text-sm">
-                        Preferisci la mail diretta?{' '}
-                        <a
-                            href="mailto:simonepizzi.1972@proton.me"
-                            className="text-dis-green hover:text-green-400 transition-colors font-medium"
-                        >
-                            simonepizzi.1972@proton.me
-                        </a>
+                <div className="mt-16 text-center">
+                    <p className="text-zinc-600 text-sm">
+                        Preferisci scrivere via email tradizionale? <a href="mailto:simonepizzi.1972@proton.me" className="text-dis-green hover:underline">simonepizzi.1972@proton.me</a>
                     </p>
                 </div>
 

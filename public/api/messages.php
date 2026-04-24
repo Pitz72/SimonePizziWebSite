@@ -79,16 +79,19 @@ if ($method === 'POST') {
     }
     if (empty($subject)) $subject = 'Nessun oggetto';
 
-    // Rate limiting basilare: max 3 messaggi per IP in 15 minuti
-    $ip = $_SERVER['REMOTE_ADDR'] ?? '';
     try {
         $pdo = Database::connect();
         ensureMessagesTable($pdo);
 
-        $count = (int)$pdo->prepare(
-            "SELECT COUNT(*) FROM messages WHERE created_at > DATE_SUB(NOW(), INTERVAL 15 MINUTE)"
-        );
-        // Nota: il rate limit è globale (semplice), sufficiente per un sito personale
+        // Rate limiting basilare: max 10 messaggi globali in 15 minuti (per evitare spam massivo)
+        $stmt_limit = $pdo->query("SELECT COUNT(*) FROM messages WHERE created_at > DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
+        $recent_count = (int)$stmt_limit->fetchColumn();
+
+        if ($recent_count >= 10) {
+            http_response_code(429);
+            echo json_encode(['status' => 'error', 'message' => 'Troppe richieste. Riprova tra 15 minuti.']);
+            exit;
+        }
 
         // Salva nel DB
         $stmt = $pdo->prepare(
@@ -109,9 +112,9 @@ if ($method === 'POST') {
             'status'  => 'success',
             'message' => 'Messaggio inviato! Ti risponderò al più presto.',
         ]);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         http_response_code(500);
-        echo json_encode(['status' => 'error', 'message' => 'Errore del server. Riprova tra qualche minuto.']);
+        echo json_encode(['status' => 'error', 'message' => 'Errore server: ' . $e->getMessage()]);
     }
     exit;
 }

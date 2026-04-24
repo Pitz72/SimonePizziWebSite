@@ -25,9 +25,9 @@ if ($method === 'GET') {
             "SELECT id, subject, sent_at, recipient_count FROM newsletter_sends ORDER BY sent_at DESC LIMIT 50"
         )->fetchAll();
         echo json_encode($rows);
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         http_response_code(500);
-        echo json_encode(['error' => $e->getMessage()]);
+        echo json_encode(['error' => 'Errore server: ' . $e->getMessage()]);
     }
     exit;
 }
@@ -91,9 +91,9 @@ if ($method === 'POST') {
 
         echo json_encode(['status' => 'success', 'sent' => $sent]);
 
-    } catch (Exception $e) {
+    } catch (Throwable $e) {
         http_response_code(500);
-        echo json_encode(['error' => $e->getMessage()]);
+        echo json_encode(['error' => 'Errore server: ' . $e->getMessage()]);
     }
     exit;
 }
