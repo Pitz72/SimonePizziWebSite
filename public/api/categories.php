@@ -12,7 +12,7 @@ try {
     if ($method === 'GET') {
         // GET pubblica: lista ordinata per sort_order (incluso parent_id per gerarchia)
         $stmt = $pdo->query("SELECT id, name, slug, sort_order, parent_id FROM categories ORDER BY sort_order ASC, name ASC");
-        echo json_encode($stmt->fetchAll());
+        echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
     }
     elseif ($method === 'POST') {
         Auth::check();
