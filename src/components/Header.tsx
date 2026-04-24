@@ -93,17 +93,6 @@ const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
         .animate-slide-in {
           animation: slide-in 0.3s ease-out forwards;
         }
-        .group-hover-visible {
-          visibility: hidden;
-          opacity: 0;
-          transform: translateY(10px);
-          transition: all 0.2s ease-out;
-        }
-        .group:hover .group-hover-visible {
-          visibility: visible;
-          opacity: 1;
-          transform: translateY(0);
-        }
       `}</style>
 
       <header
@@ -147,19 +136,24 @@ const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
                     {cat.name}
                   </DesktopNavLink>
                   
-                  {/* Dropdown menu */}
+                  {/* Dropdown menu con Glassmorphism verde */}
                   {cat.subcategories && cat.subcategories.length > 0 && (
-                    <div className="group-hover-visible absolute top-full left-1/2 -translate-x-1/2 pt-2 w-56">
-                      <div className="bg-gray-900/95 backdrop-blur-xl border border-gray-800 rounded-xl shadow-2xl overflow-hidden p-1">
-                        {cat.subcategories.map(sub => (
-                          <Link
-                            key={sub.slug}
-                            to={`/${sub.slug}`}
-                            className="block px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
-                          >
-                            {sub.name}
-                          </Link>
-                        ))}
+                    <div className="invisible opacity-0 translate-y-2 group-hover:visible group-hover:opacity-100 group-hover:translate-y-0 pointer-events-none group-hover:pointer-events-auto absolute top-full left-1/2 -translate-x-1/2 pt-3 w-64 transition-all duration-300 ease-out z-50">
+                      <div className="bg-green-950/30 backdrop-blur-2xl border border-green-500/20 rounded-2xl shadow-[0_0_40px_rgba(34,197,94,0.15)] overflow-hidden p-1.5 ring-1 ring-white/5 relative before:absolute before:inset-0 before:bg-gradient-to-br before:from-green-500/10 before:to-transparent before:pointer-events-none">
+                        <div className="relative z-10 flex flex-col gap-0.5">
+                          {cat.subcategories.map(sub => (
+                            <Link
+                              key={sub.slug}
+                              to={`/${sub.slug}`}
+                              className="block px-4 py-3 text-sm text-gray-300 hover:text-green-400 hover:bg-green-500/10 rounded-xl transition-all duration-200 border border-transparent hover:border-green-500/20 group/item"
+                            >
+                              <div className="flex items-center justify-between">
+                                <span>{sub.name}</span>
+                                <div className="w-1.5 h-1.5 rounded-full bg-green-500 opacity-0 group-hover/item:opacity-100 transition-opacity shadow-[0_0_8px_rgba(34,197,94,1)]" />
+                              </div>
+                            </Link>
+                          ))}
+                        </div>
                       </div>
                     </div>
                   )}
