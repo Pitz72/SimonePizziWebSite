@@ -10,8 +10,8 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 try {
     if ($method === 'GET') {
-        // GET pubblica: lista ordinata per sort_order
-        $stmt = $pdo->query("SELECT id, name, slug, sort_order FROM categories ORDER BY sort_order ASC, name ASC");
+        // GET pubblica: lista ordinata per sort_order (incluso parent_id per gerarchia)
+        $stmt = $pdo->query("SELECT id, name, slug, sort_order, parent_id FROM categories ORDER BY sort_order ASC, name ASC");
         echo json_encode($stmt->fetchAll());
     }
     elseif ($method === 'POST') {
@@ -19,6 +19,7 @@ try {
         $data = json_decode(file_get_contents('php://input'), true);
         $name = trim($data['name'] ?? '');
         $slug = trim($data['slug'] ?? '');
+        $parent_id = !empty($data['parent_id']) ? (int)$data['parent_id'] : null;
 
         if (!$name || !$slug) {
             http_response_code(400);
@@ -33,8 +34,8 @@ try {
         $stmt = $pdo->query("SELECT COALESCE(MAX(sort_order), 0) + 1 FROM categories");
         $next_order = (int)$stmt->fetchColumn();
 
-        $stmt = $pdo->prepare("INSERT INTO categories (name, slug, sort_order) VALUES (?, ?, ?)");
-        $stmt->execute([$name, $slug, $next_order]);
+        $stmt = $pdo->prepare("INSERT INTO categories (name, slug, sort_order, parent_id) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$name, $slug, $next_order, $parent_id]);
 
         echo json_encode(['status' => 'success', 'id' => (int)$pdo->lastInsertId()]);
     }
@@ -52,6 +53,7 @@ try {
         $name = trim($data['name'] ?? '');
         $slug = trim($data['slug'] ?? '');
         $sort_order = isset($data['sort_order']) ? (int)$data['sort_order'] : 0;
+        $parent_id = !empty($data['parent_id']) ? (int)$data['parent_id'] : null;
 
         if (!$name || !$slug) {
             http_response_code(400);
@@ -62,8 +64,8 @@ try {
         $slug = strtolower(preg_replace('/[^a-z0-9-]+/', '-', $slug));
         $slug = trim($slug, '-');
 
-        $stmt = $pdo->prepare("UPDATE categories SET name=?, slug=?, sort_order=? WHERE id=?");
-        $stmt->execute([$name, $slug, $sort_order, $id]);
+        $stmt = $pdo->prepare("UPDATE categories SET name=?, slug=?, sort_order=?, parent_id=? WHERE id=?");
+        $stmt->execute([$name, $slug, $sort_order, $parent_id, $id]);
 
         echo json_encode(['status' => 'success']);
     }

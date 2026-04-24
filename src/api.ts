@@ -221,6 +221,13 @@ export const api = {
         return res.json();
     },
 
+    // --- NAVIGATION (v1.11.0) ---
+    getNavigation: async () => {
+        const res = await fetch(`${API_URL}/navigation.php`, fetchConfig);
+        if (!res.ok) throw new Error('Errore recupero navigazione');
+        return res.json();
+    },
+
     // --- CATEGORIES (v1.6.5) ---
     getCategories: async () => {
         const res = await fetch(`${API_URL}/categories.php`, fetchConfig);

@@ -18,7 +18,7 @@ export const useCategories = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        api.getCategories()
+        api.getNavigation()
             .then(data => {
                 if (Array.isArray(data) && data.length > 0) {
                     setCategories(data);

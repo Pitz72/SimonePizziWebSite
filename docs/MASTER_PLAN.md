@@ -2,8 +2,8 @@
 
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.10.1  
-**Ultimo aggiornamento documento:** 24 Aprile 2026 (Database Schema Alignment)  
+**Versione corrente:** 1.10.2  
+**Ultimo aggiornamento documento:** 24 Aprile 2026 (Hierarchical Subcategories)  
 **Sito:** simonepizzi.runtimeradio.it
 
 > Questo documento è la fonte autoritativa per lo stato del progetto, le promesse di sviluppo e la pianificazione futura.  
@@ -76,6 +76,7 @@ Elenco sintetico delle funzionalità core e miglioramenti completati:
 - ✅ **[P4-04]** Generazione fisica robots.txt e sitemap.xml via Prerender (v1.9.6)
 - ✅ **[P1-06]** Consolidamento CTA (Community Hub) & Refactor Contatti (v1.10.0)
 - ✅ **[P1-07]** Allineamento Schema MySQL & Fix Errori Backend (v1.10.1)
+- ✅ **[P1-08]** Sottocategorie Gerarchiche & Header Dropdown (v1.10.2)
 
 - ✅ **Menu Mobile:** Hamburger e drawer ottimizzato
 

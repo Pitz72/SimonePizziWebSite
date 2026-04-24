@@ -140,8 +140,29 @@ try {
         }
 
         if ($category) {
-            $conditions[] = "a.category = ?";
-            $params[] = $category;
+            // [v1.10.2] Supporto gerarchico: se la categoria ha sottocategorie, le includiamo nella ricerca
+            $catStmt = $pdo->prepare("SELECT id FROM categories WHERE slug = ? LIMIT 1");
+            $catStmt->execute([$category]);
+            $parent_cat_id = $catStmt->fetchColumn();
+            
+            if ($parent_cat_id) {
+                $subCatStmt = $pdo->prepare("SELECT slug FROM categories WHERE parent_id = ?");
+                $subCatStmt->execute([$parent_cat_id]);
+                $subSlugs = $subCatStmt->fetchAll(PDO::FETCH_COLUMN);
+                
+                if (!empty($subSlugs)) {
+                    $allSlugs = array_merge([$category], $subSlugs);
+                    $placeholders = implode(',', array_fill(0, count($allSlugs), '?'));
+                    $conditions[] = "a.category IN ($placeholders)";
+                    foreach ($allSlugs as $s) $params[] = $s;
+                } else {
+                    $conditions[] = "a.category = ?";
+                    $params[] = $category;
+                }
+            } else {
+                $conditions[] = "a.category = ?";
+                $params[] = $category;
+            }
         }
 
         if ($tag) {

@@ -12,6 +12,8 @@ export interface CategoryItem {
   name: string;
   slug: string;
   sort_order: number;
+  parent_id?: number | null;
+  subcategories?: CategoryItem[];
 }
 
 export interface Project {

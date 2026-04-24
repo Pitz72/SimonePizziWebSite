@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Menu, X, Search } from 'lucide-react';
+import { Menu, X, Search, ChevronDown } from 'lucide-react';
 import { useCategories } from '../hooks/useCategories';
 
 interface HeaderProps {
@@ -32,13 +32,14 @@ const MobileNavLink: React.FC<MobileNavLinkProps> = ({ to, children, onClick }) 
 interface DesktopNavLinkProps {
   to: string;
   children: React.ReactNode;
+  hasSubmenu?: boolean;
 }
 
-const DesktopNavLink: React.FC<DesktopNavLinkProps> = ({ to, children }) => (
+const DesktopNavLink: React.FC<DesktopNavLinkProps> = ({ to, children, hasSubmenu }) => (
   <NavLink
     to={to}
     className={({ isActive }) =>
-      `relative px-3 py-2 text-sm font-medium transition-colors duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 rounded-sm ${
+      `relative px-3 py-2 text-sm font-medium transition-colors duration-300 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 rounded-sm flex items-center gap-1 ${
         isActive ? 'text-green-400' : 'text-gray-400 hover:text-white'
       }`
     }
@@ -46,6 +47,7 @@ const DesktopNavLink: React.FC<DesktopNavLinkProps> = ({ to, children }) => (
     {({ isActive }) => (
       <>
         {children}
+        {hasSubmenu && <ChevronDown size={14} className="opacity-50" />}
         {isActive && (
           <span className="absolute bottom-0 left-0 w-full h-0.5 bg-green-500 animate-slide-in" />
         )}
@@ -91,6 +93,17 @@ const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
         .animate-slide-in {
           animation: slide-in 0.3s ease-out forwards;
         }
+        .group-hover-visible {
+          visibility: hidden;
+          opacity: 0;
+          transform: translateY(10px);
+          transition: all 0.2s ease-out;
+        }
+        .group:hover .group-hover-visible {
+          visibility: visible;
+          opacity: 1;
+          transform: translateY(0);
+        }
       `}</style>
 
       <header
@@ -126,9 +139,31 @@ const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
             <div className="hidden md:flex items-center space-x-1 lg:space-x-2 flex-1 justify-center px-4">
               <DesktopNavLink to="/">Home</DesktopNavLink>
               {categories.map(cat => (
-                <DesktopNavLink key={cat.slug} to={`/${cat.slug}`}>
-                  {cat.name}
-                </DesktopNavLink>
+                <div key={cat.slug} className="relative group">
+                  <DesktopNavLink 
+                    to={`/${cat.slug}`} 
+                    hasSubmenu={cat.subcategories && cat.subcategories.length > 0}
+                  >
+                    {cat.name}
+                  </DesktopNavLink>
+                  
+                  {/* Dropdown menu */}
+                  {cat.subcategories && cat.subcategories.length > 0 && (
+                    <div className="group-hover-visible absolute top-full left-1/2 -translate-x-1/2 pt-2 w-56">
+                      <div className="bg-gray-900/95 backdrop-blur-xl border border-gray-800 rounded-xl shadow-2xl overflow-hidden p-1">
+                        {cat.subcategories.map(sub => (
+                          <Link
+                            key={sub.slug}
+                            to={`/${sub.slug}`}
+                            className="block px-4 py-2.5 text-sm text-gray-400 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+                          >
+                            {sub.name}
+                          </Link>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               ))}
               <DesktopNavLink to="/contatti">Contatti</DesktopNavLink>
             </div>
@@ -197,9 +232,22 @@ const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
             <div className="flex flex-col gap-1">
               <MobileNavLink to="/" onClick={closeMenu}>Home</MobileNavLink>
               {categories.map(cat => (
-                <MobileNavLink key={cat.slug} to={`/${cat.slug}`} onClick={closeMenu}>
-                  {cat.name}
-                </MobileNavLink>
+                <React.Fragment key={cat.slug}>
+                  <MobileNavLink to={`/${cat.slug}`} onClick={closeMenu}>
+                    {cat.name}
+                  </MobileNavLink>
+                  {/* Sottocategorie Mobile (rientrate) */}
+                  {cat.subcategories && cat.subcategories.map(sub => (
+                    <Link
+                      key={sub.slug}
+                      to={`/${sub.slug}`}
+                      onClick={closeMenu}
+                      className="block px-8 py-2 text-sm font-medium text-gray-400 hover:text-green-400 transition-colors"
+                    >
+                      {sub.name}
+                    </Link>
+                  ))}
+                </React.Fragment>
               ))}
               <MobileNavLink to="/contatti" onClick={closeMenu}>Contatti</MobileNavLink>
             </div>
