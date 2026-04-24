@@ -77,6 +77,8 @@ Elenco sintetico delle funzionalità core e miglioramenti completati:
 - ✅ **[P1-06]** Consolidamento CTA (Community Hub) & Refactor Contatti (v1.10.0)
 - ✅ **[P1-07]** Allineamento Schema MySQL & Fix Errori Backend (v1.10.1)
 - ✅ **[P1-08]** Sottocategorie Gerarchiche & Header Dropdown (v1.10.2)
+- ✅ **[P2-07]** Gestione Admin Sottocategorie (v1.10.3)
+- ✅ **[P2-08]** Integrazione Sottocategorie nei Filtri & Progetti (v1.10.3)
 
 - ✅ **Menu Mobile:** Hamburger e drawer ottimizzato
 
@@ -113,10 +115,10 @@ Voci attive ordinate per priorità.
 ### 🟠 PRIORITÀ ALTA
 
 #### [P2-07] Gestione Admin Sottocategorie
-- **Obiettivo:** Aggiornare `CategoryManager.tsx` per permettere la selezione di un `parent_id`, abilitando la creazione di sottocategorie direttamente dall'interfaccia admin.
+- **STATO:** COMPLETATO ✅ (v1.10.3)
 
 #### [P2-08] Integrazione Sottocategorie nei Filtri
-- **Obiettivo:** Analizzare e implementare il supporto alle sottocategorie nelle pagine "Tutti i Progetti" e nella lista articoli dell'area admin (filtri e visualizzazione).
+- **STATO:** COMPLETATO ✅ (v1.10.3)
 
 #### [P2-05] Ottimizzazione Bundle & Code Splitting
 - **STATO:** COMPLETATO ✅ (v1.9.1)
