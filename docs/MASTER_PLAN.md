@@ -112,7 +112,11 @@ Voci attive ordinate per priorità.
 
 ### 🟠 PRIORITÀ ALTA
 
-(Nessuna nuova priorità alta al momento. La Q2 2026 è focalizzata su SEO tramite prerendering e performance optimization.)
+#### [P2-07] Gestione Admin Sottocategorie
+- **Obiettivo:** Aggiornare `CategoryManager.tsx` per permettere la selezione di un `parent_id`, abilitando la creazione di sottocategorie direttamente dall'interfaccia admin.
+
+#### [P2-08] Integrazione Sottocategorie nei Filtri
+- **Obiettivo:** Analizzare e implementare il supporto alle sottocategorie nelle pagine "Tutti i Progetti" e nella lista articoli dell'area admin (filtri e visualizzazione).
 
 #### [P2-05] Ottimizzazione Bundle & Code Splitting
 - **STATO:** COMPLETATO ✅ (v1.9.1)
