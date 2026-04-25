@@ -338,6 +338,27 @@ export const api = {
         if (!res.ok) throw new Error('Errore eliminazione iscritto');
         return res.json();
     },
+    approveSubscriber: async (id: number) => {
+        const res = await fetch(`${API_URL}/subscribers.php`, {
+            ...fetchConfig,
+            method: 'PATCH',
+            body: JSON.stringify({ id })
+        });
+        if (!res.ok) throw new Error('Errore approvazione iscritto');
+        return res.json();
+    },
+    addSubscriberAdmin: async (data: { email: string; name?: string }) => {
+        const res = await fetch(`${API_URL}/subscribers.php`, {
+            ...fetchConfig,
+            method: 'POST',
+            body: JSON.stringify({ ...data, force_confirm: true }),
+        });
+        if (!res.ok) {
+            const r = await res.json();
+            throw new Error(r.message || 'Errore aggiunta iscritto');
+        }
+        return res.json();
+    },
     sendNewsletter: async (data: { subject: string; body: string }) => {
         const res = await fetch(`${API_URL}/newsletter_send.php`, {
             ...fetchConfig,

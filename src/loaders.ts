@@ -1,6 +1,6 @@
 import { LoaderFunctionArgs, redirect } from 'react-router-dom';
 import { api } from './api';
-import { mapArticleToPortfolioItem } from './utils/mappers';
+import { mapArticleToPortfolioItem, mapProjectToPortfolioItem } from './utils/mappers';
 import { CategoryItem } from './types';
 
 /**
@@ -22,9 +22,24 @@ export const adminAuthLoader = async () => {
 // --- PUBLIC LOADERS ---
 
 export const portfolioLoader = async () => {
-    const res = await api.getArticles({ limit: 40 });
-    const data = Array.isArray(res) ? res : res.data;
-    return data.map(mapArticleToPortfolioItem);
+    const [articlesRes, projectsRes] = await Promise.all([
+        api.getArticles({ limit: 10 }),
+        api.getProjects()
+    ]);
+    
+    const articlesData = Array.isArray(articlesRes) ? articlesRes : articlesRes.data;
+    const projectsData = Array.isArray(projectsRes) ? projectsRes : projectsRes.data;
+
+    // Ordiniamo i progetti per data di creazione decrescente per prendere gli ultimi 4
+    const recentProjects = projectsData
+        .filter((p: any) => p.is_visible === 1 || p.is_visible === true)
+        .sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+        .slice(0, 4);
+
+    return {
+        articles: articlesData.map(mapArticleToPortfolioItem),
+        projects: recentProjects.map(mapProjectToPortfolioItem)
+    };
 };
 
 export const allProjectsLoader = async () => {

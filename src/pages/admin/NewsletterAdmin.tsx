@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, ReactElement } from 'react';
 import { useLoaderData } from 'react-router-dom';
-import { Users, Send, Trash2, Download, CheckCircle, Clock, XCircle, Loader2, AlertCircle, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { Users, Send, Trash2, Download, CheckCircle, Clock, XCircle, Loader2, AlertCircle, FileText, ChevronDown, ChevronUp, UserPlus, Check } from 'lucide-react';
 import { api } from '../../api';
 
 type Tab = 'subscribers' | 'send';
@@ -74,7 +74,11 @@ export default function NewsletterAdmin() {
     const [sending, setSending]         = useState(false);
     const [sendResult, setSendResult]   = useState<{ ok: boolean; message: string } | null>(null);
 
-    // Selezione articoli
+    // Inserimento manuale
+    const [newEmail, setNewEmail] = useState('');
+    const [newName, setNewName]   = useState('');
+    const [adding, setAdding]     = useState(false);
+
     const [articles, setArticles]         = useState<Article[]>([]);
     const [selectedIds, setSelectedIds]   = useState<Set<number>>(new Set());
     const [articlesOpen, setArticlesOpen] = useState(false);
@@ -126,6 +130,32 @@ export default function NewsletterAdmin() {
         await api.deleteSubscriber(id);
         setSubscribers(prev => prev.filter(s => s.id !== id));
         setStats(prev => prev ? { ...prev, total: prev.total - 1 } : prev);
+    };
+
+    const handleApprove = async (id: number) => {
+        if (!confirm('Approvare manualmente questo iscritto?')) return;
+        try {
+            await api.approveSubscriber(id);
+            setSubscribers(prev => prev.map(s => s.id === id ? { ...s, status: 'confirmed', confirmed_at: new Date().toISOString() } : s));
+            loadData(); // Ricarica stats
+        } catch (err: any) {
+            alert(err.message || 'Errore durante l\'approvazione');
+        }
+    };
+
+    const handleAddManual = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newEmail.trim()) return;
+        setAdding(true);
+        try {
+            await api.addSubscriberAdmin({ email: newEmail, name: newName });
+            setNewEmail(''); setNewName('');
+            loadData(); // Ricarica tutto
+        } catch (err: any) {
+            alert(err.message || 'Errore durante l\'aggiunta');
+        } finally {
+            setAdding(false);
+        }
     };
 
     const exportCsv = () => {
@@ -216,9 +246,36 @@ export default function NewsletterAdmin() {
             {/* ── Tab: Iscritti ── */}
             {tab === 'subscribers' && (
                 <div className="space-y-4">
-                    <div className="flex justify-end">
+                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
+                        {/* Form inserimento rapido */}
+                        <form onSubmit={handleAddManual} className="flex flex-wrap items-end gap-2 bg-zinc-900/50 p-3 rounded-xl border border-zinc-800 w-full sm:w-auto">
+                            <div className="space-y-1">
+                                <label className="text-[10px] uppercase text-zinc-500 font-bold ml-1">Email</label>
+                                <input 
+                                    type="email" value={newEmail} onChange={e => setNewEmail(e.target.value)}
+                                    placeholder="email@esempio.com" required
+                                    className="bg-zinc-800 border border-zinc-700 text-white text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-dis-green w-48"
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-[10px] uppercase text-zinc-500 font-bold ml-1">Nome (Opz.)</label>
+                                <input 
+                                    type="text" value={newName} onChange={e => setNewName(e.target.value)}
+                                    placeholder="Nome"
+                                    className="bg-zinc-800 border border-zinc-700 text-white text-xs px-3 py-2 rounded-lg focus:outline-none focus:border-dis-green w-32"
+                                />
+                            </div>
+                            <button 
+                                type="submit" disabled={adding || !newEmail}
+                                className="bg-dis-green text-black p-2 rounded-lg hover:bg-green-400 transition-colors disabled:opacity-50 h-[34px] flex items-center justify-center min-w-[34px]"
+                                title="Aggiungi Iscritto"
+                            >
+                                {adding ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
+                            </button>
+                        </form>
+
                         <button onClick={exportCsv}
-                            className="flex items-center gap-2 text-sm text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-2 rounded-lg transition-colors">
+                            className="flex items-center gap-2 text-sm text-zinc-400 hover:text-white border border-zinc-700 hover:border-zinc-500 px-3 py-2 rounded-lg transition-colors h-[42px]">
                             <Download size={14}/> Esporta CSV
                         </button>
                     </div>
@@ -248,10 +305,18 @@ export default function NewsletterAdmin() {
                                             <td className="px-4 py-3">{STATUS_BADGE[s.status]}</td>
                                             <td className="px-4 py-3 text-zinc-500 text-xs">{formatDate(s.created_at)}</td>
                                             <td className="px-4 py-3">
-                                                <button onClick={() => handleDelete(s.id)}
-                                                    className="text-zinc-600 hover:text-red-400 transition-colors" title="Elimina">
-                                                    <Trash2 size={14}/>
-                                                </button>
+                                                <div className="flex items-center gap-2">
+                                                    {s.status === 'pending' && (
+                                                        <button onClick={() => handleApprove(s.id)}
+                                                            className="text-zinc-500 hover:text-green-400 transition-colors" title="Approva Manualmente">
+                                                            <Check size={16}/>
+                                                        </button>
+                                                    )}
+                                                    <button onClick={() => handleDelete(s.id)}
+                                                        className="text-zinc-600 hover:text-red-400 transition-colors" title="Elimina">
+                                                        <Trash2 size={14}/>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}

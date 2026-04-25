@@ -4,10 +4,10 @@ import NewsletterSignup from './NewsletterSignup';
 
 const CommunityHub: React.FC = () => {
     return (
-        <section className="container mx-auto py-16 sm:py-24 px-4 sm:px-6 lg:px-8">
+        <section className="container mx-auto pt-8 pb-12 sm:pt-12 sm:pb-16 px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-16">
                 <h2 className="text-4xl md:text-5xl font-black text-white tracking-tight mb-4">
-                    Entra nel <span className="text-dis-green text-glow">Mondo</span>
+                    Entriamo in <span className="text-dis-green text-glow">Contatto</span>
                 </h2>
                 <p className="text-lg text-zinc-400 max-w-2xl mx-auto">
                     Sostieni il mio lavoro, resta aggiornato sulle ultime uscite o connettiamoci sui social per scambiare due chiacchiere.

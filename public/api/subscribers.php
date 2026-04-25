@@ -116,13 +116,17 @@ if ($method === 'GET') {
 }
 
 // ──────────────────────────────────────────────────────────────────────────────
-// POST — nuova iscrizione (pubblico, double opt-in)
+// POST — nuova iscrizione (pubblico, double opt-in o admin diretto)
 // ──────────────────────────────────────────────────────────────────────────────
 if ($method === 'POST') {
     header('Content-Type: application/json');
     $data  = json_decode(file_get_contents('php://input'), true) ?? [];
     $email = trim(filter_var($data['email'] ?? '', FILTER_SANITIZE_EMAIL));
     $name  = trim(strip_tags($data['name'] ?? ''));
+
+    // Verifica se l'azione è compiuta da un admin per forzare la conferma
+    $isAdmin      = isset($_SESSION['user_id']);
+    $forceConfirm = $isAdmin && isset($data['force_confirm']) && $data['force_confirm'] === true;
 
     if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         http_response_code(400);
@@ -142,40 +146,86 @@ if ($method === 'POST') {
             if ($existing['status'] === 'confirmed') {
                 echo json_encode(['status' => 'already', 'message' => 'Questa email è già iscritta.']);
             } else {
-                // Re-invia email di conferma
-                $ct = bin2hex(random_bytes(32));
-                $pdo->prepare("UPDATE subscribers SET confirm_token=:ct, status='pending' WHERE id=:id")
-                    ->execute([':ct' => $ct, ':id' => $existing['id']]);
-                sendConfirmEmail($email, $name ?: 'Amico', $ct);
-                echo json_encode(['status' => 'pending', 'message' => 'Controlla la tua email per confermare l\'iscrizione.']);
+                if ($forceConfirm) {
+                    // Approva forzatamente se esistente ma pending/unsub
+                    $pdo->prepare("UPDATE subscribers SET status='confirmed', confirmed_at=NOW(), confirm_token=NULL WHERE id=:id")
+                        ->execute([':id' => $existing['id']]);
+                    echo json_encode(['status' => 'success', 'message' => 'Iscrizione esistente confermata manualmente.']);
+                } else {
+                    // Re-invia email di conferma standard
+                    $ct = bin2hex(random_bytes(32));
+                    $pdo->prepare("UPDATE subscribers SET confirm_token=:ct, status='pending' WHERE id=:id")
+                        ->execute([':ct' => $ct, ':id' => $existing['id']]);
+                    sendConfirmEmail($email, $name ?: 'Amico', $ct);
+                    echo json_encode(['status' => 'pending', 'message' => 'Controlla la tua email per confermare l\'iscrizione.']);
+                }
             }
             exit;
         }
 
         // Nuova iscrizione
-        $confirmToken     = bin2hex(random_bytes(32));
+        $confirmToken     = $forceConfirm ? null : bin2hex(random_bytes(32));
         $unsubscribeToken = bin2hex(random_bytes(32));
+        $status           = $forceConfirm ? 'confirmed' : 'pending';
+        $confirmedAt      = $forceConfirm ? date('Y-m-d H:i:s') : null;
 
         $stmt = $pdo->prepare(
-            "INSERT INTO subscribers (email, name, status, confirm_token, unsubscribe_token)
-             VALUES (:email, :name, 'pending', :ct, :ut)"
+            "INSERT INTO subscribers (email, name, status, confirm_token, unsubscribe_token, confirmed_at)
+             VALUES (:email, :name, :status, :ct, :ut, :ca)"
         );
         $stmt->execute([
-            ':email' => $email,
-            ':name'  => $name ?: null,
-            ':ct'    => $confirmToken,
-            ':ut'    => $unsubscribeToken,
+            ':email'  => $email,
+            ':name'   => $name ?: null,
+            ':status' => $status,
+            ':ct'     => $confirmToken,
+            ':ut'     => $unsubscribeToken,
+            ':ca'     => $confirmedAt
         ]);
 
-        sendConfirmEmail($email, $name ?: 'Amico', $confirmToken);
-
-        echo json_encode([
-            'status'  => 'success',
-            'message' => 'Quasi fatto! Controlla la tua email e clicca il link per confermare l\'iscrizione.',
-        ]);
+        if (!$forceConfirm) {
+            sendConfirmEmail($email, $name ?: 'Amico', $confirmToken);
+            echo json_encode([
+                'status'  => 'success',
+                'message' => 'Quasi fatto! Controlla la tua email e clicca il link per confermare l\'iscrizione.',
+            ]);
+        } else {
+            echo json_encode([
+                'status'  => 'success',
+                'message' => 'Iscritto aggiunto correttamente come confermato.',
+            ]);
+        }
     } catch (Throwable $e) {
         http_response_code(500);
         echo json_encode(['status' => 'error', 'message' => 'Errore server: ' . $e->getMessage()]);
+    }
+    exit;
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// PATCH — approvazione manuale (admin)
+// ──────────────────────────────────────────────────────────────────────────────
+if ($method === 'PATCH') {
+    header('Content-Type: application/json');
+    Auth::check();
+    $data = json_decode(file_get_contents('php://input'), true) ?? [];
+    $id   = (int)($data['id'] ?? 0);
+
+    if (!$id) {
+        http_response_code(400);
+        echo json_encode(['error' => 'ID mancante.']);
+        exit;
+    }
+
+    try {
+        $pdo = Database::connect();
+        $upd = $pdo->prepare(
+            "UPDATE subscribers SET status='confirmed', confirmed_at=NOW(), confirm_token=NULL WHERE id=:id"
+        );
+        $upd->execute([':id' => $id]);
+        echo json_encode(['status' => 'success', 'message' => 'Iscritto approvato con successo.']);
+    } catch (Throwable $e) {
+        http_response_code(500);
+        echo json_encode(['error' => 'Errore server: ' . $e->getMessage()]);
     }
     exit;
 }

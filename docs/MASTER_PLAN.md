@@ -2,8 +2,8 @@
 
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.10.5  
-**Ultimo aggiornamento documento:** 25 Aprile 2026 (Media Gallery Emergency Patch)  
+**Versione corrente:** 1.11.0  
+**Ultimo aggiornamento documento:** 25 Aprile 2026 (Newsletter & Home 2.0)  
 **Sito:** simonepizzi.runtimeradio.it
 
 > Questo documento è la fonte autoritativa per lo stato del progetto, le promesse di sviluppo e la pianificazione futura.  
@@ -26,7 +26,6 @@
 | SEO server-side (OpenGraph / TwitterCard via `index.php`) | ✅ Attivo |
 | Recupero password via Email | ✅ Attivo v1.8.0 |
 
-
 ### Database — Tabelle
 
 | Tabella | Stato |
@@ -42,7 +41,6 @@
 | `subscribers` | ✅ Attiva (Newsletter) |
 | `messages` | ✅ Attiva (Contatti) |
 | `password_resets` | ✅ Attiva (v1.8.0) |
-
 
 ---
 
@@ -79,6 +77,8 @@ Elenco sintetico delle funzionalità core e miglioramenti completati:
 - ✅ **[P1-08]** Sottocategorie Gerarchiche & Header Dropdown (v1.10.2)
 - ✅ **[P2-07]** Gestione Admin Sottocategorie (v1.10.3)
 - ✅ **[P2-08]** Integrazione Sottocategorie nei Filtri & Progetti (v1.10.3)
+- ❌ **[P3-06]** Audio Player nativo fluttuante (Escluso)
+- ❌ **[P3-07]** Dark/Light Mode (Escluso - Identità Solo Dark)
 
 - ✅ **Menu Mobile:** Hamburger e drawer ottimizzato
 
@@ -88,65 +88,39 @@ Elenco sintetico delle funzionalità core e miglioramenti completati:
 
 Voci attive ordinate per priorità.
 
-### ✅ COMPLETATE RECENTEMENTE (v1.8.6)
-
-#### [P1-05] Risoluzione Indexing Google (SEO)
-
-**COMPLETATO** — Implementazione Prerendering Statico (22 Aprile 2026)
-
-- **Soluzione implementata:** Script PHP `/api/prerender.php` che genera HTML statico per tutte le route.
-- **Come funziona:**
-  1. Admin accede a `/api/prerender.php` (protetto da autenticazione)
-  2. Lo script recupera tutte le categorie e articoli dal database MySQL
-  3. Cattura l'output di `index.php` per ogni rotta e lo salva in un file `index.html` dedicato.
-  4. Es: `/videogiochi/titolo-articolo/index.html` contiene l'HTML pre-renderizzato con Meta Tag dinamici.
-- **Effetto:** Google trova HTML statico con metadati già pronti, non javascript CSR. Indicizzazione garantita.
-- **Flusso:**
-  - Build locale: `npm run build` (senza prerendering, veloce)
-  - Deploy: Carica `dist/` su FTP
-  - Post-deploy: Esegui `/api/prerender.php` dal browser (5 minuti per generare ~30+ HTML)
-- **File creati:**
-  - `public/api/prerender.php` — Script di generazione
-  - `prerender-routes.js`, `prerender.js` — Helper Node per sviluppatori (opzionali, per uso locale)
-- **Analisi completa:** Vedere [indicizzazione.google.md](file:///C:/Users/Utente/Documents/GitHub/SITI-WEB/SimonePizziWebSite/docs/indicizzazione.google.md).
-
 ---
 
 ### 🟠 PRIORITÀ ALTA
 
 #### [P2-07] Gestione Admin Sottocategorie
+
 - **STATO:** COMPLETATO ✅ (v1.10.3)
 
 #### [P2-08] Integrazione Sottocategorie nei Filtri
+
 - **STATO:** COMPLETATO ✅ (v1.10.3)
 
 #### [P2-05] Ottimizzazione Bundle & Code Splitting
+
 - **STATO:** COMPLETATO ✅ (v1.9.1)
 
 #### [P2-06] Refactor Data Loaders (React Router 7)
+
 - **STATO:** COMPLETATO ✅
 
 ### 🔵 PRIORITÀ BASSA / LUNGO TERMINE
 
 #### [P3-10] Dashboard Analytics Visuale
+
 - **STATO:** COMPLETATO ✅ (v1.9.2)
 
 #### [P3-11] Auto-Save & Draft System
+
 - **Obiettivo:** Implementare il salvataggio automatico in background per gli editor per prevenire perdite accidentali di dati oltre al Dirty State Warning.
 
 #### [P3-12] Transizioni Fluide tra Pagine
+
 - **Obiettivo:** Migliorare la UX premium con transizioni animate tra le rotte sfruttando le API di React Router.
-
-
-
----
-
-## PARTE IV — FEATURE CANCELLATE / ESCLUSE ❌
-
-Funzionalità rimosse dalla pianificazione perché non coerenti con la visione del progetto:
-
-- ❌ **[P3-06] Audio Player nativo fluttuante:** Considerata superflua per la tipologia di contenuti del sito.
-- ❌ **[P3-07] Dark/Light Mode:** Il sito mantiene un'identità visiva esclusivamente **Dark**. Non verrà implementato il selettore di modalità chiara.
 
 ---
 
@@ -164,6 +138,7 @@ Funzionalità rimosse dalla pianificazione perché non coerenti con la visione d
 ### Incidente Restyling v1.8.x (21 Aprile 2026)
 
 - **Evento:** Fallimento tentativo di reskin totale con perdita di contenuti bio e testi legali.
+
 - **Azione:** Rollback al commit `87cb0c` (v1.7.13).
 ---
 
@@ -180,8 +155,16 @@ Funzionalità rimosse dalla pianificazione perché non coerenti con la visione d
 
 - **Evento:** Tentativo di "dereactizzazione" totale per trasformare il sito in una MPA PHP pura con Tailwind 4 e Vanilla JS.
 - **Motivazione:** Ricerca di performance estreme e semplificazione architetturale.
+
 - **Esito:** Operazione abortita. La complessità del porting di tutte le funzionalità React (Admin, Editor, Analytics) è risultata eccessiva e "dolorosa" rispetto ai benefici immediati.
-- **Azione:** Rollback completo al commit `8f5e04b` (v1.10.4). Ripristinata l'architettura React SPA originale.
+---
+
+### Versione 1.11.0 (25 Aprile 2026) — Consolidamento e Nuove Funzioni
+
+- **Newsletter Admin:** Implementata approvazione manuale (PATCH) e inserimento diretto admin (POST + force_confirm). Interfaccia potenziata con form rapido e tasti d'azione.
+- **Home Page 2.0:** Aggiunta sezione "Ultimi Progetti" (Hero + Grid), rinominato Hub di contatto in "Entriamo in Contatto" e ottimizzati i padding verticali.
+- **Bug Fix Critico:** Risolto crash 404 sulle card progetti tramite refactoring del componente `FeaturedCard` in modalità non-link con pulsanti d'azione reali.
+- **Build:** Versione stabilizzata e verificata tramite build di produzione.
 
 ---
 
@@ -190,6 +173,7 @@ Funzionalità rimosse dalla pianificazione perché non coerenti con la visione d
 ### Workflow Prerendering (Post-Deploy)
 
 Il prerendering **NON avviene durante il build locale** bensì **dopo il deploy**:
+
 - Backend PHP deve essere online e raggiungibile
 - Richiede accesso ai dati MySQL del sito live
 - Genera file HTML da ~30+ articoli (tempo: ~30-60 secondi)
@@ -198,19 +182,22 @@ Il prerendering **NON avviene durante il build locale** bensì **dopo il deploy*
 ### Procedura Step-by-Step
 
 **1. Build e deploy normale:**
+
 ```bash
 npm run build
 # Upload dist/ su FTP → simonepizzi.runtimeradio.it/
 ```
 
 **2. Accedi da browser e triggera il prerendering:**
-```
+
+```http
 URL: https://simonepizzi.runtimeradio.it/api/prerender.php
 Prerequisito: Devi essere loggato all'admin
 Risultato: Response JSON con "Prerendering con iniezione SEO completato"
 ```
 
 **3. Verifica risultato:**
+
 - File system: `/dist/videogiochi/`, `/dist/progetti-software/`, ecc. contengono `index.html` statici
 - Google: `site:simonepizzi.runtimeradio.it` per verificare indexing
 - Search Console: Monitora nuova sitemap
@@ -218,11 +205,10 @@ Risultato: Response JSON con "Prerendering con iniezione SEO completato"
 ### File di Sistema
 
 | File | Ruolo |
-|---|---|
+| :--- | :--- |
 | `public/api/prerender.php` | Script PHP principale (ESEGUIBILE DAL BROWSER) |
 | `prerender-routes.js` | Helper Node scoperta route (opzionale) |
 | `prerender.js` | Helper Node generazione file (opzionale) |
-
 
 ---
 
