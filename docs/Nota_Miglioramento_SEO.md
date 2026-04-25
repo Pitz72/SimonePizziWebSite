@@ -1,31 +1,51 @@
 # Nota di Miglioramento: SEO & Prerendering
-**Stato:** Analisi Post-Sviluppo (v1.11.1)
+**Stato:** Risolto ✅ (v1.12.0 — SEO Engine v2.0)
 
 ## 🎯 Obiettivi Raggiunti
-Il progetto ha implementato con successo un sistema di **Prerendering Statico** con iniezione di metadati SEO (OpenGraph, TwitterCards) gestito via PHP (`index.php` e `prerender.php`). Questo permette l'indicizzazione corretta dei contenuti dinamici (articoli e categorie) nonostante l'architettura SPA.
 
-## ⚠️ Problemi Riscontrati e Non Risolti
-Nonostante gli sforzi, rimangono delle criticità che richiedono un'analisi futura più approfondita, probabilmente legata alla configurazione del server Apache o alle restrizioni dell'hosting:
+### v1.7.3 — Meta Tag Injection (Fase 1)
+Il progetto ha implementato un sistema di **iniezione meta tag** (OpenGraph, TwitterCards) gestito via PHP (`index.php`). Questo garantiva anteprime corrette sui social media ma lasciava il `<body>` vuoto per i crawler.
 
-### 1. Incidente Robots.txt (v1.9.6)
-- **Descrizione:** Il file `robots.txt` restituisce occasionalmente un errore 404 (gestito da React) invece di servire il file fisico presente nella root o il fallback generato via PHP.
-- **Analisi Corrente:** Il server sembra ignorare le direttive di rewrite nel `.htaccess` specificamente per questo file, o esiste una collisione con la gestione delle rotte del frontend.
-- **Stato:** Investigazione aperta.
+### v1.12.0 — Dynamic Rendering Ibrido (Fase 2) ✅
+Riscrittura completa di `index.php` come motore **Dynamic Rendering**:
 
-### 2. Workflow di Prerendering Manuale
-- **Descrizione:** Attualmente il prerendering delle pagine statiche deve essere innescato manualmente dall'area admin dopo ogni deploy.
-- **Debito Tecnico:** Non è stato implementato un sistema di automazione (Cron Job o Webhook) che aggiorni le pagine statiche alla creazione di un nuovo articolo.
-- **Futuro:** Valutare l'attivazione di un trigger automatico lato backend MySQL/PHP.
+- **Visitatori umani** → SPA React con meta tag iniettati (comportamento invariato)
+- **Crawler** (Googlebot, Bingbot, social bot) → HTML completo con:
+  - Contenuto reale nel `<body>` (`<h1>`, `<article>`, testo, immagini)
+  - Dati strutturati **JSON-LD** (Article, CollectionPage, WebSite, Person, ContactPage)
+  - `<link rel="canonical">` per prevenire contenuti duplicati
+  - **Breadcrumb** semantici per navigazione gerarchica
 
-### 3. Sincronizzazione Sitemap.xml
-- **Descrizione:** La sitemap viene generata correttamente dallo script di prerendering, ma riflette solo lo stato al momento della generazione.
-- **Rischio:** Ritardo tra la pubblicazione di un articolo e la sua presenza nella sitemap fisica se lo script non viene eseguito prontamente.
+## ✅ Problemi Risolti
 
-## 🔍 Analisi per il Futuro
-Nel caso di una ripresa dello sviluppo o di un cambio di hosting, si consiglia di:
-- Analizzare i log di errore del server Apache per identificare il motivo preciso del 404 sul `robots.txt`.
-- Implementare una gestione SEO interamente tramite **Edge Functions** o un layer di **Reverse Proxy** per eliminare la dipendenza dal prerendering fisico su disco.
-- Verificare la coerenza del protocollo HTTPS nei link generati nella sitemap (attualmente forzati via PHP).
+### 1. Incidente Robots.txt (v1.9.6) → RISOLTO
+- **Causa radice:** Le regole `.htaccess` dipendevano dalla condizione `!-f` (file non esiste), creando una race condition tra file fisico e fallback PHP.
+- **Soluzione v2.0:** `robots.txt` e `sitemap.xml` puntano **sempre** ai generatori PHP (`robots.php`, `sitemap.php`) senza condizioni sul filesystem. Il bug del 404 sporadico è eliminato.
+
+### 2. Workflow di Prerendering Manuale → ELIMINATO
+- **Era:** Prerendering manuale tramite `prerender.php` dopo ogni deploy.
+- **Ora:** `index.php` genera HTML completo **on-demand** ad ogni richiesta crawler. Nessun file statico necessario, nessun cron job, nessun intervento manuale.
+- `prerender.php` è stato deprecato e sostituito con un messaggio informativo.
+
+### 3. Sincronizzazione Sitemap.xml → RISOLTA
+- **Era:** La sitemap rifletteva solo lo stato al momento della generazione manuale.
+- **Ora:** `sitemap.php` è servito in tempo reale ad ogni richiesta. Include `<lastmod>` calcolato dinamicamente e supporto per sottocategorie.
+
+## Architettura SEO v2.0
+
+```
+Richiesta HTTP
+    │
+    ├─ /robots.txt     → robots.php (sempre, via .htaccess)
+    ├─ /sitemap.xml    → sitemap.php (sempre, via .htaccess)
+    ├─ /api/*          → endpoint PHP (passthrough)
+    ├─ file fisico     → Apache serve direttamente (.js, .css, .png)
+    │
+    └─ Rotta pubblica  → index.php (SEO Engine v2.0)
+         │
+         ├─ Crawler?   → HTML completo (head + body + JSON-LD)
+         └─ Umano?     → SPA React (head con meta + bundle JS)
+```
 
 ---
-*Nota generata a chiusura della fase di sviluppo v1.11.1 - 25 Aprile 2026*
+*Nota aggiornata a chiusura della v1.12.0 — 25 Aprile 2026*
