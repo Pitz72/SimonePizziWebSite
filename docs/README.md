@@ -8,6 +8,7 @@ Tutta la pianificazione, lo stato corrente e le regole architetturali sono ora c
 
 ## 📂 Struttura Documentale
 - **[Changelogs (changelogs/)](changelogs/)**: Lo storico dettagliato di tutte le versioni rilasciate.
+- **[Nota di Miglioramento SEO](Nota_Miglioramento_SEO.md)**: Analisi dei problemi SEO risolti e delle sfide future.
 - **[Archive (archive/)](archive/)**: Documenti di analisi passate, vecchie roadmap e studi tecnici archiviati.
 
 ---
