@@ -7,6 +7,9 @@
   php_value max_input_time 300
 </IfModule>
 
+# [v2.0] Forza Apache a eseguire index.php (SEO Engine) prima di index.html
+DirectoryIndex index.php index.html
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
