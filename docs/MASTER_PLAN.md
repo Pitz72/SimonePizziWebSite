@@ -2,8 +2,8 @@
 
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.10.2  
-**Ultimo aggiornamento documento:** 24 Aprile 2026 (Hierarchical Subcategories)  
+**Versione corrente:** 1.10.4  
+**Ultimo aggiornamento documento:** 25 Aprile 2026 (Rollback MPA & Organization)  
 **Sito:** simonepizzi.runtimeradio.it
 
 > Questo documento è la fonte autoritativa per lo stato del progetto, le promesse di sviluppo e la pianificazione futura.  
@@ -176,6 +176,15 @@ Funzionalità rimosse dalla pianificazione perché non coerenti con la visione d
 
 ---
 
+### Incidente Migrazione MPA (25 Aprile 2026)
+
+- **Evento:** Tentativo di "dereactizzazione" totale per trasformare il sito in una MPA PHP pura con Tailwind 4 e Vanilla JS.
+- **Motivazione:** Ricerca di performance estreme e semplificazione architetturale.
+- **Esito:** Operazione abortita. La complessità del porting di tutte le funzionalità React (Admin, Editor, Analytics) è risultata eccessiva e "dolorosa" rispetto ai benefici immediati.
+- **Azione:** Rollback completo al commit `8f5e04b` (v1.10.4). Ripristinata l'architettura React SPA originale.
+
+---
+
 ## PARTE VII — GUIDA OPERAZIONALE: PRERENDERING SEO
 
 ### Workflow Prerendering (Post-Deploy)
@@ -213,6 +222,23 @@ Risultato: Response JSON con "Prerendering con iniezione SEO completato"
 | `public/api/prerender.php` | Script PHP principale (ESEGUIBILE DAL BROWSER) |
 | `prerender-routes.js` | Helper Node scoperta route (opzionale) |
 | `prerender.js` | Helper Node generazione file (opzionale) |
+
+
+---
+
+## ALLEGATO A — ARCHITETTURA DEL PROGETTO
+
+Questo allegato consolida le regole strutturali del progetto per garantire coerenza tra frontend e backend.
+
+| Directory | Descrizione |
+| :--- | :--- |
+| **`/src/`** | **Core Frontend (React 19)**. Contiene componenti, custom hook, pagine, tipi e utility. Niente codice logico deve risiedere fuori da qui. |
+| **`/public/`** | **Assets & Entry Point**. Contiene `index.php` (SEO server-side) e gli asset statici (immagini, favicon). |
+| **`/public/api/`** | **Backend REST PHP**. Layer di comunicazione con il database MySQL. Include endpoint per articoli, newsletter, ecc. |
+| **`/public/uploads/`** | **Media CMS**. Directory dinamica per i file caricati tramite l'area admin (WebP, PDF, ZIP). |
+| **`/docs/`** | **Documentazione**. Contiene il Master Plan, l'archivio storico e i changelog. |
+| **`/scripts/`** | **Tooling**. Script di manutenzione, ottimizzazione immagini e setup. |
+| **`/dist/`** | **Production Build**. Output generato da Vite (`npm run build`). |
 
 ---
 *Documento mantenuto da Simone Pizzi.*
