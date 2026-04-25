@@ -140,6 +140,10 @@ if (count($uri_parts) === 0) {
     $pageType = 'contact';
 } elseif ($uri_parts[0] === 'newsletter') {
     $pageType = 'static';
+} elseif ($uri_parts[0] === 'privacy') {
+    $pageType = 'legal_privacy';
+} elseif ($uri_parts[0] === 'cookie-policy') {
+    $pageType = 'legal_cookies';
 } elseif (count($uri_parts) === 2) {
     $pageType = 'article';
     $catSlug  = $uri_parts[0];
@@ -335,6 +339,19 @@ try {
         ];
     }
 
+    // ── PAGINE LEGALI ──
+    if ($pageType === 'legal_privacy') {
+        $metaTitle = "Privacy Policy | Simone Pizzi";
+        $metaDesc  = "Informativa sul trattamento dei dati personali ai sensi del GDPR (Reg. UE 2016/679).";
+        $canonicalUrl = $baseUrl . '/privacy';
+    }
+
+    if ($pageType === 'legal_cookies') {
+        $metaTitle = "Cookie Policy | Simone Pizzi";
+        $metaDesc  = "Informativa sull'uso dei cookie del sito Simone Pizzi. Solo cookie tecnici essenziali.";
+        $canonicalUrl = $baseUrl . '/cookie-policy';
+    }
+
 } catch (Exception $e) {
     // Fallback silenzioso: i meta default sono già impostati
     error_log("SEO Engine v2.0 DB Error: " . $e->getMessage());
@@ -345,6 +362,16 @@ try {
 // ─────────────────────────────────────────────
 
 $isCrawler = isCrawler();
+
+// Per le pagine legali, serve direttamente il file PHP (non React SPA)
+if ($pageType === 'legal_privacy') {
+    require __DIR__ . '/privacy.php';
+    exit;
+}
+if ($pageType === 'legal_cookies') {
+    require __DIR__ . '/cookie-policy.php';
+    exit;
+}
 
 if ($isCrawler && $pageType !== 'admin') {
     // ═══════════════════════════════════════════
@@ -574,6 +601,8 @@ if ($isCrawler && $pageType !== 'admin') {
     <script type="application/ld+json">' . json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</script>';
     }
 
+    // Iniezione cookie banner per visitatori umani (non crawler)
+    $seoInjection .= "\n    <script src=\"/js/cookie-banner.js\" defer></script>";
     $seoInjection .= "\n</head>";
 
     $htmlContent = str_replace('</head>', $seoInjection, $htmlContent);

@@ -159,7 +159,7 @@ const ContactPage: React.FC = () => {
                                         <label className="flex items-start gap-3 cursor-pointer group">
                                             <input type="checkbox" checked={gdprConsent} onChange={e => setGdprConsent(e.target.checked)} className="mt-1 shrink-0 accent-dis-green w-4 h-4 rounded" required />
                                             <span className="text-zinc-400 text-xs leading-relaxed group-hover:text-zinc-300 transition-colors">
-                                                Acconsento al trattamento dei dati personali per questa richiesta. <span className="text-red-500">*</span>
+                                                Ho letto la <a href="/privacy" target="_blank" rel="noopener noreferrer" className="text-dis-green hover:underline">Privacy Policy</a> e acconsento al trattamento dei miei dati per ricevere risposta a questa richiesta. <span className="text-red-500">*</span>
                                             </span>
                                         </label>
                                         <label className="flex items-start gap-3 cursor-pointer group">
