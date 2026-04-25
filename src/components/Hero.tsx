@@ -71,24 +71,21 @@ const Hero: React.FC<HeroProps> = ({ onOpenModal }) => {
           transition={{ duration: 0.8, delay: 0.2 }}
           className="relative h-[448px] md:h-[672px] flex items-center justify-center"
         >
-          <picture>
-            <source srcSet="/Simone-Pizzi.webp" type="image/webp" />
-            <motion.img
-              animate={{ y: [-10, 10, -10] }}
-              transition={{
-                repeat: Infinity,
-                duration: 6,
-                ease: "easeInOut"
-              }}
-              src="/Simone-Pizzi.png"
-              alt="Simone Pizzi"
-              className="w-full h-full object-contain"
-              style={{
-                filter: 'drop-shadow(0 0 2rem rgba(34, 197, 94, 0.3))',
-                maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)',
-              }}
-            />
-          </picture>
+          <motion.img
+            animate={{ y: [-10, 10, -10] }}
+            transition={{
+              repeat: Infinity,
+              duration: 6,
+              ease: "easeInOut"
+            }}
+            src="/Simone-Pizzi.webp"
+            alt="Simone Pizzi"
+            className="w-full h-full object-contain"
+            style={{
+              filter: 'drop-shadow(0 0 2rem rgba(34, 197, 94, 0.3))',
+              maskImage: 'radial-gradient(circle, rgba(0,0,0,1) 60%, rgba(0,0,0,0) 100%)',
+            }}
+          />
         </motion.div>
       </div>
     </section>
