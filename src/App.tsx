@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { createBrowserRouter, RouterProvider, useLocation, Outlet, useLoaderData, isRouteErrorResponse, useRouteError } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { PortfolioItem, CategoryItem } from './types';
 import { HelmetProvider } from 'react-helmet-async';
 import Header from './components/Header';
@@ -110,9 +111,18 @@ const PublicLayout: React.FC = () => {
         <SearchModal isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
 
         <main className="px-4 sm:px-6 lg:px-8">
-          <React.Suspense fallback={<Loader />}>
-            <Outlet />
-          </React.Suspense>
+          <AnimatePresence>
+            <motion.div
+              key={useLocation().pathname}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            >
+              <React.Suspense fallback={<Loader />}>
+                <Outlet />
+              </React.Suspense>
+            </motion.div>
+          </AnimatePresence>
         </main>
 
         <Footer />

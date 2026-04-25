@@ -67,7 +67,10 @@ Elenco sintetico delle funzionalità core e miglioramenti completati:
 - ✅ **[P3-09]** Paginazione e Ricerca Avanzata nel Backend (v1.8.5)
 - ✅ **[P1-05]** Prerendering Statico con Iniezione SEO (v1.9.0)
 - ✅ **[P2-05]** Ottimizzazione Bundle & Code Splitting (v1.9.1)
+- ✅ **[P2-06]** Refactor Data Loaders (React Router 7)
 - ✅ **[P3-10]** Dashboard Analytics Visuale con Chart.js (v1.9.2)
+- ✅ **[P3-11]** Sistema Recupero Bozze Locale (LocalStorage Recovery)
+- ✅ **[P3-12]** Transizioni Fluide tra Pagine (Framer Motion)
 - ✅ **[P4-01]** Ottimizzazioni Forensi delle Performance (v1.9.3)
 - ✅ **[P4-02]** Sitemap & Robots Dinamici via PHP (v1.9.4)
 - ✅ **[P4-03]** Hotfix Routing SEO & Stabilizzazione .htaccess (v1.9.5)
@@ -92,35 +95,11 @@ Voci attive ordinate per priorità.
 
 ### 🟠 PRIORITÀ ALTA
 
-#### [P2-07] Gestione Admin Sottocategorie
-
-- **STATO:** COMPLETATO ✅ (v1.10.3)
-
-#### [P2-08] Integrazione Sottocategorie nei Filtri
-
-- **STATO:** COMPLETATO ✅ (v1.10.3)
-
-#### [P2-05] Ottimizzazione Bundle & Code Splitting
-
-- **STATO:** COMPLETATO ✅ (v1.9.1)
-
-#### [P2-06] Refactor Data Loaders (React Router 7)
-
-- **STATO:** COMPLETATO ✅
+Nessuna voce pendente.
 
 ### 🔵 PRIORITÀ BASSA / LUNGO TERMINE
 
-#### [P3-10] Dashboard Analytics Visuale
-
-- **STATO:** COMPLETATO ✅ (v1.9.2)
-
-#### [P3-11] Auto-Save & Draft System
-
-- **Obiettivo:** Implementare il salvataggio automatico in background per gli editor per prevenire perdite accidentali di dati oltre al Dirty State Warning.
-
-#### [P3-12] Transizioni Fluide tra Pagine
-
-- **Obiettivo:** Migliorare la UX premium con transizioni animate tra le rotte sfruttando le API di React Router.
+Nessuna voce pendente.
 
 ---
 

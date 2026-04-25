@@ -42,6 +42,8 @@ export default function ProjectEditor() {
     const [btnAType, setBtnAType] = useState<'url' | 'email'>('url');
     const [btnBType, setBtnBType] = useState<'url' | 'email'>('url');
     const [initialData, setInitialData] = useState<FormData | null>(null);
+    const [localDraft, setLocalDraft] = useState<FormData | null>(null);
+    const [showDraftBanner, setShowDraftBanner] = useState(false);
 
     // Helper per mostrare le categorie indentate nel select
     const getHierarchicalCategories = (items: CategoryItem[]) => {
@@ -79,12 +81,69 @@ export default function ProjectEditor() {
             };
             setForm(loadedForm);
             setInitialData(loadedForm);
+
+            // Controllo bozza locale al caricamento
+            const draftKey = `project_draft_${id}`;
+            const savedDraft = localStorage.getItem(draftKey);
+            if (savedDraft) {
+                try {
+                    const parsedDraft = JSON.parse(savedDraft);
+                    if (JSON.stringify(parsedDraft) !== JSON.stringify(loadedForm)) {
+                        setLocalDraft(parsedDraft);
+                        setShowDraftBanner(true);
+                    }
+                } catch (e) {
+                    console.error("Errore nel parsing della bozza locale progetto", e);
+                }
+            }
         } else if (categories.length > 0) {
             const newForm = { ...EMPTY_FORM, category: categories[0].slug };
             setForm(newForm);
             setInitialData(newForm);
+
+            // Controllo bozza locale per nuovo progetto
+            const draftKey = `project_draft_new`;
+            const savedDraft = localStorage.getItem(draftKey);
+            if (savedDraft) {
+                try {
+                    const parsedDraft = JSON.parse(savedDraft);
+                    setLocalDraft(parsedDraft);
+                    setShowDraftBanner(true);
+                } catch (e) {
+                    console.error("Errore nel parsing della bozza locale progetto nuovo", e);
+                }
+            }
         }
-    }, [projData, categories]);
+    }, [projData, categories, id]);
+
+    // Calcolo stato Dirty
+    const isDirty = !!(initialData && JSON.stringify(form) !== JSON.stringify(initialData));
+
+    // Effetto per il salvataggio automatico della bozza locale
+    useEffect(() => {
+        if (!initialData || !isDirty || showDraftBanner) return;
+
+        const timer = setTimeout(() => {
+            const draftKey = isEdit ? `project_draft_${id}` : `project_draft_new`;
+            localStorage.setItem(draftKey, JSON.stringify(form));
+        }, 2000);
+
+        return () => clearTimeout(timer);
+    }, [form, isEdit, id, isDirty, initialData, showDraftBanner]);
+
+    const restoreDraft = () => {
+        if (localDraft) {
+            setForm(localDraft);
+            setShowDraftBanner(false);
+        }
+    };
+
+    const discardDraft = () => {
+        const draftKey = isEdit ? `project_draft_${id}` : `project_draft_new`;
+        localStorage.removeItem(draftKey);
+        setLocalDraft(null);
+        setShowDraftBanner(false);
+    };
 
     const set = (field: keyof FormData, value: string | boolean) => {
         setForm(prev => ({ ...prev, [field]: value }));
@@ -114,6 +173,11 @@ export default function ProjectEditor() {
             
             setSaveSuccess(true);
             setInitialData(form); // Reset dirty state
+
+            // Rimuove la bozza locale dopo il salvataggio con successo sul server
+            const draftKey = isEdit ? `project_draft_${id}` : `project_draft_new`;
+            localStorage.removeItem(draftKey);
+
             setTimeout(() => {
                 navigate('/admin/projects');
             }, 1200);
@@ -122,9 +186,6 @@ export default function ProjectEditor() {
             setSaving(false);
         }
     };
-
-    // Calcolo stato Dirty
-    const isDirty = !!(initialData && JSON.stringify(form) !== JSON.stringify(initialData));
 
     // Blocco chiusura Tab/Browser
     useEffect(() => {
@@ -208,6 +269,37 @@ export default function ProjectEditor() {
             {error && (
                 <div className="bg-red-500/10 border border-red-500/30 text-red-400 rounded-lg px-4 py-3 mb-6 text-sm">
                     {error}
+                </div>
+            )}
+
+            {/* Banner di ripristino bozza locale */}
+            {showDraftBanner && (
+                <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl flex flex-col items-center justify-between gap-4 mb-6 animate-in slide-in-from-top-4 duration-500">
+                    <div className="flex items-center gap-3 w-full">
+                        <div className="p-2 bg-orange-500/20 text-orange-400 rounded-lg shrink-0">
+                            <Save size={20} />
+                        </div>
+                        <div>
+                            <p className="text-white font-bold text-sm">Recupero Sessione</p>
+                            <p className="text-zinc-400 text-xs">Trovata una versione locale più recente. Ripristinarla?</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 w-full">
+                        <button 
+                            type="button"
+                            onClick={restoreDraft}
+                            className="flex-1 px-4 py-2 bg-orange-500 text-black font-bold text-xs rounded-lg hover:bg-orange-400 transition-colors"
+                        >
+                            Ripristina
+                        </button>
+                        <button 
+                            type="button"
+                            onClick={discardDraft}
+                            className="flex-1 px-4 py-2 bg-zinc-800 text-zinc-300 font-bold text-xs rounded-lg hover:text-white transition-colors"
+                        >
+                            Ignora
+                        </button>
+                    </div>
                 </div>
             )}
 

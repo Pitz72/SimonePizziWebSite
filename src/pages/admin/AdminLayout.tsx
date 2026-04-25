@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, FileText, Image as ImageIcon, Settings, LogOut, FolderOpen, Tag, Mail, Hash } from 'lucide-react';
 import { api } from '../../api';
 import Loader from '../../components/Loader';
@@ -85,9 +86,18 @@ export default function AdminLayout() {
             {/* Main Content Area */}
             <main className="flex-1 overflow-auto bg-zinc-950/50">
                 <div className="p-8">
-                    <React.Suspense fallback={<Loader />}>
-                        <Outlet />
-                    </React.Suspense>
+                    <AnimatePresence>
+                        <motion.div
+                            key={location.pathname}
+                            initial={{ opacity: 0, x: -10 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            transition={{ duration: 0.25, ease: "easeOut" }}
+                        >
+                            <React.Suspense fallback={<Loader />}>
+                                <Outlet />
+                            </React.Suspense>
+                        </motion.div>
+                    </AnimatePresence>
                 </div>
             </main>
         </div>

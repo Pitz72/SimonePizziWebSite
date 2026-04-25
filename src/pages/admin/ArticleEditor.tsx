@@ -23,6 +23,8 @@ export default function ArticleEditor() {
     const [btnAType, setBtnAType] = useState<'url' | 'email'>('url');
     const [btnBType, setBtnBType] = useState<'url' | 'email'>('url');
     const [initialData, setInitialData] = useState<any>(null);
+    const [localDraft, setLocalDraft] = useState<any>(null);
+    const [showDraftBanner, setShowDraftBanner] = useState(false);
 
     // Helper per mostrare le categorie indentate nel select
     const getHierarchicalCategories = (items: CategoryItem[]) => {
@@ -76,6 +78,22 @@ export default function ArticleEditor() {
             };
             setFormData(loadedData);
             setInitialData(loadedData);
+
+            // Controllo bozza locale al caricamento
+            const draftKey = `article_draft_${id}`;
+            const savedDraft = localStorage.getItem(draftKey);
+            if (savedDraft) {
+                try {
+                    const parsedDraft = JSON.parse(savedDraft);
+                    // Mostra il banner solo se la bozza è sensibilmente diversa dai dati del DB
+                    if (JSON.stringify(parsedDraft) !== JSON.stringify(loadedData)) {
+                        setLocalDraft(parsedDraft);
+                        setShowDraftBanner(true);
+                    }
+                } catch (e) {
+                    console.error("Errore nel parsing della bozza locale", e);
+                }
+            }
         } else {
             // Per i nuovi articoli, resettiamo lo stato iniziale
             const freshData = {
@@ -84,8 +102,50 @@ export default function ArticleEditor() {
             };
             setFormData(freshData);
             setInitialData(freshData);
+
+            // Controllo bozza locale per nuovo articolo
+            const draftKey = `article_draft_new`;
+            const savedDraft = localStorage.getItem(draftKey);
+            if (savedDraft) {
+                try {
+                    const parsedDraft = JSON.parse(savedDraft);
+                    setLocalDraft(parsedDraft);
+                    setShowDraftBanner(true);
+                } catch (e) {
+                    console.error("Errore nel parsing della bozza locale", e);
+                }
+            }
         }
-    }, [article, categories]);
+    }, [article, categories, id]);
+
+    const isDirty = !!(initialData && JSON.stringify(formData) !== JSON.stringify(initialData));
+
+    // Effetto per il salvataggio automatico della bozza locale
+    useEffect(() => {
+        // Evitiamo di salvare se stiamo visualizzando il banner di ripristino o se il form è pulito
+        if (!initialData || !isDirty || showDraftBanner) return;
+
+        const timer = setTimeout(() => {
+            const draftKey = isEditing ? `article_draft_${id}` : `article_draft_new`;
+            localStorage.setItem(draftKey, JSON.stringify(formData));
+        }, 2000); // Salvataggio ogni 2 secondi di inattività
+
+        return () => clearTimeout(timer);
+    }, [formData, isEditing, id, isDirty, initialData, showDraftBanner]);
+
+    const restoreDraft = () => {
+        if (localDraft) {
+            setFormData(localDraft);
+            setShowDraftBanner(false);
+        }
+    };
+
+    const discardDraft = () => {
+        const draftKey = isEditing ? `article_draft_${id}` : `article_draft_new`;
+        localStorage.removeItem(draftKey);
+        setLocalDraft(null);
+        setShowDraftBanner(false);
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value, type } = e.target;
@@ -122,6 +182,10 @@ export default function ArticleEditor() {
             setSaveSuccess(true);
             setInitialData(formData); // Resetta lo stato dirty dopo il salvataggio
             
+            // Rimuove la bozza locale dopo il salvataggio con successo sul server
+            const draftKey = isEditing ? `article_draft_${id}` : `article_draft_new`;
+            localStorage.removeItem(draftKey);
+
             setTimeout(() => {
                 navigate('/admin/articles');
             }, 1200);
@@ -130,9 +194,6 @@ export default function ArticleEditor() {
             setSaving(false);
         }
     };
-
-    // Calcolo stato Dirty
-    const isDirty = !!(initialData && JSON.stringify(formData) !== JSON.stringify(initialData));
 
     // Blocco chiusura Tab/Browser
     useEffect(() => {
@@ -228,6 +289,35 @@ export default function ArticleEditor() {
             </header>
 
             {error && <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 font-medium">{error}</div>}
+
+            {/* Banner di ripristino bozza locale */}
+            {showDraftBanner && (
+                <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl flex flex-col sm:flex-row items-center justify-between gap-4 animate-in slide-in-from-top-4 duration-500">
+                    <div className="flex items-center gap-3">
+                        <div className="p-2 bg-orange-500/20 text-orange-400 rounded-lg">
+                            <LayoutTemplate size={20} />
+                        </div>
+                        <div>
+                            <p className="text-white font-bold text-sm">Recupero Sessione Interrotta</p>
+                            <p className="text-zinc-400 text-xs">È stata trovata una versione più recente salvata localmente. Vuoi ripristinarla?</p>
+                        </div>
+                    </div>
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <button 
+                            onClick={restoreDraft}
+                            className="flex-1 sm:flex-none px-4 py-2 bg-orange-500 text-black font-bold text-xs rounded-lg hover:bg-orange-400 transition-colors"
+                        >
+                            Ripristina Bozza
+                        </button>
+                        <button 
+                            onClick={discardDraft}
+                            className="flex-1 sm:flex-none px-4 py-2 bg-zinc-800 text-zinc-300 font-bold text-xs rounded-lg hover:text-white transition-colors"
+                        >
+                            Ignora
+                        </button>
+                    </div>
+                </div>
+            )}
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
