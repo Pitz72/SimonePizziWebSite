@@ -4,7 +4,7 @@ Benvenuto nel repository della documentazione. In linea con la filosofia di semp
 
 ## 📌 Documento Unico di Verità
 Tutta la pianificazione, lo stato corrente e le regole architetturali sono ora contenute nel:
-- **[MASTER PLAN (MASTER_PLAN.md)](MASTER_PLAN.md)**
+- **[MASTER PLAN (archive/MASTER_PLAN.md)](archive/MASTER_PLAN.md)**
 
 ## 📂 Struttura Documentale
 - **[Changelogs (changelogs/)](changelogs/)**: Lo storico dettagliato di tutte le versioni rilasciate.
