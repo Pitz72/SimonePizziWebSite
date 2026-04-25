@@ -144,3 +144,6 @@ export const adminNewsletterLoader = async () => {
 export const adminSettingsLoader = async () => {
     return await api.getAppSettings();
 };
+export const adminMediaLoader = async () => {
+    return await api.getMedia();
+};

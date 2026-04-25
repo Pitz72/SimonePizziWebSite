@@ -2,8 +2,8 @@
 
 ## Documento Unico di Verità
 
-**Versione corrente:** 1.10.4  
-**Ultimo aggiornamento documento:** 25 Aprile 2026 (Rollback MPA & Organization)  
+**Versione corrente:** 1.10.5  
+**Ultimo aggiornamento documento:** 25 Aprile 2026 (Media Gallery Emergency Patch)  
 **Sito:** simonepizzi.runtimeradio.it
 
 > Questo documento è la fonte autoritativa per lo stato del progetto, le promesse di sviluppo e la pianificazione futura.  

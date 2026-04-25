@@ -126,7 +126,7 @@ import {
   adminDashboardLoader, adminArticlesLoader, adminArticleEditLoader, 
   adminProjectsLoader, adminProjectEditLoader, adminCategoriesLoader, 
   adminTagsLoader, adminNewsletterLoader, adminSettingsLoader,
-  adminAuthLoader
+  adminAuthLoader, adminMediaLoader
 } from './loaders';
 
 // Definizione del router con createBrowserRouter (Richiesto per useBlocker in RR7)
@@ -153,7 +153,7 @@ const router = createBrowserRouter([
           { path: "projects", element: <ProjectsList />, loader: adminProjectsLoader },
           { path: "projects/new", element: <ProjectEditor />, loader: adminProjectEditLoader },
           { path: "projects/edit/:id", element: <ProjectEditor />, loader: adminProjectEditLoader },
-          { path: "media", element: <MediaGallery /> },
+          { path: "media", element: <MediaGallery />, loader: adminMediaLoader },
           { path: "categories", element: <CategoryManager />, loader: adminCategoriesLoader },
           { path: "tags", element: <TagsList />, loader: adminTagsLoader },
           { path: "newsletter", element: <NewsletterAdmin />, loader: adminNewsletterLoader },
