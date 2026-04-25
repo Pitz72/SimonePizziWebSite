@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Calendar, ArrowRight } from 'lucide-react';
 import SEO from './SEO';
 import { useFetchArticles } from '../hooks/useFetchArticles';
@@ -22,7 +22,7 @@ interface ArticleArchiveProps {
 }
 
 const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category, initialItems }) => {
-    const navigate = useNavigate();
+    const navigate = useRouter();
     const { items, loading, error, hasMore, loadMore, loadingMore } = useFetchArticles(category, 10, initialItems);
 
     if (loading) {
@@ -80,7 +80,7 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category, initia
                             {/* HERO ITEM (1° Articolo come Hub) */}
                             {heroItem && (
                                 <article
-                                    onClick={() => navigate(`/${category || heroItem.category}/${heroItem.slug}`)}
+                                    onClick={() => navigate.push(`/${category || heroItem.category}/${heroItem.slug}`)}
                                     className="group flex flex-col md:flex-row bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden cursor-pointer hover:border-dis-green/60 transition-all duration-500 hover:shadow-[0_0_60px_-10px_rgba(34,197,94,0.4)] hover:-translate-y-1 animate-[fade-in_0.5s_ease-out_forwards]"
                                 >
                                     <div className="w-full md:w-3/5 lg:w-2/3 relative aspect-[16/10] md:aspect-auto md:h-full min-h-[300px] overflow-hidden bg-black">
@@ -131,7 +131,7 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category, initia
                                 return (
                                     <article
                                         key={item.id}
-                                        onClick={() => navigate(targetUrl)}
+                                        onClick={() => navigate.push(targetUrl)}
                                         className="group relative flex flex-col bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden cursor-pointer hover:border-dis-green/60 transition-all duration-500 hover:shadow-[0_0_50px_-5px_rgba(34,197,94,0.5)] hover:-translate-y-2 opacity-0 animate-[fade-in_0.5s_ease-out_forwards]"
                                         style={{ animationDelay: `${index * 100}ms` }}
                                     >

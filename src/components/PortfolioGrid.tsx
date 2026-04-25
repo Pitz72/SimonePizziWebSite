@@ -1,17 +1,16 @@
+"use client";
+
 import React, { useState } from 'react';
 import Hero from './Hero';
 import Modal from './Modal'; // Import Modal component
 import SEO from './SEO';
-import { useLoaderData } from 'react-router-dom';
+
 import { PortfolioItem } from '../types';
 import { aboutMeData } from '../data/aboutMeData';
 import FeaturedCard from './FeaturedCard';
 import CommunityHub from './CommunityHub';
 
-const PortfolioGrid: React.FC = () => {
-    // Caricamento via Loader (Code Splitting & Parallel Fetching)
-    const items = useLoaderData() as PortfolioItem[];
-
+const PortfolioGrid: React.FC<{ items: PortfolioItem[] }> = ({ items }) => {
     // Filtra e Ordina i dati
     const sortedItems = [...items].sort((a, b) => {
         if (a.isFeatured && !b.isFeatured) return -1;

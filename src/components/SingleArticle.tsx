@@ -1,5 +1,7 @@
+"use client";
+
 import React from 'react';
-import { useLoaderData, useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, Share2, Tag, Calendar, Heart } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { api } from '../api';
@@ -30,8 +32,8 @@ const formatDateTime = (dateStr: string): string => {
 };
 
 const SingleArticle: React.FC<SingleArticleProps> = () => {
-    const article = useLoaderData() as PortfolioItem;
-    const navigate = useNavigate();
+    const article = {} as PortfolioItem;
+    const navigate = useRouter();
 
     const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
     const [isLetterModalOpen, setIsLetterModalOpen] = React.useState(false);
@@ -69,7 +71,7 @@ const SingleArticle: React.FC<SingleArticleProps> = () => {
                 <div className="relative z-10 container mx-auto px-4 md:px-8 pb-12 md:pb-24">
                     {/* Back Button Tattico */}
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => navigate.back()}
                         className="mb-8 md:mb-12 inline-flex items-center gap-2 px-5 py-2.5 bg-black/40 hover:bg-black/80 backdrop-blur-md border border-white/10 text-zinc-300 rounded-full text-sm font-medium transition-all group"
                     >
                         <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />

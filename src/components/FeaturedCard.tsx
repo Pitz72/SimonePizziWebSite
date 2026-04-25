@@ -1,5 +1,7 @@
+"use client";
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Calendar } from 'lucide-react';
 import { Category, PortfolioItem } from '../types';
@@ -25,7 +27,7 @@ const FeaturedCard: React.FC<FeaturedCardProps> = ({ item, category, isHero = fa
 
     if (isHero) {
         return (
-            <Link to={targetUrl} className="block w-full group">
+            <Link href={targetUrl} className="block w-full group">
                 <motion.div
                     whileHover={{ scale: 1.01, transition: { duration: 0.3 } }}
                     className="flex flex-col md:flex-row bg-zinc-900 border border-zinc-800 rounded-3xl overflow-hidden hover:border-dis-green/60 hover:shadow-[0_0_60px_-10px_rgba(34,197,94,0.4)] transition-all duration-500 hover:-translate-y-1"
@@ -65,7 +67,7 @@ const FeaturedCard: React.FC<FeaturedCardProps> = ({ item, category, isHero = fa
 
     // Default Grid Card
     return (
-        <Link to={targetUrl} className="block h-full cursor-pointer">
+        <Link href={targetUrl} className="block h-full cursor-pointer">
             <motion.div
                 whileHover={{ scale: 1.02, transition: { duration: 0.3 } }}
                 className="flex flex-col h-full bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden group hover:border-dis-green/60 hover:shadow-[0_0_50px_-5px_rgba(34,197,94,0.3)] transition-all duration-500 hover:-translate-y-2"

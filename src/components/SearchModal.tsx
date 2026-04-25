@@ -1,5 +1,7 @@
+"use client";
+
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { Search, X, FileText, Layout, ArrowRight, CornerDownLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -25,7 +27,7 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
-  const navigate = useNavigate();
+  const navigate = useRouter();
 
   useEffect(() => {
     if (isOpen) {
@@ -75,13 +77,13 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   const handleSelect = (result: SearchResult) => {
     onClose();
     if (result.type === 'article') {
-      navigate(`/${result.category}/${result.slug}`);
+      navigate.push(`/${result.category}/${result.slug}`);
     } else {
       // Per i progetti, se c'è un URL esterno andiamo lì, altrimenti alla sezione progetti
       if (result.url && result.url.startsWith('http')) {
         window.open(result.url, '_blank');
       } else {
-        navigate('/tutti-i-progetti');
+        navigate.push('/tutti-i-progetti');
       }
     }
   };
