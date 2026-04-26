@@ -119,8 +119,13 @@ export const adminArticleEditLoader = async ({ params }: LoaderFunctionArgs) => 
         api.getCategories(),
         api.getTags()
     ]);
+
+    // Recupera analytics solo in modalità edit (l'articolo esiste già)
+    const articleAnalytics = (id && article)
+        ? await api.getArticleAnalytics(parseInt(id), 30)
+        : { total_views: 0, daily_views: [] };
     
-    return { article, categories, tags };
+    return { article, categories, tags, articleAnalytics };
 };
 
 export const adminProjectsLoader = async ({ request }: LoaderFunctionArgs) => {

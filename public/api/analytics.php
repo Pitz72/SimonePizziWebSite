@@ -52,6 +52,39 @@ try {
     elseif ($method === 'GET') {
         Auth::check();
 
+        // ── Modalità per-articolo: GET ?article_id=X&period=30 ──────────────────
+        if (isset($_GET['article_id'])) {
+            $article_id = (int)$_GET['article_id'];
+            $period     = min((int)($_GET['period'] ?? 30), 365); // max 365 giorni
+
+            // Visualizzazioni giornaliere nell'arco del periodo
+            $stmt = $pdo->prepare("
+                SELECT view_date, COUNT(*) AS count
+                FROM article_views
+                WHERE article_id = ?
+                  AND view_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+                GROUP BY view_date
+                ORDER BY view_date ASC
+            ");
+            $stmt->execute([$article_id, $period]);
+            $daily_views = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Totale visualizzazioni dell'articolo
+            $stmtTotal = $pdo->prepare("SELECT COUNT(*) FROM article_views WHERE article_id = ?");
+            $stmtTotal->execute([$article_id]);
+            $total = (int)$stmtTotal->fetchColumn();
+
+            echo json_encode([
+                'article_id'  => $article_id,
+                'period_days' => $period,
+                'total_views' => $total,
+                'daily_views' => $daily_views,
+            ]);
+            exit;
+        }
+
+        // ── Modalità globale (Dashboard) ────────────────────────────────────────
+
         // Top 10 articoli per visualizzazioni
         $top_articles = $pdo->query("
             SELECT a.id, a.title, a.slug, COUNT(av.id) AS view_count

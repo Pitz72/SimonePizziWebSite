@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link, useLoaderData } from 'react-router-dom';
-import { ArrowLeft, Save, Image as ImageIcon, LayoutTemplate, X, Tag as TagIcon, Loader2, Check, Link as LinkIcon, Mail } from 'lucide-react';
+import { ArrowLeft, Save, Image as ImageIcon, LayoutTemplate, X, Tag as TagIcon, Loader2, Check, Link as LinkIcon, Mail, Eye } from 'lucide-react';
+import { Line } from 'react-chartjs-2';
+import { chartColors, commonOptions } from '../../utils/chartConfig';
 import { api } from '../../api';
 import { CategoryItem } from '../../types';
 import { RichTextEditor } from '../../components/admin/RichTextEditor';
 import { NavigationBlocker } from '../../components/admin/NavigationBlocker';
+import SeoScorePanel from '../../components/admin/SeoScorePanel';
 
 const getLocalDatetime = () => {
     const tzoffset = (new Date()).getTimezoneOffset() * 60000;
@@ -15,7 +18,7 @@ export default function ArticleEditor() {
     const { id } = useParams();
     const navigate = useNavigate();
     const isEditing = !!id;
-    const { article, categories, tags: availableTags } = useLoaderData() as { article: any, categories: CategoryItem[], tags: any[] };
+    const { article, categories, tags: availableTags, articleAnalytics } = useLoaderData() as { article: any, categories: CategoryItem[], tags: any[], articleAnalytics: { total_views: number; daily_views: { view_date: string; count: number }[] } };
 
     const [saving, setSaving] = useState(false);
     const [saveSuccess, setSaveSuccess] = useState(false);
@@ -546,9 +549,59 @@ export default function ArticleEditor() {
                             </div>
                         </div>
                     </div>
+
+                    {/* SEO Score Panel */}
+                    <SeoScorePanel
+                        title={formData.title}
+                        excerpt={formData.excerpt}
+                        content={formData.content}
+                        cover_image={formData.cover_image}
+                        tags={formData.tags as string[]}
+                    />
+
                 </div>
 
             </div>
+
+            {/* Grafico Visualizzazioni — solo in modalità edit */}
+            {isEditing && (
+                <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
+                    <div className="flex items-center gap-2 mb-5">
+                        <Eye size={18} className="text-cyan-400" />
+                        <h3 className="text-white font-semibold">Visualizzazioni Ultimi 30 Giorni</h3>
+                        {articleAnalytics.total_views > 0 && (
+                            <span className="ml-auto text-sm font-bold text-cyan-400">{articleAnalytics.total_views} totali</span>
+                        )}
+                    </div>
+                    <div className="h-48">
+                        {articleAnalytics.daily_views.length > 0 ? (
+                            <Line
+                                data={{
+                                    labels: articleAnalytics.daily_views.map(d =>
+                                        new Date(d.view_date).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })
+                                    ),
+                                    datasets: [{
+                                        label: 'Visualizzazioni',
+                                        data: articleAnalytics.daily_views.map(d => d.count),
+                                        borderColor: chartColors.cyan,
+                                        backgroundColor: 'rgba(34,211,238,0.08)',
+                                        fill: true,
+                                        tension: 0.4,
+                                        pointBackgroundColor: chartColors.cyan,
+                                        pointRadius: 3,
+                                        pointHoverRadius: 5,
+                                    }]
+                                }}
+                                options={commonOptions}
+                            />
+                        ) : (
+                            <div className="h-full flex items-center justify-center border border-dashed border-zinc-800 rounded-lg">
+                                <p className="text-zinc-600 text-sm">Nessuna visualizzazione negli ultimi 30 giorni.</p>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

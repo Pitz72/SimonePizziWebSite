@@ -307,6 +307,15 @@ export const api = {
         if (!res.ok) throw new Error('Errore recupero analytics');
         return res.json();
     },
+    getArticleAnalytics: async (articleId: number, period: number = 30): Promise<{ total_views: number; daily_views: { view_date: string; count: number }[] }> => {
+        try {
+            const res = await fetch(`${API_URL}/analytics.php?article_id=${articleId}&period=${period}`, fetchConfig);
+            if (!res.ok) return { total_views: 0, daily_views: [] };
+            return res.json();
+        } catch {
+            return { total_views: 0, daily_views: [] };
+        }
+    },
 
     // --- NEWSLETTER (v1.7.4) ---
     newsletterSubscribe: async (data: { email: string; name?: string }) => {
