@@ -35,3 +35,6 @@ public/api/.data/
 
 # Configurazione database MySQL (credenziali reali, mai in repo)
 public/api/config.php
+
+# Cartella di pre-produzione (asset originali e backup sensibili)
+PRE-PRODUZIONE/

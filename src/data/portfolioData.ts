@@ -29,7 +29,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
 <p>Il mio sogno è che "The Safe Place Chronicles" diventi più di un semplice gioco. Spero che sia un'esperienza, un piccolo viaggio in un'altra epoca del gaming, ma con una sensibilità e una profondità narrativa che possano risuonare anche oggi. È la prova che, anche nell'era della grafica fotorealistica, il potere di una storia ben raccontata e dell'immaginazione del giocatore rimane imbattuto.</p>
 <p>Questo progetto è la mia lettera d'amore a un modo di giocare che pensavo perduto. E spero, con tutto il cuore, che la sua eco possa raggiungere e appassionare anche voi.</p>
 `,
-      imageUrl: '/images/tspc-echo.png',
+      imageUrl: '/images/tspc-echo.webp',
       category: Category.VIDEOGIOCHI,
       tags: ['RPG Testuale', 'Sopravvivenza', 'Narrativa'],
       link: 'https://thesafeplace.runtimeradio.it',
@@ -44,7 +44,7 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
       slug: 'IL RELITTO SILENTE',
       title: 'IL RELITTO SILENTE',
       summary: 'Versione Gold Master (v1.0.1) disponibile per Windows. Un\'avventura testuale fantascientifica completa e definitiva, che omaggia i terminali anni \'80 con un\'esperienza narrativa curata e non punitiva.',
-      description: `<p><strong>Versione:</strong> 1.0.1 (Gold Master) | <strong>Stato:</strong> Completo</p>
+      description: `<p><strong>Versione:</strong> 1.0.1 (Gold Master) | <strong>Stato:</strong> Completo (Win, Linux, Mac)</p>
 <p>IL RELITTO SILENTE è la mia lettera d'amore a un genere che ha definito la mia passione per la narrazione interattiva. È un'avventura testuale fantascientifica che rievoca l'estetica dei terminali a fosfori verdi degli anni '80, ma con un cuore moderno.</p>
 
 <h3>Un Omaggio, Non una Sfida Punitiva</h3>
@@ -55,21 +55,21 @@ export const portfolioData: Record<Category, PortfolioItem[]> = {
 <p>Raggiungere la versione <strong>1.0.1</strong> è stato un viaggio incredibile. Quello che è iniziato come un esperimento è diventato un prodotto software maturo:</p>
 <ul>
 <li><strong>Motore Proprietario:</strong> Non ho usato tool esistenti. Ho scritto da zero un <strong>Motore a Oggetti Ibrido</strong> (passando da semplici regex a un sistema Entity-Component) per gestire interazioni complesse come <code>USA X SU Y</code>.</li>
-<li><strong>Packaging Desktop:</strong> Grazie a Electron, il gioco ora è un'applicazione desktop nativa per <strong>Windows</strong>. Versioni per Linux e Mac potrebbero arrivare in futuro.</li>
+<li><strong>Packaging Desktop:</strong> Grazie a Electron, il gioco ora è un'applicazione desktop nativa disponibile per <strong>Windows, Linux e macOS</strong>.</li>
 <li><strong>Cura del Dettaglio:</strong> Ogni risposta del parser, ogni descrizione della "lore" e ogni pixel dell'interfaccia (inclusi i font VT323 e le scanlines) è stato calibrato per l'immersione totale.</li>
 </ul>
 
 <p>Dalla riscrittura del motore nella v0.4.8 alla rifinitura finale della v1.0.0, ogni passo è stato una lezione di design e architettura software. Il risultato è un piccolo gioiello di archeologia digitale moderna di cui vado immensamente fiero.</p>
 
-<p><em>Inoltre, nel pacchetto "Materiale Extra" troverete una raccolta di contenuti curiosi: video, audio e testi generati durante lo sviluppo, che offrono uno sguardo dietro le quinte di questo progetto.</em></p>
+<p><em>Scegli la tua piattaforma: <a href="https://simonepizzi.runtimeradio.it/api/download.php?id=32" class="text-green-400 hover:underline">Windows</a> | <a href="https://simonepizzi.runtimeradio.it/api/download.php?id=33" class="text-green-400 hover:underline">Linux</a> | <a href="https://simonepizzi.runtimeradio.it/api/download.php?id=34" class="text-green-400 hover:underline">macOS</a></em></p>
 `,
       imageUrl: '/images/relitto-silente-v2.webp',
       category: Category.VIDEOGIOCHI,
       tags: ['Avventura Testuale', 'Fantascienza', 'React'],
       link: 'https://simonepizzi.runtimeradio.it/relitto',
       buttonText: 'INIZIA LA TUA AVVENTURA SPAZIALE!',
-      extraLink: '/downloads/MATERIALE-EXTRA.zip',
-      extraLinkText: 'MATERIALE EXTRA',
+      extraLink: 'https://simonepizzi.runtimeradio.it/api/download.php?id=32',
+      extraLinkText: 'DOWNLOAD WIN (GM v1.0.1)',
       isVisible: true,
       isFeatured: true,
       featuredOrder: 2,
@@ -254,7 +254,7 @@ Ho sviluppato RLM su stack <strong>Electron + React</strong>, ma con una modific
 <p><em>Tecnologie utilizzate: Electron, React, TypeScript, Vite, TailwindCSS, Web Audio API, Web MIDI API.</em><br />
 <em>Sviluppato da Simone Pizzi con il supporto di Gemini 3.0.</em></p>
 `,
-      imageUrl: '/images/rlm.png',
+      imageUrl: '/images/rlm.webp',
       category: Category.PROGETTI_SOFTWARE,
       tags: ['Regia Audio', 'Electron', 'React', 'MIDI', 'Open Source'],
       link: 'https://simonepizzi.runtimeradio.it/sw/rlm/',
@@ -306,7 +306,7 @@ Ho sviluppato RLM su stack <strong>Electron + React</strong>, ma con una modific
 
 <p>Questo progetto è la mia personale esplorazione dei confini dello sviluppo software e della creatività. È un esperimento pratico su come l'IA possa non solo aumentare la nostra produttività, ma diventare un vero e proprio catalizzatore per realizzare idee che, fino a ieri, sembravano destinate a rimanere solo sogni.</p>
 `,
-      imageUrl: '/images/favella1.png',
+      imageUrl: '/images/favella1.webp',
       category: Category.PROGETTI_SOFTWARE,
       tags: ['Linguaggio di Programmazione', 'Python', 'IA', 'Parser'],
       link: 'https://github.com/Pitz72/FAVELLA1',
@@ -400,8 +400,8 @@ Ho sviluppato RLM su stack <strong>Electron + React</strong>, ma con una modific
       category: Category.NARRATIVA_E_PUBBLICAZIONI,
       tags: ['Racconto', 'Sci-Fi', 'Il Relitto Silente'],
       link: '#',
-      extraLink: '/downloads/frequenza-di-servizio.epub',
-      extraLinkText: 'SCARICA L\'EPUB - FREQUENZA DI SERVIZIO',
+      extraLink: 'https://simonepizzi.runtimeradio.it/api/download.php?id=15',
+      extraLinkText: 'SCARICA L\'EPUB',
       relatedLink: 'https://simonepizzi.runtimeradio.it/relitto',
       relatedLinkText: 'Gioca nei panni di William',
       isVisible: true,

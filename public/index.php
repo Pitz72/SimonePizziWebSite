@@ -31,7 +31,7 @@ $currentUrl = $baseUrl . $_SERVER['REQUEST_URI'];
 // Meta tag di default (Homepage / fallback)
 $metaTitle  = "Simone Pizzi - Videogiochi, Software e Narrativa";
 $metaDesc   = "Portfolio Creativo, Game Design, Sviluppo Software e Pubblicazioni";
-$metaImage  = $baseUrl . "/Simone-Pizzi.png";
+$metaImage  = $baseUrl . "/Simone-Pizzi.webp";
 $ogType     = "website";
 $canonicalUrl = $currentUrl;
 
@@ -110,7 +110,7 @@ function esc(string $str): string {
  * Normalizza un URL immagine relativo in assoluto.
  */
 function absImageUrl(string $img, string $baseUrl): string {
-    if (empty($img)) return $baseUrl . '/Simone-Pizzi.png';
+    if (empty($img)) return $baseUrl . '/Simone-Pizzi.webp';
     if (strpos($img, 'http') === 0) return $img;
     $prefix = (substr($img, 0, 1) !== '/') ? '/' : '';
     return $baseUrl . $prefix . $img;
