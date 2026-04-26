@@ -102,14 +102,19 @@ export const api = {
         if (!res.ok) throw new Error('Errore esecuzione backup manuale');
         return res.json();
     },
-    exportContent: (options: { db: boolean, images: boolean, docs: boolean }) => {
+    exportContent: async (options: { db: boolean, images: boolean, docs: boolean }) => {
         const params = new URLSearchParams();
         params.append('action', 'export');
         if (options.db) params.append('db', 'true');
         if (options.images) params.append('images', 'true');
         if (options.docs) params.append('docs', 'true');
         
-        window.open(`${API_URL}/backup.php?${params.toString()}`, '_blank');
+        const res = await fetch(`${API_URL}/backup.php?${params.toString()}`, fetchConfig);
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error(text || 'Errore durante l\'esportazione');
+        }
+        return res.blob();
     },
 
     // --- SYSTEM STATS ---

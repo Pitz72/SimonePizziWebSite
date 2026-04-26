@@ -48,10 +48,18 @@ if (!in_array($realMime, $allowedMimes)) {
     exit;
 }
 
-// Crea directory uploads definita nella Public root (compilata da Vite)
-$uploadDir = __DIR__ . '/../uploads/';
+// Determina la sottocartella di destinazione in base al tipo MIME reale
+$subFolder = 'file';
+if (strpos($realMime, 'image/') === 0) {
+    $subFolder = 'immagini';
+} elseif ($realMime === 'application/pdf') {
+    $subFolder = 'documenti';
+}
+
+// Crea directory uploads specifica (compilata da Vite)
+$uploadDir = __DIR__ . '/../uploads/' . $subFolder . '/';
 if (!is_dir($uploadDir)) {
-    mkdir($uploadDir, 0755, true); // [v1.5.10] 0755: rwxr-xr-x — owner pieno, altri solo lettura/esecuzione
+    mkdir($uploadDir, 0755, true); // [v1.5.10] 0755: rwxr-xr-x
 }
 
 // Genera un nome unico per il file per non sovrascrivere
@@ -59,14 +67,11 @@ $newFileName = uniqid() . '-' . preg_replace('/[^A-Za-z0-9.\-_]/', '', $fileName
 $destination = $uploadDir . $newFileName;
 
 // Lo URL relativo che React/Browser userà per renderizzare
-$publicUrl = '/uploads/' . $newFileName;
+$publicUrl = '/uploads/' . $subFolder . '/' . $newFileName;
 
 if (move_uploaded_file($file['tmp_name'], $destination)) {
 
     // --- Ottimizzazione immagini: conversione automatica a WebP ---
-    // Converte JPEG e PNG in WebP (qualità 82, resize max 1920px).
-    // GIF: solo primo frame (le GIF animate perdono l'animazione — edge case accettato).
-    // Richiede GD Library abilitata sul server (extension_loaded('gd')).
     $imageMimes = ['image/jpeg', 'image/png', 'image/gif'];
     if (in_array($realMime, $imageMimes) && extension_loaded('gd') && function_exists('imagewebp')) {
         $img = false;
@@ -75,14 +80,13 @@ if (move_uploaded_file($file['tmp_name'], $destination)) {
         elseif ($realMime === 'image/gif')  $img = @imagecreatefromgif($destination);
 
         if ($img !== false) {
-            // Resize se larghezza > 1920px mantenendo le proporzioni
+            // Resize se larghezza > 1920px
             $origW = imagesx($img);
             $origH = imagesy($img);
             if ($origW > 1920) {
                 $newW  = 1920;
                 $newH  = (int) round($origH * (1920 / $origW));
                 $canvas = imagecreatetruecolor($newW, $newH);
-                // Preserva trasparenza PNG
                 imagealphablending($canvas, false);
                 imagesavealpha($canvas, true);
                 imagecopyresampled($canvas, $img, 0, 0, 0, 0, $newW, $newH, $origW, $origH);
@@ -90,16 +94,14 @@ if (move_uploaded_file($file['tmp_name'], $destination)) {
                 $img = $canvas;
             }
 
-            // Salva WebP con qualità 82 (ottimo compromesso peso/qualità)
+            // Salva WebP
             $webpNewFileName = preg_replace('/\.[^.]+$/', '.webp', $newFileName);
             $webpDestination = $uploadDir . $webpNewFileName;
             if (@imagewebp($img, $webpDestination, 82)) {
-                // Rimozione originale PNG/JPEG, aggiornamento variabili
                 unlink($destination);
                 $destination = $webpDestination;
                 $newFileName  = $webpNewFileName;
-                $publicUrl    = '/uploads/' . $newFileName;
-                // Aggiorna il nome display con estensione .webp
+                $publicUrl    = '/uploads/' . $subFolder . '/' . $newFileName;
                 $fileName = preg_replace('/\.[^.]+$/', '.webp', $fileName);
             }
             imagedestroy($img);

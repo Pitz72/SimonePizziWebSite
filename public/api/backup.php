@@ -98,19 +98,24 @@ try {
                 $zip->addFromString('database_dump.sql', $sql);
             }
 
-            // 2. IMMAGINI (public/images)
+            // 2. IMMAGINI (public/uploads/immagini)
             if ($include_images) {
-                $img_dir = realpath(__DIR__ . '/../images');
+                $img_dir = realpath(__DIR__ . '/../uploads/immagini');
                 if ($img_dir && is_dir($img_dir)) {
-                    addDirToZip($img_dir, 'images', $zip);
+                    addDirToZip($img_dir, 'uploads/immagini', $zip);
                 }
             }
 
-            // 3. DOCUMENTI (public/downloads)
+            // 3. DOCUMENTI E ARCHIVI (public/uploads/documenti e public/uploads/file)
             if ($include_docs) {
-                $docs_dir = realpath(__DIR__ . '/../downloads');
+                $docs_dir = realpath(__DIR__ . '/../uploads/documenti');
                 if ($docs_dir && is_dir($docs_dir)) {
-                    addDirToZip($docs_dir, 'downloads', $zip);
+                    addDirToZip($docs_dir, 'uploads/documenti', $zip);
+                }
+                
+                $files_dir = realpath(__DIR__ . '/../uploads/file');
+                if ($files_dir && is_dir($files_dir)) {
+                    addDirToZip($files_dir, 'uploads/file', $zip);
                 }
             }
 

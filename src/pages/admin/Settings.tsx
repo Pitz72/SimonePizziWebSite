@@ -22,6 +22,7 @@ export default function Settings() {
     const [exportDb, setExportDb] = useState(true);
     const [exportImages, setExportImages] = useState(false);
     const [exportDocs, setExportDocs] = useState(false);
+    const [exportLoading, setExportLoading] = useState(false);
 
     useEffect(() => {
         if (initialSettings) {
@@ -78,12 +79,50 @@ export default function Settings() {
         api.downloadBackup();
     };
 
-    const handleExportSubmit = () => {
-        api.exportContent({ db: exportDb, images: exportImages, docs: exportDocs });
+    const handleExportSubmit = async () => {
+        setExportLoading(true);
+        setMessage({ type: '', text: '' });
+        
+        try {
+            const blob = await api.exportContent({ db: exportDb, images: exportImages, docs: exportDocs });
+            
+            // Crea un link temporaneo per il download del blob
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `export_pizzi_${new Date().toISOString().split('T')[0]}.zip`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
+            setMessage({ type: 'success', text: 'Esportazione completata con successo!' });
+        } catch (err: any) {
+            setMessage({ type: 'error', text: err.message || 'Errore durante la generazione del pacchetto.' });
+        } finally {
+            setExportLoading(false);
+        }
     };
 
     return (
-        <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500 pb-20">
+        <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500 pb-20 relative">
+            
+            {/* Overlay di caricamento Esportazione */}
+            {exportLoading && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+                    <div className="bg-zinc-900 border border-zinc-800 p-8 rounded-2xl shadow-2xl flex flex-col items-center max-w-sm text-center">
+                        <History size={48} className="text-dis-green animate-spin mb-6" />
+                        <h3 className="text-xl font-bold text-white mb-2">Generazione Pacchetto</h3>
+                        <p className="text-zinc-400 text-sm mb-4">
+                            Il sistema sta comprimendo i file e preparando il database. Per favore, non chiudere questa finestra.
+                        </p>
+                        <div className="w-full bg-zinc-800 h-1.5 rounded-full overflow-hidden">
+                            <div className="bg-dis-green h-full w-1/3 animate-[shimmer_2s_infinite_linear]" style={{ backgroundSize: '200% 100%', backgroundImage: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent)' }} />
+                        </div>
+                    </div>
+                </div>
+            )}
+
             <header>
                 <h1 className="text-3xl font-bold text-white flex items-center gap-3">
                     <KeyRound className="text-dis-green" size={28} />
@@ -259,7 +298,7 @@ export default function Settings() {
                 <p className="text-zinc-400 text-sm mb-8">
                     Seleziona i moduli da includere nel pacchetto di esportazione. Il sistema genererà un file .zip contenente i dati scelti.
                     <br />
-                    <span className="text-orange-400/80 italic font-medium">Nota: L'inclusione delle immagini potrebbe richiedere tempo per la compressione.</span>
+                    <span className="text-orange-400/80 italic font-medium">Nota: L'inclusione dei contenuti media potrebbe richiedere tempo per la compressione.</span>
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
@@ -283,7 +322,7 @@ export default function Settings() {
                         <History size={32} />
                         <div className="text-center">
                             <span className="block font-bold text-sm">Immagini</span>
-                            <span className="text-[10px] opacity-60">Cartella /images</span>
+                            <span className="text-[10px] opacity-60">Cartella /uploads/immagini</span>
                         </div>
                     </button>
 
@@ -294,8 +333,8 @@ export default function Settings() {
                     >
                         <Download size={32} />
                         <div className="text-center">
-                            <span className="block font-bold text-sm">Documenti</span>
-                            <span className="text-[10px] opacity-60">Cartella /downloads</span>
+                            <span className="block font-bold text-sm">Contenuti Media</span>
+                            <span className="text-[10px] opacity-60">/documenti e /file</span>
                         </div>
                     </button>
                 </div>
@@ -303,11 +342,11 @@ export default function Settings() {
                 <div className="flex justify-center border-t border-zinc-800 pt-8">
                     <button
                         onClick={handleExportSubmit}
-                        disabled={!exportDb && !exportImages && !exportDocs}
+                        disabled={exportLoading || (!exportDb && !exportImages && !exportDocs)}
                         className="flex items-center gap-3 bg-dis-green text-black font-bold px-8 py-4 rounded-xl hover:bg-green-400 transition-all shadow-lg shadow-dis-green/10 disabled:opacity-50 disabled:grayscale"
                     >
-                        <Download size={20} />
-                        Genera ed Esporta Pacchetto ZIP
+                        {exportLoading ? <History className="animate-spin" size={20} /> : <Download size={20} />}
+                        {exportLoading ? 'Generazione in corso...' : 'Genera ed Esporta Pacchetto ZIP'}
                     </button>
                 </div>
             </div>
