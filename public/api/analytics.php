@@ -98,6 +98,7 @@ try {
 
         $total_views  = (int)$pdo->query("SELECT COUNT(*) FROM article_views")->fetchColumn();
         $total_clicks = (int)$pdo->query("SELECT COUNT(*) FROM cta_clicks")->fetchColumn();
+        $total_reactions = (int)$pdo->query("SELECT COUNT(*) FROM article_reactions")->fetchColumn();
 
         // Click raggruppati per etichetta bottone
         $clicks_by_button = $pdo->query("
@@ -105,6 +106,24 @@ try {
             FROM cta_clicks
             GROUP BY button_label
             ORDER BY count DESC
+            LIMIT 10
+        ")->fetchAll();
+
+        // Reazioni raggruppate per tipo
+        $reactions_by_type = $pdo->query("
+            SELECT reaction, COUNT(*) AS count
+            FROM article_reactions
+            GROUP BY reaction
+            ORDER BY count DESC
+        ")->fetchAll();
+
+        // Top articoli per reazioni
+        $top_articles_by_reactions = $pdo->query("
+            SELECT a.id, a.title, a.slug, COUNT(ar.id) AS reaction_count
+            FROM articles a
+            JOIN article_reactions ar ON a.id = ar.article_id
+            GROUP BY a.id
+            ORDER BY reaction_count DESC
             LIMIT 10
         ")->fetchAll();
 
@@ -118,11 +137,14 @@ try {
         ")->fetchAll();
 
         echo json_encode([
-            'total_views'      => $total_views,
-            'total_clicks'     => $total_clicks,
-            'top_articles'     => $top_articles,
-            'clicks_by_button' => $clicks_by_button,
-            'weekly_views'     => $weekly_views,
+            'total_views'               => $total_views,
+            'total_clicks'              => $total_clicks,
+            'total_reactions'           => $total_reactions,
+            'top_articles'              => $top_articles,
+            'top_articles_by_reactions' => $top_articles_by_reactions,
+            'clicks_by_button'          => $clicks_by_button,
+            'reactions_by_type'         => $reactions_by_type,
+            'weekly_views'              => $weekly_views,
         ]);
     }
 } catch (PDOException $e) {
