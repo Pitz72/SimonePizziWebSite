@@ -102,6 +102,15 @@ export const api = {
         if (!res.ok) throw new Error('Errore esecuzione backup manuale');
         return res.json();
     },
+    exportContent: (options: { db: boolean, images: boolean, docs: boolean }) => {
+        const params = new URLSearchParams();
+        params.append('action', 'export');
+        if (options.db) params.append('db', 'true');
+        if (options.images) params.append('images', 'true');
+        if (options.docs) params.append('docs', 'true');
+        
+        window.open(`${API_URL}/backup.php?${params.toString()}`, '_blank');
+    },
 
     // --- SYSTEM STATS ---
     getStats: async () => {

@@ -2,6 +2,11 @@
 require_once 'db.php';
 require_once 'auth_helper.php';
 
+// Abilita log errori locale per debug (verrà rimosso dopo il fix)
+ini_set('log_errors', 1);
+ini_set('error_log', __DIR__ . '/.data/php_error.log');
+error_reporting(E_ALL);
+
 $pdo = Database::connect();
 $action = $_GET['action'] ?? 'status';
 
@@ -52,13 +57,122 @@ try {
         echo $sql;
         exit;
     } 
-    elseif ($action === 'status') {
+    elseif ($action === 'export') {
         Auth::check();
-        $stmt = $pdo->query("SELECT setting_key, setting_value FROM app_settings WHERE setting_key LIKE 'backup_%'");
-        $settings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
-        echo json_encode($settings);
-        exit;
+        
+        try {
+            // Estensione tempo di esecuzione per archivi grandi
+            set_time_limit(600); // 10 minuti
+            ini_set('memory_limit', '512M');
+
+            $include_db = isset($_GET['db']) && $_GET['db'] === 'true';
+            $include_images = isset($_GET['images']) && $_GET['images'] === 'true';
+            $include_docs = isset($_GET['docs']) && $_GET['docs'] === 'true';
+
+            if (!$include_db && !$include_images && !$include_docs) {
+                throw new Exception("Nessun modulo selezionato per l'esportazione.");
+            }
+
+            if (!class_exists('ZipArchive')) {
+                throw new Exception("L'estensione PHP 'ZipArchive' non è abilitata su questo server.");
+            }
+
+            $zip = new ZipArchive();
+            $temp_dir = __DIR__ . '/.data/temp';
+            if (!is_dir($temp_dir)) {
+                if (!@mkdir($temp_dir, 0755, true)) {
+                    throw new Exception("Impossibile creare la cartella temporanea: " . $temp_dir);
+                }
+            }
+            
+            $zip_name = "export_pizzi_" . date('Y-m-d_H-i-s') . ".zip";
+            $zip_path = $temp_dir . '/' . $zip_name;
+
+            if ($zip->open($zip_path, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== TRUE) {
+                throw new Exception("Impossibile creare l'archivio ZIP.");
+            }
+
+            // 1. DATABASE
+            if ($include_db) {
+                $sql = generateSQLDump($pdo);
+                $zip->addFromString('database_dump.sql', $sql);
+            }
+
+            // 2. IMMAGINI (public/images)
+            if ($include_images) {
+                $img_dir = realpath(__DIR__ . '/../images');
+                if ($img_dir && is_dir($img_dir)) {
+                    addDirToZip($img_dir, 'images', $zip);
+                }
+            }
+
+            // 3. DOCUMENTI (public/downloads)
+            if ($include_docs) {
+                $docs_dir = realpath(__DIR__ . '/../downloads');
+                if ($docs_dir && is_dir($docs_dir)) {
+                    addDirToZip($docs_dir, 'downloads', $zip);
+                }
+            }
+
+            $zip->close();
+
+            if (!file_exists($zip_path)) {
+                throw new Exception("Generazione del file ZIP fallita.");
+            }
+
+            // Pulisce buffer di uscita per evitare caratteri extra nello ZIP
+            if (ob_get_level()) ob_end_clean();
+
+            // Invio file con header completi
+            header('Content-Description: File Transfer');
+            header('Content-Type: application/zip');
+            header('Content-Disposition: attachment; filename="' . $zip_name . '"');
+            header('Content-Transfer-Encoding: binary');
+            header('Expires: 0');
+            header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+            header('Pragma: public');
+            header('Content-Length: ' . filesize($zip_path));
+            
+            readfile($zip_path);
+
+            // Rimuove file temporaneo
+            @unlink($zip_path);
+            exit;
+
+        } catch (Exception $e) {
+            http_response_code(500);
+            die("ERRORE BACKUP: " . $e->getMessage());
+        }
     }
+    elseif ($action === 'status') {
+// ... (rest of the file)
+
+/**
+ * Helper ricorsivo per aggiungere cartelle allo ZIP
+ */
+function addDirToZip($dir, $zipPath, $zip) {
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::SELF_FIRST
+    );
+
+    foreach ($files as $file) {
+        // $file è un oggetto SplFileInfo
+        $filePath = $file->getRealPath();
+        $relativePath = $zipPath . '/' . substr($filePath, strlen($dir) + 1);
+        $relativePath = str_replace('\\', '/', $relativePath);
+
+        // Salta file di sistema
+        if (basename($filePath) === '.DS_Store' || basename($filePath) === 'Thumbs.db') continue;
+
+        if ($file->isDir()) {
+            $zip->addEmptyDir($relativePath);
+        } else {
+            $zip->addFile($filePath, $relativePath);
+        }
+    }
+}
+
     elseif ($action === 'cron') {
         // Pseudo-cron: attivabile via URL o trigger
         // Per sicurezza aggiungiamo una secret key o permettiamo solo se loggati

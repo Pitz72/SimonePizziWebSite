@@ -2,7 +2,7 @@
 require_once 'db.php';
 
 session_start();
-header('Content-Type: application/json');
+// Il Content-Type viene gestito dai singoli endpoint
 
 // Helper class per validare l'autenticazione dalle API protette
 class Auth {

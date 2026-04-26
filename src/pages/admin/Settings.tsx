@@ -18,6 +18,11 @@ export default function Settings() {
     const [lastRun, setLastRun] = useState(initialSettings?.backup_last_run || '');
     const [saveLoading, setSaveLoading] = useState(false);
 
+    // Export states
+    const [exportDb, setExportDb] = useState(true);
+    const [exportImages, setExportImages] = useState(false);
+    const [exportDocs, setExportDocs] = useState(false);
+
     useEffect(() => {
         if (initialSettings) {
             setBackupAuto(initialSettings.backup_auto === '1');
@@ -71,6 +76,10 @@ export default function Settings() {
 
     const handleManualDownload = () => {
         api.downloadBackup();
+    };
+
+    const handleExportSubmit = () => {
+        api.exportContent({ db: exportDb, images: exportImages, docs: exportDocs });
     };
 
     return (
@@ -237,6 +246,69 @@ export default function Settings() {
                             </button>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* SEZIONE ESPORTAZIONE TOTALE */}
+            <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 sm:p-8">
+                <h2 className="text-xl font-bold text-white flex items-center gap-2 mb-6">
+                    <History size={20} className="text-dis-green" />
+                    Esportazione Contenuti Personalizzata
+                </h2>
+                
+                <p className="text-zinc-400 text-sm mb-8">
+                    Seleziona i moduli da includere nel pacchetto di esportazione. Il sistema genererà un file .zip contenente i dati scelti.
+                    <br />
+                    <span className="text-orange-400/80 italic font-medium">Nota: L'inclusione delle immagini potrebbe richiedere tempo per la compressione.</span>
+                </p>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+                    {/* Database */}
+                    <button 
+                        onClick={() => setExportDb(!exportDb)}
+                        className={`flex flex-col items-center gap-3 p-6 rounded-xl border-2 transition-all ${exportDb ? 'bg-dis-green/10 border-dis-green text-white' : 'bg-zinc-950 border-zinc-800 text-zinc-500 hover:border-zinc-700'}`}
+                    >
+                        <Database size={32} />
+                        <div className="text-center">
+                            <span className="block font-bold text-sm">Database</span>
+                            <span className="text-[10px] opacity-60">SQL Dump</span>
+                        </div>
+                    </button>
+
+                    {/* Immagini */}
+                    <button 
+                        onClick={() => setExportImages(!exportImages)}
+                        className={`flex flex-col items-center gap-3 p-6 rounded-xl border-2 transition-all ${exportImages ? 'bg-dis-green/10 border-dis-green text-white' : 'bg-zinc-950 border-zinc-800 text-zinc-500 hover:border-zinc-700'}`}
+                    >
+                        <History size={32} />
+                        <div className="text-center">
+                            <span className="block font-bold text-sm">Immagini</span>
+                            <span className="text-[10px] opacity-60">Cartella /images</span>
+                        </div>
+                    </button>
+
+                    {/* Documenti */}
+                    <button 
+                        onClick={() => setExportDocs(!exportDocs)}
+                        className={`flex flex-col items-center gap-3 p-6 rounded-xl border-2 transition-all ${exportDocs ? 'bg-dis-green/10 border-dis-green text-white' : 'bg-zinc-950 border-zinc-800 text-zinc-500 hover:border-zinc-700'}`}
+                    >
+                        <Download size={32} />
+                        <div className="text-center">
+                            <span className="block font-bold text-sm">Documenti</span>
+                            <span className="text-[10px] opacity-60">Cartella /downloads</span>
+                        </div>
+                    </button>
+                </div>
+
+                <div className="flex justify-center border-t border-zinc-800 pt-8">
+                    <button
+                        onClick={handleExportSubmit}
+                        disabled={!exportDb && !exportImages && !exportDocs}
+                        className="flex items-center gap-3 bg-dis-green text-black font-bold px-8 py-4 rounded-xl hover:bg-green-400 transition-all shadow-lg shadow-dis-green/10 disabled:opacity-50 disabled:grayscale"
+                    >
+                        <Download size={20} />
+                        Genera ed Esporta Pacchetto ZIP
+                    </button>
                 </div>
             </div>
         </div>
