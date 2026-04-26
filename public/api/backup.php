@@ -145,34 +145,12 @@ try {
         }
     }
     elseif ($action === 'status') {
-// ... (rest of the file)
-
-/**
- * Helper ricorsivo per aggiungere cartelle allo ZIP
- */
-function addDirToZip($dir, $zipPath, $zip) {
-    $files = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
-        RecursiveIteratorIterator::SELF_FIRST
-    );
-
-    foreach ($files as $file) {
-        // $file è un oggetto SplFileInfo
-        $filePath = $file->getRealPath();
-        $relativePath = $zipPath . '/' . substr($filePath, strlen($dir) + 1);
-        $relativePath = str_replace('\\', '/', $relativePath);
-
-        // Salta file di sistema
-        if (basename($filePath) === '.DS_Store' || basename($filePath) === 'Thumbs.db') continue;
-
-        if ($file->isDir()) {
-            $zip->addEmptyDir($relativePath);
-        } else {
-            $zip->addFile($filePath, $relativePath);
-        }
+        Auth::check();
+        $stmt = $pdo->query("SELECT setting_key, setting_value FROM app_settings WHERE setting_key LIKE 'backup_%'");
+        $settings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+        echo json_encode($settings);
+        exit;
     }
-}
-
     elseif ($action === 'cron') {
         // Pseudo-cron: attivabile via URL o trigger
         // Per sicurezza aggiungiamo una secret key o permettiamo solo se loggati
@@ -227,4 +205,30 @@ function addDirToZip($dir, $zipPath, $zip) {
 } catch (Exception $e) {
     http_response_code(500);
     echo json_encode(['error' => $e->getMessage()]);
+}
+
+/**
+ * Helper ricorsivo per aggiungere cartelle allo ZIP
+ */
+function addDirToZip($dir, $zipPath, $zip) {
+    $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($dir, RecursiveDirectoryIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::SELF_FIRST
+    );
+
+    foreach ($files as $file) {
+        // $file è un oggetto SplFileInfo
+        $filePath = $file->getRealPath();
+        $relativePath = $zipPath . '/' . substr($filePath, strlen($dir) + 1);
+        $relativePath = str_replace('\\', '/', $relativePath);
+
+        // Salta file di sistema
+        if (basename($filePath) === '.DS_Store' || basename($filePath) === 'Thumbs.db') continue;
+
+        if ($file->isDir()) {
+            $zip->addEmptyDir($relativePath);
+        } else {
+            $zip->addFile($filePath, $relativePath);
+        }
+    }
 }
