@@ -81,7 +81,12 @@ export const singleArticleLoader = async ({ params }: LoaderFunctionArgs) => {
         throw new Response("Articolo non trovato", { status: 404 });
     }
     
-    return mapArticleToPortfolioItem(article);
+    const mappedArticle = mapArticleToPortfolioItem(article);
+    
+    // Recupera le reazioni in parallelo dopo aver ottenuto l'id articolo
+    const reactions = await api.getReactions(article.id);
+    
+    return { article: mappedArticle, reactions };
 };
 
 // --- ADMIN LOADERS ---

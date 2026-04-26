@@ -8,6 +8,7 @@ import SEO from './SEO';
 import ShareModal from './ShareModal';
 import LetterModal from './LetterModal';
 import NewsletterSignup from './NewsletterSignup';
+import ReactionBar, { ReactionData } from './ReactionBar';
 
 interface SingleArticleProps {
     /* props riservati per sviluppi futuri */
@@ -30,7 +31,7 @@ const formatDateTime = (dateStr: string): string => {
 };
 
 const SingleArticle: React.FC<SingleArticleProps> = () => {
-    const article = useLoaderData() as PortfolioItem;
+    const { article, reactions } = useLoaderData() as { article: PortfolioItem; reactions: ReactionData };
     const navigate = useNavigate();
 
     const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
@@ -126,6 +127,11 @@ const SingleArticle: React.FC<SingleArticleProps> = () => {
                         dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.description, { ADD_ATTR: ['style'] }) }}
                     />
                 </div>
+            </div>
+
+            {/* REACTION BAR */}
+            <div className="max-w-4xl mx-auto px-6 md:px-10">
+                <ReactionBar articleId={article.id} initialData={reactions} />
             </div>
 
             {/* CALL TO ACTION PREMIUM (Fondo Pagina) */}

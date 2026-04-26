@@ -446,5 +446,25 @@ export const api = {
             xhr.setRequestHeader('Accept', 'application/json');
             xhr.send(formData);
         });
+    },
+
+    // --- REACTIONS (v1.13.0) ---
+    getReactions: async (articleId: number): Promise<{ counts: Record<string, number>; my_reactions: string[] }> => {
+        try {
+            const res = await fetch(`${API_URL}/reactions.php?article_id=${articleId}`, fetchConfig);
+            if (!res.ok) return { counts: { thumb: 0, heart: 0, fire: 0, think: 0, game: 0 }, my_reactions: [] };
+            return res.json();
+        } catch {
+            return { counts: { thumb: 0, heart: 0, fire: 0, think: 0, game: 0 }, my_reactions: [] };
+        }
+    },
+    toggleReaction: async (articleId: number, reaction: string): Promise<{ action: string; counts: Record<string, number>; my_reactions: string[] }> => {
+        const res = await fetch(`${API_URL}/reactions.php`, {
+            ...fetchConfig,
+            method: 'POST',
+            body: JSON.stringify({ article_id: articleId, reaction })
+        });
+        if (!res.ok) throw new Error('Errore reazione');
+        return res.json();
     }
 };
