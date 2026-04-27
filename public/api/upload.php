@@ -33,12 +33,17 @@ if (!in_array($fileExt, $allowedExts)) {
 // Verifica Sicurezza Intrinseca (Magic Bytes / MIME Type) 
 // Previene estensioni falsificate es. shell.php.jpg o file text camuffati.
 $realMime = mime_content_type($file['tmp_name']);
+// Fallback: ZIP/RAR rilevati come octet-stream su alcuni server PHP/Apache.
+// Normalizziamo solo se l'estensione è già stata validata come zip o rar.
+if ($realMime === 'application/octet-stream' && in_array($fileExt, ['zip', 'rar'])) {
+    $realMime = 'application/zip';
+}
+
 $allowedMimes = [
     'image/jpeg', 'image/png', 'image/webp', 'image/gif',
     'application/pdf',
     'application/zip', 'application/x-zip-compressed', 'application/x-zip',
     'application/x-rar-compressed', 'application/vnd.rar',
-    'application/octet-stream', // ZIP/RAR su alcuni server vengono rilevati così
     'audio/mpeg'
 ];
 

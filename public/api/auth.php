@@ -10,8 +10,29 @@ header('Content-Type: application/json');
 
 $method = $_SERVER['REQUEST_METHOD'];
 
+// Restituisce l'IP reale del client anche dietro proxy interno.
+// NON usa X-Forwarded-For se REMOTE_ADDR è già pubblico (non falsificabile).
+function getClientIp(): string {
+    $remoteAddr = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+    $isPrivate = (
+        $remoteAddr === '127.0.0.1' || $remoteAddr === '::1' ||
+        preg_match('/^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/', $remoteAddr)
+    );
+    if (!$isPrivate) return $remoteAddr;
+    $forwarded = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? '';
+    if ($forwarded) {
+        $first = trim(explode(',', $forwarded)[0]);
+        $valid = filter_var($first, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+        if ($valid) return $valid;
+    }
+    return $remoteAddr;
+}
+
 try {
     $pdo = Database::connect();
+    // Migrazione idempotente: aggiunge session_version a users (per invalidazione sessioni al reset)
+    try { $pdo->exec("ALTER TABLE users ADD COLUMN session_version INT NOT NULL DEFAULT 0"); }
+    catch (PDOException $e) { /* colonna già presente */ }
 
     if ($method === 'POST') {
         $data = json_decode(file_get_contents('php://input'), true);
@@ -101,7 +122,8 @@ try {
             }
 
             $hash = password_hash($newPassword, PASSWORD_DEFAULT);
-            $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?")
+            // session_version++ invalida tutte le sessioni attive di questo utente
+            $pdo->prepare("UPDATE users SET password_hash = ?, session_version = session_version + 1 WHERE id = ?")
                 ->execute([$hash, $reset['user_id']]);
 
             $pdo->prepare("DELETE FROM password_resets WHERE token = ?")
@@ -123,7 +145,7 @@ try {
         }
 
         // --- INIZIO RATE LIMITING ---
-        $ip_address = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $ip_address = getClientIp();
         
         // Pulizia vecchi tentativi (più vecchi di 15 minuti)
         $pdo->exec("DELETE FROM login_attempts WHERE attempt_time < DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
@@ -140,7 +162,7 @@ try {
         }
         // --- FINE RATE LIMITING ---
 
-        $stmt = $pdo->prepare("SELECT id, username, password_hash FROM users WHERE username = ?");
+        $stmt = $pdo->prepare("SELECT id, username, password_hash, session_version FROM users WHERE username = ?");
         $stmt->execute([$username]);
         $user = $stmt->fetch();
 
@@ -150,6 +172,7 @@ try {
             // Setup Session
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
+            $_SESSION['session_version'] = (int)$user['session_version'];
             
             // Login riuscito: reset tentativi falliti per questo IP
             $stmtReset = $pdo->prepare("DELETE FROM login_attempts WHERE ip_address = ?");

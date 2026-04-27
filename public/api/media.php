@@ -28,11 +28,14 @@ try {
         $media = $stmt->fetch();
         
         if ($media) {
-            // Rimuovi fisicamente il file dalla /public/uploads/
-            // $media['file_path'] solitamente è /uploads/nomefile.ext.
-            $physicalPath = __DIR__ . '/..' . $media['file_path'];
-            if (file_exists($physicalPath)) {
-                unlink($physicalPath);
+            // Sicurezza: accetta solo path che iniziano con /uploads/ (mai path traversal dal DB)
+            $filePath = $media['file_path'];
+            if (str_starts_with($filePath, '/uploads/')) {
+                $physicalPath = realpath(__DIR__ . '/..' . $filePath);
+                $uploadsBase  = realpath(__DIR__ . '/../uploads');
+                if ($physicalPath && $uploadsBase && str_starts_with($physicalPath, $uploadsBase)) {
+                    unlink($physicalPath);
+                }
             }
             
             // Rimozione riga DB SQLite

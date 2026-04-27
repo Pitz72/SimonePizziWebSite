@@ -13,6 +13,15 @@ date_default_timezone_set('Europe/Rome');
 $ita_now_str = date('Y-m-d H:i:s');
 $ita_now_time = time();
 
+// Valida URL bottoni CTA: accetta solo http/https/mailto, rigetta javascript: e simili
+function sanitizeUrl(string $url): string {
+    $url = trim($url);
+    if (empty($url)) return '';
+    if (preg_match('/^mailto:/i', $url)) return $url;
+    if (!preg_match('/^https?:\/\//i', $url)) return '';
+    return filter_var($url, FILTER_VALIDATE_URL) ? $url : '';
+}
+
 // Helper per generare slug unici
 function generateSlug($title, $pdo) {
     // [v1.5.10] Normalizzazione accenti italiani prima del replace (evita slug come "caf-" da "caffè")
@@ -181,6 +190,7 @@ try {
         }
 
         if ($q) {
+            $q = mb_substr($q, 0, 100); // cap: evita query lentissime su stringhe arbitrariamente lunghe
             $conditions[] = "(a.title LIKE ? OR a.content LIKE ? OR a.excerpt LIKE ?)";
             $params[] = "%$q%";
             $params[] = "%$q%";
@@ -246,12 +256,15 @@ try {
         $category = $data['category'] ?? 'blog-e-riflessioni';
         $tags = $data['tags'] ?? ''; // Raccogllie array o CSV
         $is_featured = isset($data['is_featured']) ? (int)$data['is_featured'] : 0;
-        $button_a_label = $data['button_a_label'] ?? '';
-        $button_a_link = $data['button_a_link'] ?? '';
-        $button_b_label = $data['button_b_label'] ?? '';
-        $button_b_link = $data['button_b_link'] ?? '';
-        $status = $data['status'] ?? 'draft';
-        $published_at = $data['published_at'] ?? date('Y-m-d H:i:s');
+        $button_a_label = substr(trim($data['button_a_label'] ?? ''), 0, 100);
+        $button_a_link  = sanitizeUrl($data['button_a_link'] ?? '');
+        $button_b_label = substr(trim($data['button_b_label'] ?? ''), 0, 100);
+        $button_b_link  = sanitizeUrl($data['button_b_link'] ?? '');
+        $status = in_array($data['status'] ?? '', ['draft', 'published']) ? $data['status'] : 'draft';
+        $published_at_raw = $data['published_at'] ?? '';
+        $published_at = (DateTime::createFromFormat('Y-m-d H:i:s', $published_at_raw) !== false)
+            ? $published_at_raw
+            : date('Y-m-d H:i:s');
 
         $stmt = $pdo->prepare("INSERT INTO articles (title, slug, content, excerpt, cover_image, category, tags, is_featured, button_a_label, button_a_link, button_b_label, button_b_link, status, published_at) VALUES (?, ?, ?, ?, ?, ?, '', ?, ?, ?, ?, ?, ?, ?)");
         $stmt->execute([$title, $slug, $content, $excerpt, $cover_image, $category, $is_featured, $button_a_label, $button_a_link, $button_b_label, $button_b_link, $status, $published_at]);
@@ -287,12 +300,15 @@ try {
         $category = $data['category'] ?? 'blog-e-riflessioni';
         $tags = $data['tags'] ?? ''; // Puo essere string o array
         $is_featured = isset($data['is_featured']) ? (int)$data['is_featured'] : 0;
-        $button_a_label = $data['button_a_label'] ?? '';
-        $button_a_link = $data['button_a_link'] ?? '';
-        $button_b_label = $data['button_b_label'] ?? '';
-        $button_b_link = $data['button_b_link'] ?? '';
-        $status = $data['status'] ?? 'draft';
-        $published_at = $data['published_at'] ?? date('Y-m-d H:i:s');
+        $button_a_label = substr(trim($data['button_a_label'] ?? ''), 0, 100);
+        $button_a_link  = sanitizeUrl($data['button_a_link'] ?? '');
+        $button_b_label = substr(trim($data['button_b_label'] ?? ''), 0, 100);
+        $button_b_link  = sanitizeUrl($data['button_b_link'] ?? '');
+        $status = in_array($data['status'] ?? '', ['draft', 'published']) ? $data['status'] : 'draft';
+        $published_at_raw = $data['published_at'] ?? '';
+        $published_at = (DateTime::createFromFormat('Y-m-d H:i:s', $published_at_raw) !== false)
+            ? $published_at_raw
+            : date('Y-m-d H:i:s');
 
         $stmt = $pdo->prepare("UPDATE articles SET title=?, slug=?, content=?, excerpt=?, cover_image=?, category=?, is_featured=?, button_a_label=?, button_a_link=?, button_b_label=?, button_b_link=?, status=?, published_at=? WHERE id=?");
         $stmt->execute([$title, $slug, $content, $excerpt, $cover_image, $category, $is_featured, $button_a_label, $button_a_link, $button_b_label, $button_b_link, $status, $published_at, $id]);

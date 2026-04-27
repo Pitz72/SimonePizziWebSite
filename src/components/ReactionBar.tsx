@@ -88,6 +88,10 @@ const ReactionBar: React.FC<ReactionBarProps> = ({ articleId, initialData }) => 
         if (loading) return;
         setLoading(reaction);
 
+        // Salva snapshot pre-update per un rollback preciso in caso di errore
+        const prevCounts = { ...counts };
+        const prevMyReactions = [...myReactions];
+
         // Optimistic update
         const wasActive = myReactions.includes(reaction);
         const newCount = wasActive
@@ -104,11 +108,9 @@ const ReactionBar: React.FC<ReactionBarProps> = ({ articleId, initialData }) => 
             setCounts(result.counts as Record<ReactionKey, number>);
             setMyReactions(result.my_reactions as ReactionKey[]);
         } catch {
-            // Rollback on error
-            setCounts(prev => ({ ...prev, [reaction]: counts[reaction] }));
-            setMyReactions(prev =>
-                wasActive ? [...prev, reaction] : prev.filter(r => r !== reaction)
-            );
+            // Rollback esatto allo snapshot pre-update
+            setCounts(prevCounts);
+            setMyReactions(prevMyReactions);
         } finally {
             setLoading(null);
         }

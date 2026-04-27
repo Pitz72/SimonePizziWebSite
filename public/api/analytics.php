@@ -10,6 +10,14 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 date_default_timezone_set('Europe/Rome');
 
+// Migrazione idempotente: aggiunge colonne ip_hash e clicked_at a cta_clicks se non presenti
+try {
+    $pdo->exec("ALTER TABLE cta_clicks ADD COLUMN ip_hash VARCHAR(64) DEFAULT NULL");
+} catch (PDOException $e) { /* colonna già presente */ }
+try {
+    $pdo->exec("ALTER TABLE cta_clicks ADD COLUMN clicked_at DATETIME DEFAULT CURRENT_TIMESTAMP");
+} catch (PDOException $e) { /* colonna già presente */ }
+
 try {
     if ($method === 'POST') {
         // Tracking pubblico (nessun Auth richiesto): view o click
@@ -39,9 +47,21 @@ try {
             echo json_encode(['status' => 'ok']);
         }
         elseif ($type === 'click') {
+            // Rate limiting per-IP: max 10 click per articolo al minuto
+            $ip_hash = hash('sha256', ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . date('Y-m-d H:i'));
+            $stmtRate = $pdo->prepare(
+                "SELECT COUNT(*) FROM cta_clicks
+                 WHERE article_id = ? AND ip_hash = ? AND clicked_at >= DATE_SUB(NOW(), INTERVAL 1 MINUTE)"
+            );
+            $stmtRate->execute([$article_id, $ip_hash]);
+            if ((int)$stmtRate->fetchColumn() >= 10) {
+                echo json_encode(['status' => 'ok']); // risposta neutra: non riveliamo il blocco
+                exit;
+            }
+
             $button_label = substr(trim($data['button_label'] ?? 'unknown'), 0, 100);
-            $stmt = $pdo->prepare("INSERT INTO cta_clicks (article_id, button_label) VALUES (?, ?)");
-            $stmt->execute([$article_id, $button_label]);
+            $stmt = $pdo->prepare("INSERT INTO cta_clicks (article_id, button_label, ip_hash) VALUES (?, ?, ?)");
+            $stmt->execute([$article_id, $button_label, $ip_hash]);
             echo json_encode(['status' => 'ok']);
         }
         else {
