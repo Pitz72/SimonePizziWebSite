@@ -4,29 +4,38 @@ const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-gray-800/50 bg-black/20 backdrop-blur-sm mt-12">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-10 text-center">
-        <div className="flex flex-col items-center gap-3">
-          <nav aria-label="Link legali" className="flex gap-6 text-sm">
-            <a
-              href="/privacy"
-              className="text-gray-600 hover:text-green-500 transition-colors duration-200"
-            >
-              Privacy Policy
-            </a>
-            <span className="text-gray-800" aria-hidden="true">·</span>
-            <a
-              href="/cookie-policy"
-              className="text-gray-600 hover:text-green-500 transition-colors duration-200"
-            >
-              Cookie Policy
-            </a>
-          </nav>
-          <p className="text-gray-600 text-sm">
-            &copy; {currentYear} Simone Pizzi. Tutti i diritti riservati.
-          </p>
-        </div>
-      </div>
+    <footer
+      className="relative z-10 px-6 md:px-[52px] py-[52px] flex items-center justify-between"
+      style={{ borderTop: '1px solid rgba(34,197,94,0.1)' }}
+    >
+      <span className="font-serif text-[26px]" style={{ color: '#d4e8d8' }}>
+        Simone <em className="not-italic text-dis-green">Pizzi</em>
+      </span>
+
+      <p className="font-mono text-[10px] tracking-[0.14em] uppercase" style={{ color: '#6a9070' }}>
+        &copy; {currentYear} Simone Pizzi. Tutti i diritti riservati.
+      </p>
+
+      <nav aria-label="Link legali" className="hidden sm:flex gap-6">
+        <a
+          href="/privacy"
+          className="font-mono text-[10px] tracking-[0.12em] uppercase transition-colors duration-200"
+          style={{ color: '#3a5540' }}
+          onMouseEnter={e => (e.currentTarget.style.color = '#22c55e')}
+          onMouseLeave={e => (e.currentTarget.style.color = '#3a5540')}
+        >
+          Privacy
+        </a>
+        <a
+          href="/cookie-policy"
+          className="font-mono text-[10px] tracking-[0.12em] uppercase transition-colors duration-200"
+          style={{ color: '#3a5540' }}
+          onMouseEnter={e => (e.currentTarget.style.color = '#22c55e')}
+          onMouseLeave={e => (e.currentTarget.style.color = '#3a5540')}
+        >
+          Cookie
+        </a>
+      </nav>
     </footer>
   );
 };

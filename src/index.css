@@ -2,94 +2,159 @@
 @plugin "@tailwindcss/typography";
 
 @theme {
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+  --font-serif: 'DM Serif Display', Georgia, serif;
+  --font-mono: 'Courier Prime', 'Courier New', monospace;
+
   --color-dis-green: #22c55e;
+  --color-v3-bg: #05080a;
+  --color-v3-surface: #0c1410;
+  --color-v3-fg: #d4e8d8;
+  --color-v3-fg2: #6a9070;
+  --color-v3-fg3: #1a2e20;
 
   --animate-slow-spin: slow-spin 20s linear infinite;
   --animate-fade-in: fade-in 0.5s ease-out forwards;
   --animate-fade-in-right: fade-in-right 0.5s ease-out forwards;
 
   @keyframes slow-spin {
-    from {
-      transform: rotate(0deg);
-    }
-
-    to {
-      transform: rotate(360deg);
-    }
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
   }
-
   @keyframes fade-in {
-    from {
-      opacity: 0;
-      transform: translateY(10px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
   }
-
   @keyframes fade-in-right {
-    from {
-      opacity: 0;
-      transform: translateX(20px);
-    }
-
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
+    from { opacity: 0; transform: translateX(20px); }
+    to   { opacity: 1; transform: translateX(0); }
   }
 }
 
+/* ── BASE ──────────────────────────────────────────────────── */
 body {
-  font-family: 'Poppins', sans-serif;
+  background-color: #05080a;
   scroll-behavior: smooth;
 }
 
+/* ── CUSTOM CURSOR ─────────────────────────────────────────── */
+@media (hover: hover) {
+  body { cursor: none; }
+  a, button, [role="button"] { cursor: none; }
+}
+
+.cur-dot {
+  position: fixed; top: 0; left: 0; z-index: 9999; pointer-events: none;
+  width: 6px; height: 6px; margin: -3px 0 0 -3px;
+  background: #22c55e; border-radius: 50%;
+  will-change: transform;
+  transition: width .15s, height .15s, margin .15s;
+}
+.cur-ring {
+  position: fixed; top: 0; left: 0; z-index: 9998; pointer-events: none;
+  width: 30px; height: 30px; margin: -15px 0 0 -15px;
+  border: 1px solid rgba(34, 197, 94, 0.45); border-radius: 50%;
+  will-change: transform;
+  transition: width .3s, height .3s, margin .3s, border-color .3s;
+}
+body:has(a:hover) .cur-ring,
+body:has(button:hover) .cur-ring,
+body:has(.v3-card:hover) .cur-ring {
+  width: 54px; height: 54px; margin: -27px 0 0 -27px;
+  border-color: rgba(34, 197, 94, 0.9);
+}
+body:has(a:hover) .cur-dot,
+body:has(button:hover) .cur-dot {
+  width: 10px; height: 10px; margin: -5px 0 0 -5px;
+}
+@media (hover: none) {
+  .cur-dot, .cur-ring { display: none; }
+}
+
+/* ── GRAIN ─────────────────────────────────────────────────── */
+@keyframes grain-anim {
+  0%   { transform: translate(0, 0); }
+  25%  { transform: translate(-2%, -1%); }
+  50%  { transform: translate(1%, 2%); }
+  75%  { transform: translate(-1%, 1%); }
+  100% { transform: translate(2%, -2%); }
+}
+.v3-grain {
+  position: fixed;
+  inset: -200%;
+  width: 400%;
+  height: 400%;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px;
+  animation: grain-anim 0.5s steps(2) infinite;
+}
+
+/* ── V3 CARD OVERLAY ANIMATIONS ────────────────────────────── */
+.v3-card {
+  position: relative;
+  overflow: hidden;
+}
+.v3-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 25;
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0);
+  transition: box-shadow 0.4s;
+}
+.v3-card:hover::after {
+  box-shadow: inset 0 0 0 1px rgba(34, 197, 94, 0.4);
+}
+.v3-card:hover img {
+  transform: scale(1.07) !important;
+  filter: brightness(0.5) saturate(1.1) !important;
+}
+.v3-card .v3-card-body {
+  transform: translateY(6px);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.v3-card:hover .v3-card-body {
+  transform: translateY(0);
+}
+.v3-card .v3-card-sum {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.4s ease, opacity 0.3s 0.05s;
+}
+.v3-card:hover .v3-card-sum {
+  max-height: 80px;
+  opacity: 1;
+}
+.v3-card .v3-card-cta {
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 0.3s 0.1s, transform 0.3s 0.1s;
+}
+.v3-card:hover .v3-card-cta {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ── LEGACY ANIMATION CLASSES ──────────────────────────────── */
 @keyframes slow-spin {
-  from {
-    transform: rotate(0deg);
-  }
-
-  to {
-    transform: rotate(360deg);
-  }
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
-
-.animate-slow-spin {
-  animation: slow-spin 20s linear infinite;
-}
+.animate-slow-spin { animation: slow-spin 20s linear infinite; }
 
 @keyframes fade-in {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-
-.animate-fade-in {
-  animation: fade-in 0.5s ease-out forwards;
-}
+.animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
 
 @keyframes fade-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
 }
-
-.animate-fade-in-right {
-  animation: fade-in-right 0.5s ease-out forwards;
-}
+.animate-fade-in-right { animation: fade-in-right 0.5s ease-out forwards; }
