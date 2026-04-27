@@ -172,7 +172,7 @@ const Hero: React.FC<HeroProps> = ({ onOpenModal }) => {
         <motion.img
           animate={{ y: [-10, 10, -10] }}
           transition={{ repeat: Infinity, duration: 6, ease: 'easeInOut' }}
-          src="/Simone-Pizzi.webp"
+          src="/SimonePizzi.webp"
           alt="Simone Pizzi"
           className="w-full h-full object-contain object-center"
           style={{
