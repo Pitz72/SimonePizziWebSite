@@ -174,11 +174,11 @@ const Hero: React.FC<HeroProps> = ({ onOpenModal }) => {
           transition={{ repeat: Infinity, duration: 6, ease: 'easeInOut' }}
           src="/Simone-Pizzi.webp"
           alt="Simone Pizzi"
-          className="w-full h-full object-contain object-bottom"
+          className="w-full h-full object-contain object-center"
           style={{
-            filter: 'brightness(0.9) saturate(0.9)',
-            maskImage: 'radial-gradient(ellipse 80% 90% at 50% 50%, rgba(0,0,0,0.95) 40%, rgba(0,0,0,0) 100%)',
-            WebkitMaskImage: 'radial-gradient(ellipse 80% 90% at 50% 50%, rgba(0,0,0,0.95) 40%, rgba(0,0,0,0) 100%)',
+            filter: 'brightness(0.95) saturate(0.9)',
+            maskImage: 'radial-gradient(ellipse 72% 78% at 56% 50%, rgba(0,0,0,1) 35%, rgba(0,0,0,0) 100%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 72% 78% at 56% 50%, rgba(0,0,0,1) 35%, rgba(0,0,0,0) 100%)',
           }}
         />
       </motion.div>
