@@ -20,5 +20,6 @@ try {
     }
     echo json_encode(array_values($menu));
 } catch (Exception $e) {
-    echo json_encode(['error' => $e->getMessage()]);
+    error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+    echo json_encode(['error' => 'Errore interno del server.']);
 }

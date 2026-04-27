@@ -25,10 +25,17 @@ function ensureMessagesTable(PDO $pdo): void
             email      VARCHAR(254)  NOT NULL,
             subject    VARCHAR(200)  NOT NULL DEFAULT '',
             message    TEXT          NOT NULL,
+            ip_hash    VARCHAR(64)   DEFAULT NULL,
             read_at    DATETIME      DEFAULT NULL,
             created_at DATETIME      NOT NULL DEFAULT CURRENT_TIMESTAMP
         ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
     ");
+    // Migrazione: aggiunge ip_hash alle installazioni esistenti senza la colonna
+    try {
+        $pdo->exec("ALTER TABLE messages ADD COLUMN ip_hash VARCHAR(64) DEFAULT NULL");
+    } catch (PDOException $e) {
+        // Colonna già presente — ignorato
+    }
 }
 
 $method = $_SERVER['REQUEST_METHOD'];
@@ -48,7 +55,8 @@ if ($method === 'GET') {
         echo json_encode($rows);
     } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode(['error' => $e->getMessage()]);
+        error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+        echo json_encode(['error' => 'Errore interno del server.']);
     }
     exit;
 }
@@ -83,26 +91,29 @@ if ($method === 'POST') {
         $pdo = Database::connect();
         ensureMessagesTable($pdo);
 
-        // Rate limiting basilare: max 10 messaggi globali in 15 minuti (per evitare spam massivo)
-        $stmt_limit = $pdo->query("SELECT COUNT(*) FROM messages WHERE created_at > DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
+        // Rate limiting per-IP: max 3 messaggi dallo stesso IP in 15 minuti
+        $ip_hash = hash('sha256', $_SERVER['REMOTE_ADDR'] ?? 'unknown');
+        $stmt_limit = $pdo->prepare("SELECT COUNT(*) FROM messages WHERE ip_hash = ? AND created_at > DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
+        $stmt_limit->execute([$ip_hash]);
         $recent_count = (int)$stmt_limit->fetchColumn();
 
-        if ($recent_count >= 10) {
+        if ($recent_count >= 3) {
             http_response_code(429);
-            echo json_encode(['status' => 'error', 'message' => 'Troppe richieste. Riprova tra 15 minuti.']);
+            echo json_encode(['status' => 'error', 'message' => 'Troppi messaggi inviati. Riprova tra 15 minuti.']);
             exit;
         }
 
         // Salva nel DB
         $stmt = $pdo->prepare(
-            "INSERT INTO messages (name, email, subject, message)
-             VALUES (:name, :email, :subject, :message)"
+            "INSERT INTO messages (name, email, subject, message, ip_hash)
+             VALUES (:name, :email, :subject, :message, :ip_hash)"
         );
         $stmt->execute([
             ':name'    => $name,
             ':email'   => $email,
             ':subject' => $subject,
             ':message' => $message,
+            ':ip_hash' => $ip_hash,
         ]);
 
         // Invia email di notifica
@@ -114,7 +125,8 @@ if ($method === 'POST') {
         ]);
     } catch (Throwable $e) {
         http_response_code(500);
-        echo json_encode(['status' => 'error', 'message' => 'Errore server: ' . $e->getMessage()]);
+        error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+        echo json_encode(['status' => 'error', 'message' => 'Errore interno del server.']);
     }
     exit;
 }
@@ -135,7 +147,8 @@ if ($method === 'PUT') {
         echo json_encode(['status' => 'success']);
     } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode(['error' => $e->getMessage()]);
+        error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+        echo json_encode(['error' => 'Errore interno del server.']);
     }
     exit;
 }
@@ -155,7 +168,8 @@ if ($method === 'DELETE') {
         echo json_encode(['status' => 'success']);
     } catch (Exception $e) {
         http_response_code(500);
-        echo json_encode(['error' => $e->getMessage()]);
+        error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+        echo json_encode(['error' => 'Errore interno del server.']);
     }
     exit;
 }

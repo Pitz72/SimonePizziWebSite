@@ -126,7 +126,8 @@ if (move_uploaded_file($file['tmp_name'], $destination)) {
         ]);
     } catch (PDOException $e) {
         http_response_code(500);
-        echo json_encode(['error' => 'Errore salvataggio DB media: ' . $e->getMessage()]);
+        error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+        echo json_encode(['error' => 'Errore salvataggio DB media: ' . 'Errore interno del server.']);
     }
 } else {
     http_response_code(500);

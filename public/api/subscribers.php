@@ -54,7 +54,8 @@ if ($method === 'GET') {
             echo json_encode(['status' => 'success', 'message' => 'Iscrizione confermata!']);
         } catch (Throwable $e) {
             http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => 'Errore server: ' . $e->getMessage()]);
+            error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+            echo json_encode(['status' => 'error', 'message' => 'Errore interno del server.']);
         }
         exit;
     }
@@ -84,7 +85,8 @@ if ($method === 'GET') {
             echo json_encode(['status' => 'success', 'message' => 'Disiscrizione effettuata.']);
         } catch (Throwable $e) {
             http_response_code(500);
-            echo json_encode(['status' => 'error', 'message' => 'Errore server: ' . $e->getMessage()]);
+            error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+            echo json_encode(['status' => 'error', 'message' => 'Errore interno del server.']);
         }
         exit;
     }
@@ -110,7 +112,8 @@ if ($method === 'GET') {
         ]);
     } catch (Throwable $e) {
         http_response_code(500);
-        echo json_encode(['error' => 'Errore server: ' . $e->getMessage()]);
+        error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+        echo json_encode(['error' => 'Errore interno del server.']);
     }
     exit;
 }
@@ -196,7 +199,8 @@ if ($method === 'POST') {
         }
     } catch (Throwable $e) {
         http_response_code(500);
-        echo json_encode(['status' => 'error', 'message' => 'Errore server: ' . $e->getMessage()]);
+        error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+        echo json_encode(['status' => 'error', 'message' => 'Errore interno del server.']);
     }
     exit;
 }
@@ -225,7 +229,8 @@ if ($method === 'PATCH') {
         echo json_encode(['status' => 'success', 'message' => 'Iscritto approvato con successo.']);
     } catch (Throwable $e) {
         http_response_code(500);
-        echo json_encode(['error' => 'Errore server: ' . $e->getMessage()]);
+        error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+        echo json_encode(['error' => 'Errore interno del server.']);
     }
     exit;
 }
@@ -248,7 +253,8 @@ if ($method === 'DELETE') {
         echo json_encode(['status' => 'success']);
     } catch (Throwable $e) {
         http_response_code(500);
-        echo json_encode(['error' => 'Errore server: ' . $e->getMessage()]);
+        error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+        echo json_encode(['error' => 'Errore interno del server.']);
     }
     exit;
 }

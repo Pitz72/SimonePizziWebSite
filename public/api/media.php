@@ -45,7 +45,8 @@ try {
         }
     }
 } catch (PDOException $e) {
-     http_response_code(500);
-     echo json_encode(['error' => $e->getMessage()]);
+    error_log('media.php PDOException: ' . $e->getMessage());
+    http_response_code(500);
+    echo json_encode(['error' => 'Errore interno del server.']);
 }
 ?>

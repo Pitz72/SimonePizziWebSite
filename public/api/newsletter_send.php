@@ -27,7 +27,8 @@ if ($method === 'GET') {
         echo json_encode($rows);
     } catch (Throwable $e) {
         http_response_code(500);
-        echo json_encode(['error' => 'Errore server: ' . $e->getMessage()]);
+        error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+        echo json_encode(['error' => 'Errore interno del server.']);
     }
     exit;
 }
@@ -93,7 +94,8 @@ if ($method === 'POST') {
 
     } catch (Throwable $e) {
         http_response_code(500);
-        echo json_encode(['error' => 'Errore server: ' . $e->getMessage()]);
+        error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+        echo json_encode(['error' => 'Errore interno del server.']);
     }
     exit;
 }

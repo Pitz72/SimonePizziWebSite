@@ -35,9 +35,10 @@ try {
 
 } catch (Exception $e) {
     http_response_code(500);
+    error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
     echo json_encode([
         'status'  => 'error',
-        'message' => $e->getMessage()
+        'message' => 'Errore interno del server.'
     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 }
 ?>

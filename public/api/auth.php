@@ -170,8 +170,9 @@ try {
     }
 
 } catch (PDOException $e) {
+    error_log('auth.php PDOException: ' . $e->getMessage());
     http_response_code(500);
-    echo json_encode(['status' => 'error', 'message' => 'Errore DB: ' . $e->getMessage()]);
+    echo json_encode(['status' => 'error', 'message' => 'Errore interno del server.']);
 }
 
 /**

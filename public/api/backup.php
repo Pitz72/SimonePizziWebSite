@@ -2,11 +2,6 @@
 require_once 'db.php';
 require_once 'auth_helper.php';
 
-// Abilita log errori locale per debug (verrà rimosso dopo il fix)
-ini_set('log_errors', 1);
-ini_set('error_log', __DIR__ . '/.data/php_error.log');
-error_reporting(E_ALL);
-
 $pdo = Database::connect();
 $action = $_GET['action'] ?? 'status';
 
@@ -78,9 +73,9 @@ try {
             }
 
             $zip = new ZipArchive();
-            $temp_dir = __DIR__ . '/.data/temp';
+            $temp_dir = sys_get_temp_dir() . '/pizzi_export';
             if (!is_dir($temp_dir)) {
-                if (!@mkdir($temp_dir, 0755, true)) {
+                if (!@mkdir($temp_dir, 0700, true)) {
                     throw new Exception("Impossibile creare la cartella temporanea: " . $temp_dir);
                 }
             }
@@ -145,8 +140,10 @@ try {
             exit;
 
         } catch (Exception $e) {
+            error_log('backup.php export error: ' . $e->getMessage());
             http_response_code(500);
-            die("ERRORE BACKUP: " . $e->getMessage());
+            echo json_encode(['error' => 'Errore interno durante l\'esportazione.']);
+            exit;
         }
     }
     elseif ($action === 'status') {
@@ -161,9 +158,9 @@ try {
         // Per sicurezza aggiungiamo una secret key o permettiamo solo se loggati
         $is_admin = isset($_SESSION['user_id']);
         $secret = $_GET['secret'] ?? '';
-        $configured_secret = 'pizzi_backup_v1'; // Sostituire con qualcosa di serio in config.php se necessario
+        $configured_secret = defined('BACKUP_CRON_SECRET') ? BACKUP_CRON_SECRET : '';
 
-        if (!$is_admin && $secret !== $configured_secret) {
+        if (!$is_admin && (empty($configured_secret) || !hash_equals($configured_secret, $secret))) {
             http_response_code(403);
             die("Accesso negato.");
         }
@@ -209,7 +206,8 @@ try {
     }
 } catch (Exception $e) {
     http_response_code(500);
-    echo json_encode(['error' => $e->getMessage()]);
+    error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+    echo json_encode(['error' => 'Errore interno del server.']);
 }
 
 /**

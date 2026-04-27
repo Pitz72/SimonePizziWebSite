@@ -44,6 +44,7 @@ try {
 
 } catch (Exception $e) {
     http_response_code(403);
-    echo json_encode(["error" => "Accesso negato o errore DB: " . $e->getMessage()]);
+    error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+    echo json_encode(["error" => "Accesso negato o errore DB: " . 'Errore interno del server.']);
 }
 ?>

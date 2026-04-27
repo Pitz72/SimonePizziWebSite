@@ -401,7 +401,7 @@ if ($isCrawler && $pageType !== 'admin') {
                 <img src="' . esc($coverUrl) . '" alt="' . esc($article['title']) . '" />
             </header>
             <section>' . ($article['excerpt'] ? '<p><strong>' . esc(strip_tags($article['excerpt'])) . '</strong></p>' : '') . '</section>
-            <div>' . $article['content'] . '</div>
+            <div>' . strip_tags($article['content'], '<p><br><h2><h3><h4><ul><ol><li><strong><em><a><blockquote><pre><code>') . '</div>
         </article>';
     }
 

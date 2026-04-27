@@ -30,5 +30,6 @@ try {
 
     echo json_encode($debug, JSON_PRETTY_PRINT);
 } catch (Exception $e) {
-    echo json_encode(['error' => $e->getMessage()]);
+    error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+    echo json_encode(['error' => 'Errore interno del server.']);
 }

@@ -37,9 +37,10 @@ if ($method === 'GET') {
         $settings = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
         echo json_encode($settings);
     } catch (PDOException $e) {
-        http_response_code(500); echo json_encode(['error' => $e->getMessage()]);
+        error_log('settings.php GET error: ' . $e->getMessage());
+        http_response_code(500); echo json_encode(['error' => 'Errore interno del server.']);
     }
-} 
+}
 elseif ($method === 'POST') {
     // Salvataggio impostazioni app
     $data = json_decode(file_get_contents('php://input'), true);
@@ -54,7 +55,8 @@ elseif ($method === 'POST') {
         }
         echo json_encode(['status' => 'success']);
     } catch (PDOException $e) {
-        http_response_code(500); echo json_encode(['error' => $e->getMessage()]);
+        error_log('settings.php POST error: ' . $e->getMessage());
+        http_response_code(500); echo json_encode(['error' => 'Errore interno del server.']);
     }
 }
 elseif ($method === 'PUT') {
@@ -88,7 +90,8 @@ elseif ($method === 'PUT') {
         }
     } catch (PDOException $e) {
         http_response_code(500);
-        echo json_encode(['error' => 'Errore DB: ' . $e->getMessage()]);
+        error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
+        echo json_encode(['error' => 'Errore DB: ' . 'Errore interno del server.']);
     }
 } else {
     http_response_code(405); echo json_encode(['error' => 'Metodo non supportato']);
