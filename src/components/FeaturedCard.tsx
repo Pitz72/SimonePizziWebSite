@@ -42,11 +42,16 @@ const HeroCard: React.FC<{ item: PortfolioItem; category: string; isProject: boo
             <div className="w-full md:w-3/5 lg:w-2/3 min-h-[300px] md:min-h-[420px] relative overflow-hidden" style={{ background: '#05080a' }}>
                 <div className="absolute inset-0 z-10 transition-opacity duration-500 opacity-80 group-hover:opacity-40"
                     style={{ background: 'linear-gradient(to right, #0c1410, rgba(12,20,16,0.1), transparent)' }} />
-                <img
-                    src={item.imageUrl} alt={item.title}
-                    className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105"
-                    style={{ filter: 'brightness(0.75) saturate(0.9)' }}
-                />
+                {item.imageUrl ? (
+                    <img
+                        src={item.imageUrl} alt={item.title}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105"
+                        style={{ filter: 'brightness(0.75) saturate(0.9)' }}
+                    />
+                ) : (
+                    <div className="absolute inset-0"
+                        style={{ background: 'linear-gradient(135deg, #0c1410 0%, #071209 100%)' }} />
+                )}
             </div>
 
             {/* Content */}
@@ -127,11 +132,16 @@ const GridCard: React.FC<{ item: PortfolioItem; category: string; isProject: boo
                 className="v3-card h-[300px] block"
                 style={{ background: '#0c1410', cursor: isProject ? 'default' : undefined }}
             >
-                <img
-                    src={item.imageUrl} alt={item.title}
-                    className="absolute inset-0 w-full h-full object-cover"
-                    style={{ filter: 'brightness(0.7) saturate(0.85)', transition: 'transform 1.2s cubic-bezier(0.16,1,0.3,1), filter 0.5s' }}
-                />
+                {item.imageUrl ? (
+                    <img
+                        src={item.imageUrl} alt={item.title}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        style={{ filter: 'brightness(0.7) saturate(0.85)', transition: 'transform 1.2s cubic-bezier(0.16,1,0.3,1), filter 0.5s' }}
+                    />
+                ) : (
+                    <div className="absolute inset-0"
+                        style={{ background: 'linear-gradient(135deg, #0c1410 0%, #071209 100%)' }} />
+                )}
                 {/* Overlay gradient */}
                 <div className="absolute inset-0 z-10 pointer-events-none"
                     style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.15) 55%, transparent 100%)' }} />
@@ -177,9 +187,14 @@ const GridCard: React.FC<{ item: PortfolioItem; category: string; isProject: boo
             <div className="h-52 overflow-hidden relative" style={{ background: '#05080a', flexShrink: 0 }}>
                 <div className="absolute inset-0 z-10 pointer-events-none"
                     style={{ background: 'linear-gradient(to top, #0c1410, transparent)', opacity: 0.8 }} />
-                <img src={item.imageUrl} alt={item.title}
-                    className="w-full h-full object-cover"
-                    style={{ filter: 'brightness(0.7) saturate(0.85)', transition: 'transform 0.7s ease' }} />
+                {item.imageUrl ? (
+                    <img src={item.imageUrl} alt={item.title}
+                        className="absolute inset-0 w-full h-full object-cover"
+                        style={{ filter: 'brightness(0.7) saturate(0.85)', transition: 'transform 0.7s ease' }} />
+                ) : (
+                    <div className="absolute inset-0"
+                        style={{ background: 'linear-gradient(135deg, #0c1410 0%, #071209 100%)' }} />
+                )}
             </div>
             <div className="p-6 flex-1 flex flex-col">
                 <span className="font-mono text-[10px] tracking-[0.18em] uppercase text-dis-green block mb-2">

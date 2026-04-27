@@ -62,9 +62,11 @@ const CustomCursor: React.FC = () => {
       animId = requestAnimationFrame(tick);
     };
 
+    document.body.classList.add('sp-cursor');
     window.addEventListener('mousemove', onMove, { passive: true });
     animId = requestAnimationFrame(tick);
     return () => {
+      document.body.classList.remove('sp-cursor');
       window.removeEventListener('mousemove', onMove);
       cancelAnimationFrame(animId);
     };

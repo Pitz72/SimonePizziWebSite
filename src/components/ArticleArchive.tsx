@@ -101,11 +101,16 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category, initia
                                     <div className="w-full md:w-3/5 lg:w-2/3 min-h-[280px] md:min-h-[400px] relative overflow-hidden" style={{ background: '#05080a' }}>
                                         <div className="absolute inset-0 z-10 opacity-80 group-hover:opacity-40 transition-opacity duration-500"
                                             style={{ background: 'linear-gradient(to right, #0c1410, rgba(12,20,16,0.1), transparent)' }} />
-                                        <img
-                                            src={heroItem.imageUrl} alt={heroItem.title}
-                                            className="w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105"
-                                            style={{ filter: 'brightness(0.75) saturate(0.9)' }}
-                                        />
+                                        {heroItem.imageUrl ? (
+                                            <img
+                                                src={heroItem.imageUrl} alt={heroItem.title}
+                                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.5s] ease-out group-hover:scale-105"
+                                                style={{ filter: 'brightness(0.75) saturate(0.9)' }}
+                                            />
+                                        ) : (
+                                            <div className="absolute inset-0"
+                                                style={{ background: 'linear-gradient(135deg, #0c1410 0%, #071209 100%)' }} />
+                                        )}
                                     </div>
                                     <div className="w-full md:w-2/5 lg:w-1/3 p-8 md:p-12 flex flex-col justify-center relative z-20"
                                         style={{ background: '#0c1410', boxShadow: '-20px 0 30px rgba(2,6,4,1)' }}>
@@ -153,11 +158,16 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category, initia
                                         className="v3-card h-[280px] cursor-pointer"
                                         style={{ background: '#0c1410' }}
                                     >
-                                        <img
-                                            src={item.imageUrl} alt={item.title}
-                                            className="absolute inset-0 w-full h-full object-cover"
-                                            style={{ filter: 'brightness(0.7) saturate(0.85)', transition: 'transform 1.2s cubic-bezier(0.16,1,0.3,1), filter 0.5s' }}
-                                        />
+                                        {item.imageUrl ? (
+                                            <img
+                                                src={item.imageUrl} alt={item.title}
+                                                className="absolute inset-0 w-full h-full object-cover"
+                                                style={{ filter: 'brightness(0.7) saturate(0.85)', transition: 'transform 1.2s cubic-bezier(0.16,1,0.3,1), filter 0.5s' }}
+                                            />
+                                        ) : (
+                                            <div className="absolute inset-0"
+                                                style={{ background: 'linear-gradient(135deg, #0c1410 0%, #071209 100%)' }} />
+                                        )}
                                         <div className="absolute inset-0 z-10 pointer-events-none"
                                             style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.15) 55%, transparent 100%)' }} />
                                         <div className="v3-card-body absolute bottom-0 left-0 right-0 z-30 p-5 pb-6">

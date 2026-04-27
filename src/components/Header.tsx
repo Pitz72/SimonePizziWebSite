@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Menu, X, Search } from 'lucide-react';
+import { Menu, X, Search, ChevronDown } from 'lucide-react';
 import { useCategories } from '../hooks/useCategories';
+import { CategoryItem } from '../types';
 
 interface HeaderProps {
   onOpenSearch?: () => void;
@@ -26,6 +27,84 @@ const MobileNavLink: React.FC<MobileNavLinkProps> = ({ to, children, onClick }) 
     {children}
   </NavLink>
 );
+
+// Desktop nav item — with optional subcategory dropdown
+const DesktopNavItem: React.FC<{ cat: CategoryItem }> = ({ cat }) => {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const hasSubs = cat.subcategories && cat.subcategories.length > 0;
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  const linkClass = (isActive: boolean) =>
+    `text-[12px] font-medium tracking-[0.07em] transition-colors duration-200 ${
+      isActive ? 'text-dis-green' : 'text-v3-fg2 hover:text-dis-green'
+    }`;
+
+  if (!hasSubs) {
+    return (
+      <NavLink to={`/${cat.slug}`} className={({ isActive }) => linkClass(isActive)}>
+        {cat.name}
+      </NavLink>
+    );
+  }
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        onClick={() => setOpen(prev => !prev)}
+        className="flex items-center gap-1 text-[12px] font-medium tracking-[0.07em] transition-colors duration-200 text-v3-fg2 hover:text-dis-green"
+      >
+        {cat.name}
+        <ChevronDown size={11} className={`transition-transform duration-200 ${open ? 'rotate-180' : ''}`} />
+      </button>
+      {open && (
+        <div
+          className="absolute top-full left-0 mt-3 min-w-[180px] py-2 z-50"
+          style={{
+            background: 'rgba(5,8,10,0.95)',
+            backdropFilter: 'blur(20px)',
+            border: '1px solid rgba(34,197,94,0.15)',
+          }}
+        >
+          <NavLink
+            to={`/${cat.slug}`}
+            onClick={() => setOpen(false)}
+            className={({ isActive }) =>
+              `block px-4 py-2 text-[11px] font-medium tracking-[0.07em] transition-colors duration-150 ${
+                isActive ? 'text-dis-green' : 'text-v3-fg2 hover:text-white hover:bg-[rgba(34,197,94,0.06)]'
+              }`
+            }
+          >
+            Tutti — {cat.name}
+          </NavLink>
+          <div style={{ borderTop: '1px solid rgba(34,197,94,0.08)', margin: '4px 0' }} />
+          {cat.subcategories!.map(sub => (
+            <NavLink
+              key={sub.slug}
+              to={`/${sub.slug}`}
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `block px-4 py-2 text-[11px] font-medium tracking-[0.07em] transition-colors duration-150 ${
+                  isActive ? 'text-dis-green' : 'text-v3-fg2 hover:text-white hover:bg-[rgba(34,197,94,0.06)]'
+                }`
+              }
+            >
+              {sub.name}
+            </NavLink>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
 
 const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -82,17 +161,7 @@ const Header: React.FC<HeaderProps> = ({ onOpenSearch }) => {
           {/* ── DESKTOP NAV ── */}
           <nav className="hidden md:flex items-center gap-9">
             {categories.map(cat => (
-              <NavLink
-                key={cat.slug}
-                to={`/${cat.slug}`}
-                className={({ isActive }) =>
-                  `text-[12px] font-medium tracking-[0.07em] transition-colors duration-200 ${
-                    isActive ? 'text-dis-green' : 'text-v3-fg2 hover:text-dis-green'
-                  }`
-                }
-              >
-                {cat.name}
-              </NavLink>
+              <DesktopNavItem key={cat.slug} cat={cat} />
             ))}
             <NavLink
               to="/contatti"
