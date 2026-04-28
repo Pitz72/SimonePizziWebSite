@@ -23,6 +23,17 @@ export default function ArticlesList() {
     const page = parseInt(searchParams.get('page') || '1');
     const limit = 10;
 
+    // Local state per la ricerca testuale — evita che ogni tasto rilanci il loader
+    const [searchInput, setSearchInput] = useState(q);
+
+    useEffect(() => { setSearchInput(q); }, [q]);
+
+    useEffect(() => {
+        const timer = setTimeout(() => { handleFilterChange('q', searchInput); }, 400);
+        return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchInput]);
+
     useEffect(() => {
         if (loaderData) {
             setArticles(loaderData.data || []);
@@ -128,8 +139,8 @@ export default function ArticlesList() {
                             <input
                                 type="text"
                                 placeholder="Cerca nel titolo o nel testo..."
-                                value={q}
-                                onChange={(e) => handleFilterChange('q', e.target.value)}
+                                value={searchInput}
+                                onChange={(e) => setSearchInput(e.target.value)}
                                 className="w-full bg-zinc-950 border border-zinc-800 py-2 pl-9 pr-4 rounded-lg text-white text-sm placeholder-zinc-600 focus:outline-none focus:border-dis-green transition-colors"
                             />
                         </div>
