@@ -9,7 +9,8 @@
  *  4. CANCELLARE SUBITO il file dal server via FTP
  */
 
-require_once __DIR__ . '/../public/api/db.php';
+// Sul server il file vive in /api/ accanto a db.php; in locale è in /scripts/ a un livello sopra.
+require_once file_exists(__DIR__ . '/db.php') ? __DIR__ . '/db.php' : __DIR__ . '/../public/api/db.php';
 
 header('Content-Type: text/plain; charset=UTF-8');
 
