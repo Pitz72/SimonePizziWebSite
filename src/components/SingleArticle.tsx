@@ -130,7 +130,23 @@ const SingleArticle: React.FC = () => {
                         maxWidth: '820px',
                         color: '#d4e8d8',
                     }}
-                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(article.description, { ADD_ATTR: ['style'] }) }}
+                    dangerouslySetInnerHTML={{ __html: (() => {
+                        // Permette <iframe> solo da YouTube (nocookie e standard), blocca tutto il resto
+                        DOMPurify.addHook('uponSanitizeElement', (node, data) => {
+                            if (data.tagName === 'iframe') {
+                                const src = (node as HTMLElement).getAttribute('src') || '';
+                                if (!src.startsWith('https://www.youtube-nocookie.com/') && !src.startsWith('https://www.youtube.com/')) {
+                                    node.parentNode?.removeChild(node);
+                                }
+                            }
+                        });
+                        const clean = DOMPurify.sanitize(article.description, {
+                            ADD_TAGS: ['iframe'],
+                            ADD_ATTR: ['style', 'allowfullscreen', 'frameborder', 'allow', 'src'],
+                        });
+                        DOMPurify.removeHooks('uponSanitizeElement');
+                        return clean;
+                    })() }}
                 />
             </div>
 
