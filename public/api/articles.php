@@ -133,9 +133,9 @@ try {
         }
 
         // [MODIFICA v1.8.5] Supporto Ricerca Avanzata
-        $query = "SELECT a.id, a.title, a.slug, a.content, a.excerpt, a.cover_image, a.category, 
-                  (SELECT GROUP_CONCAT(t2.name SEPARATOR ', ') FROM article_tags at2 JOIN tags t2 ON at2.tag_id = t2.id WHERE at2.article_id = a.id) as tags, 
-                  a.is_featured, a.status, a.published_at, a.created_at 
+        $query = "SELECT a.id, a.title, a.slug, a.content, a.excerpt, a.cover_image, a.category,
+                  (SELECT GROUP_CONCAT(t2.name SEPARATOR ', ') FROM article_tags at2 JOIN tags t2 ON at2.tag_id = t2.id WHERE at2.article_id = a.id) as tags,
+                  a.is_featured, a.is_category_pinned, a.status, a.published_at, a.created_at
                   FROM articles a";
         
         $params = [];
@@ -212,10 +212,9 @@ try {
         $countStmt->execute();
         $total = (int)$countStmt->fetchColumn();
 
-        // Ordinamento per data di pubblicazione effettiva.
-        // Gli articoli 'in vetrina' vengono portati in cima per coerenza con il frontend.
-        // Raggruppiamo esplicitamente per a.id per evitare bug con GROUP_CONCAT.
-        $query .= " GROUP BY a.id ORDER BY a.is_featured DESC, CASE WHEN a.published_at IS NOT NULL THEN a.published_at ELSE a.created_at END DESC LIMIT ? OFFSET ?";
+        // Ordinamento: pin di categoria > vetrina globale > data pubblicazione.
+        // Raggruppiamo per a.id per evitare duplicati con GROUP_CONCAT.
+        $query .= " GROUP BY a.id ORDER BY a.is_category_pinned DESC, a.is_featured DESC, CASE WHEN a.published_at IS NOT NULL THEN a.published_at ELSE a.created_at END DESC LIMIT ? OFFSET ?";
         
         $stmt = $pdo->prepare($query);
         
@@ -256,6 +255,7 @@ try {
         $category = $data['category'] ?? 'blog-e-riflessioni';
         $tags = $data['tags'] ?? ''; // Raccogllie array o CSV
         $is_featured = isset($data['is_featured']) ? (int)$data['is_featured'] : 0;
+        $is_category_pinned = isset($data['is_category_pinned']) ? (int)$data['is_category_pinned'] : 0;
         $button_a_label = substr(trim($data['button_a_label'] ?? ''), 0, 100);
         $button_a_link  = sanitizeUrl($data['button_a_link'] ?? '');
         $button_b_label = substr(trim($data['button_b_label'] ?? ''), 0, 100);
@@ -266,8 +266,8 @@ try {
             ? $published_at_raw
             : date('Y-m-d H:i:s');
 
-        $stmt = $pdo->prepare("INSERT INTO articles (title, slug, content, excerpt, cover_image, category, tags, is_featured, button_a_label, button_a_link, button_b_label, button_b_link, status, published_at) VALUES (?, ?, ?, ?, ?, ?, '', ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$title, $slug, $content, $excerpt, $cover_image, $category, $is_featured, $button_a_label, $button_a_link, $button_b_label, $button_b_link, $status, $published_at]);
+        $stmt = $pdo->prepare("INSERT INTO articles (title, slug, content, excerpt, cover_image, category, tags, is_featured, is_category_pinned, button_a_label, button_a_link, button_b_label, button_b_link, status, published_at) VALUES (?, ?, ?, ?, ?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->execute([$title, $slug, $content, $excerpt, $cover_image, $category, $is_featured, $is_category_pinned, $button_a_label, $button_a_link, $button_b_label, $button_b_link, $status, $published_at]);
         
         $new_id = $pdo->lastInsertId();
         syncArticleTags($pdo, $new_id, $tags);
@@ -300,6 +300,7 @@ try {
         $category = $data['category'] ?? 'blog-e-riflessioni';
         $tags = $data['tags'] ?? ''; // Puo essere string o array
         $is_featured = isset($data['is_featured']) ? (int)$data['is_featured'] : 0;
+        $is_category_pinned = isset($data['is_category_pinned']) ? (int)$data['is_category_pinned'] : 0;
         $button_a_label = substr(trim($data['button_a_label'] ?? ''), 0, 100);
         $button_a_link  = sanitizeUrl($data['button_a_link'] ?? '');
         $button_b_label = substr(trim($data['button_b_label'] ?? ''), 0, 100);
@@ -310,8 +311,8 @@ try {
             ? $published_at_raw
             : date('Y-m-d H:i:s');
 
-        $stmt = $pdo->prepare("UPDATE articles SET title=?, slug=?, content=?, excerpt=?, cover_image=?, category=?, is_featured=?, button_a_label=?, button_a_link=?, button_b_label=?, button_b_link=?, status=?, published_at=? WHERE id=?");
-        $stmt->execute([$title, $slug, $content, $excerpt, $cover_image, $category, $is_featured, $button_a_label, $button_a_link, $button_b_label, $button_b_link, $status, $published_at, $id]);
+        $stmt = $pdo->prepare("UPDATE articles SET title=?, slug=?, content=?, excerpt=?, cover_image=?, category=?, is_featured=?, is_category_pinned=?, button_a_label=?, button_a_link=?, button_b_label=?, button_b_link=?, status=?, published_at=? WHERE id=?");
+        $stmt->execute([$title, $slug, $content, $excerpt, $cover_image, $category, $is_featured, $is_category_pinned, $button_a_label, $button_a_link, $button_b_label, $button_b_link, $status, $published_at, $id]);
         
         syncArticleTags($pdo, $id, $tags);
 
@@ -330,18 +331,43 @@ try {
     }
     elseif ($method === 'PATCH') {
         Auth::check();
-        
+
         $data = json_decode(file_get_contents('php://input'), true);
         $id = $data['id'] ?? null;
-        $is_featured = isset($data['is_featured']) ? (int)$data['is_featured'] : 0;
-        
+
         if (!$id) {
             http_response_code(400); echo json_encode(['error' => 'ID mancante']); exit;
         }
 
-        $stmt = $pdo->prepare("UPDATE articles SET is_featured=? WHERE id=?");
-        $stmt->execute([$is_featured, $id]);
-        
+        if (isset($data['is_featured'])) {
+            $is_featured = (int)$data['is_featured'];
+            $stmt = $pdo->prepare("UPDATE articles SET is_featured=? WHERE id=?");
+            $stmt->execute([$is_featured, $id]);
+
+        } elseif (isset($data['is_category_pinned'])) {
+            $pin = (int)$data['is_category_pinned'];
+
+            // Recupera la categoria dell'articolo
+            $catStmt = $pdo->prepare("SELECT category FROM articles WHERE id=?");
+            $catStmt->execute([$id]);
+            $row = $catStmt->fetch();
+            if (!$row) {
+                http_response_code(404); echo json_encode(['error' => 'Articolo non trovato']); exit;
+            }
+
+            if ($pin) {
+                // Un solo pin per categoria: rimuove il precedente
+                $pdo->prepare("UPDATE articles SET is_category_pinned=0 WHERE category=? AND id!=?")
+                    ->execute([$row['category'], $id]);
+            }
+
+            $pdo->prepare("UPDATE articles SET is_category_pinned=? WHERE id=?")
+                ->execute([$pin, $id]);
+
+        } else {
+            http_response_code(400); echo json_encode(['error' => 'Parametro mancante']); exit;
+        }
+
         echo json_encode(['status' => 'success']);
     }
 

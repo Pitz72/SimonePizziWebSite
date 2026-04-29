@@ -184,6 +184,15 @@ export const api = {
         if (!res.ok) throw new Error('Errore aggiornamento stato vetrina');
         return res.json();
     },
+    toggleCategoryPin: async (id: number, is_category_pinned: boolean) => {
+        const res = await fetch(`${API_URL}/articles.php`, {
+            ...fetchConfig,
+            method: 'PATCH',
+            body: JSON.stringify({ id, is_category_pinned: is_category_pinned ? 1 : 0 })
+        });
+        if (!res.ok) throw new Error('Errore aggiornamento pin categoria');
+        return res.json();
+    },
     deleteArticle: async (id: number) => {
         const res = await fetch(`${API_URL}/articles.php?id=${id}`, {
             ...fetchConfig,

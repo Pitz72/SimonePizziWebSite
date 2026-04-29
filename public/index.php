@@ -562,6 +562,10 @@ if ($isCrawler && $pageType !== 'admin') {
     // PERCORSO UMANO: SPA React con meta iniettati
     // ═══════════════════════════════════════════
 
+    // Impedisce a proxy/CDN/server-cache di conservare l'HTML della SPA,
+    // evitando che versioni vecchie vengano restituite su hard refresh.
+    header('Cache-Control: no-store, no-cache, must-revalidate');
+
     $htmlFile = __DIR__ . '/index.html';
 
     if (!file_exists($htmlFile)) {

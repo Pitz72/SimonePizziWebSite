@@ -9,12 +9,13 @@ import { Table } from '@tiptap/extension-table';
 import { TableRow } from '@tiptap/extension-table-row';
 import { TableHeader } from '@tiptap/extension-table-header';
 import { TableCell } from '@tiptap/extension-table-cell';
+import { Youtube } from '@tiptap/extension-youtube';
 
-
-import { 
-    Bold, Italic, Link as LinkIcon, List, ListOrdered, 
-    AlignLeft, AlignCenter, AlignRight, Type, Eraser, 
-    Image as ImageIcon, Table2, Strikethrough, Underline as UnderlineIcon
+import {
+    Bold, Italic, Link as LinkIcon, List, ListOrdered,
+    AlignLeft, AlignCenter, AlignRight, Type, Eraser,
+    Image as ImageIcon, Table2, Strikethrough, Underline as UnderlineIcon,
+    Youtube as YoutubeIcon
 } from 'lucide-react';
 
 
@@ -44,6 +45,8 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
     const [showColorPicker, setShowColorPicker] = useState(false);
     const [showLinkPicker, setShowLinkPicker] = useState(false);
     const [showMediaModal, setShowMediaModal] = useState(false);
+    const [showYoutubeInput, setShowYoutubeInput] = useState(false);
+    const [youtubeUrl, setYoutubeUrl] = useState('');
     const [wordCount, setWordCount] = useState(0);
     const [charCount, setCharCount] = useState(0);
 
@@ -79,6 +82,12 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
             TableCell.configure({
                 HTMLAttributes: {
                     class: 'border border-zinc-700 px-3 py-2 text-zinc-300',
+                },
+            }),
+            Youtube.configure({
+                nocookie: true,
+                HTMLAttributes: {
+                    class: 'w-full aspect-video rounded-xl my-4 border border-zinc-800',
                 },
             }),
         ],
@@ -123,6 +132,14 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
 
     const insertTable = () => {
         editor.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+    };
+
+    const handleYoutubeInsert = () => {
+        const url = youtubeUrl.trim();
+        if (!url) return;
+        editor.chain().focus().setYoutubeVideo({ src: url }).run();
+        setYoutubeUrl('');
+        setShowYoutubeInput(false);
     };
 
     return (
@@ -272,11 +289,54 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                     icon={<ImageIcon size={16} />} 
                     title="Inserisci Immagine" 
                 />
-                <ToolbarBtn 
-                    onClick={insertTable} 
-                    icon={<Table2 size={16} />} 
-                    title="Inserisci Tabella" 
+                <ToolbarBtn
+                    onClick={insertTable}
+                    icon={<Table2 size={16} />}
+                    title="Inserisci Tabella"
                 />
+
+                {/* YouTube embed */}
+                <div className="relative">
+                    <ToolbarBtn
+                        onClick={() => { setShowYoutubeInput(!showYoutubeInput); setYoutubeUrl(''); }}
+                        active={showYoutubeInput}
+                        icon={<YoutubeIcon size={16} className="text-red-400" />}
+                        title="Incorpora Video YouTube"
+                    />
+                    {showYoutubeInput && (
+                        <>
+                            <div className="fixed inset-0 z-40" onClick={() => setShowYoutubeInput(false)} />
+                            <div className="absolute top-full left-0 z-50 mt-2 w-80 bg-zinc-950 border border-zinc-800 rounded-lg shadow-2xl p-3 animate-in zoom-in-95 duration-150">
+                                <p className="text-[10px] text-zinc-500 uppercase tracking-widest mb-2">URL o ID Video YouTube</p>
+                                <input
+                                    autoFocus
+                                    type="text"
+                                    value={youtubeUrl}
+                                    onChange={(e) => setYoutubeUrl(e.target.value)}
+                                    onKeyDown={(e) => { if (e.key === 'Enter') handleYoutubeInsert(); if (e.key === 'Escape') setShowYoutubeInput(false); }}
+                                    placeholder="https://www.youtube.com/watch?v=..."
+                                    className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-1.5 text-sm text-zinc-200 placeholder-zinc-600 outline-none focus:border-red-500 transition-colors"
+                                />
+                                <div className="flex gap-2 mt-2">
+                                    <button
+                                        type="button"
+                                        onClick={handleYoutubeInsert}
+                                        className="flex-1 bg-red-600 hover:bg-red-500 text-white text-xs font-semibold py-1.5 rounded transition-colors"
+                                    >
+                                        Inserisci
+                                    </button>
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowYoutubeInput(false)}
+                                        className="flex-1 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 text-xs font-semibold py-1.5 rounded transition-colors"
+                                    >
+                                        Annulla
+                                    </button>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
 
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
 

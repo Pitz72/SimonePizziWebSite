@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLoaderData, useSearchParams } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Search, ExternalLink, Calendar, ChevronLeft, ChevronRight, Filter, X } from 'lucide-react';
+import { Plus, Edit2, Trash2, Search, ExternalLink, Calendar, ChevronLeft, ChevronRight, Filter, X, Pin, PinOff } from 'lucide-react';
 import { api } from '../../api';
 import { useCategories } from '../../hooks/useCategories';
 
@@ -94,6 +94,22 @@ export default function ArticlesList() {
         } catch (err) {
             alert('Errore durante l\'aggiornamento dello stato vetrina sul server.');
             setArticles(articles.map(a => a.id === id ? { ...a, is_featured: currentStatus } : a));
+        }
+    };
+
+    const handleToggleCategoryPin = async (id: number, currentCategory: string, currentStatus: number | boolean) => {
+        const newStatus = currentStatus ? 0 : 1;
+        // Ottimisticamente: rimuove il pin dagli altri articoli della stessa categoria, poi lo imposta su questo
+        setArticles(articles.map(a => {
+            if (a.id === id) return { ...a, is_category_pinned: newStatus };
+            if (newStatus && a.category === currentCategory) return { ...a, is_category_pinned: 0 };
+            return a;
+        }));
+        try {
+            await api.toggleCategoryPin(id, !!newStatus);
+        } catch (err) {
+            alert('Errore durante l\'aggiornamento del pin categoria sul server.');
+            setArticles(articles.map(a => a.id === id ? { ...a, is_category_pinned: currentStatus } : a));
         }
     };
 
@@ -205,18 +221,19 @@ export default function ArticlesList() {
                     <table className="w-full text-left border-collapse table-fixed">
                         <thead>
                             <tr className="bg-zinc-950/50 text-zinc-400 text-sm border-b border-zinc-800">
-                                <th className="p-4 font-medium w-[35%]">Titolo</th>
-                                <th className="p-4 font-medium w-[18%]">Categoria</th>
-                                <th className="p-4 font-medium w-[15%]">Stato</th>
-                                <th className="p-4 font-medium w-[15%]">Data</th>
-                                <th className="p-4 font-medium w-[7%] text-center">Vetrina</th>
-                                <th className="p-4 font-medium w-[10%] text-right">Azioni</th>
+                                <th className="p-4 font-medium w-[30%]">Titolo</th>
+                                <th className="p-4 font-medium w-[17%]">Categoria</th>
+                                <th className="p-4 font-medium w-[12%]">Stato</th>
+                                <th className="p-4 font-medium w-[13%]">Data</th>
+                                <th className="p-4 font-medium w-[7%] text-center" title="Vetrina Homepage">★</th>
+                                <th className="p-4 font-medium w-[7%] text-center" title="Articolo di Riferimento per la Categoria">📌</th>
+                                <th className="p-4 font-medium w-[14%] text-right">Azioni</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-800/50">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={6} className="p-12 text-center">
+                                    <td colSpan={7} className="p-12 text-center">
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="w-8 h-8 border-2 border-dis-green border-t-transparent rounded-full animate-spin" />
                                             <span className="text-zinc-500 text-sm font-medium">Sincronizzazione dati...</span>
@@ -225,7 +242,7 @@ export default function ArticlesList() {
                                 </tr>
                             ) : articles.length === 0 ? (
                                 <tr>
-                                    <td colSpan={6} className="p-12 text-center">
+                                    <td colSpan={7} className="p-12 text-center">
                                         <div className="flex flex-col items-center gap-2 opacity-40">
                                             <Filter size={32} className="text-zinc-600" />
                                             <span className="text-zinc-500 text-sm">Nessun articolo corrisponde ai filtri selezionati.</span>
@@ -282,12 +299,25 @@ export default function ArticlesList() {
                                             <button
                                                 onClick={() => handleToggleFeatured(article.id, article.is_featured)}
                                                 className="transition-transform hover:scale-125 focus:outline-none focus:ring-0 active:scale-90"
-                                                title={article.is_featured ? "Rimuovi dalla Vetrina" : "Aggiungi in Vetrina"}
+                                                title={article.is_featured ? "Rimuovi dalla Vetrina Homepage" : "Aggiungi in Vetrina Homepage"}
                                             >
                                                 {article.is_featured ? (
                                                     <span className="text-yellow-500 text-xl drop-shadow-[0_0_8px_rgba(234,179,8,0.6)]">★</span>
                                                 ) : (
                                                     <span className="text-zinc-600 text-xl hover:text-yellow-500/50">☆</span>
+                                                )}
+                                            </button>
+                                        </td>
+                                        <td className="p-4 text-center">
+                                            <button
+                                                onClick={() => handleToggleCategoryPin(article.id, article.category, article.is_category_pinned)}
+                                                className="transition-transform hover:scale-125 focus:outline-none focus:ring-0 active:scale-90 flex items-center justify-center mx-auto"
+                                                title={article.is_category_pinned ? "Rimuovi pin dalla Categoria" : "Fissa come Articolo di Riferimento della Categoria"}
+                                            >
+                                                {article.is_category_pinned ? (
+                                                    <Pin size={16} className="text-dis-green drop-shadow-[0_0_6px_rgba(34,197,94,0.7)]" />
+                                                ) : (
+                                                    <PinOff size={16} className="text-zinc-600 hover:text-dis-green/50" />
                                                 )}
                                             </button>
                                         </td>

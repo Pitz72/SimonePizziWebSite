@@ -49,6 +49,7 @@ export interface PortfolioItem {
   isVisible?: boolean;
   hasLetter?: boolean;
   isFeatured?: boolean;
+  isCategoryPinned?: boolean;
   featuredOrder?: number;
   publishedAt?: string;
 }
@@ -63,6 +64,7 @@ export interface Article {
   category: string;
   tags: string;
   is_featured: number | boolean;
+  is_category_pinned: number | boolean;
   status: 'draft' | 'published';
   published_at: string;
   created_at: string;

@@ -69,6 +69,8 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category, initia
 
             {(() => {
                 const sortedItems = [...items].sort((a, b) => {
+                    if (a.isCategoryPinned && !b.isCategoryPinned) return -1;
+                    if (!a.isCategoryPinned && b.isCategoryPinned) return 1;
                     if (a.isFeatured && !b.isFeatured) return -1;
                     if (!a.isFeatured && b.isFeatured) return 1;
                     const dateA = a.publishedAt ? new Date(a.publishedAt).getTime() : 0;
@@ -115,7 +117,12 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category, initia
                                     <div className="w-full md:w-2/5 lg:w-1/3 p-8 md:p-12 flex flex-col justify-center relative z-20"
                                         style={{ background: '#0c1410', boxShadow: '-20px 0 30px rgba(2,6,4,1)' }}>
                                         <div className="mb-3 flex flex-wrap gap-2">
-                                            {heroItem.isFeatured && (
+                                            {heroItem.isCategoryPinned && (
+                                                <span className="font-mono text-[10px] tracking-[0.18em] uppercase px-3 py-1.5 text-black bg-dis-green">
+                                                    Articolo di Riferimento
+                                                </span>
+                                            )}
+                                            {heroItem.isFeatured && !heroItem.isCategoryPinned && (
                                                 <span className="font-mono text-[10px] tracking-[0.18em] uppercase px-3 py-1.5 text-black bg-dis-green">
                                                     In Primo Piano
                                                 </span>
@@ -172,7 +179,12 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category, initia
                                             style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.15) 55%, transparent 100%)' }} />
                                         <div className="v3-card-body absolute bottom-0 left-0 right-0 z-30 p-5 pb-6">
                                             <div className="flex items-center gap-3 mb-1.5">
-                                                {item.isFeatured && (
+                                                {item.isCategoryPinned && (
+                                                    <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-black bg-dis-green px-2 py-0.5">
+                                                        Riferimento
+                                                    </span>
+                                                )}
+                                                {item.isFeatured && !item.isCategoryPinned && (
                                                     <span className="font-mono text-[9px] tracking-[0.15em] uppercase text-black bg-dis-green px-2 py-0.5">
                                                         Vetrina
                                                     </span>

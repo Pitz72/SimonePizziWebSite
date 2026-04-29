@@ -15,7 +15,8 @@
       "Bash(npm audit fix --legacy-peer-deps)",
       "Bash(python3 \"c:/Users/Utente/Documents/GitHub/SITI-WEB/SimonePizziWebSite/scripts/_write_changelog_1510.py\")",
       "Bash(npm run build)",
-      "Bash(ls \"c:\\\\Users\\\\Utente\\\\Documents\\\\GitHub\\\\SITI-WEB\\\\SimonePizziWebSite\\\\dist\\\\api\"\" && echo \"---\" && ls \"c:UsersUtenteDocumentsGitHubSITI-WEBSimonePizziWebSitedist\"\")"
+      "Bash(ls \"c:\\\\Users\\\\Utente\\\\Documents\\\\GitHub\\\\SITI-WEB\\\\SimonePizziWebSite\\\\dist\\\\api\"\" && echo \"---\" && ls \"c:UsersUtenteDocumentsGitHubSITI-WEBSimonePizziWebSitedist\"\")",
+      "Bash(git add *)"
     ]
   }
 }
