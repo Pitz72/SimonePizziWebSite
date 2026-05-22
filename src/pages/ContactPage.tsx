@@ -218,7 +218,7 @@ const ContactPage: React.FC = () => {
                                 </a>
                             </div>
 
-                            <a href="https://www.paypal.com/paypalme/simonepizzi" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 w-full bg-[#0070BA] text-white font-bold py-4 rounded-2xl hover:bg-[#003087] transition-all shadow-lg shadow-blue-900/20 active:scale-95">
+                            <a href="https://www.paypal.com/paypalme/runtimeradio" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center gap-3 w-full bg-[#0070BA] text-white font-bold py-4 rounded-2xl hover:bg-[#003087] transition-all shadow-lg shadow-blue-900/20 active:scale-95">
                                 <Heart size={18} fill="currentColor" /> Sostieni con PayPal
                             </a>
                         </div>

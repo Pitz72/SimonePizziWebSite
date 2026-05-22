@@ -50,7 +50,7 @@ const CommunityHub: React.FC = () => {
                     </div>
                     <div className="mt-auto">
                         <a
-                            href="https://www.paypal.com/paypalme/simonepizzi"
+                            href="https://www.paypal.com/paypalme/runtimeradio"
                             target="_blank"
                             rel="noopener noreferrer"
                             className="w-full flex items-center justify-center gap-3 bg-[#0070BA] text-white font-bold py-4 px-8 rounded-2xl hover:bg-[#003087] transition-all duration-300 shadow-lg shadow-blue-900/20 group-hover:shadow-blue-500/20"

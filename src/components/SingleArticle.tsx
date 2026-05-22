@@ -185,7 +185,7 @@ const SingleArticle: React.FC = () => {
                             </div>
                             <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto">
                                 <a
-                                    href="https://www.paypal.com/paypalme/simonepizzi"
+                                    href="https://www.paypal.com/paypalme/runtimeradio"
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     className="flex items-center justify-center gap-3 px-7 py-4 font-bold text-white transition-all hover:scale-[1.02] active:scale-95"
