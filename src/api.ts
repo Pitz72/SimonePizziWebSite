@@ -325,8 +325,8 @@ export const api = {
             });
         } catch { /* silenzioso */ }
     },
-    getAnalytics: async () => {
-        const res = await fetch(`${API_URL}/analytics.php`, fetchConfig);
+    getAnalytics: async (period: number = 30) => {
+        const res = await fetch(`${API_URL}/analytics.php?period=${period}`, fetchConfig);
         if (!res.ok) throw new Error('Errore recupero analytics');
         return res.json();
     },

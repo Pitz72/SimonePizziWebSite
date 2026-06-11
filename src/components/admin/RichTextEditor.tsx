@@ -15,7 +15,7 @@ import {
     Bold, Italic, Link as LinkIcon, List, ListOrdered,
     AlignLeft, AlignCenter, AlignRight, Type, Eraser,
     Image as ImageIcon, Table2, Strikethrough, Underline as UnderlineIcon,
-    Youtube as YoutubeIcon
+    Youtube as YoutubeIcon, Undo2, Redo2
 } from 'lucide-react';
 
 
@@ -27,6 +27,42 @@ interface RichTextEditorProps {
     onChange: (value: string) => void;
     className?: string;
 }
+
+/**
+ * Verifica che un URL sia sicuro per l'inserimento come link:
+ * consente http/https, percorsi relativi (/, #) e mailto.
+ * Blocca schemi pericolosi come javascript: e data:.
+ */
+const isSafeLinkUrl = (url: string): boolean => {
+    const trimmed = url.trim();
+    return /^https?:\/\//i.test(trimmed)
+        || trimmed.startsWith('/')
+        || trimmed.startsWith('#')
+        || /^mailto:/i.test(trimmed);
+};
+
+/**
+ * Normalizza l'input YouTube: accetta URL http/https di youtube.com / youtu.be
+ * oppure un ID video di 11 caratteri. Ritorna null se non valido.
+ */
+const normalizeYoutubeUrl = (input: string): string | null => {
+    const trimmed = input.trim();
+    // ID video "nudo" (11 caratteri alfanumerici, - e _)
+    if (/^[A-Za-z0-9_-]{11}$/.test(trimmed)) {
+        return `https://www.youtube.com/watch?v=${trimmed}`;
+    }
+    if (!/^https?:\/\//i.test(trimmed)) return null;
+    try {
+        const parsed = new URL(trimmed);
+        const host = parsed.hostname.replace(/^www\./i, '').toLowerCase();
+        if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtube-nocookie.com' || host === 'youtu.be') {
+            return trimmed;
+        }
+    } catch {
+        return null;
+    }
+    return null;
+};
 
 const COLORS = [
     '#ffffff', '#000000', '#22c55e', '#16a34a', '#15803d', // Verdi
@@ -47,10 +83,20 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
     const [showMediaModal, setShowMediaModal] = useState(false);
     const [showYoutubeInput, setShowYoutubeInput] = useState(false);
     const [youtubeUrl, setYoutubeUrl] = useState('');
+    const [youtubeError, setYoutubeError] = useState('');
     const [wordCount, setWordCount] = useState(0);
     const [charCount, setCharCount] = useState(0);
 
+    const updateCounts = (text: string) => {
+        setCharCount(text.length);
+        setWordCount(text.trim() ? text.trim().split(/\s+/).length : 0);
+    };
+
     const editor = useEditor({
+        // Tiptap v3: di default il componente NON si ri-renderizza ad ogni transazione,
+        // quindi gli stati attivi della toolbar (isActive) non si aggiornerebbero
+        // spostando il cursore. Questo flag ripristina il comportamento corretto.
+        shouldRerenderOnTransaction: true,
         extensions: [
             StarterKit.configure({
                 heading: {
@@ -92,15 +138,13 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
             }),
         ],
         content: value,
+        onCreate: ({ editor }) => {
+            // Inizializza i conteggi anche per contenuto pre-esistente (modifica articolo)
+            updateCounts(editor.getText());
+        },
         onUpdate: ({ editor }) => {
-            const html = editor.getHTML();
-            onChange(html);
-            
-            // Update counts
-            const text = editor.getText();
-            setCharCount(text.length);
-            const words = text.trim() ? text.trim().split(/\s+/).length : 0;
-            setWordCount(words);
+            onChange(editor.getHTML());
+            updateCounts(editor.getText());
         },
         editorProps: {
             attributes: {
@@ -112,7 +156,11 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
     // Sync external value changes
     useEffect(() => {
         if (editor && value !== editor.getHTML()) {
-            editor.commands.setContent(value);
+            // emitUpdate: false — in Tiptap v3 setContent emette onUpdate di default:
+            // senza questo flag il sync esterno marcherebbe dirty il form e creerebbe
+            // bozze "fantasma" in localStorage aprendo articoli esistenti.
+            editor.commands.setContent(value, { emitUpdate: false });
+            updateCounts(editor.getText());
         }
     }, [value, editor]);
 
@@ -121,7 +169,15 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
     }
 
     const handleInternalLinkSelect = (url: string) => {
-        editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
+        // Il selettore link suggerisce anche input tipo "www.esempio.it": completa lo schema
+        if (/^www\./i.test(url.trim())) {
+            url = 'https://' + url.trim();
+        }
+        if (!isSafeLinkUrl(url)) {
+            window.alert('URL non valido: sono ammessi solo link http(s), percorsi relativi (/...) o mailto.');
+            return;
+        }
+        editor.chain().focus().extendMarkRange('link').setLink({ href: url.trim() }).run();
         setShowLinkPicker(false);
     };
 
@@ -137,18 +193,41 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
     const handleYoutubeInsert = () => {
         const url = youtubeUrl.trim();
         if (!url) return;
-        editor.chain().focus().setYoutubeVideo({ src: url }).run();
+        const normalized = normalizeYoutubeUrl(url);
+        if (!normalized) {
+            setYoutubeError('URL non valido: inserisci un link YouTube (youtube.com / youtu.be) o un ID video di 11 caratteri.');
+            return;
+        }
+        editor.chain().focus().setYoutubeVideo({ src: normalized }).run();
         setYoutubeUrl('');
+        setYoutubeError('');
         setShowYoutubeInput(false);
     };
 
     return (
         <div className={`border border-zinc-800 rounded-lg bg-zinc-950 flex flex-col min-h-[300px] ${className || ''}`}>
             {/* Toolbar */}
-            <div className="sticky top-0 z-30 flex flex-wrap items-center gap-1 p-2 bg-zinc-900 border-b border-zinc-800 shrink-0 rounded-t-lg">
+            <div role="toolbar" aria-label="Formattazione testo" className="sticky top-0 z-30 flex flex-wrap items-center gap-1 p-2 bg-zinc-900 border-b border-zinc-800 shrink-0 rounded-t-lg">
                 
+                {/* Undo / Redo */}
+                <ToolbarBtn
+                    onClick={() => editor.chain().focus().undo().run()}
+                    disabled={!editor.can().undo()}
+                    icon={<Undo2 size={16} />}
+                    title="Annulla (Ctrl+Z)"
+                />
+                <ToolbarBtn
+                    onClick={() => editor.chain().focus().redo().run()}
+                    disabled={!editor.can().redo()}
+                    icon={<Redo2 size={16} />}
+                    title="Ripristina (Ctrl+Y)"
+                />
+
+                <div className="w-px h-6 bg-zinc-800 mx-1" />
+
                 {/* Heading Selector */}
                 <select
+                    aria-label="Stile del paragrafo"
                     className="bg-zinc-950 border border-zinc-800 rounded text-xs text-zinc-300 p-1.5 h-8 mr-2 focus:ring-1 focus:ring-dis-green outline-none hover:border-zinc-700 transition-colors"
                     onChange={(e) => {
                         const val = e.target.value;
@@ -178,26 +257,26 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                 <ToolbarBtn 
                     onClick={() => editor.chain().focus().toggleBold().run()} 
                     active={editor.isActive('bold')}
-                    icon={<Bold size={16} />} 
-                    title="Grassetto" 
+                    icon={<Bold size={16} />}
+                    title="Grassetto (Ctrl+B)"
                 />
-                <ToolbarBtn 
-                    onClick={() => editor.chain().focus().toggleItalic().run()} 
+                <ToolbarBtn
+                    onClick={() => editor.chain().focus().toggleItalic().run()}
                     active={editor.isActive('italic')}
-                    icon={<Italic size={16} />} 
-                    title="Corsivo" 
+                    icon={<Italic size={16} />}
+                    title="Corsivo (Ctrl+I)"
                 />
-                <ToolbarBtn 
-                    onClick={() => editor.chain().focus().toggleUnderline().run()} 
+                <ToolbarBtn
+                    onClick={() => editor.chain().focus().toggleUnderline().run()}
                     active={editor.isActive('underline')}
-                    icon={<UnderlineIcon size={16} />} 
-                    title="Sottolineato" 
+                    icon={<UnderlineIcon size={16} />}
+                    title="Sottolineato (Ctrl+U)"
                 />
-                <ToolbarBtn 
-                    onClick={() => editor.chain().focus().toggleStrike().run()} 
+                <ToolbarBtn
+                    onClick={() => editor.chain().focus().toggleStrike().run()}
                     active={editor.isActive('strike')}
-                    icon={<Strikethrough size={16} />} 
-                    title="Barrato" 
+                    icon={<Strikethrough size={16} />}
+                    title="Barrato (Ctrl+Shift+S)"
                 />
 
                 {/* Color Picker (Moved here) */}
@@ -207,6 +286,8 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                         onClick={() => setShowColorPicker(!showColorPicker)}
                         className={`p-1.5 rounded transition-colors flex flex-col items-center justify-center gap-[2px] ${showColorPicker ? 'bg-zinc-800' : 'hover:bg-zinc-800'}`}
                         title="Colore Testo"
+                        aria-label="Colore Testo"
+                        aria-expanded={showColorPicker}
                     >
                         <Type size={14} className={editor.getAttributes('textStyle').color ? '' : 'text-zinc-400'} style={{ color: editor.getAttributes('textStyle').color }} />
                         <div className="w-4 h-1 bg-gradient-to-r from-red-500 via-green-500 to-blue-500 rounded-full"></div>
@@ -251,20 +332,20 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                 <ToolbarBtn 
                     onClick={() => editor.chain().focus().setTextAlign('left').run()} 
                     active={editor.isActive({ textAlign: 'left' })}
-                    icon={<AlignLeft size={16} />} 
-                    title="Allinea a Sinistra" 
+                    icon={<AlignLeft size={16} />}
+                    title="Allinea a Sinistra (Ctrl+Shift+L)"
                 />
-                <ToolbarBtn 
-                    onClick={() => editor.chain().focus().setTextAlign('center').run()} 
+                <ToolbarBtn
+                    onClick={() => editor.chain().focus().setTextAlign('center').run()}
                     active={editor.isActive({ textAlign: 'center' })}
-                    icon={<AlignCenter size={16} />} 
-                    title="Allinea al Centro" 
+                    icon={<AlignCenter size={16} />}
+                    title="Allinea al Centro (Ctrl+Shift+E)"
                 />
-                <ToolbarBtn 
-                    onClick={() => editor.chain().focus().setTextAlign('right').run()} 
+                <ToolbarBtn
+                    onClick={() => editor.chain().focus().setTextAlign('right').run()}
                     active={editor.isActive({ textAlign: 'right' })}
-                    icon={<AlignRight size={16} />} 
-                    title="Allinea a Destra" 
+                    icon={<AlignRight size={16} />}
+                    title="Allinea a Destra (Ctrl+Shift+R)"
                 />
 
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
@@ -272,14 +353,14 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                 <ToolbarBtn 
                     onClick={() => editor.chain().focus().toggleBulletList().run()} 
                     active={editor.isActive('bulletList')}
-                    icon={<List size={16} />} 
-                    title="Elenco Puntato" 
+                    icon={<List size={16} />}
+                    title="Elenco Puntato (Ctrl+Shift+8)"
                 />
-                <ToolbarBtn 
-                    onClick={() => editor.chain().focus().toggleOrderedList().run()} 
+                <ToolbarBtn
+                    onClick={() => editor.chain().focus().toggleOrderedList().run()}
                     active={editor.isActive('orderedList')}
-                    icon={<ListOrdered size={16} />} 
-                    title="Elenco Numerato" 
+                    icon={<ListOrdered size={16} />}
+                    title="Elenco Numerato (Ctrl+Shift+7)"
                 />
 
                 <div className="w-px h-6 bg-zinc-800 mx-1" />
@@ -298,7 +379,7 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                 {/* YouTube embed */}
                 <div className="relative">
                     <ToolbarBtn
-                        onClick={() => { setShowYoutubeInput(!showYoutubeInput); setYoutubeUrl(''); }}
+                        onClick={() => { setShowYoutubeInput(!showYoutubeInput); setYoutubeUrl(''); setYoutubeError(''); }}
                         active={showYoutubeInput}
                         icon={<YoutubeIcon size={16} className="text-red-400" />}
                         title="Incorpora Video YouTube"
@@ -312,11 +393,14 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                                     autoFocus
                                     type="text"
                                     value={youtubeUrl}
-                                    onChange={(e) => setYoutubeUrl(e.target.value)}
+                                    onChange={(e) => { setYoutubeUrl(e.target.value); if (youtubeError) setYoutubeError(''); }}
                                     onKeyDown={(e) => { if (e.key === 'Enter') handleYoutubeInsert(); if (e.key === 'Escape') setShowYoutubeInput(false); }}
                                     placeholder="https://www.youtube.com/watch?v=..."
                                     className="w-full bg-zinc-900 border border-zinc-700 rounded px-3 py-1.5 text-sm text-zinc-200 placeholder-zinc-600 outline-none focus:border-red-500 transition-colors"
                                 />
+                                {youtubeError && (
+                                    <p className="text-[11px] text-red-400 mt-1.5 leading-snug" role="alert">{youtubeError}</p>
+                                )}
                                 <div className="flex gap-2 mt-2">
                                     <button
                                         type="button"
@@ -379,9 +463,15 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
                         <span className="w-1.5 h-1.5 rounded-full bg-blue-500/60"></span>
                         {charCount} {charCount === 1 ? 'carattere' : 'caratteri'}
                     </span>
+                    {wordCount > 0 && (
+                        <span className="hidden sm:flex items-center gap-1.5" title="Tempo di lettura stimato (200 parole/min)">
+                            <span className="w-1.5 h-1.5 rounded-full bg-yellow-500/60"></span>
+                            ~{Math.max(1, Math.ceil(wordCount / 200))} min lettura
+                        </span>
+                    )}
                 </div>
                 <div className="text-[10px] font-bold text-zinc-600 uppercase tracking-tighter">
-                    Tiptap Editor v2
+                    Tiptap Editor v3
                 </div>
             </div>
 
@@ -403,12 +493,27 @@ export function RichTextEditor({ value, onChange, className }: RichTextEditorPro
     );
 }
 
-const ToolbarBtn = ({ onClick, icon, title, active }: any) => (
+interface ToolbarBtnProps {
+    onClick: () => void;
+    icon: React.ReactNode;
+    title: string;
+    active?: boolean;
+    disabled?: boolean;
+}
+
+const ToolbarBtn = ({ onClick, icon, title, active, disabled }: ToolbarBtnProps) => (
     <button
         type="button"
+        disabled={disabled}
+        aria-label={title}
+        aria-pressed={active !== undefined ? active : undefined}
         onMouseDown={(e) => e.preventDefault()}
         onClick={(e) => { e.preventDefault(); onClick(); }}
-        className={`p-1.5 rounded transition-colors ${active ? 'bg-dis-green text-black' : 'text-zinc-400 hover:text-white hover:bg-zinc-800'}`}
+        className={`p-1.5 rounded transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-dis-green ${
+            active
+                ? 'bg-dis-green text-black shadow-sm shadow-dis-green/40'
+                : 'text-zinc-400 hover:text-white hover:bg-zinc-800'
+        } disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-zinc-400`}
         title={title}
     >
         {icon}

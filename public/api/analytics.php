@@ -109,6 +109,12 @@ try {
 
         // ── Modalità globale (Dashboard) ────────────────────────────────────────
 
+        // [v1.19.0] Periodo selezionabile per la serie giornaliera (7/30/90 giorni)
+        $period = (int)($_GET['period'] ?? 30);
+        if (!in_array($period, [7, 30, 90], true)) {
+            $period = 30;
+        }
+
         // Top 10 articoli per visualizzazioni
         $top_articles = $pdo->query("
             SELECT a.id, a.title, a.slug, COUNT(av.id) AS view_count
@@ -160,6 +166,89 @@ try {
             ORDER BY view_date ASC
         ")->fetchAll();
 
+        // ── [v1.19.0] Statistiche estese ────────────────────────────────────────
+
+        // Serie giornaliera sul periodo selezionato (7/30/90 giorni)
+        $stmtDaily = $pdo->prepare("
+            SELECT view_date, COUNT(*) AS count
+            FROM article_views
+            WHERE view_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+            GROUP BY view_date
+            ORDER BY view_date ASC
+        ");
+        $stmtDaily->execute([$period - 1]);
+        $daily_views = $stmtDaily->fetchAll(PDO::FETCH_ASSOC);
+
+        // Views di oggi e di ieri
+        $views_today = (int)$pdo->query("
+            SELECT COUNT(*) FROM article_views WHERE view_date = CURDATE()
+        ")->fetchColumn();
+        $views_yesterday = (int)$pdo->query("
+            SELECT COUNT(*) FROM article_views WHERE view_date = DATE_SUB(CURDATE(), INTERVAL 1 DAY)
+        ")->fetchColumn();
+
+        // Confronto: ultimi 7 giorni vs 7 precedenti
+        $views_last_7 = (int)$pdo->query("
+            SELECT COUNT(*) FROM article_views
+            WHERE view_date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+        ")->fetchColumn();
+        $views_prev_7 = (int)$pdo->query("
+            SELECT COUNT(*) FROM article_views
+            WHERE view_date >= DATE_SUB(CURDATE(), INTERVAL 13 DAY)
+              AND view_date <  DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+        ")->fetchColumn();
+
+        // Visitatori unici (ip_hash distinti) nel periodo selezionato
+        $stmtUnique = $pdo->prepare("
+            SELECT COUNT(DISTINCT ip_hash) FROM article_views
+            WHERE view_date >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+        ");
+        $stmtUnique->execute([$period - 1]);
+        $unique_visitors = (int)$stmtUnique->fetchColumn();
+
+        // Contenuti: articoli pubblicati/bozze, progetti visibili
+        $published_articles = (int)$pdo->query("SELECT COUNT(*) FROM articles WHERE status = 'published'")->fetchColumn();
+        $draft_articles     = (int)$pdo->query("SELECT COUNT(*) FROM articles WHERE status = 'draft'")->fetchColumn();
+        $visible_projects   = 0;
+        try {
+            $visible_projects = (int)$pdo->query("SELECT COUNT(*) FROM projects WHERE is_visible = 1")->fetchColumn();
+        } catch (PDOException $_) { /* tabella non ancora migrata */ }
+
+        // Newsletter: confermati, pending, nuovi negli ultimi 30 giorni
+        $newsletter = ['confirmed' => 0, 'pending' => 0, 'new_last_30' => 0];
+        try {
+            $newsletter['confirmed']   = (int)$pdo->query("SELECT COUNT(*) FROM subscribers WHERE status = 'confirmed'")->fetchColumn();
+            $newsletter['pending']     = (int)$pdo->query("SELECT COUNT(*) FROM subscribers WHERE status = 'pending'")->fetchColumn();
+            $newsletter['new_last_30'] = (int)$pdo->query("
+                SELECT COUNT(*) FROM subscribers
+                WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)
+            ")->fetchColumn();
+        } catch (PDOException $_) { /* tabella non ancora migrata */ }
+
+        // Messaggi: totali e non letti (read_at IS NULL — mai confrontare DATETIME con '')
+        $messages = ['total' => 0, 'unread' => 0];
+        try {
+            $messages['total']  = (int)$pdo->query("SELECT COUNT(*) FROM messages")->fetchColumn();
+            $messages['unread'] = (int)$pdo->query("SELECT COUNT(*) FROM messages WHERE read_at IS NULL")->fetchColumn();
+        } catch (PDOException $_) { /* tabella non ancora migrata */ }
+
+        // Media views per articolo pubblicato
+        $avg_views_per_published = $published_articles > 0
+            ? round($total_views / $published_articles, 1)
+            : 0;
+
+        // Top categorie per visualizzazioni
+        $top_categories = $pdo->query("
+            SELECT COALESCE(NULLIF(a.category, ''), 'Senza categoria') AS category,
+                   COUNT(av.id) AS view_count
+            FROM articles a
+            JOIN article_views av ON av.article_id = a.id
+            WHERE a.status = 'published'
+            GROUP BY COALESCE(NULLIF(a.category, ''), 'Senza categoria')
+            ORDER BY view_count DESC
+            LIMIT 8
+        ")->fetchAll();
+
         echo json_encode([
             'total_views'               => $total_views,
             'total_clicks'              => $total_clicks,
@@ -169,6 +258,23 @@ try {
             'clicks_by_button'          => $clicks_by_button,
             'reactions_by_type'         => $reactions_by_type,
             'weekly_views'              => $weekly_views,
+            // [v1.19.0] Nuove statistiche (additive, retrocompatibili)
+            'period_days'               => $period,
+            'daily_views'               => $daily_views,
+            'views_today'               => $views_today,
+            'views_yesterday'           => $views_yesterday,
+            'views_last_7'              => $views_last_7,
+            'views_prev_7'              => $views_prev_7,
+            'unique_visitors'           => $unique_visitors,
+            'content'                   => [
+                'published_articles' => $published_articles,
+                'draft_articles'     => $draft_articles,
+                'visible_projects'   => $visible_projects,
+            ],
+            'newsletter'                => $newsletter,
+            'messages'                  => $messages,
+            'avg_views_per_published'   => $avg_views_per_published,
+            'top_categories'            => $top_categories,
         ]);
     }
 } catch (PDOException $e) {
