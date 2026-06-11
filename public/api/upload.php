@@ -67,8 +67,12 @@ if (!is_dir($uploadDir)) {
     mkdir($uploadDir, 0755, true); // [v1.5.10] 0755: rwxr-xr-x
 }
 
-// Genera un nome unico per il file per non sovrascrivere
-$newFileName = uniqid() . '-' . preg_replace('/[^A-Za-z0-9.\-_]/', '', $fileName);
+// Genera un nome unico per il file per non sovrascrivere.
+// [v1.19.0] Il nome base non può contenere punti: evita doppie estensioni
+// (es. shell.php.jpg) eseguibili con configurazioni Apache AddHandler/mod_mime.
+$safeBase = preg_replace('/[^A-Za-z0-9\-_]/', '', pathinfo($fileName, PATHINFO_FILENAME));
+if ($safeBase === '') $safeBase = 'file';
+$newFileName = uniqid() . '-' . $safeBase . '.' . $fileExt;
 $destination = $uploadDir . $newFileName;
 
 // Lo URL relativo che React/Browser userà per renderizzare

@@ -31,7 +31,9 @@ try {
             if ($e->getCode() == '42000' || strpos($e->getMessage(), '1061') !== false) {
                 $results[] = ["query" => $sql, "status" => "Saltato", "info" => "Indice già esistente"];
             } else {
-                $results[] = ["query" => $sql, "status" => "Errore", "info" => $e->getMessage()];
+                // [v1.19.0] Il messaggio PDO va nel log, mai nella risposta HTTP
+                error_log('optimize_db.php: ' . $e->getMessage());
+                $results[] = ["query" => $sql, "status" => "Errore", "info" => "Vedi error log del server"];
             }
         }
     }

@@ -102,6 +102,22 @@ if ($method === 'POST') {
         exit;
     }
 
+    // [v1.19.0] Secondo limite basato sul SOLO IP: voter_hash include lo User-Agent,
+    // che è controllato dal client — ruotandolo si aggirerebbe il limite sopra.
+    $rl_key = 'rea:' . substr(hash('sha256', $ip), 0, 40);
+    $pdo->exec("DELETE FROM login_attempts WHERE attempt_time < DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
+    $stmtIpRate = $pdo->prepare(
+        "SELECT COUNT(*) FROM login_attempts
+         WHERE ip_address = ? AND attempt_time >= DATE_SUB(NOW(), INTERVAL 1 MINUTE)"
+    );
+    $stmtIpRate->execute([$rl_key]);
+    if ((int)$stmtIpRate->fetchColumn() >= 30) {
+        http_response_code(429);
+        echo json_encode(['error' => 'Troppe richieste. Attendi un momento.']);
+        exit;
+    }
+    $pdo->prepare("INSERT INTO login_attempts (ip_address) VALUES (?)")->execute([$rl_key]);
+
     // Verifica se la reazione esiste già (per il toggle)
     $stmtCheck = $pdo->prepare(
         "SELECT id FROM article_reactions

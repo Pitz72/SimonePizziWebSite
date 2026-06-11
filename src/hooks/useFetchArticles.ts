@@ -38,13 +38,15 @@ export const useFetchArticles = (categoryFilter?: string, limit: number = 10, in
                 setItems(prev => {
                     const existingIds = new Set(prev.map(p => p.id));
                     const newUnique = mappedItems.filter((i: PortfolioItem) => !existingIds.has(i.id));
-                    return [...prev, ...newUnique];
+                    const merged = [...prev, ...newUnique];
+                    // Calcolato dentro il callback per evitare closure stantia su items
+                    setHasMore(merged.length < total);
+                    return merged;
                 });
             } else {
                 setItems(mappedItems);
+                setHasMore(mappedItems.length < total);
             }
-
-            setHasMore((isLoadMore ? items.length + mappedItems.length : mappedItems.length) < total);
             
         } catch (err: any) {
             console.error("useFetchArticles error:", err);

@@ -32,9 +32,18 @@ try {
     }
 
     // Costruisce il percorso fisico dalla file_path (es. /uploads/abc123-nomefile.zip)
-    $physicalPath = __DIR__ . '/..' . $media['file_path'];
+    // [v1.19.0] Difesa in profondità (come media.php): anche se il path arriva dal DB,
+    // accetta solo file realmente dentro /uploads/ — mai path traversal.
+    $filePath = $media['file_path'];
+    if (!str_starts_with($filePath, '/uploads/')) {
+        http_response_code(404);
+        exit('File non trovato.');
+    }
+    $physicalPath = realpath(__DIR__ . '/..' . $filePath);
+    $uploadsBase  = realpath(__DIR__ . '/../uploads');
 
-    if (!file_exists($physicalPath) || !is_readable($physicalPath)) {
+    if (!$physicalPath || !$uploadsBase || !str_starts_with($physicalPath, $uploadsBase)
+        || !is_file($physicalPath) || !is_readable($physicalPath)) {
         http_response_code(404);
         exit('File non trovato sul disco del server.');
     }

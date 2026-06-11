@@ -10,13 +10,8 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 date_default_timezone_set('Europe/Rome');
 
-// Migrazione idempotente: aggiunge colonne ip_hash e clicked_at a cta_clicks se non presenti
-try {
-    $pdo->exec("ALTER TABLE cta_clicks ADD COLUMN ip_hash VARCHAR(64) DEFAULT NULL");
-} catch (PDOException $e) { /* colonna già presente */ }
-try {
-    $pdo->exec("ALTER TABLE cta_clicks ADD COLUMN clicked_at DATETIME DEFAULT CURRENT_TIMESTAMP");
-} catch (PDOException $e) { /* colonna già presente */ }
+// [v1.19.0] Rimossa la migrazione idempotente (ALTER TABLE a ogni richiesta pubblica):
+// le colonne ip_hash e clicked_at esistono dalla v1.x. Le migrazioni vivono in scripts/.
 
 try {
     if ($method === 'POST') {
@@ -28,6 +23,15 @@ try {
         if (!$article_id) {
             http_response_code(400);
             echo json_encode(['error' => 'article_id richiesto']);
+            exit;
+        }
+
+        // [v1.19.0] L'articolo deve esistere: evita di gonfiare il DB con ID inventati
+        $existsStmt = $pdo->prepare("SELECT COUNT(*) FROM articles WHERE id = ?");
+        $existsStmt->execute([$article_id]);
+        if ((int)$existsStmt->fetchColumn() === 0) {
+            http_response_code(400);
+            echo json_encode(['error' => 'article_id non valido']);
             exit;
         }
 

@@ -14,6 +14,10 @@ DirectoryIndex index.php index.html
   RewriteEngine On
   RewriteBase /
 
+# [v1.19.0] Forza HTTPS: ogni richiesta in chiaro viene redirezionata (301)
+  RewriteCond %{HTTPS} !=on
+  RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
 # [v2.0] SEO Files — SEMPRE serviti da PHP (contenuto dinamico real-time)
 # Questo elimina il bug v1.9.6 del 404 sporadico su robots.txt e garantisce
 # che la sitemap sia sempre aggiornata senza bisogno di prerendering manuale.
@@ -49,6 +53,11 @@ DirectoryIndex index.php index.html
 # Impedisce MIME-type sniffing (es. eseguire un file .jpg come script)
 
   Header always set X-Content-Type-Options "nosniff"
+
+# [v1.19.0] HSTS: i browser ricordano per 1 anno di usare solo HTTPS
+# (inviato solo su connessioni HTTPS, come da specifica)
+
+  Header always set Strict-Transport-Security "max-age=31536000" env=HTTPS
 
 # Blocca il sito nell'essere caricato in iframe da altri domini (Clickjacking)
 

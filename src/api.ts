@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:8888/api';
+export const API_URL = import.meta.env.PROD ? '/api' : 'http://localhost:8888/api';
 
 // Configurazione standard con credenziali per mantenere i cookie session PHP
 const fetchConfig: RequestInit = {

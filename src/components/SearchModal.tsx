@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Search, X, FileText, Layout, ArrowRight, CornerDownLeft } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { API_URL } from '../api';
 
 interface SearchResult {
   id: number;
@@ -37,15 +38,23 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
   }, [isOpen]);
 
   useEffect(() => {
+    const controller = new AbortController();
     const delayDebounceFn = setTimeout(async () => {
       if (query.length >= 2) {
         setLoading(true);
         try {
-          const response = await fetch(`/api/search.php?q=${encodeURIComponent(query)}`);
+          const response = await fetch(`${API_URL}/search.php?q=${encodeURIComponent(query)}`, {
+            signal: controller.signal,
+          });
+          if (!response.ok) {
+            setResults([]);
+            return;
+          }
           const data = await response.json();
           setResults(data);
           setSelectedIndex(0);
         } catch (error) {
+          if (error instanceof DOMException && error.name === 'AbortError') return;
           console.error('Search error:', error);
         } finally {
           setLoading(false);
@@ -55,7 +64,10 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       }
     }, 300);
 
-    return () => clearTimeout(delayDebounceFn);
+    return () => {
+      clearTimeout(delayDebounceFn);
+      controller.abort();
+    };
   }, [query]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {

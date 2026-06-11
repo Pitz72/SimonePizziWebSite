@@ -64,8 +64,9 @@ if ($method === 'POST') {
             exit;
         }
 
-        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-        $host     = $_SERVER['HTTP_HOST'];
+        // [v1.19.0] URL canonico hardcoded (SITE_URL), mai da HTTP_HOST (link poisoning)
+        $protocol = parse_url(SITE_URL, PHP_URL_SCHEME);
+        $host     = parse_url(SITE_URL, PHP_URL_HOST);
         $from     = 'newsletter@' . $host;
         $replyTo  = 'simonepizzi.1972@proton.me';
 

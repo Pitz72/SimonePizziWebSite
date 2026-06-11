@@ -41,8 +41,8 @@ export default function Settings() {
             return;
         }
 
-        if (newPassword.length < 6) {
-            setMessage({ type: 'error', text: 'La password deve contenere almeno 6 caratteri.' });
+        if (newPassword.length < 12) {
+            setMessage({ type: 'error', text: 'La password deve contenere almeno 12 caratteri.' });
             return;
         }
 

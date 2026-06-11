@@ -36,5 +36,9 @@ public/api/.data/
 # Configurazione database MySQL (credenziali reali, mai in repo)
 public/api/config.php
 
+# Media caricati dagli utenti (vivono solo sul server) — tranne l'.htaccess di sicurezza
+public/uploads/*
+!public/uploads/.htaccess
+
 # Cartella di pre-produzione (asset originali e backup sensibili)
 PRE-PRODUZIONE/

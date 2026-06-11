@@ -118,6 +118,29 @@ const RootBoundary = () => {
   );
 };
 
+// Boundary minimale per le rotte admin, coerente con lo stile di RootBoundary
+const AdminErrorBoundary = () => {
+  const error = useRouteError();
+
+  if (isRouteErrorResponse(error) && error.status === 404) {
+    return (
+      <div className="min-h-screen text-white flex flex-col items-center justify-center p-4 bg-zinc-950">
+        <h1 className="text-6xl font-bold text-dis-green mb-4 font-serif">404</h1>
+        <p className="text-xl text-zinc-400 mb-8 text-center max-w-md">Questa sezione del pannello non esiste.</p>
+        <a href="/admin" className="px-8 py-3 bg-dis-green text-black font-bold transition-all hover:bg-green-400">Torna alla Dashboard</a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen text-white flex flex-col items-center justify-center p-4 bg-zinc-950">
+      <h1 className="text-4xl font-bold text-red-500 mb-4">Errore di Sistema</h1>
+      <p className="text-xl text-zinc-400 mb-8 text-center max-w-md">Si è verificato un problema tecnico nel pannello di amministrazione.</p>
+      <button onClick={() => window.location.reload()} className="px-8 py-3 bg-red-600 hover:bg-red-500 transition-all font-bold">Riavvia Moduli</button>
+    </div>
+  );
+};
+
 const PublicLayout: React.FC = () => {
   const [isSearchOpen, setIsSearchOpen] = React.useState(false);
 
@@ -206,6 +229,7 @@ import {
 const router = createBrowserRouter([
   {
     path: '/admin',
+    errorElement: <AdminErrorBoundary />,
     children: [
       { path: 'login', element: <Login /> },
       { path: 'recovery', element: <RecoveryRequest /> },

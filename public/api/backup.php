@@ -188,11 +188,38 @@ try {
 
         if ($should_run || $is_admin) {
             $sql = generateSQLDump($pdo);
-            $backup_dir = __DIR__ . '/.data/backups';
-            if (!is_dir($backup_dir)) mkdir($backup_dir, 0755, true);
-            
-            $filename = "auto_backup_" . date('Y-m-d_H-i-s') . ".sql";
+
+            // [v1.19.0] I backup vanno FUORI dalla document root quando possibile.
+            // Fallback: .data/backups, ma con .htaccess di diniego ricreato a runtime
+            // (clean-dist.js elimina .data/ dalla dist, quindi il deny del repo non
+            // arriva mai sul server) e permessi restrittivi.
+            $docroot = realpath(__DIR__ . '/..');
+            $outside = dirname($docroot) . '/db_backups_simonepizzi';
+            if (!is_dir($outside)) @mkdir($outside, 0700, true);
+
+            if (is_dir($outside) && is_writable($outside)) {
+                $backup_dir = $outside;
+            } else {
+                $backup_dir = __DIR__ . '/.data/backups';
+                if (!is_dir($backup_dir)) mkdir($backup_dir, 0700, true);
+                foreach ([__DIR__ . '/.data/.htaccess', $backup_dir . '/.htaccess'] as $ht) {
+                    if (!file_exists($ht)) @file_put_contents($ht, "Require all denied\n");
+                }
+            }
+
+            // Suffisso random: il nome file non deve essere indovinabile dal timestamp
+            $filename = "auto_backup_" . date('Y-m-d_H-i-s') . '_' . bin2hex(random_bytes(8)) . ".sql";
             file_put_contents($backup_dir . '/' . $filename, $sql);
+            @chmod($backup_dir . '/' . $filename, 0600);
+
+            // Rotazione: conserva solo gli ultimi 15 backup
+            $old_backups = glob($backup_dir . '/auto_backup_*.sql');
+            if ($old_backups && count($old_backups) > 15) {
+                sort($old_backups);
+                foreach (array_slice($old_backups, 0, count($old_backups) - 15) as $old_file) {
+                    @unlink($old_file);
+                }
+            }
             
             // Aggiorna ultima esecuzione
             $updateStmt = $pdo->prepare("UPDATE app_settings SET setting_value = ? WHERE setting_key = 'backup_last_run'");

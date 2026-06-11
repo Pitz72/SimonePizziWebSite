@@ -1,6 +1,14 @@
 <?php
 require_once __DIR__ . '/config.php';
 
+// [v1.19.0] URL canonico del sito, usato per costruire i link nelle email
+// (recupero password, conferma newsletter). Mai derivarlo da HTTP_HOST:
+// un header Host falsificato finirebbe dentro email legittime (link poisoning).
+// Sovrascrivibile da config.php per ambienti diversi.
+if (!defined('SITE_URL')) {
+    define('SITE_URL', 'https://simonepizzi.runtimeradio.it');
+}
+
 class Database {
     private static $pdo = null;
 

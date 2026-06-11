@@ -1,0 +1,16 @@
+# [v1.19.0] Difesa in profondità: nessuno script deve essere eseguibile
+# nella directory degli upload, qualunque cosa riesca a finirci dentro.
+
+# Disattiva il motore PHP (mod_php)
+<IfModule mod_php.c>
+  php_flag engine off
+</IfModule>
+
+# Rimuove qualunque handler/tipo associato a estensioni eseguibili
+RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .phps .cgi .pl .py
+RemoveType .php .phtml .phps
+
+# Nega direttamente la richiesta di file con estensioni eseguibili
+<FilesMatch "\.(php|phtml|php[0-9]|phps|cgi|pl|py|sh)$">
+  Require all denied
+</FilesMatch>

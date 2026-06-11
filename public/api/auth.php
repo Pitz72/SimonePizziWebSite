@@ -72,6 +72,19 @@ try {
                 exit;
             }
 
+            // [v1.19.0] Rate limiting: max 3 richieste di recovery per IP ogni 15 minuti.
+            // Riusa login_attempts con una chiave marcata per non interferire col login.
+            $rl_key = 'rec:' . substr(hash('sha256', getClientIp()), 0, 40);
+            $pdo->exec("DELETE FROM login_attempts WHERE attempt_time < DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
+            $stmtRl = $pdo->prepare("SELECT COUNT(*) FROM login_attempts WHERE ip_address = ?");
+            $stmtRl->execute([$rl_key]);
+            if ((int)$stmtRl->fetchColumn() >= 3) {
+                http_response_code(429);
+                echo json_encode(['status' => 'error', 'message' => 'Troppe richieste. Riprova tra 15 minuti.']);
+                exit;
+            }
+            $pdo->prepare("INSERT INTO login_attempts (ip_address) VALUES (?)")->execute([$rl_key]);
+
             $stmt = $pdo->prepare("SELECT id, username, email FROM users WHERE username = ? OR email = ?");
             $stmt->execute([$identifier, $identifier]);
             $user = $stmt->fetch();
@@ -85,6 +98,8 @@ try {
             $token = bin2hex(random_bytes(32));
             $expires = date('Y-m-d H:i:s', strtotime('+1 hour'));
 
+            // [v1.19.0] Una nuova richiesta invalida tutti i token precedenti dell'utente
+            $pdo->prepare("DELETE FROM password_resets WHERE user_id = ?")->execute([$user['id']]);
             $pdo->prepare("INSERT INTO password_resets (user_id, token, expires_at) VALUES (?, ?, ?)")
                 ->execute([$user['id'], $token, $expires]);
 
@@ -105,6 +120,13 @@ try {
             if (empty($token) || empty($newPassword)) {
                 http_response_code(400);
                 echo json_encode(['status' => 'error', 'message' => 'Dati mancanti']);
+                exit;
+            }
+
+            // [v1.19.0] Requisito minimo di robustezza password
+            if (strlen($newPassword) < 12) {
+                http_response_code(400);
+                echo json_encode(['status' => 'error', 'message' => 'La password deve avere almeno 12 caratteri.']);
                 exit;
             }
 
@@ -202,9 +224,10 @@ try {
  * [v1.7.18] Invia email di recupero password
  */
 function sendRecoveryEmail($to, $username, $token) {
-    $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    $host = $_SERVER['HTTP_HOST'];
-    $link = "{$protocol}://{$host}/admin/reset-password/{$token}";
+    // [v1.19.0] URL canonico hardcoded (SITE_URL), mai da HTTP_HOST:
+    // previene il password reset poisoning via header Host falsificato.
+    $host = parse_url(SITE_URL, PHP_URL_HOST);
+    $link = SITE_URL . "/admin/reset-password/{$token}";
     
     $subject = "Recupero Password — Simone Pizzi";
     $subjectEncoded = '=?UTF-8?B?' . base64_encode($subject) . '?=';

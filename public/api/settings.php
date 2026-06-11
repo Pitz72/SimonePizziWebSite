@@ -71,6 +71,11 @@ elseif ($method === 'PUT') {
         http_response_code(400); echo json_encode(['error' => 'Campi mancanti']); exit;
     }
 
+    // [v1.19.0] Requisito minimo di robustezza password (enforcement server-side)
+    if (strlen($newPassword) < 12) {
+        http_response_code(400); echo json_encode(['error' => 'La password deve avere almeno 12 caratteri.']); exit;
+    }
+
     try {
         // Verifica vecchia password
         $stmt = $pdo->prepare("SELECT password_hash FROM users WHERE id = ?");
@@ -78,11 +83,14 @@ elseif ($method === 'PUT') {
         $user = $stmt->fetch();
 
         if ($user && password_verify($currentPassword, $user['password_hash'])) {
-            // Aggiorna con nuova password hashata
+            // Aggiorna con nuova password hashata.
+            // [v1.19.0] session_version++ invalida le ALTRE sessioni attive (come il reset);
+            // la sessione corrente resta valida aggiornando il valore in $_SESSION.
             $newHash = password_hash($newPassword, PASSWORD_DEFAULT);
-            $updateStmt = $pdo->prepare("UPDATE users SET password_hash = ? WHERE id = ?");
+            $updateStmt = $pdo->prepare("UPDATE users SET password_hash = ?, session_version = session_version + 1 WHERE id = ?");
             $updateStmt->execute([$newHash, $userId]);
-            
+            $_SESSION['session_version'] = (int)($_SESSION['session_version'] ?? 0) + 1;
+
             echo json_encode(['status' => 'success', 'message' => 'Password aggiornata con successo!']);
         } else {
             http_response_code(401);

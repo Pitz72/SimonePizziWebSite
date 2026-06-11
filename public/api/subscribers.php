@@ -140,6 +140,22 @@ if ($method === 'POST') {
     try {
         $pdo = Database::connect();
 
+        // [v1.19.0] Rate limiting per-IP sulle iscrizioni pubbliche: max 3 ogni 15 minuti.
+        // Senza questo limite chiunque può usare il form per mail-bombing verso terzi
+        // (l'email di conferma parte verso indirizzi arbitrari) bruciando la reputazione del dominio.
+        if (!$isAdmin) {
+            $rl_key = 'sub:' . substr(hash('sha256', $_SERVER['REMOTE_ADDR'] ?? 'unknown'), 0, 40);
+            $pdo->exec("DELETE FROM login_attempts WHERE attempt_time < DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
+            $stmtRl = $pdo->prepare("SELECT COUNT(*) FROM login_attempts WHERE ip_address = ?");
+            $stmtRl->execute([$rl_key]);
+            if ((int)$stmtRl->fetchColumn() >= 3) {
+                http_response_code(429);
+                echo json_encode(['status' => 'error', 'message' => 'Troppe richieste. Riprova tra qualche minuto.']);
+                exit;
+            }
+            $pdo->prepare("INSERT INTO login_attempts (ip_address) VALUES (?)")->execute([$rl_key]);
+        }
+
         // Controlla se esiste già
         $check = $pdo->prepare("SELECT id, status FROM subscribers WHERE email = :email LIMIT 1");
         $check->execute([':email' => $email]);
@@ -267,9 +283,9 @@ echo json_encode(['error' => 'Metodo non supportato.']);
 // ──────────────────────────────────────────────────────────────────────────────
 function sendConfirmEmail(string $email, string $name, string $token): void
 {
-    $protocol    = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-    $host        = $_SERVER['HTTP_HOST'];
-    $confirmLink = $protocol . '://' . $host . '/newsletter/confermato?token=' . urlencode($token);
+    // [v1.19.0] URL canonico hardcoded (SITE_URL), mai da HTTP_HOST (link poisoning)
+    $host        = parse_url(SITE_URL, PHP_URL_HOST);
+    $confirmLink = SITE_URL . '/newsletter/confermato?token=' . urlencode($token);
     $from        = 'newsletter@' . $host;
     $subject     = '=?UTF-8?B?' . base64_encode('Conferma la tua iscrizione — Simone Pizzi') . '?=';
 

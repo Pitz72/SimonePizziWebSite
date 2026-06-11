@@ -21,6 +21,29 @@ const formatExternalUrl = (url?: string) => {
     return `https://${url}`;
 };
 
+/**
+ * Sanitizza l'HTML di un articolo permettendo <iframe> solo per embed YouTube
+ * (standard e nocookie). L'hook globale viene sempre rimosso, anche in caso di eccezione.
+ */
+const sanitizeArticleHtml = (html: string): string => {
+    DOMPurify.addHook('uponSanitizeElement', (node, data) => {
+        if (data.tagName === 'iframe') {
+            const src = (node as HTMLElement).getAttribute('src') || '';
+            if (!src.startsWith('https://www.youtube.com/embed/') && !src.startsWith('https://www.youtube-nocookie.com/embed/')) {
+                node.parentNode?.removeChild(node);
+            }
+        }
+    });
+    try {
+        return DOMPurify.sanitize(html, {
+            ADD_TAGS: ['iframe'],
+            ADD_ATTR: ['style', 'allowfullscreen', 'frameborder', 'allow', 'src'],
+        });
+    } finally {
+        DOMPurify.removeHooks('uponSanitizeElement');
+    }
+};
+
 const SingleArticle: React.FC = () => {
     const { article, reactions } = useLoaderData() as { article: PortfolioItem; reactions: ReactionData };
     const navigate = useNavigate();
@@ -130,23 +153,7 @@ const SingleArticle: React.FC = () => {
                         maxWidth: '820px',
                         color: '#d4e8d8',
                     }}
-                    dangerouslySetInnerHTML={{ __html: (() => {
-                        // Permette <iframe> solo da YouTube (nocookie e standard), blocca tutto il resto
-                        DOMPurify.addHook('uponSanitizeElement', (node, data) => {
-                            if (data.tagName === 'iframe') {
-                                const src = (node as HTMLElement).getAttribute('src') || '';
-                                if (!src.startsWith('https://www.youtube-nocookie.com/') && !src.startsWith('https://www.youtube.com/')) {
-                                    node.parentNode?.removeChild(node);
-                                }
-                            }
-                        });
-                        const clean = DOMPurify.sanitize(article.description, {
-                            ADD_TAGS: ['iframe'],
-                            ADD_ATTR: ['style', 'allowfullscreen', 'frameborder', 'allow', 'src'],
-                        });
-                        DOMPurify.removeHooks('uponSanitizeElement');
-                        return clean;
-                    })() }}
+                    dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(article.description) }}
                 />
             </div>
 

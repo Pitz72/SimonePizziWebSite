@@ -3,7 +3,15 @@ import { PortfolioItem, Category } from '../types';
 /**
  * Mappa un record grezzo dal database (Article) nel tipo PortfolioItem usato dal frontend.
  */
+/** Normalizza il campo tags: accetta array, stringa CSV o valori assenti. */
+const parseTags = (tags: any): string[] => {
+    if (Array.isArray(tags)) return tags.map((t: any) => String(t).trim()).filter(Boolean);
+    if (typeof tags === 'string') return tags.split(',').map((t: string) => t.trim()).filter(Boolean);
+    return [];
+};
+
 export const mapArticleToPortfolioItem = (article: any): PortfolioItem => {
+    const tags = parseTags(article.tags);
     return {
         id: article.id,
         slug: article.slug,
@@ -12,7 +20,7 @@ export const mapArticleToPortfolioItem = (article: any): PortfolioItem => {
         description: article.content,
         imageUrl: article.cover_image || '/api/placeholder/800/600',
         category: article.category as Category,
-        tags: article.tags ? article.tags.split(',').map((t: string) => t.trim()) : [],
+        tags,
         isFeatured: article.is_featured === 1 || article.is_featured === true,
         isCategoryPinned: article.is_category_pinned === 1 || article.is_category_pinned === true,
         publishedAt: article.published_at,
@@ -21,7 +29,7 @@ export const mapArticleToPortfolioItem = (article: any): PortfolioItem => {
         extraLink: article.button_b_link || undefined,
         extraLinkText: article.button_b_label || undefined,
         isVisible: true,
-        hasLetter: article.tags && article.tags.toLowerCase().includes('lettera')
+        hasLetter: tags.some(t => t.toLowerCase().includes('lettera'))
     };
 };
 /**

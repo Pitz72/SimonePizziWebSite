@@ -12,3 +12,7 @@ define('DB_PASS',    'YOUR_PASSWORD');
 
 // Secret per il cron di backup automatico — generare con: php -r "echo bin2hex(random_bytes(32));"
 define('BACKUP_CRON_SECRET', 'SOSTITUIRE_CON_STRINGA_CASUALE_64_CHAR');
+
+// (Opzionale) URL canonico del sito per i link nelle email.
+// Se non definito, db.php usa il default di produzione.
+// define('SITE_URL', 'https://simonepizzi.runtimeradio.it');

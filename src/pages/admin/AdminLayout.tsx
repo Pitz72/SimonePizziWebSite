@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { LayoutDashboard, FileText, Image as ImageIcon, Settings, LogOut, FolderOpen, Tag, Mail, Hash } from 'lucide-react';
@@ -6,29 +6,15 @@ import { api } from '../../api';
 import Loader from '../../components/Loader';
 
 export default function AdminLayout() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [loading, setLoading] = useState(true);
+    // La verifica della sessione è gestita da adminAuthLoader (src/loaders.ts) sulla rotta
+    // che monta questo layout: copre tutte le rotte admin figlie con redirect a /admin/login.
     const navigate = useNavigate();
     const location = useLocation();
-
-    useEffect(() => {
-        // Verifica sessione al mount del Layout (che è genitore di tutti i moduli Admin)
-        api.checkSession()
-            .then(() => setIsAuthenticated(true))
-            .catch(() => navigate('/admin/login'))
-            .finally(() => setLoading(false));
-    }, [navigate]);
 
     const handleLogout = async () => {
         await api.logout();
         navigate('/admin/login');
     };
-
-    if (loading) {
-        return <Loader />;
-    }
-
-    if (!isAuthenticated) return null;
 
     const navLinks = [
         { path: '/admin/dashboard', icon: <LayoutDashboard size={20} />, label: 'Dashboard' },
@@ -78,7 +64,7 @@ export default function AdminLayout() {
                         <span className="font-medium text-sm">Disconnetti</span>
                     </button>
                     <div className="mt-4 text-center">
-                        <a href="#/" target="_blank" rel="noopener noreferrer" className="text-xs text-zinc-600 hover:text-dis-green transition-colors">Vedi Sito Live ↗</a>
+                        <a href="/" target="_blank" rel="noopener noreferrer" className="text-xs text-zinc-600 hover:text-dis-green transition-colors">Vedi Sito Live ↗</a>
                     </div>
                 </div>
             </aside>

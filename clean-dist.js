@@ -72,4 +72,15 @@ filesToRemove.forEach((file) => {
 const apiPatterns = ['debug_', 'test_', 'fix_', 'migrate_', 'diag_', 'porting_data', 'check_schema'];
 removeByPattern(apiPath, apiPatterns);
 
+// 4. [v1.19.0] Ricrea uploads/ nella dist con il SOLO .htaccess di sicurezza
+// (disattiva l'esecuzione PHP nella dir upload). L'upload FTP della dist lo porta
+// sul server senza toccare i media esistenti (FTP non cancella file remoti).
+const uploadsHtaccessSrc = path.join(__dirname, 'public', 'uploads', '.htaccess');
+const uploadsDistDir = path.join(distPath, 'uploads');
+if (fs.existsSync(uploadsHtaccessSrc)) {
+    fs.mkdirSync(uploadsDistDir, { recursive: true });
+    fs.copyFileSync(uploadsHtaccessSrc, path.join(uploadsDistDir, '.htaccess'));
+    console.log('✅ Aggiunto uploads/.htaccess di sicurezza alla dist');
+}
+
 console.log('🎉 Pulizia profonda completata. La cartella dist/ è ora "Production Ready".');
