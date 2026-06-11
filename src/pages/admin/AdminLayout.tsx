@@ -1,7 +1,7 @@
 import React from 'react';
 import { Outlet, useNavigate, Link, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LayoutDashboard, FileText, Image as ImageIcon, Settings, LogOut, FolderOpen, Tag, Mail, Hash } from 'lucide-react';
+import { LayoutDashboard, FileText, Image as ImageIcon, Settings, LogOut, FolderOpen, Tag, Mail, Hash, MessageSquare } from 'lucide-react';
 import { api } from '../../api';
 import Loader from '../../components/Loader';
 
@@ -24,6 +24,7 @@ export default function AdminLayout() {
         { path: '/admin/tags', icon: <Hash size={20} />, label: 'Tag Dinamici' },
         { path: '/admin/media', icon: <ImageIcon size={20} />, label: 'Media Gallery' },
         { path: '/admin/newsletter', icon: <Mail size={20} />, label: 'Newsletter' },
+        { path: '/admin/messages', icon: <MessageSquare size={20} />, label: 'Messaggi' },
         { path: '/admin/settings', icon: <Settings size={20} />, label: 'Impostazioni' },
     ];
 

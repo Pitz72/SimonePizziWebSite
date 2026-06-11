@@ -78,7 +78,7 @@ export default function Dashboard() {
         ? ((analytics?.total_clicks ?? 0) / totalViewsNum * 100).toFixed(1)
         : '0.0';
 
-    const miniStats: { label: string; value: string; icon: ReactNode; sub?: string; subClass?: string }[] = [
+    const miniStats: { label: string; value: string; icon: ReactNode; sub?: string; subClass?: string; to?: string }[] = [
         { label: 'Views Oggi',            value: (analytics?.views_today ?? 0).toString(),                icon: <Eye size={18} className="text-cyan-400" /> },
         { label: 'Views Ieri',            value: (analytics?.views_yesterday ?? 0).toString(),            icon: <Eye size={18} className="text-zinc-400" /> },
         {
@@ -98,7 +98,8 @@ export default function Dashboard() {
             value: (analytics?.messages?.unread ?? 0).toString(),
             sub: `${analytics?.messages?.total ?? 0} totali`,
             subClass: 'text-zinc-500',
-            icon: <Mail size={18} className="text-blue-400" />
+            icon: <Mail size={18} className="text-blue-400" />,
+            to: '/admin/messages'
         },
         {
             label: 'Nuovi Iscritti (30 gg)',
@@ -201,18 +202,29 @@ export default function Dashboard() {
             {/* Mini Stat Cards [v1.19.0] */}
             {!analyticsError && (
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                    {miniStats.map((stat, i) => (
-                        <div key={i} className="bg-zinc-900 border border-zinc-800 p-4 rounded-xl">
-                            <div className="flex items-center justify-between mb-1">
-                                <p className="text-zinc-500 text-xs font-medium">{stat.label}</p>
-                                {stat.icon}
+                    {miniStats.map((stat, i) => {
+                        const inner = (
+                            <>
+                                <div className="flex items-center justify-between mb-1">
+                                    <p className="text-zinc-500 text-xs font-medium">{stat.label}</p>
+                                    {stat.icon}
+                                </div>
+                                <p className="text-xl font-bold text-white">{stat.value}</p>
+                                {stat.sub && (
+                                    <p className={`text-xs mt-1 ${stat.subClass}`}>{stat.sub}</p>
+                                )}
+                            </>
+                        );
+                        return stat.to ? (
+                            <Link key={i} to={stat.to} className="block bg-zinc-900 border border-zinc-800 p-4 rounded-xl hover:border-dis-green/50 transition-colors">
+                                {inner}
+                            </Link>
+                        ) : (
+                            <div key={i} className="bg-zinc-900 border border-zinc-800 p-4 rounded-xl">
+                                {inner}
                             </div>
-                            <p className="text-xl font-bold text-white">{stat.value}</p>
-                            {stat.sub && (
-                                <p className={`text-xs mt-1 ${stat.subClass}`}>{stat.sub}</p>
-                            )}
-                        </div>
-                    ))}
+                        );
+                    })}
                 </div>
             )}
 

@@ -406,6 +406,34 @@ export const api = {
         return res.json();
     },
 
+    // --- MESSAGGI CONTATTI (admin) ---
+    getMessages: async () => {
+        const res = await fetch(`${API_URL}/messages.php`, fetchConfig);
+        if (!res.ok) throw new Error('Errore recupero messaggi');
+        return res.json();
+    },
+    getMessage: async (id: number) => {
+        const res = await fetch(`${API_URL}/messages.php?id=${id}`, fetchConfig);
+        if (!res.ok) throw new Error('Errore recupero messaggio');
+        return res.json();
+    },
+    markMessageRead: async (id: number) => {
+        const res = await fetch(`${API_URL}/messages.php?id=${id}`, {
+            ...fetchConfig,
+            method: 'PUT',
+        });
+        if (!res.ok) throw new Error('Errore aggiornamento messaggio');
+        return res.json();
+    },
+    deleteMessage: async (id: number) => {
+        const res = await fetch(`${API_URL}/messages.php?id=${id}`, {
+            ...fetchConfig,
+            method: 'DELETE',
+        });
+        if (!res.ok) throw new Error('Errore eliminazione messaggio');
+        return res.json();
+    },
+
     // --- MEDIA ---
     uploadMedia: async (file: File) => {
         const formData = new FormData();

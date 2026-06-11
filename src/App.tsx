@@ -29,6 +29,7 @@ const ProjectEditor = React.lazy(() => import('./pages/admin/ProjectEditor'));
 const CategoryManager = React.lazy(() => import('./pages/admin/CategoryManager'));
 const TagsList = React.lazy(() => import('./pages/admin/TagsList'));
 const NewsletterAdmin = React.lazy(() => import('./pages/admin/NewsletterAdmin'));
+const MessagesList = React.lazy(() => import('./pages/admin/MessagesList'));
 
 const AllProjects = React.lazy(() => import('./pages/AllProjects'));
 const ContactPage = React.lazy(() => import('./pages/ContactPage'));
@@ -253,6 +254,7 @@ const router = createBrowserRouter([
           { path: 'categories', element: <CategoryManager />, loader: adminCategoriesLoader },
           { path: 'tags', element: <TagsList />, loader: adminTagsLoader },
           { path: 'newsletter', element: <NewsletterAdmin />, loader: adminNewsletterLoader },
+          { path: 'messages', element: <MessagesList /> },
         ]
       }
     ]

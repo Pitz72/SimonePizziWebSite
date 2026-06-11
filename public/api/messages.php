@@ -46,6 +46,26 @@ if ($method === 'GET') {
     try {
         $pdo = Database::connect();
         ensureMessagesTable($pdo);
+
+        // Dettaglio singolo messaggio completo: ?id=N
+        $id = (int)($_GET['id'] ?? 0);
+        if ($id) {
+            $stmt = $pdo->prepare(
+                "SELECT id, name, email, subject, message, read_at, created_at
+                 FROM messages
+                 WHERE id = :id"
+            );
+            $stmt->execute([':id' => $id]);
+            $row = $stmt->fetch();
+            if (!$row) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Messaggio non trovato.']);
+                exit;
+            }
+            echo json_encode($row);
+            exit;
+        }
+
         $rows = $pdo->query(
             "SELECT id, name, email, subject, LEFT(message, 200) AS preview,
                     read_at, created_at
