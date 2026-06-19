@@ -46,6 +46,12 @@ DirectoryIndex index.php index.html
 #
 # (Aggiungere i redirect specifici sotto questa riga quando necessario)
 
+# [v1.23.0] Vecchie categorie della struttura pre-categorie (gen 2026) ancora
+# nell'indice Google come 404. Redirect SOLO esatto (no sotto-path: gli articoli
+# di quella vecchia struttura sono stati rimossi e devono dare 404 reale via index.php).
+RedirectMatch 301 ^/software/?$ /progetti-software
+RedirectMatch 301 ^/libri/?$ /narrativa-e-pubblicazioni
+
 # [v1.5.10] Security Headers
 
 <IfModule mod_headers.c>

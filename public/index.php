@@ -153,6 +153,13 @@ if (count($uri_parts) === 0) {
     $catSlug  = $uri_parts[0];
 }
 
+// [SEO 404] Qualsiasi path non riconosciuto (es. 3+ segmenti come /sw/rlm/Per)
+// è rimasto 'homepage' di default: marcalo come 'notfound' per non servire
+// un soft-404 (stato 200 con contenuto vuoto), che Google penalizza.
+if ($pageType === 'homepage' && count($uri_parts) > 0) {
+    $pageType = 'notfound';
+}
+
 // ─────────────────────────────────────────────
 // 4. DATABASE QUERIES — Recupero dati per la pagina
 // ─────────────────────────────────────────────
@@ -358,6 +365,27 @@ try {
 }
 
 // ─────────────────────────────────────────────
+// 4b. [SEO 404] Rilevamento pagina inesistente
+// Articolo o categoria non trovati nel DB, oppure rotta sconosciuta:
+// invia un vero HTTP 404 + <meta robots noindex>, così Google smette di
+// trattarli come soft-404 e li rimuove dall'indice (motivo "Non trovata 404").
+// ─────────────────────────────────────────────
+$robotsTag  = '';
+$isNotFound = ($pageType === 'notfound')
+    || ($pageType === 'article'  && !$article)
+    || ($pageType === 'category' && !$categoryName);
+
+if ($isNotFound) {
+    http_response_code(404);
+    $pageType  = 'notfound';
+    $robotsTag = '<meta name="robots" content="noindex, follow" />';
+    $metaTitle = 'Pagina non trovata | Simone Pizzi';
+    $metaDesc  = 'La pagina che cerchi non esiste, è stata spostata o rimossa.';
+    $ogType    = 'website';
+    $jsonLd    = null;
+}
+
+// ─────────────────────────────────────────────
 // 5. RENDERING — Decisione crawler vs umano
 // ─────────────────────────────────────────────
 
@@ -516,6 +544,15 @@ if ($isCrawler && $pageType !== 'admin') {
         </main>';
     }
 
+    // ── Body per PAGINA NON TROVATA (404) ──
+    elseif ($pageType === 'notfound') {
+        $bodyContent = '
+        <main>
+            <h1>Pagina non trovata</h1>
+            <p>La pagina che cerchi non esiste, è stata spostata o rimossa. Torna alla <a href="' . $baseUrl . '/">home</a>.</p>
+        </main>';
+    }
+
     // ── Costruzione HTML completo per crawler ──
     $jsonLdScript = $jsonLd ? '<script type="application/ld+json">' . json_encode($jsonLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) . '</script>' : '';
 
@@ -528,7 +565,7 @@ if ($isCrawler && $pageType !== 'admin') {
     <title>' . $metaTitle . '</title>
     <meta name="description" content="' . esc($metaDesc) . '" />
     <link rel="canonical" href="' . esc($canonicalUrl) . '" />
-    
+    ' . $robotsTag . '
     <!-- Open Graph / Facebook / Telegram -->
     <meta property="og:type" content="' . $ogType . '" />
     <meta property="og:site_name" content="Simone Pizzi" />
@@ -580,7 +617,7 @@ if ($isCrawler && $pageType !== 'admin') {
     <meta name="title" content="' . esc($metaTitle) . '" />
     <meta name="description" content="' . esc($metaDesc) . '" />
     <link rel="canonical" href="' . esc($canonicalUrl) . '" />
-
+    ' . $robotsTag . '
     <!-- Open Graph / Facebook / Telegram -->
     <meta property="og:type" content="' . $ogType . '" />
     <meta property="og:site_name" content="Simone Pizzi" />
