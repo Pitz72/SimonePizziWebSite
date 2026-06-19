@@ -42,3 +42,6 @@ public/uploads/*
 
 # Cartella di pre-produzione (asset originali e backup sensibili)
 PRE-PRODUZIONE/
+
+# Cartella segreti (credenziali FTP/SFTP, mai in repo)
+.secrets/

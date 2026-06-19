@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLoaderData, useNavigate } from 'react-router-dom';
-import { Share2, Tag, Heart } from 'lucide-react';
+import { Share2, Tag, Heart, Clock } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { api } from '../api';
 import { PortfolioItem } from '../types';
@@ -13,6 +13,18 @@ import ReactionBar, { ReactionData } from './ReactionBar';
 const formatDate = (dateStr: string): string => {
     const d = new Date(dateStr);
     return d.toLocaleDateString('it-IT', { day: '2-digit', month: 'long', year: 'numeric' });
+};
+
+/**
+ * Tempo di lettura stimato in minuti: spoglia l'HTML dai tag, conta le parole
+ * e divide per 200 (media parole/minuto). Stessa formula usata nell'editor admin.
+ * Minimo 1 minuto.
+ */
+const computeReadingTime = (html?: string): number => {
+    if (!html) return 1;
+    const text = html.replace(/<[^>]+>/g, ' ').replace(/&[a-z#0-9]+;/gi, ' ');
+    const words = text.trim().split(/\s+/).filter(Boolean).length;
+    return Math.max(1, Math.ceil(words / 200));
 };
 
 const formatExternalUrl = (url?: string) => {
@@ -50,6 +62,8 @@ const SingleArticle: React.FC = () => {
 
     const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
     const [isLetterModalOpen, setIsLetterModalOpen] = React.useState(false);
+
+    const readingTime = computeReadingTime(article?.description);
 
     React.useEffect(() => {
         if (article) {
@@ -115,6 +129,11 @@ const SingleArticle: React.FC = () => {
                                 {formatDate(article.publishedAt)}
                             </span>
                         )}
+                        <span className="font-mono text-[11px] tracking-[0.1em] uppercase px-3 py-1.5 flex items-center gap-1.5"
+                            style={{ color: '#6a9070', border: '1px solid rgba(34,197,94,0.15)', background: 'rgba(5,8,10,0.4)', borderRadius: '999px' }}>
+                            <Clock size={10} />
+                            {readingTime} min di lettura
+                        </span>
                         {article.tags.map(tag => (
                             <span key={tag} className="font-mono text-[11px] tracking-[0.1em] uppercase px-3 py-1.5 text-black bg-dis-green flex items-center gap-1.5"
                                 style={{ borderRadius: '999px' }}>
