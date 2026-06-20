@@ -9,6 +9,7 @@ import ShareModal from './ShareModal';
 import LetterModal from './LetterModal';
 import NewsletterSignup from './NewsletterSignup';
 import ReactionBar, { ReactionData } from './ReactionBar';
+import FeaturedCard from './FeaturedCard';
 
 const formatDate = (dateStr: string): string => {
     const d = new Date(dateStr);
@@ -57,7 +58,7 @@ const sanitizeArticleHtml = (html: string): string => {
 };
 
 const SingleArticle: React.FC = () => {
-    const { article, reactions } = useLoaderData() as { article: PortfolioItem; reactions: ReactionData };
+    const { article, reactions, related } = useLoaderData() as { article: PortfolioItem; reactions: ReactionData; related: PortfolioItem[] };
     const navigate = useNavigate();
 
     const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
@@ -291,8 +292,25 @@ const SingleArticle: React.FC = () => {
                 </div>
             </div>
 
+            {/* ── ARTICOLI CORRELATI ─────────────────────────── */}
+            {related && related.length > 0 && (
+                <section className="mt-20 md:mt-28" style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px' }}>
+                    <div className="flex items-center gap-4 mb-8">
+                        <h2 className="font-serif text-white whitespace-nowrap" style={{ fontSize: 'clamp(1.4rem, 3vw, 2.1rem)', letterSpacing: '-0.02em' }}>
+                            Continua a leggere
+                        </h2>
+                        <div className="flex-1 h-px" style={{ background: 'rgba(34,197,94,0.15)' }} />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {related.map(item => (
+                            <FeaturedCard key={item.id} item={item} category={item.category} />
+                        ))}
+                    </div>
+                </section>
+            )}
+
             {/* ── NEWSLETTER ─────────────────────────────────── */}
-            <div className="max-w-2xl mx-auto mt-10 px-6">
+            <div className="max-w-2xl mx-auto mt-20 px-6">
                 <NewsletterSignup />
             </div>
         </article>

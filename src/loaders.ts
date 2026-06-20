@@ -1,7 +1,7 @@
 import { LoaderFunctionArgs, redirect } from 'react-router-dom';
 import { api } from './api';
 import { mapArticleToPortfolioItem, mapProjectToPortfolioItem } from './utils/mappers';
-import { CategoryItem } from './types';
+import { CategoryItem, PortfolioItem } from './types';
 
 /**
  * Loader per la protezione delle rotte Admin.
@@ -82,11 +82,25 @@ export const singleArticleLoader = async ({ params }: LoaderFunctionArgs) => {
     }
     
     const mappedArticle = mapArticleToPortfolioItem(article);
-    
+
     // Recupera le reazioni in parallelo dopo aver ottenuto l'id articolo
     const reactions = await api.getReactions(article.id);
-    
-    return { article: mappedArticle, reactions };
+
+    // Articoli correlati: stessa categoria, escluso l'articolo corrente, max 3.
+    // Fallback silenzioso a lista vuota: la sezione viene semplicemente nascosta.
+    let related: PortfolioItem[] = [];
+    try {
+        const relRes = await api.getArticles({ category: article.category, limit: 7 });
+        const relData = Array.isArray(relRes) ? relRes : relRes.data;
+        related = relData
+            .map(mapArticleToPortfolioItem)
+            .filter((a: PortfolioItem) => a.id !== mappedArticle.id)
+            .slice(0, 3);
+    } catch {
+        related = [];
+    }
+
+    return { article: mappedArticle, reactions, related };
 };
 
 // --- ADMIN LOADERS ---
