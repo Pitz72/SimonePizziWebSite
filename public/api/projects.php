@@ -4,6 +4,9 @@ require_once 'auth_helper.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH');
+// Contenuto modificabile da admin (visibilità, nome, ordine): niente cache browser
+// così hide/show e modifiche si propagano subito senza attendere la scadenza cache.
+header('Cache-Control: no-store, no-cache, must-revalidate');
 
 $pdo = Database::connect();
 $method = $_SERVER['REQUEST_METHOD'];

@@ -12,4 +12,4 @@ Tutta la pianificazione, lo stato corrente e le regole architetturali sono ora c
 - **[Archive (archive/)](archive/)**: Documenti di analisi passate, vecchie roadmap e studi tecnici archiviati.
 
 ---
-*Ultimo aggiornamento: 22 Maggio 2026 — v1.18.1*
+*Ultimo aggiornamento: 07 Luglio 2026 — v1.25.0*

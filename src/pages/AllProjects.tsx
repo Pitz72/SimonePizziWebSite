@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLoaderData, Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { EyeOff } from 'lucide-react';
 import { Project, CategoryItem } from '../types';
 import SEO from '../components/SEO';
 
@@ -46,13 +47,25 @@ const ProjectButton: React.FC<ProjectButtonProps> = ({ label, url, variant = 'pr
 };
 
 const ProjectCard: React.FC<{ project: Project; index: number }> = ({ project, index }) => {
+    // Un progetto nascosto (is_visible=0) arriva qui SOLO se sei loggato come admin:
+    // il server filtra i non visibili per i visitatori anonimi. Segnaliamolo con un badge
+    // così dal pannello non si scambia un nascosto per "ancora pubblico".
+    const isHidden = Number(project.is_visible) !== 1;
     return (
         <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: index * 0.06 }}
-            className="group relative w-full rounded-xl overflow-hidden border border-zinc-800 hover:border-zinc-600 transition-all duration-300 hover:shadow-xl hover:shadow-black/40"
+            className={`group relative w-full rounded-xl overflow-hidden border transition-all duration-300 hover:shadow-xl hover:shadow-black/40 ${
+                isHidden ? 'border-amber-500/60' : 'border-zinc-800 hover:border-zinc-600'
+            }`}
         >
+            {isHidden && (
+                <div className="absolute top-3 right-3 z-20 flex items-center gap-1.5 bg-amber-500 text-black text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full shadow-lg">
+                    <EyeOff size={12} />
+                    Nascosto
+                </div>
+            )}
             {project.cover_image ? (
                 /* Card con immagine: layout flex-col → immagine + pannello testo separato */
                 <div className="flex flex-col">

@@ -275,7 +275,7 @@ try {
 
         // Progetti recenti
         $projStmt = $pdo->query(
-            "SELECT id, name, category, description, cover_url 
+            "SELECT id, name, category, description 
              FROM projects 
              WHERE is_visible = 1 
              ORDER BY sort_order ASC 
@@ -312,7 +312,7 @@ try {
         $canonicalUrl = $baseUrl . '/tutti-i-progetti';
 
         $projStmt = $pdo->query(
-            "SELECT id, name, category, description, cover_url 
+            "SELECT id, name, category, description 
              FROM projects 
              WHERE is_visible = 1 
              ORDER BY sort_order ASC"

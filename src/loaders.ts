@@ -106,11 +106,26 @@ export const singleArticleLoader = async ({ params }: LoaderFunctionArgs) => {
 // --- ADMIN LOADERS ---
 
 export const adminDashboardLoader = async () => {
-    const [stats, analytics] = await Promise.all([
-        api.getStats(),
-        api.getAnalytics()
-    ]);
-    return { stats, analytics };
+    try {
+        const [stats, analytics] = await Promise.all([
+            api.getStats(),
+            api.getAnalytics()
+        ]);
+        return { stats, analytics };
+    } catch {
+        // Degrado morbido: se stats/analytics falliscono la dashboard mostra zeri
+        // invece di crashare (il componente accede a rawStats.* senza guardie).
+        const stats = {
+            total_articles: 0, total_media: 0, total_subscribers: 0,
+            total_views: 0, total_clicks: 0, system_status: 'Non disponibile'
+        };
+        const analytics = {
+            total_views: 0, total_clicks: 0, total_reactions: 0,
+            top_articles: [], top_articles_by_reactions: [],
+            clicks_by_button: [], reactions_by_type: [], weekly_views: []
+        };
+        return { stats, analytics };
+    }
 };
 
 export const adminArticlesLoader = async ({ request }: LoaderFunctionArgs) => {

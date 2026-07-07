@@ -1,6 +1,9 @@
 <?php
 require_once 'db.php';
 header('Content-Type: application/json');
+// Contenuto modificabile da admin (rinomina categorie, ordine): niente cache browser
+// così le modifiche si propagano subito senza attendere la scadenza cache o un hard refresh.
+header('Cache-Control: no-store, no-cache, must-revalidate');
 $pdo = Database::connect();
 try {
     $stmt = $pdo->query("SELECT id, name, slug, parent_id FROM categories ORDER BY sort_order ASC, name ASC");
