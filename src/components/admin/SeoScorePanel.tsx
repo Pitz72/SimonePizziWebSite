@@ -136,46 +136,50 @@ function computeChecks(
     // Google valuta il testo, non la tassonomia: titolo, apertura e corpo.
     const kw = norm(focusKeyword.trim());
 
+    // Tre controlli indipendenti, un punto ciascuno. Nessun punto "regalato" per
+    // aver solo compilato il campo, e nessun tutto-o-niente su due cose insieme:
+    // ogni riga dice esattamente quale dei tre posti manca.
+    const kwLabel = focusKeyword.trim();
+
     if (!kw) {
-        // Una riga sola: tre avvisi identici per un unico campo vuoto sono rumore.
-        // Il costo in punti va detto esplicitamente, altrimenti il punteggio basso
-        // sembra arbitrario.
-        checks.push({
-            label: 'Parola chiave principale',
-            status: 'warn',
-            message: 'Non impostata: mancano 3 punti su 9. Scrivi il termine su cui vuoi essere trovato nel campo qui a sinistra — poi controllo se lo usi nel titolo, nell\'apertura e nel testo.',
-        });
+        const nota = 'Imposta la Parola chiave principale (campo a sinistra): vale 3 punti su 9.';
+        checks.push({ label: 'Chiave nel titolo',   status: 'warn', message: nota });
+        checks.push({ label: 'Chiave nel riassunto', status: 'warn', message: nota });
+        checks.push({ label: 'Chiave nel testo',     status: 'warn', message: nota });
     } else {
         const plain = norm(stripHtml(content));
         const inTitle = norm(title).includes(kw);
         const inExcerpt = norm(excerpt).includes(kw);
         const inHeading = norm((content.match(/<h[23][^>]*>(.*?)<\/h[23]>/gis) || []).join(' ')).includes(kw);
-        const occurrences = kw ? plain.split(kw).length - 1 : 0;
+        const occurrences = plain.split(kw).length - 1;
 
-        checks.push({ label: 'Parola chiave principale', status: 'ok', message: `Impostata: "${focusKeyword.trim()}".` });
-        score += 1;
-
-        if (inTitle && inExcerpt) {
-            checks.push({ label: 'Chiave in titolo e apertura', status: 'ok', message: 'Presente in entrambi: è il posto che conta di più.' });
+        // 7. Nel titolo — è la riga che Google mostra come link.
+        if (inTitle) {
+            checks.push({ label: 'Chiave nel titolo', status: 'ok', message: `"${kwLabel}" compare nel titolo.` });
             score += 1;
-        } else if (inTitle || inExcerpt) {
-            checks.push({ label: 'Chiave in titolo e apertura', status: 'warn', message: `Presente solo ${inTitle ? 'nel titolo' : "nel riassunto"}. Metterla in entrambi vale mezzo punto in più.` });
-            score += 0.5;
         } else {
-            checks.push({ label: 'Chiave in titolo e apertura', status: 'warn', message: 'Non compare né nel titolo né nel riassunto: sono i due punti che Google legge per primi.' });
+            checks.push({ label: 'Chiave nel titolo', status: 'warn', message: `"${kwLabel}" non compare nel titolo, che è la riga cliccabile nei risultati di ricerca.` });
         }
 
-        // Densità: sotto 2 occorrenze il tema non è chiaro, sopra ~1 ogni 100
-        // parole si scade nella ripetizione forzata che Google penalizza.
+        // 8. Nel riassunto — è il testo sotto il link nei risultati di ricerca.
+        if (inExcerpt) {
+            checks.push({ label: 'Chiave nel riassunto', status: 'ok', message: `"${kwLabel}" compare nel Breve Riassunto.` });
+            score += 1;
+        } else {
+            checks.push({ label: 'Chiave nel riassunto', status: 'warn', message: `"${kwLabel}" non compare nel Breve Riassunto, il testo mostrato sotto il link su Google.` });
+        }
+
+        // 9. Nel corpo — presenza reale, con un tetto oltre il quale la ripetizione
+        // diventa forzata (circa una ogni 100 parole, minimo 4).
         const maxSensible = Math.max(4, Math.round(wordCount / 100));
         if (occurrences === 0) {
-            checks.push({ label: 'Chiave nel testo', status: 'error', message: 'Mai citata nell\'articolo. Se il pezzo parla davvero di questo, la parola dovrebbe comparirci.' });
+            checks.push({ label: 'Chiave nel testo', status: 'error', message: `"${kwLabel}" non compare mai nell'articolo. Se il pezzo parla di questo, dovrebbe esserci.` });
         } else if (occurrences > maxSensible) {
-            checks.push({ label: 'Chiave nel testo', status: 'warn', message: `Ripetuta ${occurrences} volte in ${wordCount} parole: troppe, sembra forzata.` });
+            checks.push({ label: 'Chiave nel testo', status: 'warn', message: `Ripetuta ${occurrences} volte in ${wordCount} parole: troppe, suona forzata (limite consigliato ${maxSensible}).` });
             score += 0.5;
         } else {
             const bonus = inHeading ? ', anche in un sottotitolo' : '';
-            checks.push({ label: 'Chiave nel testo', status: 'ok', message: `Citata ${occurrences} volte${bonus}: dosaggio giusto.` });
+            checks.push({ label: 'Chiave nel testo', status: 'ok', message: `Citata ${occurrences} ${occurrences === 1 ? 'volta' : 'volte'}${bonus}: dosaggio giusto.` });
             score += 1;
         }
     }
