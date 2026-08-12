@@ -193,6 +193,38 @@ export const api = {
         if (!res.ok) throw new Error('Errore aggiornamento pin categoria');
         return res.json();
     },
+    // [v1.26.0] Crea una copia dell'articolo come bozza. Ritorna il nuovo id.
+    duplicateArticle: async (sourceId: number): Promise<{ id: number; slug: string; title: string }> => {
+        const res = await fetch(`${API_URL}/articles.php`, {
+            ...fetchConfig,
+            method: 'POST',
+            body: JSON.stringify({ action: 'duplicate', source_id: sourceId })
+        });
+        if (!res.ok) {
+            const r = await res.json().catch(() => ({}));
+            throw new Error(r.error || 'Errore duplicazione articolo');
+        }
+        return res.json();
+    },
+    // [v1.26.0] Azioni multiple dalla lista admin.
+    bulkSetArticleStatus: async (ids: number[], status: 'draft' | 'published') => {
+        const res = await fetch(`${API_URL}/articles.php`, {
+            ...fetchConfig,
+            method: 'PATCH',
+            body: JSON.stringify({ ids, status })
+        });
+        if (!res.ok) throw new Error('Errore aggiornamento stato multiplo');
+        return res.json();
+    },
+    bulkDeleteArticles: async (ids: number[]) => {
+        const res = await fetch(`${API_URL}/articles.php`, {
+            ...fetchConfig,
+            method: 'DELETE',
+            body: JSON.stringify({ ids })
+        });
+        if (!res.ok) throw new Error('Errore eliminazione multipla');
+        return res.json();
+    },
     deleteArticle: async (id: number) => {
         const res = await fetch(`${API_URL}/articles.php?id=${id}`, {
             ...fetchConfig,
@@ -282,6 +314,14 @@ export const api = {
     // --- TAGS (v1.7.0) ---
     getTags: async () => {
         const res = await fetch(`${API_URL}/tags.php`, fetchConfig);
+        if (!res.ok) throw new Error('Errore recupero tag');
+        return res.json();
+    },
+    // [v1.26.0] Lookup pubblico per la pagina archivio /tag/:slug.
+    // Ritorna null se il tag non esiste, così il loader può alzare un 404 vero.
+    getTagBySlug: async (slug: string): Promise<{ id: number; name: string; slug: string } | null> => {
+        const res = await fetch(`${API_URL}/tags.php?slug=${encodeURIComponent(slug)}`, fetchConfig);
+        if (res.status === 404) return null;
         if (!res.ok) throw new Error('Errore recupero tag');
         return res.json();
     },

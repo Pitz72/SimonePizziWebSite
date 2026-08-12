@@ -1,4 +1,9 @@
-# MASTER PLAN — Simone Pizzi Portfolio Creativo (COMPLETATO ✅)
+# MASTER PLAN — Simone Pizzi Portfolio Creativo (ARCHIVIATO ✅)
+
+> ⚠️ **Documento storico, chiuso alla v1.11.1 (25 Aprile 2026). NON è il backlog.**
+> Lo sviluppo è proseguito fino alla v1.26.0. Per sapere cosa è fatto e cosa manca
+> vedere **[docs/25-04-2026-roadmap.md](../25-04-2026-roadmap.md)** e i changelog.
+> Questo file resta come racconto di come il progetto è arrivato alla v1.11.1.
 
 ## Documento Finale di Chiusura Progetto
 

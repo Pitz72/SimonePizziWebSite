@@ -1,13 +1,19 @@
 import { useEffect, useState } from 'react';
-import { Link, useLoaderData, useSearchParams } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Search, ExternalLink, Calendar, ChevronLeft, ChevronRight, Filter, X, Pin, PinOff } from 'lucide-react';
+import { Link, useLoaderData, useSearchParams, useNavigate } from 'react-router-dom';
+import { Plus, Edit2, Trash2, Search, ExternalLink, Calendar, ChevronLeft, ChevronRight, Filter, X, Pin, PinOff, Copy, Eye, EyeOff, Loader2 } from 'lucide-react';
 import { api } from '../../api';
 import { useCategories } from '../../hooks/useCategories';
 
 export default function ArticlesList() {
     const { categories } = useCategories();
+    const navigate = useNavigate();
     const loaderData = useLoaderData() as { data: any[], total: number };
     const [searchParams, setSearchParams] = useSearchParams();
+
+    // [v1.26.0] Selezione multipla e azioni di gruppo.
+    const [selected, setSelected] = useState<number[]>([]);
+    const [bulkBusy, setBulkBusy] = useState(false);
+    const [duplicatingId, setDuplicatingId] = useState<number | null>(null);
     
     // Sincronizziamo dati dal loader
     const [articles, setArticles] = useState<any[]>(loaderData.data || []);
@@ -38,6 +44,9 @@ export default function ArticlesList() {
         if (loaderData) {
             setArticles(loaderData.data || []);
             setTotal(loaderData.total || 0);
+            // La selezione vale per la pagina corrente: cambiando pagina o filtro
+            // le righe non sono più a schermo e tenerle selezionate è pericoloso.
+            setSelected([]);
         }
     }, [loaderData]);
 
@@ -83,6 +92,63 @@ export default function ArticlesList() {
             setTotal(prev => prev - 1);
         } catch (err) {
             alert('Errore eliminazione articolo');
+        }
+    };
+
+    // ── [v1.26.0] Duplica articolo ──────────────────────────────
+    const handleDuplicate = async (id: number, title: string) => {
+        setDuplicatingId(id);
+        try {
+            const res = await api.duplicateArticle(id);
+            // Si va dritti nell'editor della copia: duplicare serve quasi sempre
+            // come punto di partenza per scrivere, non per lasciarla lì.
+            navigate(`/admin/articles/edit/${res.id}`);
+        } catch (err: any) {
+            alert(err.message || `Errore nella duplicazione di "${title}"`);
+            setDuplicatingId(null);
+        }
+    };
+
+    // ── [v1.26.0] Azioni multiple ───────────────────────────────
+    const allOnPageSelected = articles.length > 0 && selected.length === articles.length;
+
+    const toggleSelectAll = () => {
+        setSelected(allOnPageSelected ? [] : articles.map(a => a.id));
+    };
+
+    const toggleSelectOne = (id: number) => {
+        setSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+    };
+
+    const handleBulkStatus = async (status: 'draft' | 'published') => {
+        const label = status === 'published' ? 'pubblicare' : 'rimettere in bozza';
+        if (!window.confirm(`Vuoi ${label} ${selected.length} articoli selezionati?`)) return;
+        setBulkBusy(true);
+        try {
+            await api.bulkSetArticleStatus(selected, status);
+            setArticles(prev => prev.map(a => selected.includes(a.id) ? { ...a, status } : a));
+            setSelected([]);
+        } catch (err: any) {
+            alert(err.message || 'Errore durante l\'aggiornamento multiplo');
+        } finally {
+            setBulkBusy(false);
+        }
+    };
+
+    const handleBulkDelete = async () => {
+        if (!window.confirm(
+            `Stai per eliminare DEFINITIVAMENTE ${selected.length} articoli.\n\nL'operazione non è reversibile. Procedere?`
+        )) return;
+        setBulkBusy(true);
+        try {
+            const res = await api.bulkDeleteArticles(selected);
+            setArticles(prev => prev.filter(a => !selected.includes(a.id)));
+            setTotal(prev => Math.max(0, prev - (res?.affected ?? selected.length)));
+            setSelected([]);
+        } catch (err: any) {
+            alert(err.message || 'Errore durante l\'eliminazione multipla');
+        } finally {
+            setBulkBusy(false);
         }
     };
 
@@ -217,23 +283,75 @@ export default function ArticlesList() {
                     </div>
                 </div>
 
+                {/* [v1.26.0] Barra azioni multiple — compare solo con righe selezionate */}
+                {selected.length > 0 && (
+                    <div className="px-4 py-3 bg-dis-green/10 border-b border-dis-green/30 flex flex-wrap items-center gap-3 animate-in fade-in duration-200">
+                        <span className="text-sm font-bold text-white">
+                            {selected.length} selezionat{selected.length === 1 ? 'o' : 'i'}
+                        </span>
+                        <span className="text-[10px] text-zinc-400 italic">su questa pagina</span>
+
+                        <div className="flex flex-wrap items-center gap-2 ml-auto">
+                            <button
+                                onClick={() => handleBulkStatus('published')}
+                                disabled={bulkBusy}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded-lg text-xs font-bold text-zinc-200 hover:border-dis-green hover:text-white transition-colors disabled:opacity-40"
+                            >
+                                <Eye size={14} /> Pubblica
+                            </button>
+                            <button
+                                onClick={() => handleBulkStatus('draft')}
+                                disabled={bulkBusy}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-zinc-900 border border-zinc-700 rounded-lg text-xs font-bold text-zinc-200 hover:border-orange-400 hover:text-white transition-colors disabled:opacity-40"
+                            >
+                                <EyeOff size={14} /> Metti in bozza
+                            </button>
+                            <button
+                                onClick={handleBulkDelete}
+                                disabled={bulkBusy}
+                                className="flex items-center gap-1.5 px-3 py-1.5 bg-red-500/10 border border-red-500/40 rounded-lg text-xs font-bold text-red-400 hover:bg-red-500/20 hover:text-red-300 transition-colors disabled:opacity-40"
+                            >
+                                {bulkBusy ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />} Elimina
+                            </button>
+                            <button
+                                onClick={() => setSelected([])}
+                                disabled={bulkBusy}
+                                className="p-1.5 text-zinc-500 hover:text-white transition-colors disabled:opacity-40"
+                                title="Annulla selezione"
+                            >
+                                <X size={16} />
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse table-fixed">
                         <thead>
                             <tr className="bg-zinc-950/50 text-zinc-400 text-sm border-b border-zinc-800">
-                                <th className="p-4 font-medium w-[30%]">Titolo</th>
-                                <th className="p-4 font-medium w-[17%]">Categoria</th>
-                                <th className="p-4 font-medium w-[12%]">Stato</th>
-                                <th className="p-4 font-medium w-[13%]">Data</th>
-                                <th className="p-4 font-medium w-[7%] text-center" title="Vetrina Homepage">★</th>
-                                <th className="p-4 font-medium w-[7%] text-center" title="Articolo di Riferimento per la Categoria">📌</th>
-                                <th className="p-4 font-medium w-[14%] text-right">Azioni</th>
+                                <th className="p-4 font-medium w-[4%]">
+                                    <input
+                                        type="checkbox"
+                                        checked={allOnPageSelected}
+                                        onChange={toggleSelectAll}
+                                        disabled={articles.length === 0}
+                                        className="w-4 h-4 accent-dis-green bg-zinc-900 border-zinc-700 rounded cursor-pointer"
+                                        title="Seleziona tutti gli articoli di questa pagina"
+                                    />
+                                </th>
+                                <th className="p-4 font-medium w-[27%]">Titolo</th>
+                                <th className="p-4 font-medium w-[16%]">Categoria</th>
+                                <th className="p-4 font-medium w-[11%]">Stato</th>
+                                <th className="p-4 font-medium w-[12%]">Data</th>
+                                <th className="p-4 font-medium w-[6%] text-center" title="Vetrina Homepage">★</th>
+                                <th className="p-4 font-medium w-[6%] text-center" title="Articolo di Riferimento per la Categoria">📌</th>
+                                <th className="p-4 font-medium w-[18%] text-right">Azioni</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-800/50">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={7} className="p-12 text-center">
+                                    <td colSpan={8} className="p-12 text-center">
                                         <div className="flex flex-col items-center gap-3">
                                             <div className="w-8 h-8 border-2 border-dis-green border-t-transparent rounded-full animate-spin" />
                                             <span className="text-zinc-500 text-sm font-medium">Sincronizzazione dati...</span>
@@ -242,7 +360,7 @@ export default function ArticlesList() {
                                 </tr>
                             ) : articles.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="p-12 text-center">
+                                    <td colSpan={8} className="p-12 text-center">
                                         <div className="flex flex-col items-center gap-2 opacity-40">
                                             <Filter size={32} className="text-zinc-600" />
                                             <span className="text-zinc-500 text-sm">Nessun articolo corrisponde ai filtri selezionati.</span>
@@ -251,7 +369,19 @@ export default function ArticlesList() {
                                 </tr>
                             ) : (
                                 articles.map(article => (
-                                    <tr key={article.id} className="hover:bg-zinc-800/30 transition-colors group">
+                                    <tr
+                                        key={article.id}
+                                        className={`hover:bg-zinc-800/30 transition-colors group ${selected.includes(article.id) ? 'bg-dis-green/5' : ''}`}
+                                    >
+                                        <td className="p-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={selected.includes(article.id)}
+                                                onChange={() => toggleSelectOne(article.id)}
+                                                className="w-4 h-4 accent-dis-green bg-zinc-900 border-zinc-700 rounded cursor-pointer"
+                                                aria-label={`Seleziona ${article.title}`}
+                                            />
+                                        </td>
                                         <td className="p-4 min-w-0">
                                             <p className="font-medium text-white group-hover:text-dis-green transition-colors truncate">{article.title}</p>
                                             <p className="text-sm text-zinc-500 mt-1 truncate">{article.slug}</p>
@@ -323,12 +453,41 @@ export default function ArticlesList() {
                                         </td>
                                         <td className="p-4">
                                             <div className="flex items-center justify-end gap-2">
-                                                <a href={`/${article.category}/${article.slug}`} target="_blank" rel="noreferrer" className="p-2 text-zinc-400 hover:text-blue-400 hover:bg-zinc-800 rounded transition-colors" title="Vedi Anteprima / Vedi sul sito">
-                                                    <ExternalLink size={18} />
-                                                </a>
+                                                {/* [v1.26.0] Le bozze e gli articoli programmati non hanno una
+                                                    URL pubblica: si aprono in anteprima, altrimenti darebbero 404. */}
+                                                {(() => {
+                                                    const isLive = article.status === 'published' && new Date(article.published_at) <= new Date();
+                                                    const href = isLive
+                                                        ? `/${article.category}/${article.slug}`
+                                                        : `/${article.category}/${article.slug}?preview=1`;
+                                                    return (
+                                                        <a
+                                                            href={href}
+                                                            target="_blank"
+                                                            /* niente 'noreferrer': servirebbe a poco e può
+                                                               impedire l'invio del cookie SameSite=Strict
+                                                               necessario all'anteprima delle bozze */
+                                                            rel="noopener"
+                                                            className={`p-2 hover:bg-zinc-800 rounded transition-colors ${isLive ? 'text-zinc-400 hover:text-blue-400' : 'text-orange-400/70 hover:text-orange-400'}`}
+                                                            title={isLive ? 'Vedi sul sito' : 'Anteprima (non ancora pubblico)'}
+                                                        >
+                                                            <ExternalLink size={18} />
+                                                        </a>
+                                                    );
+                                                })()}
                                                 <Link to={`/admin/articles/edit/${article.id}`} className="p-2 text-zinc-400 hover:text-dis-green hover:bg-zinc-800 rounded transition-colors" title="Modifica">
                                                     <Edit2 size={18} />
                                                 </Link>
+                                                <button
+                                                    onClick={() => handleDuplicate(article.id, article.title)}
+                                                    disabled={duplicatingId !== null}
+                                                    className="p-2 text-zinc-400 hover:text-blue-400 hover:bg-zinc-800 rounded transition-colors disabled:opacity-40"
+                                                    title="Duplica come bozza"
+                                                >
+                                                    {duplicatingId === article.id
+                                                        ? <Loader2 size={18} className="animate-spin" />
+                                                        : <Copy size={18} />}
+                                                </button>
                                                 <button onClick={() => handleDelete(article.id, article.title)} className="p-2 text-zinc-400 hover:text-red-400 hover:bg-zinc-800 rounded transition-colors" title="Elimina">
                                                     <Trash2 size={18} />
                                                 </button>

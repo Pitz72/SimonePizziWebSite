@@ -1,15 +1,17 @@
 import React from 'react';
-import { useLoaderData, useNavigate } from 'react-router-dom';
+import { useLoaderData, useNavigate, Link } from 'react-router-dom';
 import { Share2, Tag, Heart, Clock } from 'lucide-react';
 import DOMPurify from 'dompurify';
 import { api } from '../api';
 import { PortfolioItem } from '../types';
+import { slugify } from '../utils/slugify';
 import SEO from './SEO';
 import ShareModal from './ShareModal';
 import LetterModal from './LetterModal';
 import NewsletterSignup from './NewsletterSignup';
 import ReactionBar, { ReactionData } from './ReactionBar';
 import FeaturedCard from './FeaturedCard';
+import TableOfContents, { buildToc } from './TableOfContents';
 
 const formatDate = (dateStr: string): string => {
     const d = new Date(dateStr);
@@ -58,7 +60,10 @@ const sanitizeArticleHtml = (html: string): string => {
 };
 
 const SingleArticle: React.FC = () => {
-    const { article, reactions, related } = useLoaderData() as { article: PortfolioItem; reactions: ReactionData; related: PortfolioItem[] };
+    const { article, reactions, related, isPreview, previewStatus } = useLoaderData() as {
+        article: PortfolioItem; reactions: ReactionData; related: PortfolioItem[];
+        isPreview?: boolean; previewStatus?: string;
+    };
     const navigate = useNavigate();
 
     const [isShareModalOpen, setIsShareModalOpen] = React.useState(false);
@@ -66,12 +71,22 @@ const SingleArticle: React.FC = () => {
 
     const readingTime = computeReadingTime(article?.description);
 
+    // [v1.26.0] Sanificazione + indice in un solo passaggio: buildToc inietta gli
+    // id sui titoli DOPO DOMPurify (prima verrebbero rimossi) e restituisce l'HTML
+    // definitivo da renderizzare. Ricalcolato solo al cambio di contenuto.
+    const toc = React.useMemo(
+        () => buildToc(sanitizeArticleHtml(article?.description || '')),
+        [article?.description]
+    );
+
     React.useEffect(() => {
         if (article) {
-            api.trackView(article.id);
+            // In anteprima non si contano le visite: falserebbe le statistiche
+            // dell'articolo con le riletture dell'autore.
+            if (!isPreview) api.trackView(article.id);
             window.scrollTo(0, 0);
         }
-    }, [article.id]);
+    }, [article.id, isPreview]);
 
     if (!article) return null;
 
@@ -80,6 +95,28 @@ const SingleArticle: React.FC = () => {
             <SEO title={article.title} description={article.summary} image={article.imageUrl} />
             <ShareModal isOpen={isShareModalOpen} onClose={() => setIsShareModalOpen(false)} url={window.location.href} title={article.title} />
             <LetterModal isOpen={isLetterModalOpen} onClose={() => setIsLetterModalOpen(false)} />
+
+            {/* ── BANNER ANTEPRIMA (v1.26.0) ──────────────────
+                Visibile solo con ?preview=1. La pagina è noindex e la visita
+                non viene conteggiata. Ancorato in basso: l'Header del sito è
+                già fixed in alto (z-50) e una barra superiore lo coprirebbe. */}
+            {isPreview && (
+                <div
+                    className="fixed bottom-0 left-0 right-0 z-[90] px-6 py-2.5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-center"
+                    style={{ background: '#f59e0b', color: '#1c1200', boxShadow: '0 -2px 20px rgba(0,0,0,0.4)' }}
+                >
+                    <span className="font-mono text-[11px] tracking-[0.14em] uppercase font-bold">
+                        Modalità Anteprima
+                        {previewStatus === 'draft' ? ' — questo articolo è una BOZZA' : ' — non pubblico'}
+                    </span>
+                    <span className="font-mono text-[11px] opacity-80">
+                        Nessuno può vederla senza login. Visita non conteggiata.
+                    </span>
+                    <Link to="/admin/articles" className="font-mono text-[11px] font-bold underline underline-offset-2">
+                        Torna al pannello
+                    </Link>
+                </div>
+            )}
 
             {/* ── HERO ───────────────────────────────────────── */}
             <header className="relative w-full min-h-[60vh] md:min-h-[70vh] flex items-end pt-32">
@@ -135,12 +172,18 @@ const SingleArticle: React.FC = () => {
                             <Clock size={10} />
                             {readingTime} min di lettura
                         </span>
-                        {article.tags.map(tag => (
-                            <span key={tag} className="font-mono text-[11px] tracking-[0.1em] uppercase px-3 py-1.5 text-black bg-dis-green flex items-center gap-1.5"
-                                style={{ borderRadius: '999px' }}>
+                        {/* [v1.26.0] Ogni tag porta al proprio archivio /tag/:slug */}
+                        {article.tags.map((tag, i) => (
+                            <Link
+                                key={tag}
+                                to={`/tag/${article.tagSlugs?.[i] || slugify(tag)}`}
+                                className="font-mono text-[11px] tracking-[0.1em] uppercase px-3 py-1.5 text-black bg-dis-green flex items-center gap-1.5 transition-all hover:bg-green-300 hover:scale-[1.04]"
+                                style={{ borderRadius: '999px' }}
+                                title={`Vedi tutti gli articoli con il tag ${tag}`}
+                            >
                                 <Tag size={10} />
                                 {tag}
-                            </span>
+                            </Link>
                         ))}
                     </div>
 
@@ -158,23 +201,35 @@ const SingleArticle: React.FC = () => {
 
             {/* ── READING VIEW ───────────────────────────────── */}
             <div className="relative z-20" style={{ background: '#05080a' }}>
-                <div
-                    className="
-                        mx-auto px-6 md:px-10 py-16 md:py-24
-                        prose prose-invert prose-lg md:prose-xl max-w-none
-                        prose-headings:font-serif prose-headings:font-normal prose-headings:tracking-tight
-                        prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:pb-4
-                        prose-p:leading-relaxed prose-p:mb-8
-                        prose-a:text-dis-green prose-a:no-underline hover:prose-a:underline
-                        prose-img:shadow-2xl
-                        prose-blockquote:border-l-4 prose-blockquote:border-dis-green prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:not-italic prose-blockquote:text-v3-fg
-                    "
-                    style={{
-                        maxWidth: '820px',
-                        color: '#d4e8d8',
-                    }}
-                    dangerouslySetInnerHTML={{ __html: sanitizeArticleHtml(article.description) }}
-                />
+                <div className="mx-auto flex justify-center gap-10 px-6 md:px-10 py-16 md:py-24" style={{ maxWidth: '1400px' }}>
+
+                    {/* Indice sticky (solo desktop largo) */}
+                    <aside className="hidden xl:block shrink-0" style={{ width: '220px' }}>
+                        <TableOfContents items={toc.items} variant="sidebar" />
+                    </aside>
+
+                    <div className="w-full" style={{ maxWidth: '820px' }}>
+                        {/* Indice collassabile (mobile/tablet) */}
+                        <TableOfContents items={toc.items} variant="inline" />
+
+                        <div
+                            className="
+                                prose prose-invert prose-lg md:prose-xl max-w-none
+                                prose-headings:font-serif prose-headings:font-normal prose-headings:tracking-tight
+                                prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-6 prose-h2:pb-4
+                                prose-p:leading-relaxed prose-p:mb-8
+                                prose-a:text-dis-green prose-a:no-underline hover:prose-a:underline
+                                prose-img:shadow-2xl
+                                prose-blockquote:border-l-4 prose-blockquote:border-dis-green prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:not-italic prose-blockquote:text-v3-fg
+                            "
+                            style={{ color: '#d4e8d8' }}
+                            dangerouslySetInnerHTML={{ __html: toc.html }}
+                        />
+                    </div>
+
+                    {/* Contrappeso: tiene il testo otticamente centrato quando c'è l'indice */}
+                    <div className="hidden xl:block shrink-0" style={{ width: '220px' }} aria-hidden="true" />
+                </div>
             </div>
 
             {/* ── REACTION BAR ───────────────────────────────── */}

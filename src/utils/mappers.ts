@@ -1,4 +1,5 @@
 import { PortfolioItem, Category } from '../types';
+import { slugify } from './slugify';
 
 /**
  * Mappa un record grezzo dal database (Article) nel tipo PortfolioItem usato dal frontend.
@@ -12,8 +13,15 @@ const parseTags = (tags: any): string[] => {
 
 export const mapArticleToPortfolioItem = (article: any): PortfolioItem => {
     const tags = parseTags(article.tags);
+    // [v1.26.0] Slug dei tag per costruire i link /tag/:slug. Il backend li
+    // restituisce nello stesso ordine dei nomi (entrambi ORDER BY name).
+    // Fallback su slugify solo per gli articoli legacy che hanno ancora i tag
+    // nella vecchia colonna CSV e nessuna riga in article_tags.
+    const rawSlugs = parseTags(article.tag_slugs);
+    const tagSlugs = tags.map((name, i) => rawSlugs[i] || slugify(name));
     return {
         id: article.id,
+        tagSlugs,
         slug: article.slug,
         title: article.title,
         summary: article.excerpt || '',
@@ -45,6 +53,7 @@ export const mapProjectToPortfolioItem = (project: any): PortfolioItem => {
         imageUrl: project.cover_image || '/api/placeholder/800/600',
         category: project.category as Category,
         tags: [],
+        tagSlugs: [],
         isFeatured: false,
         publishedAt: project.created_at,
         link: project.button_a_url || undefined,

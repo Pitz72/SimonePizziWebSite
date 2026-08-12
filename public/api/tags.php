@@ -4,6 +4,9 @@ require_once 'auth_helper.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
+// [v1.26.0] Endpoint ora anche pubblico (pagine /tag/:slug): stessa politica
+// degli altri endpoint dinamici, così una rinomina tag si propaga subito.
+header('Cache-Control: no-store, no-cache, must-revalidate');
 
 $pdo = Database::connect();
 $method = $_SERVER['REQUEST_METHOD'];
@@ -26,9 +29,43 @@ function generateTagSlug($title, $pdo) {
 
 try {
     if ($method === 'GET') {
+        // [v1.26.0] Lookup pubblico per slug — alimenta la pagina archivio /tag/:slug.
+        // Restituisce 404 se il tag non esiste, così il loader React può alzare
+        // una Response 404 invece di mostrare un archivio vuoto (soft-404).
+        if (isset($_GET['slug'])) {
+            $stmt = $pdo->prepare("SELECT id, name, slug FROM tags WHERE slug = ? LIMIT 1");
+            $stmt->execute([trim($_GET['slug'])]);
+            $tag = $stmt->fetch();
+            if (!$tag) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Tag non trovato']);
+                exit;
+            }
+            echo json_encode($tag);
+            exit;
+        }
+
+        // Elenco completo. Con ?with_counts=1 aggiunge il numero di articoli
+        // PUBBLICATI per tag (usato per non generare pagine tag vuote).
+        if (isset($_GET['with_counts'])) {
+            date_default_timezone_set('Europe/Rome');
+            $stmt = $pdo->prepare(
+                "SELECT t.id, t.name, t.slug,
+                        (SELECT COUNT(*) FROM article_tags at2
+                          JOIN articles a2 ON a2.id = at2.article_id
+                         WHERE at2.tag_id = t.id
+                           AND a2.status = 'published'
+                           AND (a2.published_at IS NULL OR a2.published_at <= ?)) AS article_count
+                 FROM tags t ORDER BY t.name ASC"
+            );
+            $stmt->execute([date('Y-m-d H:i:s')]);
+            echo json_encode($stmt->fetchAll());
+            exit;
+        }
+
         $stmt = $pdo->query("SELECT id, name, slug FROM tags ORDER BY name ASC");
         echo json_encode($stmt->fetchAll());
-    } 
+    }
     elseif ($method === 'POST') {
         Auth::check();
         $data = json_decode(file_get_contents('php://input'), true);

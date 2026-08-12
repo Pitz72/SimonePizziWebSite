@@ -72,16 +72,43 @@ export const categoryArticlesLoader = async ({ params }: LoaderFunctionArgs) => 
     return { category, articles };
 };
 
-export const singleArticleLoader = async ({ params }: LoaderFunctionArgs) => {
+/**
+ * [v1.26.0] Archivio per tag: /tag/:tagSlug.
+ * Un tag inesistente o senza articoli pubblicati alza un 404 vero, coerente
+ * con quanto index.php serve ai crawler (niente pagine archivio vuote indicizzate).
+ */
+export const tagArticlesLoader = async ({ params }: LoaderFunctionArgs) => {
+    const { tagSlug } = params;
+    if (!tagSlug) throw new Response('Tag non specificato', { status: 404 });
+
+    const tag = await api.getTagBySlug(tagSlug);
+    if (!tag) throw new Response('Tag non trovato', { status: 404 });
+
+    const res = await api.getArticles({ tag: tag.slug, limit: 100 });
+    const data = Array.isArray(res) ? res : res.data;
+    const articles = data.map(mapArticleToPortfolioItem);
+
+    if (articles.length === 0) throw new Response('Tag senza articoli', { status: 404 });
+
+    return { tag, articles };
+};
+
+export const singleArticleLoader = async ({ params, request }: LoaderFunctionArgs) => {
     const { projectSlug } = params;
     if (!projectSlug) throw new Error("Slug non specificato");
-    
+
+    // [v1.26.0] Anteprima bozza: articles.php restituisce già gli articoli non
+    // pubblicati quando esiste una sessione admin. Qui serve solo sapere che
+    // siamo in anteprima, per mostrare il banner e non contare la visita.
+    const isPreview = new URL(request.url).searchParams.get('preview') === '1';
+
     const article = await api.getArticleBySlug(projectSlug);
     if (!article) {
         throw new Response("Articolo non trovato", { status: 404 });
     }
-    
+
     const mappedArticle = mapArticleToPortfolioItem(article);
+    const previewStatus: string | undefined = article.status;
 
     // Recupera le reazioni in parallelo dopo aver ottenuto l'id articolo
     const reactions = await api.getReactions(article.id);
@@ -100,7 +127,7 @@ export const singleArticleLoader = async ({ params }: LoaderFunctionArgs) => {
         related = [];
     }
 
-    return { article: mappedArticle, reactions, related };
+    return { article: mappedArticle, reactions, related, isPreview, previewStatus };
 };
 
 // --- ADMIN LOADERS ---

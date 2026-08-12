@@ -4,7 +4,16 @@ import { PortfolioItem } from '../types';
 
 import { mapArticleToPortfolioItem } from '../utils/mappers';
 
-export const useFetchArticles = (categoryFilter?: string, limit: number = 10, initialItems?: PortfolioItem[]) => {
+/**
+ * Carica articoli con paginazione "Carica altri".
+ * `tagFilter` (v1.26.0) è alternativo a `categoryFilter`: alimenta /tag/:slug.
+ */
+export const useFetchArticles = (
+    categoryFilter?: string,
+    limit: number = 10,
+    initialItems?: PortfolioItem[],
+    tagFilter?: string
+) => {
     const [items, setItems] = useState<PortfolioItem[]>(initialItems || []);
     const [loading, setLoading] = useState<boolean>(!initialItems);
     const [loadingMore, setLoadingMore] = useState<boolean>(false);
@@ -25,6 +34,7 @@ export const useFetchArticles = (categoryFilter?: string, limit: number = 10, in
         try {
             const res = await api.getArticles({
                 category: categoryFilter,
+                tag: tagFilter,
                 admin: false,
                 page: pageRef.current,
                 limit
@@ -60,13 +70,13 @@ export const useFetchArticles = (categoryFilter?: string, limit: number = 10, in
 
     useEffect(() => {
         loadData(false);
-    }, [categoryFilter]); // Ignoriamo volontariamente limit per non ricaricare
+    }, [categoryFilter, tagFilter]); // Ignoriamo volontariamente limit per non ricaricare
 
     const loadMore = useCallback(() => {
         if (!loadingMore && hasMore) {
             loadData(true);
         }
-    }, [loadingMore, hasMore, categoryFilter]);
+    }, [loadingMore, hasMore, categoryFilter, tagFilter]);
 
     return { items, loading, error, hasMore, loadMore, loadingMore };
 };

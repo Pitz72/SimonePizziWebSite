@@ -94,6 +94,23 @@ const DynamicArchiveWrapper = () => {
   return <ArticleArchive title={category.name} category={category.slug} initialItems={articles} />;
 };
 
+// [v1.26.0] Archivio per tag: riusa ArticleArchive in modalità tag.
+// Gli articoli di un tag possono appartenere a categorie diverse, quindi NON
+// passiamo `category`: ogni card costruisce l'URL dalla propria categoria.
+const TagArchiveWrapper = () => {
+    const { tag, articles } = useLoaderData() as { tag: { name: string; slug: string }, articles: PortfolioItem[] };
+    return (
+        <ArticleArchive
+            title={tag.name}
+            tag={tag.slug}
+            initialItems={articles}
+            eyebrow="Tag"
+            subtitle={`Tutti gli articoli etichettati con "${tag.name}".`}
+            emptyMessage="Nessun articolo pubblicato con questo tag."
+        />
+    );
+};
+
 // Componente per gestire gli errori in modo elegante (UX Premium)
 const RootBoundary = () => {
   const error = useRouteError();
@@ -220,7 +237,7 @@ const PublicLayout: React.FC = () => {
 };
 
 import {
-  portfolioLoader, allProjectsLoader, categoryArticlesLoader, singleArticleLoader,
+  portfolioLoader, allProjectsLoader, categoryArticlesLoader, singleArticleLoader, tagArticlesLoader,
   adminDashboardLoader, adminArticlesLoader, adminArticleEditLoader,
   adminProjectsLoader, adminProjectEditLoader, adminCategoriesLoader,
   adminTagsLoader, adminNewsletterLoader, adminSettingsLoader,
@@ -270,6 +287,7 @@ const router = createBrowserRouter([
       { path: 'contatti', element: <ContactPage /> },
       { path: 'newsletter/confermato', element: <NewsletterConfirm /> },
       { path: 'newsletter/disiscritto', element: <NewsletterUnsubscribe /> },
+      { path: 'tag/:tagSlug', element: <TagArchiveWrapper />, loader: tagArticlesLoader },
       { path: ':categorySlug', element: <DynamicArchiveWrapper />, loader: categoryArticlesLoader },
       { path: ':categorySlug/:projectSlug', element: <SingleArticle />, loader: singleArticleLoader },
       { path: '*', element: <div className="min-h-[50vh] flex items-center justify-center text-white text-2xl">404 - Pagina non trovata</div> }

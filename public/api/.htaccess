@@ -1,0 +1,32 @@
+# [v1.26.0] Neutralizza la cache statica ereditata dalla configurazione DreamHost.
+#
+# PROBLEMA: le risposte di /api/*.php arrivavano al browser con DUE header
+# Cache-Control — quello corretto emesso dal PHP (no-store, v1.25.0) e un
+# "max-age=172800" (2 giorni) accompagnato da un "Expires" a +2 giorni.
+# Nessuno dei due viene dal repo: sono iniettati da una configurazione a monte
+# della docroot (un .htaccess nella home dell'utente SFTP e/o mod_expires
+# attivato dal pannello). Verificato con curl su navigation.php il 12/08/2026.
+#
+# no-store vince comunque nei browser, ma la coppia contraddittoria confonde
+# proxy e strumenti diagnostici. Le direttive di una .htaccess figlia vengono
+# applicate DOPO quelle ereditate, quindi qui possiamo ripulire.
+#
+# Ogni endpoint sotto /api/ è dinamico e dipende dalla sessione: no-store è
+# la semantica corretta per tutti, nessuno escluso.
+
+<IfModule mod_expires.c>
+  # Impedisce a mod_expires di calcolare Expires/max-age per questa directory
+  ExpiresActive Off
+</IfModule>
+
+<IfModule mod_headers.c>
+  # "always" agisce sulla tabella err_headers_out, dove finiscono gli header
+  # impostati con "Header always set" a monte: senza questo la riga duplicata
+  # sopravvive anche con ExpiresActive Off.
+  Header always unset Cache-Control
+  Header always unset Expires
+  Header unset Expires
+
+  # Riemette il valore corretto una volta sola, a valle di ogni unset.
+  Header set Cache-Control "no-store, no-cache, must-revalidate"
+</IfModule>

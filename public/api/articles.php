@@ -16,6 +16,12 @@ date_default_timezone_set('Europe/Rome');
 $ita_now_str = date('Y-m-d H:i:s');
 $ita_now_time = time();
 
+// [v1.26.0] Sottoquery per nomi e slug dei tag. Entrambe ordinate per nome:
+// il frontend accoppia i due elenchi per posizione (nome ↔ URL /tag/:slug),
+// quindi l'ordine DEVE essere identico e deterministico in entrambe.
+const SQL_TAG_NAMES = "(SELECT GROUP_CONCAT(t2.name ORDER BY t2.name ASC SEPARATOR ', ') FROM article_tags at2 JOIN tags t2 ON at2.tag_id = t2.id WHERE at2.article_id = a.id)";
+const SQL_TAG_SLUGS = "(SELECT GROUP_CONCAT(t3.slug ORDER BY t3.name ASC SEPARATOR ',') FROM article_tags at3 JOIN tags t3 ON at3.tag_id = t3.id WHERE at3.article_id = a.id)";
+
 // Valida URL bottoni CTA: accetta solo http/https/mailto, rigetta javascript: e simili
 function sanitizeUrl(string $url): string {
     $url = trim($url);
@@ -25,23 +31,50 @@ function sanitizeUrl(string $url): string {
     return filter_var($url, FILTER_VALIDATE_URL) ? $url : '';
 }
 
-// Helper per generare slug unici
-function generateSlug($title, $pdo) {
-    // [v1.5.10] Normalizzazione accenti italiani prima del replace (evita slug come "caf-" da "caffè")
+/**
+ * Normalizza una stringa in uno slug URL-safe.
+ * [v1.5.10] Normalizzazione accenti italiani prima del replace (evita slug come "caf-" da "caffè").
+ */
+function normalizeSlug($raw) {
     $accents      = ['à','è','é','ì','ò','ù','À','È','É','Ì','Ò','Ù','â','ê','î','ô','û','ä','ë','ï','ö','ü'];
     $replacements = ['a','e','e','i','o','u','a','e','e','i','o','u','a','e','i','o','u','a','e','i','o','u'];
-    $title = str_replace($accents, $replacements, $title);
-    $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $title)));
-    
-    // Verifica pendenza
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM articles WHERE slug = ?");
-    $stmt->execute([$slug]);
-    $count = $stmt->fetchColumn();
-    
-    if ($count > 0) {
-        $slug .= '-' . time();
+    $raw  = str_replace($accents, $replacements, (string)$raw);
+    $slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $raw)));
+    return trim(preg_replace('/-+/', '-', $slug), '-');
+}
+
+/**
+ * [v1.26.0] Rende lo slug univoco.
+ * $excludeId esclude l'articolo che stiamo aggiornando: senza questo, salvare
+ * un articolo esistente senza cambiargli il titolo collideva con se stesso.
+ * Il suffisso è un contatore leggibile (-2, -3) invece del vecchio timestamp.
+ */
+function uniqueSlug($base, $pdo, $excludeId = null) {
+    $base = $base !== '' ? $base : 'articolo';
+
+    $sql  = "SELECT COUNT(*) FROM articles WHERE slug = ?" . ($excludeId ? " AND id != ?" : "");
+    $stmt = $pdo->prepare($sql);
+
+    $taken = function ($candidate) use ($stmt, $excludeId) {
+        $stmt->execute($excludeId ? [$candidate, $excludeId] : [$candidate]);
+        return (int)$stmt->fetchColumn() > 0;
+    };
+
+    if (!$taken($base)) return $base;
+    for ($i = 2; $i <= 50; $i++) {
+        if (!$taken($base . '-' . $i)) return $base . '-' . $i;
     }
-    return $slug;
+    return $base . '-' . time();
+}
+
+/**
+ * Risolve lo slug definitivo a partire da quello inviato dal client (campo
+ * modificabile a mano dalla v1.26.0) con fallback sul titolo se è vuoto.
+ */
+function resolveSlug($data, $title, $pdo, $excludeId = null) {
+    $requested = normalizeSlug($data['slug'] ?? '');
+    if ($requested === '') $requested = normalizeSlug($title);
+    return uniqueSlug($requested, $pdo, $excludeId);
 }
 
 // Helper per i tag dinamici
@@ -103,7 +136,7 @@ try {
         
         // Modalità GET per singolo articolo (!is_admin = solo pubblicato)
         if (isset($_GET['slug'])) {
-            $stmt = $pdo->prepare("SELECT a.*, (SELECT GROUP_CONCAT(t2.name SEPARATOR ', ') FROM article_tags at2 JOIN tags t2 ON at2.tag_id = t2.id WHERE at2.article_id = a.id) as dyn_tags FROM articles a WHERE a.slug = ?");
+            $stmt = $pdo->prepare("SELECT a.*, " . SQL_TAG_NAMES . " as dyn_tags, " . SQL_TAG_SLUGS . " as tag_slugs FROM articles a WHERE a.slug = ?");
             $stmt->execute([$_GET['slug']]);
             $article = $stmt->fetch();
             if ($article && $article['dyn_tags']) $article['tags'] = $article['dyn_tags'];
@@ -126,7 +159,7 @@ try {
 
         if (isset($_GET['id'])) {
             Auth::check();
-            $stmt = $pdo->prepare("SELECT a.*, (SELECT GROUP_CONCAT(t2.name SEPARATOR ', ') FROM article_tags at2 JOIN tags t2 ON at2.tag_id = t2.id WHERE at2.article_id = a.id) as dyn_tags FROM articles a WHERE a.id = ?");
+            $stmt = $pdo->prepare("SELECT a.*, " . SQL_TAG_NAMES . " as dyn_tags, " . SQL_TAG_SLUGS . " as tag_slugs FROM articles a WHERE a.id = ?");
             $stmt->execute([$_GET['id']]);
             $article = $stmt->fetch();
             if ($article && $article['dyn_tags']) $article['tags'] = $article['dyn_tags'];
@@ -137,7 +170,8 @@ try {
 
         // [MODIFICA v1.8.5] Supporto Ricerca Avanzata
         $query = "SELECT a.id, a.title, a.slug, a.content, a.excerpt, a.cover_image, a.category,
-                  (SELECT GROUP_CONCAT(t2.name SEPARATOR ', ') FROM article_tags at2 JOIN tags t2 ON at2.tag_id = t2.id WHERE at2.article_id = a.id) as tags,
+                  " . SQL_TAG_NAMES . " as tags,
+                  " . SQL_TAG_SLUGS . " as tag_slugs,
                   a.is_featured, a.is_category_pinned, a.status, a.published_at, a.created_at
                   FROM articles a";
         
@@ -178,7 +212,10 @@ try {
         }
 
         if ($tag) {
-            $conditions[] = "a.id IN (SELECT article_id FROM article_tags at_f JOIN tags t_f ON at_f.tag_id = t_f.id WHERE t_f.name = ?)";
+            // [v1.26.0] Accetta sia il nome (filtro admin, storico) sia lo slug
+            // (pagina pubblica /tag/:slug, che lavora sempre su slug).
+            $conditions[] = "a.id IN (SELECT article_id FROM article_tags at_f JOIN tags t_f ON at_f.tag_id = t_f.id WHERE t_f.name = ? OR t_f.slug = ?)";
+            $params[] = $tag;
             $params[] = $tag;
         }
 
@@ -250,8 +287,59 @@ try {
             exit;
         }
 
+        // ── [v1.26.0] DUPLICA ARTICOLO ──────────────────────────────
+        // Copia integrale come BOZZA: mai pubblicata per errore, mai in vetrina
+        // e mai pinnata (vetrina e pin sono esclusivi, un duplicato li ruberebbe
+        // all'originale). I tag vengono ricopiati sulla nuova riga.
+        if (($data['action'] ?? '') === 'duplicate') {
+            $sourceId = (int)($data['source_id'] ?? 0);
+            if (!$sourceId) {
+                http_response_code(400);
+                echo json_encode(['error' => 'ID articolo di origine mancante']);
+                exit;
+            }
+
+            $srcStmt = $pdo->prepare("SELECT * FROM articles WHERE id = ?");
+            $srcStmt->execute([$sourceId]);
+            $src = $srcStmt->fetch();
+            if (!$src) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Articolo di origine non trovato']);
+                exit;
+            }
+
+            $copyTitle = mb_substr($src['title'] . ' (copia)', 0, 255);
+            $copySlug  = uniqueSlug(normalizeSlug($copyTitle), $pdo);
+
+            $ins = $pdo->prepare(
+                "INSERT INTO articles
+                    (title, slug, content, excerpt, cover_image, category, tags,
+                     is_featured, is_category_pinned,
+                     button_a_label, button_a_link, button_b_label, button_b_link,
+                     status, published_at)
+                 VALUES (?, ?, ?, ?, ?, ?, '', 0, 0, ?, ?, ?, ?, 'draft', ?)"
+            );
+            $ins->execute([
+                $copyTitle, $copySlug, $src['content'], $src['excerpt'], $src['cover_image'], $src['category'],
+                $src['button_a_label'], $src['button_a_link'], $src['button_b_label'], $src['button_b_link'],
+                $ita_now_str
+            ]);
+            $copyId = $pdo->lastInsertId();
+
+            // Ricopia le associazioni tag e riallinea la colonna legacy 'tags'
+            $pdo->prepare(
+                "INSERT IGNORE INTO article_tags (article_id, tag_id)
+                 SELECT ?, tag_id FROM article_tags WHERE article_id = ?"
+            )->execute([$copyId, $sourceId]);
+            $pdo->prepare("UPDATE articles SET tags = ? WHERE id = ?")
+                ->execute([$src['tags'] ?? '', $copyId]);
+
+            echo json_encode(['status' => 'success', 'id' => $copyId, 'slug' => $copySlug, 'title' => $copyTitle]);
+            exit;
+        }
+
         $title = $data['title'] ?? 'Nuovo Articolo';
-        $slug = $data['slug'] ?? generateSlug($title, $pdo);
+        $slug = resolveSlug($data, $title, $pdo);
         $content = $data['content'] ?? '';
         $excerpt = $data['excerpt'] ?? '';
         $cover_image = $data['cover_image'] ?? '';
@@ -296,7 +384,15 @@ try {
         }
 
         $title = $data['title'] ?? 'Senza Titolo';
-        $slug = $data['slug'] ?? ($data['title'] ? generateSlug($data['title'], $pdo) : null);
+
+        // [v1.26.0] Lo slug è ora modificabile a mano. Conserviamo il precedente
+        // per segnalare al pannello se l'URL pubblica è cambiata (serve il 301).
+        $prevStmt = $pdo->prepare("SELECT slug, category, status FROM articles WHERE id = ?");
+        $prevStmt->execute([$id]);
+        $prev = $prevStmt->fetch();
+        $oldSlug = $prev['slug'] ?? null;
+
+        $slug = resolveSlug($data, $title, $pdo, $id);
         $content = $data['content'] ?? '';
         $excerpt = $data['excerpt'] ?? '';
         $cover_image = $data['cover_image'] ?? '';
@@ -319,11 +415,34 @@ try {
         
         syncArticleTags($pdo, $id, $tags);
 
-        echo json_encode(['status' => 'success']);
+        // slug_changed=true → il pannello mostra la riga di redirect 301 da
+        // incollare in .htaccess, così una URL già pubblicata non resta orfana.
+        echo json_encode([
+            'status'        => 'success',
+            'slug'          => $slug,
+            'old_slug'      => $oldSlug,
+            'old_category'  => $prev['category'] ?? null,
+            'was_published' => ($prev['status'] ?? '') === 'published',
+            'slug_changed'  => ($oldSlug !== null && $oldSlug !== $slug),
+        ]);
     }
     elseif ($method === 'DELETE') {
         Auth::check();
         $data = json_decode(file_get_contents('php://input'), true);
+
+        // [v1.26.0] Eliminazione multipla dalla lista admin.
+        if (!empty($data['ids']) && is_array($data['ids'])) {
+            $ids = array_values(array_filter(array_map('intval', $data['ids'])));
+            if (empty($ids)) {
+                http_response_code(400); echo json_encode(['error' => 'Nessun ID valido']); exit;
+            }
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+            $stmt = $pdo->prepare("DELETE FROM articles WHERE id IN ($placeholders)");
+            $stmt->execute($ids);
+            echo json_encode(['status' => 'success', 'affected' => $stmt->rowCount()]);
+            exit;
+        }
+
         $id = $_GET['id'] ?? ($data['id'] ?? null);
         if (!$id) {
             http_response_code(400); echo json_encode(['error' => 'ID mancante']); exit;
@@ -336,6 +455,38 @@ try {
         Auth::check();
 
         $data = json_decode(file_get_contents('php://input'), true);
+
+        // [v1.26.0] Cambio stato multiplo (pubblica / metti in bozza) dalla lista admin.
+        if (!empty($data['ids']) && is_array($data['ids']) && isset($data['status'])) {
+            $bulkStatus = in_array($data['status'], ['draft', 'published'], true) ? $data['status'] : null;
+            if (!$bulkStatus) {
+                http_response_code(400); echo json_encode(['error' => 'Stato non valido']); exit;
+            }
+            $ids = array_values(array_filter(array_map('intval', $data['ids'])));
+            if (empty($ids)) {
+                http_response_code(400); echo json_encode(['error' => 'Nessun ID valido']); exit;
+            }
+            $placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+            // Pubblicando un articolo mai uscito, published_at potrebbe essere nel
+            // futuro (programmato) o assente: lo portiamo a "adesso" solo in quel caso,
+            // per non retrodatare né posticipare articoli già datati correttamente.
+            if ($bulkStatus === 'published') {
+                $stmt = $pdo->prepare(
+                    "UPDATE articles
+                        SET status = 'published',
+                            published_at = CASE WHEN published_at IS NULL THEN ? ELSE published_at END
+                      WHERE id IN ($placeholders)"
+                );
+                $stmt->execute(array_merge([$ita_now_str], $ids));
+            } else {
+                $stmt = $pdo->prepare("UPDATE articles SET status = 'draft' WHERE id IN ($placeholders)");
+                $stmt->execute($ids);
+            }
+            echo json_encode(['status' => 'success', 'affected' => $stmt->rowCount()]);
+            exit;
+        }
+
         $id = $data['id'] ?? null;
 
         if (!$id) {

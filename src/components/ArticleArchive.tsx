@@ -13,11 +13,24 @@ interface ArticleArchiveProps {
     title: string;
     category?: string;
     initialItems?: PortfolioItem[];
+    /** [v1.26.0] Modalità tag: filtra per slug del tag invece che per categoria. */
+    tag?: string;
+    /** Etichetta sopra il titolo (default "Archivio"). */
+    eyebrow?: string;
+    /** Sottotitolo descrittivo sotto il titolo. */
+    subtitle?: string;
+    /** Messaggio mostrato quando non ci sono articoli. */
+    emptyMessage?: string;
 }
 
-const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category, initialItems }) => {
+const ArticleArchive: React.FC<ArticleArchiveProps> = ({
+    title, category, initialItems, tag,
+    eyebrow = 'Archivio',
+    subtitle = 'Esplora tutti i contenuti, gli approfondimenti e i progetti pubblicati in questa sezione.',
+    emptyMessage = 'Nessun articolo pubblicato in questa categoria.',
+}) => {
     const navigate = useNavigate();
-    const { items, loading, error, hasMore, loadMore, loadingMore } = useFetchArticles(category, 10, initialItems);
+    const { items, loading, error, hasMore, loadMore, loadingMore } = useFetchArticles(category, 10, initialItems, tag);
 
     if (loading) {
         return (
@@ -40,7 +53,7 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category, initia
                 </h1>
                 <div className="inline-block p-8" style={{ border: '1px solid rgba(34,197,94,0.1)', background: '#0c1410' }}>
                     <p className="font-mono text-[11px] tracking-wider uppercase" style={{ color: '#6a9070' }}>
-                        {error ? `Errore: ${error}` : 'Nessun articolo pubblicato in questa categoria.'}
+                        {error ? `Errore: ${error}` : emptyMessage}
                     </p>
                 </div>
             </section>
@@ -49,20 +62,20 @@ const ArticleArchive: React.FC<ArticleArchiveProps> = ({ title, category, initia
 
     return (
         <section className="px-6 md:px-[52px] py-20 min-h-[80vh]">
-            <SEO title={title} description={`Archivio articoli della sezione ${title}`} />
+            <SEO title={title} description={subtitle} />
 
             {/* ── CATEGORY HEADER ── */}
             <div className="mb-20 pb-8" style={{ borderBottom: '1px solid rgba(34,197,94,0.1)' }}>
                 <div className="flex items-center gap-3 font-mono text-[10px] tracking-[0.18em] uppercase text-dis-green mb-5">
                     <span className="w-6 h-px bg-dis-green" />
-                    Archivio
+                    {eyebrow}
                 </div>
                 <h1 className="font-serif text-white tracking-tight"
                     style={{ fontSize: 'clamp(40px, 6vw, 72px)', letterSpacing: '-0.02em', lineHeight: 1.1 }}>
                     {title}
                 </h1>
                 <p className="mt-4 font-light" style={{ fontSize: '17px', color: '#6a9070', maxWidth: '560px' }}>
-                    Esplora tutti i contenuti, gli approfondimenti e i progetti pubblicati in questa sezione.
+                    {subtitle}
                 </p>
                 <div className="mt-8 h-px w-16 bg-dis-green" />
             </div>

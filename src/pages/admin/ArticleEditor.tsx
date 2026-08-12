@@ -47,8 +47,13 @@ export default function ArticleEditor() {
 
     const hierarchicalCategories = getHierarchicalCategories(categories);
 
+    // [v1.26.0] Avviso di redirect: compare quando il salvataggio ha cambiato
+    // lo slug di un articolo già pubblicato (la vecchia URL diventa orfana).
+    const [redirectNotice, setRedirectNotice] = useState<{ from: string; to: string } | null>(null);
+
     const [formData, setFormData] = useState({
         title: '',
+        slug: '',
         excerpt: '',
         content: '',
         cover_image: '',
@@ -73,6 +78,7 @@ export default function ArticleEditor() {
 
             const loadedData = {
                 ...article,
+                slug: article.slug || '',
                 button_a_link: linkA.startsWith('mailto:') ? linkA.replace('mailto:', '') : linkA,
                 button_b_link: linkB.startsWith('mailto:') ? linkB.replace('mailto:', '') : linkB,
                 tags: article.tags ? (typeof article.tags === 'string' ? article.tags.split(',').map((t: string) => t.trim()) : article.tags) : [],
@@ -175,19 +181,33 @@ export default function ArticleEditor() {
                 published_at: formData.published_at ? formData.published_at.replace('T', ' ') + ':00' : null
             };
 
-            if (isEditing) {
-                await api.updateArticle(Number(id), payload);
-            } else {
-                await api.createArticle(payload);
-            }
-            
-            
+            const res = isEditing
+                ? await api.updateArticle(Number(id), payload)
+                : await api.createArticle(payload);
+
             setSaveSuccess(true);
-            setInitialData(formData); // Resetta lo stato dirty dopo il salvataggio
-            
+            // Lo slug definitivo lo decide il server (normalizzazione + unicità):
+            // riallineiamo il form, altrimenti il campo mostrerebbe un valore falso.
+            const finalData = { ...formData, slug: res?.slug || formData.slug };
+            setFormData(finalData);
+            setInitialData(finalData); // Resetta lo stato dirty dopo il salvataggio
+
             // Rimuove la bozza locale dopo il salvataggio con successo sul server
             const draftKey = isEditing ? `article_draft_${id}` : `article_draft_new`;
             localStorage.removeItem(draftKey);
+
+            // Se l'URL pubblica di un articolo già pubblicato è cambiata, restiamo
+            // sulla pagina e mostriamo la riga di redirect da mettere in .htaccess:
+            // andarsene in silenzio lascerebbe la vecchia URL a 404.
+            if (res?.slug_changed && res?.was_published) {
+                setRedirectNotice({
+                    from: `/${res.old_category}/${res.old_slug}`,
+                    to: `/${payload.category}/${res.slug}`,
+                });
+                setSaving(false);
+                setTimeout(() => setSaveSuccess(false), 1200);
+                return;
+            }
 
             setTimeout(() => {
                 navigate('/admin/articles');
@@ -196,6 +216,24 @@ export default function ArticleEditor() {
             setError(err.message || 'Errore durante il salvataggio.');
             setSaving(false);
         }
+    };
+
+    // [v1.26.0] Anteprima. Punta SEMPRE all'ultima versione salvata sul server
+    // (initialData si riallinea dopo ogni salvataggio), non a quella nel form:
+    // il frontend legge dal DB, non dallo stato locale dell'editor.
+    const savedSlug = initialData?.slug || article?.slug || '';
+    const savedCategory = initialData?.category || article?.category || '';
+    const canPreview = isEditing && !!savedSlug && !!savedCategory;
+
+    const handlePreview = () => {
+        if (!canPreview) return;
+        if (isDirty && !window.confirm(
+            "Ci sono modifiche non salvate.\n\nL'anteprima mostra l'ultima versione SALVATA sul server, non quella che stai scrivendo.\n\nAprire lo stesso?"
+        )) return;
+        // Solo 'noopener': con 'noreferrer' alcuni browser trattano la nuova
+        // scheda come priva di iniziatore, e il cookie di sessione (SameSite=Strict)
+        // rischia di non partire — senza sessione l'anteprima darebbe 404.
+        window.open(`/${savedCategory}/${savedSlug}?preview=1`, '_blank', 'noopener');
     };
 
     // Blocco chiusura Tab/Browser
@@ -275,6 +313,18 @@ export default function ArticleEditor() {
 
                 <div className="flex items-center gap-3">
 
+                    {canPreview && (
+                        <button
+                            type="button"
+                            onClick={handlePreview}
+                            disabled={saving || saveSuccess}
+                            title="Apre l'articolo sul sito in modalità anteprima (visibile solo a te)"
+                            className="flex items-center gap-2 bg-zinc-900 border border-zinc-700 text-zinc-200 font-bold px-5 py-2 rounded-lg hover:border-dis-green hover:text-white transition-colors disabled:opacity-50"
+                        >
+                            <Eye size={18} /> Anteprima
+                        </button>
+                    )}
+
                     <button
                         onClick={handleSave}
                         disabled={saving || saveSuccess}
@@ -292,6 +342,38 @@ export default function ArticleEditor() {
             </header>
 
             {error && <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-500 font-medium">{error}</div>}
+
+            {/* [v1.26.0] Slug cambiato su articolo già pubblicato: la vecchia URL
+                resta 404 finché non si aggiunge il redirect. Diamo la riga pronta. */}
+            {redirectNotice && (
+                <div className="p-4 bg-orange-500/10 border border-orange-500/30 rounded-xl space-y-3">
+                    <p className="text-white font-bold text-sm">URL pubblica cambiata — serve un redirect 301</p>
+                    <p className="text-zinc-400 text-xs">
+                        L'articolo era già pubblicato su <code className="text-orange-300">{redirectNotice.from}</code>.
+                        Chi ha quel link (o Google) troverà un 404 finché non aggiungi questa riga in
+                        <code className="text-zinc-300"> public/.htaccess</code>, nella sezione dei redirect permanenti:
+                    </p>
+                    <pre className="bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-xs text-dis-green overflow-x-auto">
+{`RedirectMatch 301 ^${redirectNotice.from}/?$ ${redirectNotice.to}`}
+                    </pre>
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            type="button"
+                            onClick={() => navigator.clipboard?.writeText(`RedirectMatch 301 ^${redirectNotice.from}/?$ ${redirectNotice.to}`)}
+                            className="px-4 py-2 bg-orange-500 text-black font-bold text-xs rounded-lg hover:bg-orange-400 transition-colors"
+                        >
+                            Copia la riga
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => { setRedirectNotice(null); navigate('/admin/articles'); }}
+                            className="px-4 py-2 bg-zinc-800 text-zinc-300 font-bold text-xs rounded-lg hover:text-white transition-colors"
+                        >
+                            Ho capito, torna all'archivio
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {/* Banner di ripristino bozza locale */}
             {showDraftBanner && (
@@ -337,6 +419,37 @@ export default function ArticleEditor() {
                                 placeholder="E.g., Il mio nuovo gioco fantastico"
                                 className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white text-lg font-medium focus:border-dis-green focus:outline-none placeholder-zinc-700"
                             />
+                        </div>
+
+                        {/* [v1.26.0] Slug modificabile a mano */}
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
+                                <LinkIcon size={15} />
+                                Slug (URL dell'articolo)
+                            </label>
+                            <div className="flex items-stretch">
+                                <span className="hidden sm:flex items-center px-3 bg-zinc-950 border border-r-0 border-zinc-800 rounded-l-lg text-zinc-500 text-sm font-mono whitespace-nowrap">
+                                    /{formData.category || '...'}/
+                                </span>
+                                <input
+                                    name="slug"
+                                    value={formData.slug}
+                                    onChange={handleChange}
+                                    placeholder={isEditing ? 'slug-articolo' : 'lascia vuoto: generato dal titolo'}
+                                    className="w-full bg-zinc-950 border border-zinc-800 rounded-lg sm:rounded-l-none p-3 text-white text-sm font-mono focus:border-dis-green focus:outline-none placeholder-zinc-700"
+                                />
+                            </div>
+                            {isEditing && initialData?.slug && formData.slug !== initialData.slug ? (
+                                <p className="text-xs text-orange-400 font-medium">
+                                    Stai cambiando l'URL pubblica. Se l'articolo è già online servirà un
+                                    redirect 301 in .htaccess: te lo mostro dopo il salvataggio.
+                                </p>
+                            ) : (
+                                <p className="text-xs text-zinc-500">
+                                    Caratteri ammessi: lettere, numeri e trattini. Il server normalizza e
+                                    garantisce l'unicità (aggiunge -2, -3… in caso di collisione).
+                                </p>
+                            )}
                         </div>
 
                         <div className="space-y-2 flex-1 flex flex-col">

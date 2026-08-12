@@ -26,14 +26,35 @@ date_default_timezone_set('Europe/Rome');
 
 $protocol   = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
 $baseUrl    = $protocol . $_SERVER['HTTP_HOST'];
-$currentUrl = $baseUrl . $_SERVER['REQUEST_URI'];
+
+// ─────────────────────────────────────────────
+// 1b. ANTEPRIMA BOZZE (v1.26.0)
+// ?preview=1 permette all'admin loggato di vedere un articolo non ancora
+// pubblicato. La sessione viene aperta SOLO su richiesta esplicita di anteprima:
+// avviarla su ogni pagina significherebbe emettere un cookie PHPSESSID a tutti
+// i visitatori (inutile e sgradito lato cookie policy).
+// Senza sessione valida il comportamento resta identico a prima: bozza = 404.
+// ─────────────────────────────────────────────
+
+$isPreview      = isset($_GET['preview']) && $_GET['preview'] === '1';
+$isAdminPreview = false;
+
+if ($isPreview) {
+    ini_set('session.cookie_httponly', 1);
+    ini_set('session.cookie_secure', 1);
+    ini_set('session.cookie_samesite', 'Strict');
+    if (session_status() === PHP_SESSION_NONE) {
+        @session_start();
+    }
+    $isAdminPreview = !empty($_SESSION['user_id']);
+}
 
 // Meta tag di default (Homepage / fallback)
 $metaTitle  = "Simone Pizzi - Videogiochi, Software e Narrativa";
 $metaDesc   = "Portfolio Creativo, Game Design, Sviluppo Software e Pubblicazioni";
 $metaImage  = $baseUrl . "/Simone-Pizzi.webp";
 $ogType     = "website";
-$canonicalUrl = $currentUrl;
+$canonicalUrl = $baseUrl . '/'; // ricalcolato sul path reale nella sezione 3 (routing)
 
 // ─────────────────────────────────────────────
 // 2. HELPER FUNCTIONS
@@ -120,15 +141,27 @@ function absImageUrl(string $img, string $baseUrl): string {
 // 3. ROUTING — Parsing dell'URL
 // ─────────────────────────────────────────────
 
-$request_uri = trim($_SERVER['REQUEST_URI'], '/');
-$request_uri = strtok($request_uri, '?'); // Rimuove query string
+// [v1.26.0] La query string va rimossa PRIMA di togliere gli slash.
+// Il vecchio ordine (trim poi strtok) produceva un soft-404 su ogni URL con
+// parametri di tracking: '/?utm_source=x' → trim → '?utm_source=x' → strtok
+// salta i delimitatori iniziali e restituisce 'utm_source=x', interpretato
+// come slug di categoria inesistente. parse_url isola il path in modo netto.
+$request_path = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+if (!is_string($request_path)) $request_path = '/';
+$request_uri = trim($request_path, '/');
 $uri_parts   = array_filter(explode('/', $request_uri), fn($p) => $p !== '');
 $uri_parts   = array_values($uri_parts); // Re-indicizza
+
+// Canonical di default costruito sul solo path: i parametri di tracking
+// (utm_source, fbclid, ...) non devono mai finire nel <link rel="canonical">,
+// altrimenti Google indicizza una URL diversa per ogni campagna.
+$canonicalUrl = $baseUrl . ($request_uri === '' ? '/' : '/' . $request_uri);
 
 // Tipo di pagina rilevato
 $pageType = 'homepage'; // default
 $slug     = null;
 $catSlug  = null;
+$tagSlug  = null;
 
 if (count($uri_parts) === 0) {
     $pageType = 'homepage';
@@ -144,6 +177,10 @@ if (count($uri_parts) === 0) {
     $pageType = 'legal_privacy';
 } elseif ($uri_parts[0] === 'cookie-policy') {
     $pageType = 'legal_cookies';
+} elseif ($uri_parts[0] === 'tag' && count($uri_parts) === 2) {
+    // [v1.26.0] Archivio per tag: /tag/:slug
+    $pageType = 'tag';
+    $tagSlug  = $uri_parts[1];
 } elseif (count($uri_parts) === 2) {
     $pageType = 'article';
     $catSlug  = $uri_parts[0];
@@ -166,7 +203,9 @@ if ($pageType === 'homepage' && count($uri_parts) > 0) {
 
 $article      = null;
 $articles     = [];
+$articleTags  = [];
 $categoryName = null;
+$tagName      = null;
 $projects     = [];
 $jsonLd       = null;
 
@@ -176,16 +215,35 @@ try {
 
     // ── ARTICOLO SINGOLO ──
     if ($pageType === 'article' && $slug) {
-        $stmt = $pdo->prepare(
-            "SELECT id, title, slug, content, excerpt, cover_image, category, published_at, created_at 
-             FROM articles 
-             WHERE slug = :slug AND status = 'published' AND (published_at IS NULL OR published_at <= :now)
-             LIMIT 1"
-        );
-        $stmt->execute([':slug' => strip_tags(trim($slug)), ':now' => $now]);
+        $artCols = "id, title, slug, content, excerpt, cover_image, category, published_at, created_at, status";
+
+        if ($isAdminPreview) {
+            // Anteprima admin: nessun filtro su stato/data, così le bozze e gli
+            // articoli programmati sono visibili. La pagina è comunque noindex.
+            $stmt = $pdo->prepare("SELECT $artCols FROM articles WHERE slug = :slug LIMIT 1");
+            $stmt->execute([':slug' => strip_tags(trim($slug))]);
+        } else {
+            $stmt = $pdo->prepare(
+                "SELECT $artCols
+                 FROM articles
+                 WHERE slug = :slug AND status = 'published' AND (published_at IS NULL OR published_at <= :now)
+                 LIMIT 1"
+            );
+            $stmt->execute([':slug' => strip_tags(trim($slug)), ':now' => $now]);
+        }
         $article = $stmt->fetch(PDO::FETCH_ASSOC);
 
         if ($article) {
+            // [v1.26.0] Tag dell'articolo: servono per i link interni verso
+            // /tag/:slug nel corpo servito ai crawler (scoperta delle pagine tag).
+            $atStmt = $pdo->prepare(
+                "SELECT t.name, t.slug FROM article_tags atx
+                 JOIN tags t ON t.id = atx.tag_id
+                 WHERE atx.article_id = ? ORDER BY t.name ASC"
+            );
+            $atStmt->execute([$article['id']]);
+            $articleTags = $atStmt->fetchAll(PDO::FETCH_ASSOC);
+
             $ogType     = "article";
             $metaTitle  = esc($article['title']) . " | Simone Pizzi";
             $rawDesc    = $article['excerpt'] ?: truncateText($article['content']);
@@ -255,6 +313,49 @@ try {
                     'url' => $baseUrl
                 ]
             ];
+        }
+    }
+
+    // ── TAG (v1.26.0) ──
+    if ($pageType === 'tag' && $tagSlug) {
+        $tagStmt = $pdo->prepare("SELECT id, name, slug FROM tags WHERE slug = :slug LIMIT 1");
+        $tagStmt->execute([':slug' => strip_tags(trim($tagSlug))]);
+        $tag = $tagStmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($tag) {
+            $tagArtStmt = $pdo->prepare(
+                "SELECT a.id, a.title, a.slug, a.excerpt, a.cover_image, a.category, a.published_at
+                 FROM articles a
+                 JOIN article_tags atx ON atx.article_id = a.id
+                 WHERE atx.tag_id = :tid AND a.status = 'published'
+                   AND (a.published_at IS NULL OR a.published_at <= :now)
+                 ORDER BY a.published_at DESC
+                 LIMIT 50"
+            );
+            $tagArtStmt->execute([':tid' => $tag['id'], ':now' => $now]);
+            $articles = $tagArtStmt->fetchAll(PDO::FETCH_ASSOC);
+
+            // Un tag senza articoli pubblicati è una pagina vuota: non deve
+            // finire nell'indice. Resta $tagName = null → ramo 404 più sotto.
+            if (!empty($articles)) {
+                $tagName      = $tag['name'];
+                $metaTitle    = esc($tag['name']) . " | Tag | Simone Pizzi";
+                $metaDesc     = esc("Tutti gli articoli di Simone Pizzi etichettati con \"" . $tag['name'] . "\".");
+                $canonicalUrl = $baseUrl . '/tag/' . esc($tag['slug']);
+
+                $jsonLd = [
+                    '@context' => 'https://schema.org',
+                    '@type' => 'CollectionPage',
+                    'name' => 'Tag: ' . $tag['name'],
+                    'description' => "Articoli etichettati con " . $tag['name'],
+                    'url' => $canonicalUrl,
+                    'isPartOf' => [
+                        '@type' => 'WebSite',
+                        'name' => 'Simone Pizzi Portfolio',
+                        'url' => $baseUrl
+                    ]
+                ];
+            }
         }
     }
 
@@ -373,7 +474,8 @@ try {
 $robotsTag  = '';
 $isNotFound = ($pageType === 'notfound')
     || ($pageType === 'article'  && !$article)
-    || ($pageType === 'category' && !$categoryName);
+    || ($pageType === 'category' && !$categoryName)
+    || ($pageType === 'tag'      && !$tagName);
 
 if ($isNotFound) {
     http_response_code(404);
@@ -383,6 +485,12 @@ if ($isNotFound) {
     $metaDesc  = 'La pagina che cerchi non esiste, è stata spostata o rimossa.';
     $ogType    = 'website';
     $jsonLd    = null;
+}
+
+// [v1.26.0] Un'anteprima non deve MAI finire in un indice, nemmeno se l'URL
+// trapela: noindex incondizionato appena compare ?preview=1.
+if ($isPreview) {
+    $robotsTag = '<meta name="robots" content="noindex, nofollow" />';
 }
 
 // ─────────────────────────────────────────────
@@ -429,7 +537,18 @@ if ($isCrawler && $pageType !== 'admin') {
                 <img src="' . esc($coverUrl) . '" alt="' . esc($article['title']) . '" />
             </header>
             <section>' . ($article['excerpt'] ? '<p><strong>' . esc(strip_tags($article['excerpt'])) . '</strong></p>' : '') . '</section>
-            <div>' . strip_tags($article['content'], '<p><br><h2><h3><h4><ul><ol><li><strong><em><a><blockquote><pre><code>') . '</div>
+            <div>' . strip_tags($article['content'], '<p><br><h2><h3><h4><ul><ol><li><strong><em><a><blockquote><pre><code>') . '</div>';
+
+        if (!empty($articleTags)) {
+            $tagLinks = [];
+            foreach ($articleTags as $t) {
+                $tagLinks[] = '<a href="' . $baseUrl . '/tag/' . esc($t['slug']) . '" rel="tag">' . esc($t['name']) . '</a>';
+            }
+            $bodyContent .= '
+            <footer><p>Tag: ' . implode(', ', $tagLinks) . '</p></footer>';
+        }
+
+        $bodyContent .= '
         </article>';
     }
 
@@ -461,6 +580,33 @@ if ($isCrawler && $pageType !== 'admin') {
             $bodyContent .= '</ul>';
         }
         $bodyContent .= '</main>';
+    }
+
+    // ── Body per TAG (v1.26.0) ──
+    elseif ($pageType === 'tag' && $tagName) {
+        $bodyContent = '
+        <nav aria-label="Breadcrumb">
+            <ol>
+                <li><a href="' . $baseUrl . '/">Home</a></li>
+                <li>Tag: ' . esc($tagName) . '</li>
+            </ol>
+        </nav>
+        <main>
+            <h1>' . esc($tagName) . '</h1>
+            <p>Articoli etichettati con ' . esc($tagName) . '</p>
+            <ul>';
+
+        foreach ($articles as $art) {
+            $artUrl = $baseUrl . '/' . esc($art['category']) . '/' . esc($art['slug']);
+            $bodyContent .= '
+                <li>
+                    <article>
+                        <h2><a href="' . $artUrl . '">' . esc($art['title']) . '</a></h2>'
+                        . ($art['excerpt'] ? '<p>' . esc(truncateText(strip_tags($art['excerpt']), 200)) . '</p>' : '') .
+                    '</article>
+                </li>';
+        }
+        $bodyContent .= '</ul></main>';
     }
 
     // ── Body per HOMEPAGE ──

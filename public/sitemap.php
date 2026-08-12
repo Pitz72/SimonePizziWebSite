@@ -111,5 +111,31 @@ while ($art = $stmtArt->fetch()) {
     echo "  </url>" . PHP_EOL;
 }
 
+// 6. [v1.26.0] PAGINE TAG — solo tag con almeno un articolo pubblicato.
+// Un tag senza contenuti visibili produrrebbe una pagina vuota (index.php la
+// serve come 404), quindi non deve mai comparire in sitemap.
+$stmtTags = $pdo->prepare("
+    SELECT t.slug,
+           MAX(COALESCE(a.published_at, a.created_at)) AS latest_article
+    FROM tags t
+    JOIN article_tags atx ON atx.tag_id = t.id
+    JOIN articles a ON a.id = atx.article_id
+    WHERE a.status = 'published' AND (a.published_at IS NULL OR a.published_at <= ?)
+    GROUP BY t.id, t.slug
+    ORDER BY t.name ASC
+");
+$stmtTags->execute([$now]);
+
+while ($tag = $stmtTags->fetch()) {
+    echo "  <url>" . PHP_EOL;
+    echo "    <loc>$baseUrl/tag/{$tag['slug']}</loc>" . PHP_EOL;
+    if ($tag['latest_article']) {
+        echo "    <lastmod>" . date('Y-m-d', strtotime($tag['latest_article'])) . "</lastmod>" . PHP_EOL;
+    }
+    echo "    <changefreq>weekly</changefreq>" . PHP_EOL;
+    echo "    <priority>0.5</priority>" . PHP_EOL;
+    echo "  </url>" . PHP_EOL;
+}
+
 echo '</urlset>';
 ?>

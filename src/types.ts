@@ -40,6 +40,8 @@ export interface PortfolioItem {
   imageUrl: string;
   category: Category;
   tags: string[];
+  /** Slug dei tag, allineati per posizione a `tags`. Alimenta i link /tag/:slug. */
+  tagSlugs?: string[];
   link?: string;
   buttonText?: string;
   extraLink?: string;
