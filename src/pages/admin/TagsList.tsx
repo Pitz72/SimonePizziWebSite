@@ -97,16 +97,17 @@ export default function TagsList() {
         }
     }, [initialTags]);
 
+    const toSlug = (value: string) =>
+        value.toLowerCase()
+            .replace(/[àáâã]/g, 'a').replace(/[èéêë]/g, 'e')
+            .replace(/[ìíîï]/g, 'i').replace(/[òóôõ]/g, 'o')
+            .replace(/[ùúûü]/g, 'u')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-|-$/g, '');
+
     const handleNameChange = (value: string) => {
         setNewName(value);
-        setNewSlug(
-            value.toLowerCase()
-                .replace(/[àáâã]/g, 'a').replace(/[èéêë]/g, 'e')
-                .replace(/[ìíîï]/g, 'i').replace(/[òóôõ]/g, 'o')
-                .replace(/[ùúûü]/g, 'u')
-                .replace(/[^a-z0-9]+/g, '-')
-                .replace(/^-|-$/g, '')
-        );
+        setNewSlug(toSlug(value));
     };
 
     const handleCreate = async () => {
@@ -306,7 +307,8 @@ export default function TagsList() {
                         {visibleTags.map((tag) => (
                             <li key={tag.id} className="px-6 py-4 flex items-center gap-4">
                                 {editingId === tag.id ? (
-                                    <div className="flex-1 flex flex-col sm:flex-row gap-2">
+                                    <div className="flex-1 space-y-2">
+                                      <div className="flex flex-col sm:flex-row gap-2">
                                         <input
                                             type="text"
                                             value={editName}
@@ -329,12 +331,50 @@ export default function TagsList() {
                                                 <X size={16} />
                                             </button>
                                         </div>
+                                      </div>
+
+                                      {/* [v1.27.1] Rinominare il nome NON riscrive lo slug: sono due
+                                          campi indipendenti, e correggendo un refuso è facilissimo
+                                          lasciarselo nell'URL (è successo con "leonaardo").
+                                          Qui lo segnaliamo e offriamo l'allineamento con un clic —
+                                          senza farlo in automatico, perché cambiare lo slug di un tag
+                                          già indicizzato ne cambia l'indirizzo pubblico. */}
+                                      {toSlug(editName) !== editSlug && editName.trim() !== '' && (
+                                        <div className="flex flex-wrap items-center gap-2 text-xs">
+                                            <span className="text-amber-400">
+                                                Lo slug non corrisponde al nome: l'indirizzo resterebbe
+                                                <code className="mx-1 text-zinc-300">/tag/{editSlug}</code>
+                                            </span>
+                                            <button
+                                                type="button"
+                                                onClick={() => setEditSlug(toSlug(editName))}
+                                                className="px-2.5 py-1 bg-amber-500/20 text-amber-100 rounded-full font-medium hover:bg-amber-500/30 transition-colors"
+                                            >
+                                                Allinea a /tag/{toSlug(editName)}
+                                            </button>
+                                            {pubOf(tag) >= SOGLIA_INDICE && (
+                                                <span className="text-zinc-500">
+                                                    — attenzione: questo tag è indicizzato, cambiarne lo slug ne cambia l'URL pubblica.
+                                                </span>
+                                            )}
+                                        </div>
+                                      )}
                                     </div>
                                 ) : (
                                     <div className="flex-1 flex items-center justify-between gap-3">
                                         <div className="min-w-0">
                                             <p className="text-white font-medium truncate">{tag.name}</p>
-                                            <p className="text-zinc-500 text-xs font-mono mt-0.5">#{tag.slug}</p>
+                                            {/* Slug in ambra quando non corrisponde al nome: è il
+                                                sintomo di un refuso corretto a metà. */}
+                                            <p
+                                                className={`text-xs font-mono mt-0.5 ${toSlug(tag.name) !== tag.slug ? 'text-amber-500' : 'text-zinc-500'}`}
+                                                title={toSlug(tag.name) !== tag.slug
+                                                    ? `Lo slug non corrisponde al nome: l'indirizzo è /tag/${tag.slug}. Apri la matita per allinearlo.`
+                                                    : `Indirizzo: /tag/${tag.slug}`}
+                                            >
+                                                #{tag.slug}
+                                                {toSlug(tag.name) !== tag.slug && <span className="ml-1.5 not-italic">⚠</span>}
+                                            </p>
                                         </div>
                                         <div className="flex items-center gap-3 shrink-0">
                                             {/* Due numeri diversi, e la differenza conta:
