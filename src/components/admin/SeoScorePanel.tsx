@@ -137,9 +137,14 @@ function computeChecks(
     const kw = norm(focusKeyword.trim());
 
     if (!kw) {
-        checks.push({ label: 'Parola Chiave', status: 'warn', message: 'Non impostata. Scrivi il termine su cui vuoi posizionarti.' });
-        checks.push({ label: 'Chiave nel Titolo', status: 'warn', message: 'Impossibile verificare senza parola chiave.' });
-        checks.push({ label: 'Chiave nel Corpo', status: 'warn', message: 'Impossibile verificare senza parola chiave.' });
+        // Una riga sola: tre avvisi identici per un unico campo vuoto sono rumore.
+        // Il costo in punti va detto esplicitamente, altrimenti il punteggio basso
+        // sembra arbitrario.
+        checks.push({
+            label: 'Parola chiave principale',
+            status: 'warn',
+            message: 'Non impostata: mancano 3 punti su 9. Scrivi il termine su cui vuoi essere trovato nel campo qui a sinistra — poi controllo se lo usi nel titolo, nell\'apertura e nel testo.',
+        });
     } else {
         const plain = norm(stripHtml(content));
         const inTitle = norm(title).includes(kw);
@@ -147,30 +152,30 @@ function computeChecks(
         const inHeading = norm((content.match(/<h[23][^>]*>(.*?)<\/h[23]>/gis) || []).join(' ')).includes(kw);
         const occurrences = kw ? plain.split(kw).length - 1 : 0;
 
-        checks.push({ label: 'Parola Chiave', status: 'ok', message: `Impostata: "${focusKeyword.trim()}".` });
+        checks.push({ label: 'Parola chiave principale', status: 'ok', message: `Impostata: "${focusKeyword.trim()}".` });
         score += 1;
 
         if (inTitle && inExcerpt) {
-            checks.push({ label: 'Chiave nel Titolo', status: 'ok', message: 'Presente sia nel titolo sia nell\'excerpt.' });
+            checks.push({ label: 'Chiave in titolo e apertura', status: 'ok', message: 'Presente in entrambi: è il posto che conta di più.' });
             score += 1;
         } else if (inTitle || inExcerpt) {
-            checks.push({ label: 'Chiave nel Titolo', status: 'warn', message: `Presente solo ${inTitle ? 'nel titolo' : "nell'excerpt"}. Meglio in entrambi.` });
+            checks.push({ label: 'Chiave in titolo e apertura', status: 'warn', message: `Presente solo ${inTitle ? 'nel titolo' : "nel riassunto"}. Metterla in entrambi vale mezzo punto in più.` });
             score += 0.5;
         } else {
-            checks.push({ label: 'Chiave nel Titolo', status: 'warn', message: 'Non compare né nel titolo né nell\'excerpt.' });
+            checks.push({ label: 'Chiave in titolo e apertura', status: 'warn', message: 'Non compare né nel titolo né nel riassunto: sono i due punti che Google legge per primi.' });
         }
 
         // Densità: sotto 2 occorrenze il tema non è chiaro, sopra ~1 ogni 100
         // parole si scade nella ripetizione forzata che Google penalizza.
         const maxSensible = Math.max(4, Math.round(wordCount / 100));
         if (occurrences === 0) {
-            checks.push({ label: 'Chiave nel Corpo', status: 'error', message: 'Mai citata nel testo dell\'articolo.' });
+            checks.push({ label: 'Chiave nel testo', status: 'error', message: 'Mai citata nell\'articolo. Se il pezzo parla davvero di questo, la parola dovrebbe comparirci.' });
         } else if (occurrences > maxSensible) {
-            checks.push({ label: 'Chiave nel Corpo', status: 'warn', message: `Ripetuta ${occurrences} volte: troppe per ${wordCount} parole.` });
+            checks.push({ label: 'Chiave nel testo', status: 'warn', message: `Ripetuta ${occurrences} volte in ${wordCount} parole: troppe, sembra forzata.` });
             score += 0.5;
         } else {
-            const bonus = inHeading ? ' e in un sottotitolo' : '';
-            checks.push({ label: 'Chiave nel Corpo', status: 'ok', message: `Citata ${occurrences} volte nel testo${bonus}.` });
+            const bonus = inHeading ? ', anche in un sottotitolo' : '';
+            checks.push({ label: 'Chiave nel testo', status: 'ok', message: `Citata ${occurrences} volte${bonus}: dosaggio giusto.` });
             score += 1;
         }
     }

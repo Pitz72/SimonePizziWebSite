@@ -1,13 +1,16 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useLoaderData } from 'react-router-dom';
-import { Plus, Pencil, Trash2, Check, X, Merge, Search, AlertTriangle } from 'lucide-react';
+import { Plus, Pencil, Trash2, Check, X, Merge, Search } from 'lucide-react';
 import { api } from '../../api';
 
 /** Soglia oltre la quale la pagina del tag entra nell'indice di Google.
  *  Deve restare allineata a TAG_INDEX_MIN_ARTICLES in public/api/db.php. */
 const SOGLIA_INDICE = 3;
 
-const countOf = (t: any): number => Number(t.article_count ?? 0);
+/** Articoli PUBBLICATI: è questo numero a decidere l'indicizzazione della pagina tag. */
+const pubOf = (t: any): number => Number(t.article_count ?? 0);
+/** TUTTI gli articoli, bozze e programmati compresi: è questo che dice se il tag è in uso. */
+const totOf = (t: any): number => Number(t.total_count ?? t.article_count ?? 0);
 
 export default function TagsList() {
     const initialTags = useLoaderData() as any[];
@@ -47,16 +50,22 @@ export default function TagsList() {
         const list = q ? tags.filter(t => t.name.toLowerCase().includes(q) || t.slug.includes(q)) : [...tags];
         return list.sort((a, b) =>
             sortBy === 'usage'
-                ? countOf(b) - countOf(a) || a.name.localeCompare(b.name)
+                ? totOf(b) - totOf(a) || a.name.localeCompare(b.name)
                 : a.name.localeCompare(b.name)
         );
     }, [tags, filter, sortBy]);
 
     const stats = useMemo(() => ({
         totali: tags.length,
-        inutilizzati: tags.filter(t => countOf(t) === 0).length,
-        unaVolta: tags.filter(t => countOf(t) === 1).length,
-        indicizzati: tags.filter(t => countOf(t) >= SOGLIA_INDICE).length,
+        // "Mai usati" deve significare davvero mai: si guarda il totale, non i
+        // soli pubblicati, altrimenti un tag presente solo in una bozza sembra
+        // eliminabile e cancellandolo lo si toglie a un articolo vero.
+        inutilizzati: tags.filter(t => totOf(t) === 0).length,
+        unaVolta: tags.filter(t => totOf(t) === 1).length,
+        indicizzati: tags.filter(t => pubOf(t) >= SOGLIA_INDICE).length,
+        // Tag in uso solo da bozze o articoli programmati: non indicizzati ma
+        // nemmeno orfani. Vanno lasciati stare.
+        soloBozze: tags.filter(t => totOf(t) > 0 && pubOf(t) === 0).length,
     }), [tags]);
 
     const handleMerge = async () => {
@@ -139,7 +148,16 @@ export default function TagsList() {
     };
 
     const handleDelete = async (tag: any) => {
-        if (!confirm(`Eliminare il tag "${tag.name}"? Verrà slegato da tutti gli articoli che ne fanno uso.`)) return;
+        const tot = totOf(tag);
+        const pub = pubOf(tag);
+        // Avviso esplicito quando il tag è in uso solo da contenuti non ancora
+        // online: è il caso in cui il badge mostra 0 pubblicati e sembra un orfano.
+        const avviso = tot === 0
+            ? `Eliminare il tag "${tag.name}"?\n\nNessun articolo lo usa: eliminazione sicura.`
+            : pub === 0
+                ? `ATTENZIONE: "${tag.name}" è usato da ${tot} articolo/i non ancora pubblicati (bozze o programmati).\n\nEliminandolo lo perderai da quegli articoli. Procedere?`
+                : `Eliminare il tag "${tag.name}"?\n\nVerrà slegato da ${tot} articolo/i (${pub} già pubblicati).`;
+        if (!confirm(avviso)) return;
         try {
             await api.deleteTag(tag.id);
             await load();
@@ -159,32 +177,50 @@ export default function TagsList() {
                 </p>
             </header>
 
-            {/* [v1.27.0] Riepilogo dello stato di salute della tassonomia */}
+            {/* [v1.27.0] Riepilogo dello stato di salute della tassonomia.
+                I conteggi sono su TUTTI gli articoli (bozze e programmati compresi),
+                tranne "Indicizzati" che per forza guarda solo i pubblicati. */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
                 {[
-                    { label: 'Tag totali', value: stats.totali, tone: 'text-white' },
-                    { label: `Indicizzati (${SOGLIA_INDICE}+ articoli)`, value: stats.indicizzati, tone: 'text-dis-green' },
-                    { label: 'Usati una volta sola', value: stats.unaVolta, tone: 'text-amber-400' },
-                    { label: 'Mai usati', value: stats.inutilizzati, tone: 'text-red-400' },
+                    { label: 'Tag totali', value: stats.totali, tone: 'text-white',
+                      hint: 'Quanti tag esistono in archivio.' },
+                    { label: `Indicizzati su Google (${SOGLIA_INDICE}+ articoli pubblicati)`, value: stats.indicizzati, tone: 'text-dis-green',
+                      hint: 'La loro pagina /tag/… è proposta ai motori di ricerca.' },
+                    { label: 'Usati in un solo articolo', value: stats.unaVolta, tone: 'text-amber-400',
+                      hint: 'Collegano un pezzo solo: candidati a essere uniti.' },
+                    { label: 'Mai usati da nessun articolo', value: stats.inutilizzati, tone: 'text-red-400',
+                      hint: 'Nessun articolo li usa, nemmeno fra le bozze: eliminabili senza conseguenze.' },
                 ].map(s => (
-                    <div key={s.label} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4">
+                    <div key={s.label} className="bg-zinc-900 border border-zinc-800 rounded-xl p-4" title={s.hint}>
                         <p className={`text-2xl font-black ${s.tone}`}>{s.value}</p>
                         <p className="text-[11px] text-zinc-500 mt-1 leading-tight">{s.label}</p>
                     </div>
                 ))}
             </div>
 
-            {stats.unaVolta > 0 && (
-                <div className="flex items-start gap-3 p-4 bg-amber-500/10 border border-amber-500/30 rounded-xl">
-                    <AlertTriangle size={18} className="text-amber-400 shrink-0 mt-0.5" />
-                    <p className="text-xs text-amber-100 leading-relaxed">
-                        <strong>{stats.unaVolta} tag compaiono in un solo articolo.</strong> Le loro pagine
-                        esistono e funzionano, ma restano fuori dall'indice di Google finché non arrivano
-                        a {SOGLIA_INDICE} articoli. Usa <em>Unisci</em> per accorparli a un tag più
-                        frequente — è così che i tag tornano utili.
+            <div className="p-4 bg-zinc-900 border border-zinc-800 rounded-xl space-y-2">
+                <p className="text-xs text-zinc-300 leading-relaxed">
+                    <strong className="text-white">Come leggere questa pagina.</strong> Il numero accanto a
+                    ogni tag è quante volte lo usi <em>in tutto</em>. Diventa verde quando il tag arriva a{' '}
+                    {SOGLIA_INDICE} articoli <em>già pubblicati</em>: da lì la sua pagina entra nell'indice
+                    di Google. Sotto quella soglia la pagina esiste e funziona, semplicemente non viene
+                    proposta ai motori.
+                </p>
+                {stats.unaVolta > 0 && (
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                        Hai <strong className="text-amber-400">{stats.unaVolta} tag usati una volta sola</strong>:
+                        non collegano niente a niente. Con <em>Unisci</em> li accorpi a un tag più frequente,
+                        che così sale verso la soglia.
                     </p>
-                </div>
-            )}
+                )}
+                {stats.soloBozze > 0 && (
+                    <p className="text-xs text-zinc-400 leading-relaxed">
+                        <strong className="text-blue-400">{stats.soloBozze} tag</strong> compaiono solo in bozze
+                        o articoli programmati: mostrano <span className="text-zinc-300">0 pubbl.</span> ma
+                        <strong> sono in uso</strong>. Non eliminarli.
+                    </p>
+                )}
+            </div>
 
             {/* Pannello di unione */}
             {mergeFrom && (
@@ -194,7 +230,7 @@ export default function TagsList() {
                         Unisci «{mergeFrom.name}» in un altro tag
                     </p>
                     <p className="text-xs text-zinc-400">
-                        I {countOf(mergeFrom)} articoli che usano «{mergeFrom.name}» passeranno al tag scelto.
+                        I {totOf(mergeFrom)} articoli che usano «{mergeFrom.name}» (bozze comprese) passeranno al tag scelto.
                         «{mergeFrom.name}» verrà eliminato.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-2">
@@ -206,10 +242,10 @@ export default function TagsList() {
                             <option value="">Scegli il tag di destinazione…</option>
                             {[...tags]
                                 .filter(t => t.id !== mergeFrom.id)
-                                .sort((a, b) => countOf(b) - countOf(a) || a.name.localeCompare(b.name))
+                                .sort((a, b) => totOf(b) - totOf(a) || a.name.localeCompare(b.name))
                                 .map(t => (
                                     <option key={t.id} value={t.id}>
-                                        {t.name} ({countOf(t)} articoli)
+                                        {t.name} ({totOf(t)} usi)
                                     </option>
                                 ))}
                         </select>
@@ -301,23 +337,38 @@ export default function TagsList() {
                                             <p className="text-zinc-500 text-xs font-mono mt-0.5">#{tag.slug}</p>
                                         </div>
                                         <div className="flex items-center gap-3 shrink-0">
-                                            {/* Conteggio: verde se il tag è indicizzabile, ambra se
-                                                collega poco, rosso se non è usato da nessuno. */}
+                                            {/* Due numeri diversi, e la differenza conta:
+                                                - totale  = quante volte il tag è usato (bozze incluse)
+                                                - pubbl.  = quanti di quegli articoli sono online
+                                                Un tag con totale>0 e pubbl.=0 è IN USO ma invisibile:
+                                                mostrarlo come "0" e basta invitava a cancellarlo. */}
                                             {(() => {
-                                                const n = countOf(tag);
-                                                const tone = n >= SOGLIA_INDICE
+                                                const tot = totOf(tag);
+                                                const pub = pubOf(tag);
+                                                const soloBozze = tot > 0 && pub === 0;
+
+                                                const tone = pub >= SOGLIA_INDICE
                                                     ? 'bg-dis-green/10 text-dis-green border-dis-green/30'
-                                                    : n === 0
+                                                    : tot === 0
                                                         ? 'bg-red-500/10 text-red-400 border-red-500/30'
-                                                        : 'bg-amber-500/10 text-amber-400 border-amber-500/30';
-                                                const title = n >= SOGLIA_INDICE
-                                                    ? `${n} articoli — la pagina del tag è indicizzata`
-                                                    : n === 0
-                                                        ? 'Nessun articolo pubblicato usa questo tag'
-                                                        : `${n} articolo/i — sotto la soglia di ${SOGLIA_INDICE}, pagina non indicizzata`;
+                                                        : soloBozze
+                                                            ? 'bg-blue-500/10 text-blue-400 border-blue-500/30'
+                                                            : 'bg-amber-500/10 text-amber-400 border-amber-500/30';
+
+                                                const title = tot === 0
+                                                    ? 'Nessun articolo usa questo tag, nemmeno fra le bozze: eliminabile'
+                                                    : soloBozze
+                                                        ? `Usato in ${tot} articolo/i, ma nessuno ancora pubblicato (bozze o programmati). NON eliminare.`
+                                                        : pub >= SOGLIA_INDICE
+                                                            ? `${pub} articoli pubblicati — la pagina del tag è nell'indice di Google`
+                                                            : `${pub} pubblicati su ${tot}: sotto la soglia di ${SOGLIA_INDICE}, pagina non indicizzata`;
+
                                                 return (
                                                     <span className={`px-2 py-1 rounded-full border text-[11px] font-bold whitespace-nowrap ${tone}`} title={title}>
-                                                        {n} {n === 1 ? 'art.' : 'art.'}
+                                                        {tot} {tot === 1 ? 'uso' : 'usi'}
+                                                        {tot > 0 && pub !== tot && (
+                                                            <span className="font-normal opacity-70"> · {pub} pubbl.</span>
+                                                        )}
                                                     </span>
                                                 );
                                             })()}

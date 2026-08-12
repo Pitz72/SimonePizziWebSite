@@ -5,7 +5,10 @@ export interface AvailableTag {
     id: number;
     name: string;
     slug: string;
+    /** Articoli pubblicati (decide l'indicizzazione della pagina tag). */
     article_count?: number | string;
+    /** Tutti gli articoli, bozze comprese: è la misura giusta di "quanto lo uso". */
+    total_count?: number | string;
 }
 
 interface Props {
@@ -43,7 +46,9 @@ const distance = (a: string, b: string): number => {
     return prev[b.length];
 };
 
-const countOf = (t: AvailableTag): number => Number(t.article_count ?? 0);
+// Per suggerire il riuso conta quante volte il tag è usato in tutto, non quanti
+// articoli sono online: un tag che sta in tre bozze è comunque un tag "vivo".
+const countOf = (t: AvailableTag): number => Number(t.total_count ?? t.article_count ?? 0);
 
 /**
  * [v1.27.0] Selettore tag orientato al RIUSO.

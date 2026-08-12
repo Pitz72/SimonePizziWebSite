@@ -45,8 +45,14 @@ try {
             exit;
         }
 
-        // Elenco completo. Con ?with_counts=1 aggiunge il numero di articoli
-        // PUBBLICATI per tag (usato per non generare pagine tag vuote).
+        // Elenco completo con i conteggi. Ne servono DUE, e distinguerli è
+        // importante:
+        //  - article_count = solo articoli PUBBLICATI e già usciti. È il numero
+        //    che decide se la pagina del tag entra nell'indice.
+        //  - total_count   = tutti gli articoli, bozze e programmati compresi.
+        //    È il numero che conta per l'admin: un tag con article_count 0 ma
+        //    total_count 1 sembrerebbe inutilizzato, e cancellarlo lo toglierebbe
+        //    a un articolo vero non ancora uscito.
         if (isset($_GET['with_counts'])) {
             date_default_timezone_set('Europe/Rome');
             $stmt = $pdo->prepare(
@@ -55,7 +61,9 @@ try {
                           JOIN articles a2 ON a2.id = at2.article_id
                          WHERE at2.tag_id = t.id
                            AND a2.status = 'published'
-                           AND (a2.published_at IS NULL OR a2.published_at <= ?)) AS article_count
+                           AND (a2.published_at IS NULL OR a2.published_at <= ?)) AS article_count,
+                        (SELECT COUNT(*) FROM article_tags at3
+                         WHERE at3.tag_id = t.id) AS total_count
                  FROM tags t ORDER BY t.name ASC"
             );
             $stmt->execute([date('Y-m-d H:i:s')]);
