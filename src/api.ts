@@ -148,6 +148,11 @@ export const api = {
     },
     getArticleBySlug: async (slug: string) => {
         const res = await fetch(`${API_URL}/articles.php?slug=${encodeURIComponent(slug)}`, fetchConfig);
+        // [v1.26.1] "Non trovato" NON è un errore tecnico: va distinto, altrimenti
+        // il loader lancia un Error generico e il RootBoundary mostra "Errore di
+        // Sistema" al posto della pagina 404. Succede su ogni articolo inesistente
+        // e su ogni bozza aperta senza sessione admin (anteprima condivisa per sbaglio).
+        if (res.status === 404) return null;
         if (!res.ok) throw new Error('Errore recupero articolo per slug');
         return res.json();
     },
