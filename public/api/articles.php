@@ -1,6 +1,7 @@
 <?php
 require_once 'db.php';
 require_once 'auth_helper.php';
+require_once 'db_maintenance.php';
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH');
@@ -23,22 +24,14 @@ const SQL_TAG_NAMES = "(SELECT GROUP_CONCAT(t2.name ORDER BY t2.name ASC SEPARAT
 const SQL_TAG_SLUGS = "(SELECT GROUP_CONCAT(t3.slug ORDER BY t3.name ASC SEPARATOR ',') FROM article_tags at3 JOIN tags t3 ON at3.tag_id = t3.id WHERE at3.article_id = a.id)";
 
 /**
- * [v1.27.0] La colonna focus_keyword arriva con una migrazione manuale eseguita
- * sul server (scripts/server-tools/migrate_focus_keyword.php). Il codice non può
- * darla per scontata: se il deploy precede la migrazione, scrivere su una colonna
- * inesistente romperebbe il salvataggio degli articoli. Qui la rileviamo una volta
- * per richiesta e ci adattiamo, così l'ordine fra deploy e migrazione è indifferente.
+ * [v1.27.0] La colonna focus_keyword viene creata da una migrazione pigra
+ * (ensureFocusKeyword in db_maintenance.php) alla prima operazione che ne ha
+ * bisogno: nessuno script da caricare sul server. La chiamiamo solo sui percorsi
+ * admin — le letture pubbliche non toccano quella colonna e non devono pagare
+ * una SHOW COLUMNS in più.
  */
 function hasFocusKeyword($pdo) {
-    static $has = null;
-    if ($has === null) {
-        try {
-            $has = (bool)$pdo->query("SHOW COLUMNS FROM articles LIKE 'focus_keyword'")->fetch();
-        } catch (Exception $e) {
-            $has = false;
-        }
-    }
-    return $has;
+    return ensureFocusKeyword($pdo);
 }
 
 // Valida URL bottoni CTA: accetta solo http/https/mailto, rigetta javascript: e simili
@@ -178,6 +171,9 @@ try {
 
         if (isset($_GET['id'])) {
             Auth::check();
+            // Apertura dell'editor: è il primo momento utile per applicare la
+            // migrazione pigra, così il campo esiste già quando si salva.
+            ensureFocusKeyword($pdo);
             $stmt = $pdo->prepare("SELECT a.*, " . SQL_TAG_NAMES . " as dyn_tags, " . SQL_TAG_SLUGS . " as tag_slugs FROM articles a WHERE a.id = ?");
             $stmt->execute([$_GET['id']]);
             $article = $stmt->fetch();
