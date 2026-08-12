@@ -29,4 +29,18 @@
 
   # Riemette il valore corretto una volta sola, a valle di ogni unset.
   Header set Cache-Control "no-store, no-cache, must-revalidate"
+
+  # [v1.27.2] Gli endpoint fuori dall'indice, senza passare da robots.txt.
+  #
+  # Il nostro robots.php contiene "Disallow: /api/", ma NON viene mai servito:
+  # /robots.txt è intercettato dall'infrastruttura DreamHost prima di arrivare
+  # ad Apache, e il file imposto non blocca /api/ (verificato il 12/08/2026 —
+  # /robots.TXT maiuscolo serve il nostro, /robots.txt minuscolo no).
+  # X-Robots-Tag ottiene lo stesso risultato per via diretta, senza dipendere
+  # da un file che non controlliamo: i crawler ricevono l'istruzione nella
+  # risposta stessa e non indicizzano le risposte JSON.
+  #
+  # Solo "noindex", MAI "nofollow": /api/rss.php è il feed RSS, e nofollow
+  # impedirebbe di seguire i link agli articoli nuovi.
+  Header set X-Robots-Tag "noindex"
 </IfModule>
