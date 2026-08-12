@@ -317,8 +317,12 @@ export const api = {
     },
 
     // --- TAGS (v1.7.0) ---
-    getTags: async () => {
-        const res = await fetch(`${API_URL}/tags.php`, fetchConfig);
+    // withCounts aggiunge article_count (articoli PUBBLICATI per tag): serve al
+    // selettore dell'editor per proporre prima i tag già in uso, e al pannello
+    // per far emergere quelli usati una volta sola.
+    getTags: async (withCounts = false) => {
+        const qs = withCounts ? '?with_counts=1' : '';
+        const res = await fetch(`${API_URL}/tags.php${qs}`, fetchConfig);
         if (!res.ok) throw new Error('Errore recupero tag');
         return res.json();
     },
@@ -342,6 +346,19 @@ export const api = {
             ...fetchConfig, method: 'PUT', body: JSON.stringify({ id, ...data })
         });
         if (!res.ok) { const r = await res.json(); throw new Error(r.error || 'Errore aggiornamento tag'); }
+        return res.json();
+    },
+    // [v1.27.0] Unisce due tag: gli articoli passano a `toId`, `fromId` sparisce.
+    mergeTags: async (fromId: number, toId: number): Promise<{ moved: number }> => {
+        const res = await fetch(`${API_URL}/tags.php`, {
+            ...fetchConfig,
+            method: 'POST',
+            body: JSON.stringify({ action: 'merge', from_id: fromId, to_id: toId })
+        });
+        if (!res.ok) {
+            const r = await res.json().catch(() => ({}));
+            throw new Error(r.error || 'Errore unione tag');
+        }
         return res.json();
     },
     deleteTag: async (id: number) => {

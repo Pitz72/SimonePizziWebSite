@@ -69,6 +69,66 @@ try {
     elseif ($method === 'POST') {
         Auth::check();
         $data = json_decode(file_get_contents('php://input'), true);
+
+        // ── [v1.27.0] UNISCI DUE TAG ────────────────────────────────
+        // Sposta tutti gli articoli dal tag assorbito a quello di destinazione
+        // e cancella il primo. Serve a rientrare dai 208 tag usati una volta sola
+        // (refusi compresi: "leonaardo" → "leonardo") senza ritoccare gli articoli
+        // uno per uno.
+        if (($data['action'] ?? '') === 'merge') {
+            $fromId = (int)($data['from_id'] ?? 0);
+            $toId   = (int)($data['to_id'] ?? 0);
+
+            if (!$fromId || !$toId || $fromId === $toId) {
+                http_response_code(400);
+                echo json_encode(['error' => 'Servono due tag diversi']);
+                exit;
+            }
+
+            $chk = $pdo->prepare("SELECT id, name FROM tags WHERE id IN (?, ?)");
+            $chk->execute([$fromId, $toId]);
+            if (count($chk->fetchAll()) !== 2) {
+                http_response_code(404);
+                echo json_encode(['error' => 'Uno dei due tag non esiste']);
+                exit;
+            }
+
+            $pdo->beginTransaction();
+            try {
+                // INSERT IGNORE: se un articolo ha già entrambi i tag la riga
+                // duplicata viene scartata invece di far fallire l'unione.
+                $pdo->prepare(
+                    "INSERT IGNORE INTO article_tags (article_id, tag_id)
+                     SELECT article_id, ? FROM article_tags WHERE tag_id = ?"
+                )->execute([$toId, $fromId]);
+
+                $moved = $pdo->prepare("DELETE FROM article_tags WHERE tag_id = ?");
+                $moved->execute([$fromId]);
+                $affected = $moved->rowCount();
+
+                $pdo->prepare("DELETE FROM tags WHERE id = ?")->execute([$fromId]);
+
+                // Riallinea la colonna legacy 'tags' degli articoli coinvolti:
+                // la usa ancora search.php per la ricerca testuale.
+                $pdo->exec(
+                    "UPDATE articles a
+                        SET a.tags = COALESCE((
+                            SELECT GROUP_CONCAT(t.name ORDER BY t.name ASC SEPARATOR ', ')
+                              FROM article_tags atx JOIN tags t ON t.id = atx.tag_id
+                             WHERE atx.article_id = a.id
+                        ), '')
+                      WHERE a.id IN (SELECT article_id FROM article_tags WHERE tag_id = $toId)"
+                );
+
+                $pdo->commit();
+                echo json_encode(['status' => 'success', 'moved' => $affected]);
+            } catch (Exception $e) {
+                $pdo->rollBack();
+                throw $e;
+            }
+            exit;
+        }
+
         $name = $data['name'] ?? null;
         if (!$name) { http_response_code(400); echo json_encode(['error' => 'Nome tag mancante']); exit; }
 

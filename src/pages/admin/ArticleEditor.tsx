@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams, Link, useLoaderData } from 'react-router-dom';
-import { ArrowLeft, Save, Image as ImageIcon, LayoutTemplate, X, Tag as TagIcon, Loader2, Check, Link as LinkIcon, Mail, Eye } from 'lucide-react';
+import { ArrowLeft, Save, Image as ImageIcon, LayoutTemplate, Loader2, Check, Link as LinkIcon, Mail, Eye, Search } from 'lucide-react';
 import { Line } from 'react-chartjs-2';
 import { chartColors, commonOptions } from '../../utils/chartConfig';
 import { api } from '../../api';
@@ -8,6 +8,7 @@ import { CategoryItem } from '../../types';
 import { RichTextEditor } from '../../components/admin/RichTextEditor';
 import { NavigationBlocker } from '../../components/admin/NavigationBlocker';
 import SeoScorePanel from '../../components/admin/SeoScorePanel';
+import TagPicker from '../../components/admin/TagPicker';
 
 const getLocalDatetime = () => {
     const tzoffset = (new Date()).getTimezoneOffset() * 60000;
@@ -54,6 +55,7 @@ export default function ArticleEditor() {
     const [formData, setFormData] = useState({
         title: '',
         slug: '',
+        focus_keyword: '',
         excerpt: '',
         content: '',
         cover_image: '',
@@ -79,6 +81,7 @@ export default function ArticleEditor() {
             const loadedData = {
                 ...article,
                 slug: article.slug || '',
+                focus_keyword: article.focus_keyword || '',
                 button_a_link: linkA.startsWith('mailto:') ? linkA.replace('mailto:', '') : linkA,
                 button_b_link: linkB.startsWith('mailto:') ? linkB.replace('mailto:', '') : linkB,
                 tags: article.tags ? (typeof article.tags === 'string' ? article.tags.split(',').map((t: string) => t.trim()) : article.tags) : [],
@@ -524,43 +527,34 @@ export default function ArticleEditor() {
                             </select>
                         </div>
 
-                        <div className="space-y-2 pb-2">
+                        {/* [v1.27.0] Parola chiave principale — separata dai tag.
+                            Prima il punteggio SEO premiava il primo tag se compariva
+                            nel testo: da lì l'abitudine a inventare un tag per articolo. */}
+                        <div className="space-y-2">
                             <label className="text-sm font-medium text-zinc-300 flex items-center gap-2">
-                                <TagIcon size={16} />
-                                Tag Dinamici (Premi Invio per aggiungere)
+                                <Search size={15} />
+                                Parola chiave principale
                             </label>
-                            <div className="flex flex-wrap gap-2 mb-2">
-                                {Array.isArray(formData.tags) && formData.tags.map((tag, i) => (
-                                    <span key={i} className="flex items-center gap-1 bg-zinc-800 text-dis-green px-3 py-1.5 rounded-full text-sm border border-zinc-700">
-                                        {tag}
-                                        <button type="button" onClick={() => setFormData(prev => ({...prev, tags: (prev.tags as string[]).filter((_, idx) => idx !== i)}))} className="text-zinc-400 hover:text-white">
-                                            <X size={14} />
-                                        </button>
-                                    </span>
-                                ))}
-                            </div>
                             <input
-                                type="text"
-                                placeholder="Aggiungi un tag e premi Invio..."
-                                list="available-tags"
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        e.preventDefault();
-                                        const newTag = e.currentTarget.value.trim();
-                                        if (newTag && !(formData.tags as string[]).includes(newTag)) {
-                                            setFormData(prev => ({ ...prev, tags: [...(prev.tags as string[]), newTag] }));
-                                        }
-                                        e.currentTarget.value = '';
-                                    }
-                                }}
-                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white focus:border-dis-green focus:outline-none placeholder-zinc-700"
+                                name="focus_keyword"
+                                value={formData.focus_keyword}
+                                onChange={handleChange}
+                                placeholder="es. avventura testuale"
+                                maxLength={120}
+                                className="w-full bg-zinc-950 border border-zinc-800 rounded-lg p-3 text-white text-sm focus:border-dis-green focus:outline-none placeholder-zinc-700"
                             />
-                            <datalist id="available-tags">
-                                {availableTags.map(t => (
-                                    <option key={t.id} value={t.name} />
-                                ))}
-                            </datalist>
-                            <p className="text-xs text-zinc-500 mt-1">Se inserisci un tag nuovo non presente a sistema, verrà creato dinamicamente al salvataggio.</p>
+                            <p className="text-xs text-zinc-500">
+                                Il termine su cui vuoi essere trovato. Serve solo al punteggio SEO qui
+                                accanto: non crea un tag e non compare sul sito.
+                            </p>
+                        </div>
+
+                        <div className="pb-2">
+                            <TagPicker
+                                value={formData.tags as string[]}
+                                onChange={(tags) => setFormData(prev => ({ ...prev, tags }))}
+                                available={availableTags}
+                            />
                         </div>
 
                         <div className="space-y-2">
@@ -670,6 +664,7 @@ export default function ArticleEditor() {
                         content={formData.content}
                         cover_image={formData.cover_image}
                         tags={formData.tags as string[]}
+                        focusKeyword={formData.focus_keyword}
                     />
 
                 </div>

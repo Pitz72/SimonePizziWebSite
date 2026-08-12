@@ -111,9 +111,11 @@ while ($art = $stmtArt->fetch()) {
     echo "  </url>" . PHP_EOL;
 }
 
-// 6. [v1.26.0] PAGINE TAG — solo tag con almeno un articolo pubblicato.
-// Un tag senza contenuti visibili produrrebbe una pagina vuota (index.php la
-// serve come 404), quindi non deve mai comparire in sitemap.
+// 6. [v1.26.0/v1.27.0] PAGINE TAG — solo quelle che raggruppano davvero qualcosa.
+// Serve almeno TAG_INDEX_MIN_ARTICLES articoli pubblicati: sotto quella soglia la
+// pagina esiste ed è navigabile, ma ripete un contenuto già presente altrove, e
+// proporla a Google significa spendere attenzione su pagine povere invece che
+// sugli articoli. index.php marca le stesse pagine come noindex.
 $stmtTags = $pdo->prepare("
     SELECT t.slug,
            MAX(COALESCE(a.published_at, a.created_at)) AS latest_article
@@ -122,6 +124,7 @@ $stmtTags = $pdo->prepare("
     JOIN articles a ON a.id = atx.article_id
     WHERE a.status = 'published' AND (a.published_at IS NULL OR a.published_at <= ?)
     GROUP BY t.id, t.slug
+    HAVING COUNT(DISTINCT a.id) >= " . (int)TAG_INDEX_MIN_ARTICLES . "
     ORDER BY t.name ASC
 ");
 $stmtTags->execute([$now]);

@@ -9,6 +9,14 @@ interface SeoScorePanelProps {
     content: string;
     cover_image: string;
     tags: string[];
+    /**
+     * [v1.27.0] Parola chiave principale dell'articolo.
+     * Prima questo ruolo lo faceva `tags[0]`: il punteggio saliva solo se il primo
+     * tag compariva nel titolo o nell'excerpt, e questo spingeva a inventare un tag
+     * su misura per ogni articolo (208 tag usati una volta sola). I tag sono una
+     * tassonomia condivisa, la parola chiave è un dato del singolo pezzo: separati.
+     */
+    focusKeyword: string;
 }
 
 interface SeoCheck {
@@ -31,16 +39,21 @@ const estimateReadTime = (words: number): number => Math.ceil(words / 200);
 
 // ─── Calcola i check SEO (tutto frontend, nessuna API) ─────────────────────────
 
+/** Confronto insensibile ad accenti e maiuscole: "perché" trova "PERCHE'". */
+const norm = (s: string): string =>
+    s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '');
+
 function computeChecks(
     title: string,
     excerpt: string,
     content: string,
     cover_image: string,
-    tags: string[]
+    tags: string[],
+    focusKeyword: string
 ): { checks: SeoCheck[]; score: number } {
     const checks: SeoCheck[] = [];
     let score = 0;
-    const maxScore = 7;
+    const maxScore = 9;
 
     // 1. Titolo — lunghezza
     const titleLen = title.trim().length;
@@ -80,17 +93,20 @@ function computeChecks(
         score += 1;
     }
 
-    // 4. Tag
+    // 4. Tag — conta solo la quantità.
+    // NON si controlla più se un tag compare nel testo: era quel controllo a
+    // spingere verso un tag inventato per articolo. I tag servono a collegare
+    // fra loro articoli diversi, non a ripetere parole di questo.
     if (tags.length === 0) {
-        checks.push({ label: 'Tag', status: 'warn', message: 'Nessun tag. Aggiungi 2-5 tag rilevanti.' });
+        checks.push({ label: 'Tag', status: 'warn', message: 'Nessun tag. Aggiungine 2-5, riusando quelli che esistono già.' });
     } else if (tags.length < 2) {
         checks.push({ label: 'Tag', status: 'warn', message: `Solo ${tags.length} tag. Consigliati almeno 2.` });
         score += 0.5;
     } else if (tags.length > 8) {
-        checks.push({ label: 'Tag', status: 'warn', message: `${tags.length} tag. Evita keyword stuffing (max 8).` });
+        checks.push({ label: 'Tag', status: 'warn', message: `${tags.length} tag. Troppi: diluiscono invece di collegare (max 8).` });
         score += 0.5;
     } else {
-        checks.push({ label: 'Tag', status: 'ok', message: `${tags.length} tag — buona copertura tematica.` });
+        checks.push({ label: 'Tag', status: 'ok', message: `${tags.length} tag — buon collegamento con gli altri articoli.` });
         score += 1;
     }
 
@@ -116,19 +132,47 @@ function computeChecks(
         score += 1;
     }
 
-    // 7. Keyword nel titolo e nell'excerpt
-    if (tags.length > 0 && titleLen > 0 && excerptLen > 0) {
-        const firstTag = tags[0].toLowerCase();
-        const titleLow = title.toLowerCase();
-        const excerptLow = excerpt.toLowerCase();
-        if (titleLow.includes(firstTag) || excerptLow.includes(firstTag)) {
-            checks.push({ label: 'Keyword nel Testo', status: 'ok', message: `Il tag principale "${tags[0]}" è presente nel titolo o nell'excerpt.` });
-            score += 1;
-        } else {
-            checks.push({ label: 'Keyword nel Testo', status: 'warn', message: `Il tag "${tags[0]}" non compare nel titolo o nell'excerpt.` });
-        }
+    // 7-9. Parola chiave principale — dove deve comparire davvero.
+    // Google valuta il testo, non la tassonomia: titolo, apertura e corpo.
+    const kw = norm(focusKeyword.trim());
+
+    if (!kw) {
+        checks.push({ label: 'Parola Chiave', status: 'warn', message: 'Non impostata. Scrivi il termine su cui vuoi posizionarti.' });
+        checks.push({ label: 'Chiave nel Titolo', status: 'warn', message: 'Impossibile verificare senza parola chiave.' });
+        checks.push({ label: 'Chiave nel Corpo', status: 'warn', message: 'Impossibile verificare senza parola chiave.' });
     } else {
-        checks.push({ label: 'Keyword nel Testo', status: 'warn', message: 'Impossibile verificare — aggiungi almeno un tag.' });
+        const plain = norm(stripHtml(content));
+        const inTitle = norm(title).includes(kw);
+        const inExcerpt = norm(excerpt).includes(kw);
+        const inHeading = norm((content.match(/<h[23][^>]*>(.*?)<\/h[23]>/gis) || []).join(' ')).includes(kw);
+        const occurrences = kw ? plain.split(kw).length - 1 : 0;
+
+        checks.push({ label: 'Parola Chiave', status: 'ok', message: `Impostata: "${focusKeyword.trim()}".` });
+        score += 1;
+
+        if (inTitle && inExcerpt) {
+            checks.push({ label: 'Chiave nel Titolo', status: 'ok', message: 'Presente sia nel titolo sia nell\'excerpt.' });
+            score += 1;
+        } else if (inTitle || inExcerpt) {
+            checks.push({ label: 'Chiave nel Titolo', status: 'warn', message: `Presente solo ${inTitle ? 'nel titolo' : "nell'excerpt"}. Meglio in entrambi.` });
+            score += 0.5;
+        } else {
+            checks.push({ label: 'Chiave nel Titolo', status: 'warn', message: 'Non compare né nel titolo né nell\'excerpt.' });
+        }
+
+        // Densità: sotto 2 occorrenze il tema non è chiaro, sopra ~1 ogni 100
+        // parole si scade nella ripetizione forzata che Google penalizza.
+        const maxSensible = Math.max(4, Math.round(wordCount / 100));
+        if (occurrences === 0) {
+            checks.push({ label: 'Chiave nel Corpo', status: 'error', message: 'Mai citata nel testo dell\'articolo.' });
+        } else if (occurrences > maxSensible) {
+            checks.push({ label: 'Chiave nel Corpo', status: 'warn', message: `Ripetuta ${occurrences} volte: troppe per ${wordCount} parole.` });
+            score += 0.5;
+        } else {
+            const bonus = inHeading ? ' e in un sottotitolo' : '';
+            checks.push({ label: 'Chiave nel Corpo', status: 'ok', message: `Citata ${occurrences} volte nel testo${bonus}.` });
+            score += 1;
+        }
     }
 
     return { checks, score: Math.round((score / maxScore) * 100) };
@@ -136,10 +180,10 @@ function computeChecks(
 
 // ─── Componente ────────────────────────────────────────────────────────────────
 
-const SeoScorePanel: React.FC<SeoScorePanelProps> = ({ title, excerpt, content, cover_image, tags }) => {
+const SeoScorePanel: React.FC<SeoScorePanelProps> = ({ title, excerpt, content, cover_image, tags, focusKeyword }) => {
     const { checks, score } = useMemo(
-        () => computeChecks(title, excerpt, content, cover_image, tags),
-        [title, excerpt, content, cover_image, tags]
+        () => computeChecks(title, excerpt, content, cover_image, tags, focusKeyword || ''),
+        [title, excerpt, content, cover_image, tags, focusKeyword]
     );
 
     const scoreColor =

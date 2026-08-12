@@ -206,6 +206,7 @@ $articles     = [];
 $articleTags  = [];
 $categoryName = null;
 $tagName      = null;
+$tagIsThin    = false;
 $projects     = [];
 $jsonLd       = null;
 
@@ -338,6 +339,12 @@ try {
             // Un tag senza articoli pubblicati è una pagina vuota: non deve
             // finire nell'indice. Resta $tagName = null → ramo 404 più sotto.
             if (!empty($articles)) {
+                // [v1.27.0] Sotto la soglia la pagina resta viva e navigabile, ma
+                // esce dall'indice: con uno o due articoli non è un archivio, è la
+                // ripetizione di contenuto che sta già altrove. 'follow' resta,
+                // così i link verso gli articoli continuano a contare.
+                $tagIsThin = count($articles) < TAG_INDEX_MIN_ARTICLES;
+
                 $tagName      = $tag['name'];
                 $metaTitle    = esc($tag['name']) . " | Tag | Simone Pizzi";
                 $metaDesc     = esc("Tutti gli articoli di Simone Pizzi etichettati con \"" . $tag['name'] . "\".");
@@ -485,6 +492,12 @@ if ($isNotFound) {
     $metaDesc  = 'La pagina che cerchi non esiste, è stata spostata o rimossa.';
     $ogType    = 'website';
     $jsonLd    = null;
+}
+
+// [v1.27.0] Pagina tag sotto soglia: navigabile ma fuori dall'indice.
+// 'follow' è voluto: i link agli articoli devono continuare a essere seguiti.
+if (!$isNotFound && $pageType === 'tag' && $tagIsThin) {
+    $robotsTag = '<meta name="robots" content="noindex, follow" />';
 }
 
 // [v1.26.0] Un'anteprima non deve MAI finire in un indice, nemmeno se l'URL

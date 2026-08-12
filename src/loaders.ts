@@ -173,7 +173,9 @@ export const adminArticleEditLoader = async ({ params }: LoaderFunctionArgs) => 
     const [article, categories, tags] = await Promise.all([
         id ? api.getArticle(parseInt(id)) : Promise.resolve(null),
         api.getCategories(),
-        api.getTags()
+        // [v1.27.0] Con i conteggi: il selettore propone per primi i tag già usati,
+        // così riusare costa meno che creare.
+        api.getTags(true)
     ]);
 
     // Recupera analytics solo in modalità edit (l'articolo esiste già)
@@ -210,7 +212,9 @@ export const adminCategoriesLoader = async () => {
 };
 
 export const adminTagsLoader = async () => {
-    return await api.getTags();
+    // Con i conteggi: la pagina ordina per frequenza e fa emergere i tag usati
+    // una volta sola, che sono quelli da unire o eliminare.
+    return await api.getTags(true);
 };
 
 export const adminNewsletterLoader = async () => {

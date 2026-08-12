@@ -22,6 +22,25 @@ $ita_now_time = time();
 const SQL_TAG_NAMES = "(SELECT GROUP_CONCAT(t2.name ORDER BY t2.name ASC SEPARATOR ', ') FROM article_tags at2 JOIN tags t2 ON at2.tag_id = t2.id WHERE at2.article_id = a.id)";
 const SQL_TAG_SLUGS = "(SELECT GROUP_CONCAT(t3.slug ORDER BY t3.name ASC SEPARATOR ',') FROM article_tags at3 JOIN tags t3 ON at3.tag_id = t3.id WHERE at3.article_id = a.id)";
 
+/**
+ * [v1.27.0] La colonna focus_keyword arriva con una migrazione manuale eseguita
+ * sul server (scripts/server-tools/migrate_focus_keyword.php). Il codice non può
+ * darla per scontata: se il deploy precede la migrazione, scrivere su una colonna
+ * inesistente romperebbe il salvataggio degli articoli. Qui la rileviamo una volta
+ * per richiesta e ci adattiamo, così l'ordine fra deploy e migrazione è indifferente.
+ */
+function hasFocusKeyword($pdo) {
+    static $has = null;
+    if ($has === null) {
+        try {
+            $has = (bool)$pdo->query("SHOW COLUMNS FROM articles LIKE 'focus_keyword'")->fetch();
+        } catch (Exception $e) {
+            $has = false;
+        }
+    }
+    return $has;
+}
+
 // Valida URL bottoni CTA: accetta solo http/https/mailto, rigetta javascript: e simili
 function sanitizeUrl(string $url): string {
     $url = trim($url);
@@ -311,19 +330,24 @@ try {
             $copyTitle = mb_substr($src['title'] . ' (copia)', 0, 255);
             $copySlug  = uniqueSlug(normalizeSlug($copyTitle), $pdo);
 
+            $fkCol = hasFocusKeyword($pdo) ? ', focus_keyword' : '';
+            $fkVal = hasFocusKeyword($pdo) ? ', ?' : '';
+
             $ins = $pdo->prepare(
                 "INSERT INTO articles
                     (title, slug, content, excerpt, cover_image, category, tags,
                      is_featured, is_category_pinned,
                      button_a_label, button_a_link, button_b_label, button_b_link,
-                     status, published_at)
-                 VALUES (?, ?, ?, ?, ?, ?, '', 0, 0, ?, ?, ?, ?, 'draft', ?)"
+                     status, published_at$fkCol)
+                 VALUES (?, ?, ?, ?, ?, ?, '', 0, 0, ?, ?, ?, ?, 'draft', ?$fkVal)"
             );
-            $ins->execute([
+            $dupParams = [
                 $copyTitle, $copySlug, $src['content'], $src['excerpt'], $src['cover_image'], $src['category'],
                 $src['button_a_label'], $src['button_a_link'], $src['button_b_label'], $src['button_b_link'],
                 $ita_now_str
-            ]);
+            ];
+            if (hasFocusKeyword($pdo)) $dupParams[] = $src['focus_keyword'] ?? '';
+            $ins->execute($dupParams);
             $copyId = $pdo->lastInsertId();
 
             // Ricopia le associazioni tag e riallinea la colonna legacy 'tags'
@@ -357,9 +381,15 @@ try {
             ? $published_at_raw
             : date('Y-m-d H:i:s');
 
-        $stmt = $pdo->prepare("INSERT INTO articles (title, slug, content, excerpt, cover_image, category, tags, is_featured, is_category_pinned, button_a_label, button_a_link, button_b_label, button_b_link, status, published_at) VALUES (?, ?, ?, ?, ?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->execute([$title, $slug, $content, $excerpt, $cover_image, $category, $is_featured, $is_category_pinned, $button_a_label, $button_a_link, $button_b_label, $button_b_link, $status, $published_at]);
-        
+        $focusKeyword = mb_substr(trim((string)($data['focus_keyword'] ?? '')), 0, 120);
+        $fkCol = hasFocusKeyword($pdo) ? ', focus_keyword' : '';
+        $fkVal = hasFocusKeyword($pdo) ? ', ?' : '';
+
+        $stmt = $pdo->prepare("INSERT INTO articles (title, slug, content, excerpt, cover_image, category, tags, is_featured, is_category_pinned, button_a_label, button_a_link, button_b_label, button_b_link, status, published_at$fkCol) VALUES (?, ?, ?, ?, ?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?$fkVal)");
+        $insParams = [$title, $slug, $content, $excerpt, $cover_image, $category, $is_featured, $is_category_pinned, $button_a_label, $button_a_link, $button_b_label, $button_b_link, $status, $published_at];
+        if (hasFocusKeyword($pdo)) $insParams[] = $focusKeyword;
+        $stmt->execute($insParams);
+
         $new_id = $pdo->lastInsertId();
         syncArticleTags($pdo, $new_id, $tags);
 
@@ -410,9 +440,15 @@ try {
             ? $published_at_raw
             : date('Y-m-d H:i:s');
 
-        $stmt = $pdo->prepare("UPDATE articles SET title=?, slug=?, content=?, excerpt=?, cover_image=?, category=?, is_featured=?, is_category_pinned=?, button_a_label=?, button_a_link=?, button_b_label=?, button_b_link=?, status=?, published_at=? WHERE id=?");
-        $stmt->execute([$title, $slug, $content, $excerpt, $cover_image, $category, $is_featured, $is_category_pinned, $button_a_label, $button_a_link, $button_b_label, $button_b_link, $status, $published_at, $id]);
-        
+        $focusKeyword = mb_substr(trim((string)($data['focus_keyword'] ?? '')), 0, 120);
+        $fkSet = hasFocusKeyword($pdo) ? ', focus_keyword=?' : '';
+
+        $stmt = $pdo->prepare("UPDATE articles SET title=?, slug=?, content=?, excerpt=?, cover_image=?, category=?, is_featured=?, is_category_pinned=?, button_a_label=?, button_a_link=?, button_b_label=?, button_b_link=?, status=?, published_at=?$fkSet WHERE id=?");
+        $updParams = [$title, $slug, $content, $excerpt, $cover_image, $category, $is_featured, $is_category_pinned, $button_a_label, $button_a_link, $button_b_label, $button_b_link, $status, $published_at];
+        if (hasFocusKeyword($pdo)) $updParams[] = $focusKeyword;
+        $updParams[] = $id;
+        $stmt->execute($updParams);
+
         syncArticleTags($pdo, $id, $tags);
 
         // slug_changed=true → il pannello mostra la riga di redirect 301 da
