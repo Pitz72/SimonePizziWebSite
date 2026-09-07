@@ -23,6 +23,15 @@ $figlie   = sottocategorie((int)$categoria['id']);
 $nomi_figlie = [];
 foreach ($figlie as $f) $nomi_figlie[$f['slug']] = $f['name'];
 $mostra_sotto = count($figlie) > 0;
+
+/* L'articolo fissato apre la sezione, come quello in vetrina apre la home.
+   Si mostra solo sulla prima pagina, e si toglie dall'elenco sotto: comparire
+   due volte nella stessa schermata lo farebbe sembrare un errore. */
+$apre = $pagina_num === 1 ? fissato_di_categoria((string)$categoria['slug']) : null;
+if ($apre) {
+    $articoli = array_values(array_filter($articoli,
+        fn($a) => (int)$a['id'] !== (int)$apre['id']));
+}
 $ultime   = ceil(max(1, $totale) / PER_PAGINA);
 
 // Chiedere la pagina 40 di un archivio che ne ha 3 non è una pagina: è un 404.
@@ -73,9 +82,15 @@ require __DIR__ . '/../partials/head.php';
       </div>
     </header>
 
-    <?php if (!$articoli): ?>
+    <?php if ($apre): ?>
+      <div style="margin-top:26px">
+        <?php blocco_primo($apre, $nomi_figlie[$apre['category']] ?? $categoria['name']); ?>
+      </div>
+    <?php endif; ?>
+
+    <?php if (!$articoli && !$apre): ?>
       <p class="vuoto">Qui non c'è ancora niente. Succede: vuol dire che il lavoro è in corso.</p>
-    <?php else: ?>
+    <?php elseif ($articoli): ?>
       <ul class="lavorazioni">
         <?php foreach ($articoli as $a) blocco_riga($a, $mostra_sotto, $nomi_figlie[$a['category']] ?? ''); ?>
       </ul>

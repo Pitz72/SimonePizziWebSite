@@ -418,3 +418,92 @@ function tag_usati_una_volta(): int {
         SELECT t.id FROM tags t JOIN article_tags x ON x.tag_id = t.id
         GROUP BY t.id HAVING COUNT(x.article_id) = 1) AS coda")->fetchColumn();
 }
+
+/* ═══════════════════ In evidenza dentro la categoria ════════════════════
+   Diverso dalla vetrina in home: quello è l'articolo che apre il sito, questo
+   è quello che apre la SUA sezione. Ce n'è uno solo per categoria — fissarne
+   un secondo toglie il primo, che è la regola che aveva anche il pannello di
+   prima (api/articles.php, riga 546). Senza, due articoli si contenderebbero
+   la stessa posizione e vincerebbe quello con la data più recente, a caso. */
+
+function fissa_in_categoria(int $id, bool $fissa): void {
+    $q = db()->prepare("SELECT category FROM articles WHERE id = ? LIMIT 1");
+    $q->execute([$id]);
+    $categoria = (string)$q->fetchColumn();
+
+    if ($fissa && $categoria !== '') {
+        db()->prepare("UPDATE articles SET is_category_pinned = 0 WHERE category = ? AND id <> ?")
+            ->execute([$categoria, $id]);
+    }
+    db()->prepare("UPDATE articles SET is_category_pinned = ? WHERE id = ?")
+        ->execute([$fissa ? 1 : 0, $id]);
+}
+
+/* ═══════════════════════════ Le analitiche ══════════════════════════════
+   Le stesse che aveva il cruscotto di prima. Sono query separate e non una
+   sola con dieci sottoselect: così, quando una diventa lenta, si vede quale. */
+
+/** Visite di oggi, di ieri, degli ultimi sette giorni, e media per articolo. */
+function ritmo_visite(): array {
+    $oggi = date('Y-m-d');
+    $ieri = date('Y-m-d', strtotime('-1 day'));
+    $settimana = date('Y-m-d', strtotime('-7 days'));
+
+    $conta = static function (string $sql, array $val): int {
+        $q = db()->prepare($sql);
+        $q->execute($val);
+        return (int)$q->fetchColumn();
+    };
+
+    $totali = $conta("SELECT COUNT(*) FROM article_views", []);
+    $articoli = max(1, $conta("SELECT COUNT(*) FROM articles WHERE status = 'published'", []));
+
+    return [
+        'oggi'      => $conta("SELECT COUNT(*) FROM article_views WHERE view_date = ?", [$oggi]),
+        'ieri'      => $conta("SELECT COUNT(*) FROM article_views WHERE view_date = ?", [$ieri]),
+        'settimana' => $conta("SELECT COUNT(*) FROM article_views WHERE view_date >= ?", [$settimana]),
+        'totali'    => $totali,
+        'media'     => (int)round($totali / $articoli),
+    ];
+}
+
+/** Le reazioni divise per tipo, dalla più usata. */
+function reazioni_per_tipo(): array {
+    $fuori = [];
+    foreach (db()->query("SELECT reaction, COUNT(*) AS quante FROM article_reactions
+                          GROUP BY reaction ORDER BY quante DESC") as $r) {
+        $fuori[(string)$r['reaction']] = (int)$r['quante'];
+    }
+    return $fuori;
+}
+
+/** I clic sui pulsanti dei progetti, per etichetta: dice quale invito funziona. */
+function clic_per_etichetta(int $quanti = 6): array {
+    $quanti = max(1, min(20, $quanti));
+    return db()->query("SELECT button_label, COUNT(*) AS quanti FROM cta_clicks
+                        GROUP BY button_label ORDER BY quanti DESC LIMIT $quanti")->fetchAll();
+}
+
+/** Gli articoli che hanno raccolto più reazioni. */
+function articoli_piu_amati(int $quanti = 6): array {
+    $quanti = max(1, min(20, $quanti));
+    return db()->query("SELECT a.id, a.title, a.slug, a.category, COUNT(r.id) AS reazioni
+                        FROM articles a JOIN article_reactions r ON r.article_id = a.id
+                        GROUP BY a.id, a.title, a.slug, a.category
+                        ORDER BY reazioni DESC LIMIT $quanti")->fetchAll();
+}
+
+/** Le categorie che raccolgono più visite. */
+function categorie_piu_lette(int $quante = 8): array {
+    $quante = max(1, min(30, $quante));
+    return db()->query("SELECT a.category, COUNT(v.id) AS visite, COUNT(DISTINCT a.id) AS articoli
+                        FROM articles a JOIN article_views v ON v.article_id = a.id
+                        GROUP BY a.category ORDER BY visite DESC LIMIT $quante")->fetchAll();
+}
+
+/** Quanti si sono iscritti alla lettera negli ultimi trenta giorni. */
+function iscritti_recenti(): int {
+    $q = db()->prepare("SELECT COUNT(*) FROM subscribers WHERE created_at >= ?");
+    $q->execute([date('Y-m-d H:i:s', strtotime('-30 days'))]);
+    return (int)$q->fetchColumn();
+}

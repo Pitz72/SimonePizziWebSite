@@ -167,6 +167,21 @@ function articoli_di_categoria(array $categoria, int $quanti = 12, int $salta = 
     return $q->fetchAll();
 }
 
+/**
+ * L'articolo fissato in cima a una categoria, se c'è.
+ *
+ * È quello che apre la sezione, e ce n'è al massimo uno: la regola la fa
+ * rispettare il pannello (fissa_in_categoria). Qui si legge e basta, ma con il
+ * LIMIT 1 per non dipendere da quella promessa.
+ */
+function fissato_di_categoria(string $slugCategoria): ?array {
+    $q = db()->prepare("SELECT " . COLONNE_ELENCO . ", content FROM articles
+                        WHERE category = :cat AND is_category_pinned = 1
+                          AND " . SOLO_PUBBLICATI . " LIMIT 1");
+    $q->execute([':cat' => $slugCategoria, ':adesso' => adesso()]);
+    return $q->fetch() ?: null;
+}
+
 /** Gli altri articoli della stessa categoria, per il fondo di un articolo. */
 function articoli_vicini(array $articolo, int $quanti = 3): array {
     $q = db()->prepare("SELECT " . COLONNE_ELENCO . " FROM articles

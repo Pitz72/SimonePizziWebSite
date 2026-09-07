@@ -57,6 +57,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     imposta_tag_articolo($nuovoId, explode(',', (string)($_POST['tags'] ?? '')));
 
+    /* La spunta «in cima alla categoria» passa da qui e non dal semplice UPDATE,
+       perché fissarne uno deve togliere il pin all'altro: due articoli in cima
+       alla stessa categoria si contenderebbero il posto, e vincerebbe quello
+       con la data più recente, a caso. */
+    fissa_in_categoria($nuovoId, !empty($_POST['is_category_pinned']));
+
     torna('/admin/articolo.php?id=' . $nuovoId,
           $id ? 'Salvato.' : 'Articolo creato: adesso è una bozza finché non lo pubblichi.');
 }
@@ -203,7 +209,9 @@ avviso_pannello();
     </label>
     <label class="spunta">
       <input type="checkbox" name="is_category_pinned" value="1"<?= $a['is_category_pinned'] ? ' checked' : '' ?>>
-      <span>In cima alla sua categoria</span>
+      <span>In cima alla sua categoria<br><small class="aiuto">È l'articolo che apre
+        <?= $a['category'] !== '' ? '<b>/' . e($a['category']) . '</b>' : 'la sua sezione' ?>.
+        Ce n'è uno solo: spuntando questo, l'altro smette di esserlo.</small></span>
     </label>
   </section>
 

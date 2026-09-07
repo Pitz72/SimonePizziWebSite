@@ -45,6 +45,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             foreach ($scelti as $id) elimina_articolo($id);
             torna($dove, conta($scelti, 'Un articolo eliminato', 'articoli eliminati'));
 
+        /* In evidenza dentro la sua categoria. Uno solo per categoria: fissarne
+           un secondo toglie il primo, e il messaggio lo dice, perché altrimenti
+           sembra che il pulsante non abbia funzionato sull'altro. */
+        case 'fissa':
+            $id = (int)($_POST['id'] ?? 0);
+            $era = (bool)($_POST['era'] ?? false);
+            fissa_in_categoria($id, !$era);
+            $a = admin_articolo($id);
+            torna($dove, $era
+                ? '«' . $a['title'] . '» non è più in evidenza in ' . $a['category'] . '.'
+                : '«' . $a['title'] . '» apre la categoria ' . $a['category']
+                  . '. Se ce ne fosse un altro, adesso non lo è più.');
+
         default:
             torna($dove, 'Azione sconosciuta.', true);
     }
@@ -82,6 +95,12 @@ titolo_pannello('Articoli', $esito['totale'] . ' in tutto',
 avviso_pannello();
 ?>
 
+<p class="aiuto" style="margin-bottom:14px">
+  La stella mette un articolo <b>in cima alla sua categoria</b>: è l'articolo che
+  apre quella sezione del sito. Ce n'è uno solo per categoria — la vetrina in
+  home, invece, è un'altra cosa e si imposta dalla scheda.
+</p>
+
 <form class="filtri" method="get" action="/admin/articoli.php">
   <label>
     <span class="eti">Cerca</span>
@@ -116,6 +135,8 @@ avviso_pannello();
       data-conferma="Confermi l'azione sugli articoli selezionati?">
   <?= campo_gettone() ?>
   <input type="hidden" name="ritorno" value="<?= e($ritorno) ?>">
+  <input type="hidden" name="id" value="">
+  <input type="hidden" name="era" value="">
 
   <div class="filtri" id="azioni-blocco" style="border:1px solid var(--filo);padding:12px;background:var(--pece)">
     <span class="eti spento" data-quanti>nessuno selezionato</span>
@@ -135,7 +156,7 @@ avviso_pannello();
           <th>Categoria</th>
           <th>Stato</th>
           <th>Data</th>
-          <th class="comandi">Azioni</th>
+          <th class="comandi">In evidenza · Azioni</th>
         </tr>
       </thead>
       <tbody>
@@ -157,6 +178,15 @@ avviso_pannello();
             <td><?= stato_articolo($a) ?></td>
             <td class="num"><?= e(data_breve($a['published_at'] ?: $a['created_at'])) ?></td>
             <td class="comandi">
+              <button class="mini" type="submit" name="azione" value="fissa"
+                      formnovalidate
+                      aria-pressed="<?= $a['is_category_pinned'] ? 'true' : 'false' ?>"
+                      title="<?= $a['is_category_pinned']
+                        ? 'Toglilo dalla cima di ' . e($a['category'])
+                        : 'Mettilo in cima a ' . e($a['category']) ?>"
+                      onclick="this.form.id.value=<?= (int)$a['id'] ?>;this.form.era.value=<?= $a['is_category_pinned'] ? 1 : '' ?>">
+                <?= $a['is_category_pinned'] ? '★' : '☆' ?>
+              </button>
               <?php if ($a['status'] === 'published'): ?>
                 <a class="mini" href="<?= e(url_articolo($a)) ?>" target="_blank" rel="noopener">Vedi</a>
               <?php endif; ?>
