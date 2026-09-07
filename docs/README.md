@@ -2,6 +2,12 @@
 
 Benvenuto nel repository della documentazione. In linea con la filosofia di semplificazione del progetto, abbiamo consolidato tutta la conoscenza operativa in un unico punto di riferimento.
 
+## ⚠️ Prossima sessione: leggere prima questo
+- **[Consegna del 07/09/2026 — migrazione a PHP puro](2026-09-07-consegna-migrazione-php-puro.md)** —
+  perché questo repo non è stato toccato durante l'omologazione degli editor dei tre siti, l'inventario
+  di quello che c'è, e il lavoro deciso da Simone: **prima due o tre proposte di design da mostrare
+  visivamente**, poi la migrazione abbandonando React. Niente codice prima della scelta del design.
+
 ## 📌 Backlog e pianificazione
 Il documento vivo su cosa è fatto e cosa manca è la **roadmap**:
 - **[Roadmap evolutiva](25-04-2026-roadmap.md)** — feature completate, backlog per priorità, minori aperti.
