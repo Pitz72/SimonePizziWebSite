@@ -1,0 +1,562 @@
+<title>Segnale</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=DM+Serif+Display:ital@0;1&family=Source+Serif+4:opsz,wght@8..60,300;8..60,400;8..60,600&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+/* ═══ CORNICE DI PRESENTAZIONE — non fa parte del design proposto ═══ */
+html,body{background:#131418;margin:0}
+.board{background:#131418;color:#c9cbd2;font:400 15px/1.6 ui-sans-serif,system-ui,sans-serif;margin:0}
+.board *{box-sizing:border-box}
+.bhead{max-width:1100px;margin:0 auto;padding:64px 28px 48px}
+.bkicker{font:700 11px/1 ui-monospace,Consolas,monospace;letter-spacing:.22em;text-transform:uppercase;color:#6f7480}
+.bname{font:400 clamp(38px,7vw,68px)/1 'DM Serif Display',Georgia,serif;color:#fff;margin:18px 0 6px;letter-spacing:-.02em}
+.bsub{font:400 17px/1.7 ui-sans-serif,system-ui,sans-serif;color:#9aa0ab;max-width:62ch;margin:0 0 28px}
+.bwhy{border-left:2px solid #2b7a4b;padding:2px 0 2px 20px;max-width:68ch;color:#b9bec8;font-size:15.5px;line-height:1.75}
+.bwhy b{color:#e8eaee;font-weight:600}
+.bmeta{display:flex;flex-wrap:wrap;gap:36px;margin-top:34px;padding-top:28px;border-top:1px solid #24262d}
+.bmeta h4{font:700 10px/1 ui-monospace,Consolas,monospace;letter-spacing:.2em;text-transform:uppercase;color:#6f7480;margin:0 0 12px}
+.bsw{display:flex;gap:8px}
+.bsw i{width:34px;height:34px;border-radius:3px;display:block;border:1px solid rgba(255,255,255,.14)}
+.bfonts{font-size:13.5px;color:#9aa0ab;line-height:1.9}
+.bfonts b{color:#dfe2e7;font-weight:500}
+.strip{position:sticky;top:0;z-index:60;background:#0b0c0f;border-top:1px solid #24262d;border-bottom:1px solid #24262d;
+  font:700 10px/1 ui-monospace,Consolas,monospace;letter-spacing:.2em;text-transform:uppercase;color:#7e8492;padding:13px 28px;
+  display:flex;justify-content:space-between;gap:16px}
+.strip span{color:#4d525d;letter-spacing:.12em}
+.frame{container-type:inline-size;overflow:hidden}
+.phones{display:flex;flex-wrap:wrap;gap:34px;justify-content:center;padding:46px 28px 70px;background:#1a1c21}
+.phone{width:390px;max-width:100%;height:760px;overflow:hidden auto;border-radius:26px;border:9px solid #2b2e36;
+  box-shadow:0 26px 60px rgba(0,0,0,.5);container-type:inline-size;scrollbar-width:thin}
+.bfoot{padding:40px 28px 80px;text-align:center;color:#565b66;font:400 13px/1.7 ui-monospace,Consolas,monospace;background:#0b0c0f}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DIREZIONE A — «SEGNALE»
+   Il verde su nero resta, ma smette di essere atmosfera e torna a
+   essere segnale: compare solo dove c'è qualcosa di attivo.
+   ═══════════════════════════════════════════════════════════════ */
+.A{
+  --nero:#04070a; --pece:#080e0d; --filo:#16241c; --filo2:#0f1a15;
+  --testo:#dce8de; --spento:#7d9b84; --verde:#22c55e;
+  --gabbia:1240px;
+  background:var(--nero);color:var(--testo);
+  font:400 16px/1.65 'DM Sans',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.A ::selection{background:var(--verde);color:#04070a}
+.A a{color:inherit;text-decoration:none}
+.A img{display:block;width:100%;height:100%;object-fit:cover}
+.A .gab{max-width:var(--gabbia);margin:0 auto;padding:0 40px}
+.A .mono{font:400 11px/1 'Courier Prime',ui-monospace,monospace;letter-spacing:.16em;text-transform:uppercase}
+.A .serif{font-family:'DM Serif Display',Georgia,serif;font-weight:400;letter-spacing:-.022em;text-wrap:balance}
+
+/* barra di navigazione — filetti, niente ombre */
+.A .nav{border-bottom:1px solid var(--filo);position:relative;z-index:5}
+.A .navin{display:flex;align-items:stretch;justify-content:space-between;gap:24px;height:66px}
+.A .logo{display:flex;align-items:center;gap:9px;font:400 20px/1 'DM Serif Display',Georgia,serif}
+.A .logo b{font-weight:400;color:var(--verde)}
+.A .navlinks{display:flex;align-items:stretch;gap:0}
+.A .navlinks a{display:flex;align-items:center;padding:0 16px;font-size:13.5px;color:var(--spento);
+  border-bottom:2px solid transparent;transition:color .2s,border-color .2s}
+.A .navlinks a:hover{color:var(--testo)}
+.A .navlinks a.on{color:var(--testo);border-bottom-color:var(--verde)}
+.A .navtools{display:flex;align-items:center;gap:14px}
+.A .cerca{display:flex;align-items:center;gap:9px;border:1px solid var(--filo);padding:8px 12px;color:var(--spento);font-size:12.5px}
+.A .cerca kbd{font:400 10px/1 'Courier Prime',monospace;border:1px solid var(--filo);padding:3px 5px;color:#5d7a64}
+.A .btn{display:inline-flex;align-items:center;gap:9px;padding:11px 20px;font:700 11px/1 'Courier Prime',monospace;
+  letter-spacing:.16em;text-transform:uppercase;border:1px solid var(--verde);color:var(--verde);
+  transition:background .2s,color .2s}
+.A .btn:hover{background:var(--verde);color:#04070a}
+.A .btn.pieno{background:var(--verde);color:#04070a}
+.A .btn.pieno:hover{background:#4ade80}
+.A .btn.muto{border-color:var(--filo);color:var(--spento)}
+.A .btn.muto:hover{background:transparent;border-color:var(--spento);color:var(--testo)}
+
+/* apertura: alta quanto serve, non quanto lo schermo */
+.A .hero{position:relative;border-bottom:1px solid var(--filo);overflow:hidden}
+.A .heroin{display:grid;grid-template-columns:1fr 380px;gap:0;align-items:end}
+.A .heroL{padding:84px 0 68px}
+.A .occhio{display:flex;align-items:center;gap:14px;color:var(--spento);margin-bottom:30px}
+.A .occhio i{width:44px;height:1px;background:var(--verde);display:block}
+.A .hero h1{font-size:clamp(50px,8.4cqw,104px);line-height:.94;margin:0 0 26px}
+.A .hero h1 em{font-style:italic;color:var(--verde)}
+.A .hero p{max-width:52ch;color:#a9c2ae;font-size:17px;line-height:1.72;margin:0 0 34px;font-weight:300}
+.A .heroBtns{display:flex;flex-wrap:wrap;gap:12px}
+.A .heroR{border-left:1px solid var(--filo);align-self:stretch;display:flex;flex-direction:column;justify-content:flex-end;padding:34px 0 34px 34px;gap:2px}
+.A .stat{padding:14px 0;border-bottom:1px solid var(--filo2);display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.A .stat:last-child{border-bottom:0}
+.A .stat b{font:400 30px/1 'DM Serif Display',Georgia,serif;color:var(--testo)}
+.A .stat span{color:var(--spento)}
+/* traccia del segnale: la traduzione del tappeto di particelle in un dettaglio */
+.A .onda{position:absolute;inset:auto 0 0 0;width:100%;height:120px;opacity:.5;pointer-events:none;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent);
+  mask-image:linear-gradient(90deg,transparent,#000 22%,#000 78%,transparent)}
+
+/* sezioni */
+.A .sez{border-bottom:1px solid var(--filo)}
+.A .sezcap{display:flex;align-items:baseline;justify-content:space-between;gap:20px;padding:26px 0;border-bottom:1px solid var(--filo)}
+.A .sezcap h2{font-size:15px;margin:0;color:var(--testo);font-weight:500;letter-spacing:.01em}
+.A .sezcap .mono{color:var(--spento)}
+.A .sezcap a.mono:hover{color:var(--verde)}
+
+/* in primo piano */
+.A .primo{display:grid;grid-template-columns:1.15fr 1fr;gap:0;align-items:stretch}
+.A .primoImg{position:relative;aspect-ratio:16/10;overflow:hidden;background:#0b1310}
+.A .primoImg img{transition:transform .7s cubic-bezier(.16,1,.3,1);filter:saturate(.85) contrast(1.05)}
+.A .primo:hover .primoImg img{transform:scale(1.04)}
+.A .primoImg::after{content:"";position:absolute;inset:0;background:linear-gradient(105deg,rgba(4,7,10,0) 45%,rgba(4,7,10,.85))}
+.A .primoTxt{padding:48px 0 48px 48px;border-left:1px solid var(--filo);display:flex;flex-direction:column;justify-content:center}
+.A .etich{display:inline-flex;align-items:center;gap:8px;color:var(--verde);margin-bottom:20px}
+.A .etich::before{content:"";width:5px;height:5px;background:var(--verde);display:block}
+.A .primoTxt h3{font-size:clamp(28px,3.2cqw,42px);line-height:1.06;margin:0 0 18px}
+.A .primoTxt p{color:#9db6a3;margin:0 0 28px;max-width:46ch;font-weight:300;line-height:1.7}
+.A .firma{display:flex;gap:20px;color:var(--spento);align-items:center}
+
+/* elenco articoli: la data è la colonna, non un numero decorativo */
+.A .riga{display:grid;grid-template-columns:118px 1fr 210px;gap:28px;align-items:center;padding:22px 0;
+  border-bottom:1px solid var(--filo2);transition:background .25s,padding .25s}
+.A .riga:hover{background:var(--pece);padding-left:14px;padding-right:14px}
+.A .riga .data{color:var(--spento);white-space:nowrap}
+.A .riga h3{margin:0 0 5px;font-size:20px;font-weight:500;line-height:1.3;letter-spacing:-.01em;transition:color .2s}
+.A .riga:hover h3{color:var(--verde)}
+.A .riga p{margin:0;color:var(--spento);font-size:14.5px;line-height:1.6;max-width:70ch;font-weight:300}
+.A .riga .mini{width:210px;height:74px;overflow:hidden;background:#0b1310;filter:grayscale(1) brightness(.7);transition:filter .35s}
+.A .riga:hover .mini{filter:grayscale(0) brightness(1)}
+.A .rigaCat{color:var(--spento);display:block;margin-top:9px}
+.A .rigaCat b{color:#8fb397;font-weight:400}
+
+/* progetti: due CTA sempre allo stesso posto */
+.A .prog{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--filo)}
+.A .progC{background:var(--nero);padding:0;display:flex;flex-direction:column}
+.A .progImg{aspect-ratio:2/1;overflow:hidden;background:#0b1310}
+.A .progImg img{filter:saturate(.9)}
+.A .progBody{padding:30px 30px 26px;display:flex;flex-direction:column;gap:14px;flex:1}
+.A .progBody h3{margin:0;font-size:23px;font-weight:500;letter-spacing:-.01em}
+.A .progBody p{margin:0;color:var(--spento);font-size:14.5px;line-height:1.65;font-weight:300;flex:1}
+.A .progCta{display:flex;gap:10px;flex-wrap:wrap;padding-top:6px}
+
+/* newsletter */
+.A .news{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center;padding:58px 0}
+.A .news h3{font-size:32px;margin:0 0 12px}
+.A .news p{color:var(--spento);margin:0;font-weight:300;max-width:44ch}
+.A .campo{display:flex;border:1px solid var(--filo)}
+.A .campo input{flex:1;background:transparent;border:0;padding:16px 18px;color:var(--testo);font:400 15px/1 'DM Sans',sans-serif;outline:none}
+.A .campo input::placeholder{color:#4d6a55}
+.A .campo button{border:0;border-left:1px solid var(--filo);background:var(--verde);color:#04070a;
+  font:700 11px/1 'Courier Prime',monospace;letter-spacing:.16em;text-transform:uppercase;padding:0 24px;cursor:pointer}
+
+/* piede */
+.A .piede{padding:44px 0;display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;color:var(--spento)}
+
+/* ── archivio di categoria ── */
+.A .briciole{display:flex;gap:10px;align-items:center;color:var(--spento);padding:26px 0}
+.A .briciole b{color:var(--testo);font-weight:400}
+.A .testata{padding:8px 0 44px;border-bottom:1px solid var(--filo);display:grid;grid-template-columns:1fr 340px;gap:48px;align-items:end}
+.A .testata h1{font-size:clamp(40px,5.6cqw,64px);line-height:1;margin:0 0 16px}
+.A .testata p{color:#9db6a3;font-weight:300;max-width:54ch;margin:0;line-height:1.7}
+.A .sotto{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end}
+.A .pill{border:1px solid var(--filo);padding:8px 13px;color:var(--spento);transition:border-color .2s,color .2s}
+.A .pill:hover{border-color:var(--verde);color:var(--verde)}
+.A .pagina{display:flex;justify-content:center;gap:6px;padding:44px 0}
+.A .pagina a{min-width:38px;height:38px;display:grid;place-items:center;border:1px solid var(--filo);color:var(--spento)}
+.A .pagina a.on{border-color:var(--verde);color:var(--verde)}
+
+/* ── articolo ── */
+.A .artHead{position:relative;border-bottom:1px solid var(--filo);padding:70px 0 54px;overflow:hidden}
+.A .artHead .sfondo{position:absolute;inset:0;opacity:.22;filter:grayscale(.4)}
+.A .artHead .sfondo::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,var(--nero) 6%,rgba(4,7,10,.55))}
+.A .artHead .gab{position:relative}
+.A .artHead h1{font-size:clamp(38px,5.6cqw,66px);line-height:1.02;margin:22px 0 20px;max-width:19ch}
+.A .artHead .somm{font:300 19px/1.65 'Source Serif 4',Georgia,serif;color:#b7cebc;max-width:58ch;margin:0 0 30px}
+.A .artMeta{display:flex;flex-wrap:wrap;gap:0;border-top:1px solid var(--filo);padding-top:18px;color:var(--spento)}
+.A .artMeta i{width:1px;background:var(--filo);margin:0 18px;font-style:normal}
+.A .corpoWrap{display:grid;grid-template-columns:216px minmax(0,1fr) 216px;gap:56px;padding:56px 0 30px;align-items:start}
+.A .toc{position:sticky;top:56px}
+.A .toc h4{margin:0 0 16px;color:var(--spento)}
+.A .toc ol{list-style:none;margin:0;padding:0;border-left:1px solid var(--filo)}
+.A .toc li a{display:block;padding:8px 0 8px 16px;margin-left:-1px;border-left:1px solid transparent;
+  color:var(--spento);font-size:13.5px;line-height:1.4;transition:color .2s,border-color .2s}
+.A .toc li a:hover{color:var(--testo)}
+.A .toc li a.on{color:var(--verde);border-left-color:var(--verde)}
+.A .corpo{font:400 18.5px/1.78 'Source Serif 4',Georgia,serif;color:#cfe0d3;max-width:66ch}
+.A .corpo p{margin:0 0 1.35em}
+.A .corpo h2{font:400 clamp(26px,2.8cqw,34px)/1.18 'DM Serif Display',Georgia,serif;color:#fff;
+  margin:2.2em 0 .7em;letter-spacing:-.02em;padding-top:.4em;border-top:1px solid var(--filo)}
+.A .corpo a{color:var(--verde);border-bottom:1px solid rgba(34,197,94,.4)}
+.A .corpo blockquote{margin:2em 0;padding:0 0 0 26px;border-left:2px solid var(--verde);font-style:italic;color:#b7cebc}
+.A .corpo .figura{margin:2.4em 0}
+.A .corpo .figura img{aspect-ratio:16/9}
+.A .corpo .figura figcaption{margin-top:12px;font:400 11px/1.5 'Courier Prime',monospace;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--spento)}
+.A .reaz{display:flex;flex-wrap:wrap;gap:10px;border-top:1px solid var(--filo);margin-top:52px;padding-top:30px}
+.A .reaz button{background:transparent;border:1px solid var(--filo);color:var(--spento);padding:10px 16px;
+  font:400 13px/1 'DM Sans',sans-serif;cursor:pointer;display:inline-flex;gap:9px;align-items:center;transition:border-color .2s,color .2s}
+.A .reaz button:hover{border-color:var(--verde);color:var(--verde)}
+.A .reaz button b{font:700 12px/1 'Courier Prime',monospace;color:#8fb397}
+.A .tagfila{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+
+@container (max-width:900px){
+  .A .gab{padding:0 20px}
+  .A .heroin,.A .primo,.A .prog,.A .news,.A .testata,.A .corpoWrap{grid-template-columns:1fr}
+  .A .heroR,.A .primoTxt{border-left:0;border-top:1px solid var(--filo);padding-left:0}
+  .A .primoTxt{padding:30px 0 40px}
+  .A .heroL{padding:52px 0 34px}
+  .A .hero h1{font-size:clamp(40px,13cqw,60px)}
+  .A .navlinks,.A .cerca,.A .toc,.A .riga .mini{display:none}
+  .A .riga{grid-template-columns:1fr;gap:8px;padding:20px 0}
+  .A .riga .data{order:-1}
+  .A .sotto{justify-content:flex-start}
+  .A .corpoWrap{gap:0;padding:34px 0 10px}
+  .A .corpo{font-size:17.5px}
+  .A .artHead{padding:44px 0 34px}
+  .A .news{gap:26px;padding:40px 0}
+}
+@media (prefers-reduced-motion:reduce){.A *{transition:none!important;animation:none!important}}
+</style>
+
+<div class="board">
+
+<header class="bhead">
+  <div class="bkicker">Proposta A · Simone Pizzi · settembre 2026</div>
+  <h1 class="bname">Segnale</h1>
+  <p class="bsub">Continuità evoluta. Chi conosce il sito lo riconosce al primo sguardo, ma tutto quello che prima era atmosfera adesso è struttura.</p>
+  <div class="bwhy">
+    <b>Che cosa cambia.</b> Oggi il verde sta dappertutto: nel cursore, nella grana, nelle particelle, nei bordi delle card, negli hover. Quando un colore sta ovunque non indica più niente. Qui il verde torna a essere <b>segnale</b>: compare solo dove c'è qualcosa di attivo — la voce di menu in cui sei, il link dentro il testo, il pulsante che agisce, il punto della lettura in cui ti trovi. Tutto il resto è nero, filetti e grigio-verde.<br><br>
+    <b>Perché.</b> Il sito ha smesso da un pezzo di essere la vetrina di quattro progetti: sono duecento e passa articoli, alcuni lunghissimi. Le ombre, gli ingrandimenti e le comparse allo scorrimento servivano a riempire pagine vuote; adesso rallentano pagine piene. La gabbia a filetti da 1px e la <b>data come prima colonna</b> di ogni elenco fanno il lavoro che facevano le card, occupano un decimo dello spazio e dicono per giunta una cosa vera in più. Il corpo degli articoli passa a una serif da lettura: è l'unico posto del sito in cui si sta per venti minuti di fila.
+  </div>
+  <div class="bmeta">
+    <div><h4>Palette</h4><div class="bsw"><i style="background:#04070a"></i><i style="background:#080e0d"></i><i style="background:#16241c"></i><i style="background:#7d9b84"></i><i style="background:#dce8de"></i><i style="background:#22c55e"></i></div></div>
+    <div class="bfonts"><h4>Caratteri</h4>
+      <b>DM Serif Display</b> — titoli (resta)<br>
+      <b>DM Sans</b> — interfaccia (resta)<br>
+      <b>Source Serif 4</b> — corpo degli articoli (nuovo)<br>
+      <b>Courier Prime</b> — etichette, date, dati (resta)
+    </div>
+    <div class="bfonts"><h4>Impianto</h4>
+      Gabbia 1240px, filetti da 1px<br>
+      Niente ombre, niente card<br>
+      Apertura alta quanto il contenuto<br>
+      Le particelle diventano una traccia
+    </div>
+  </div>
+</header>
+
+<div class="strip">Home <span>1280 px</span></div>
+<div class="frame"><div class="A">
+
+  <nav class="nav"><div class="gab navin">
+    <a class="logo" href="#">Simone <b>Pizzi</b></a>
+    <div class="navlinks">
+      <a href="#" class="on">Videogiochi</a><a href="#">Software</a><a href="#">Pubblicazioni</a>
+      <a href="#">Podcast &amp; Radio</a><a href="#">Blog</a><a href="#">Web</a>
+    </div>
+    <div class="navtools">
+      <div class="cerca"><span>Cerca</span><kbd>Ctrl K</kbd></div>
+      <a class="btn" href="#">Tutti i progetti</a>
+    </div>
+  </div></nav>
+
+  <header class="hero">
+    <canvas class="onda" id="ondaA" width="1200" height="120" aria-hidden="true"></canvas>
+    <div class="gab heroin">
+      <div class="heroL">
+        <div class="occhio"><i></i><span class="mono">Portfolio &amp; blog · dal 2010</span></div>
+        <h1 class="serif">Creazioni<br>ibride. <em>Na</em></h1>
+        <p>Podcaster dal 2010. Scrittore di storie e racconti. Sviluppatore sperimentale con AI. Fondatore di Runtime Radio e Italian Podcast Network.</p>
+        <div class="heroBtns"><a class="btn pieno" href="#">Scopri di più</a><a class="btn muto" href="#">In primo piano</a></div>
+      </div>
+      <aside class="heroR">
+        <div class="stat"><span class="mono">Articoli</span><b>214</b></div>
+        <div class="stat"><span class="mono">Progetti</span><b>18</b></div>
+        <div class="stat"><span class="mono">Ultimo</span><b>5 set</b></div>
+      </aside>
+    </div>
+  </header>
+
+  <section class="sez"><div class="gab">
+    <div class="sezcap"><h2>In primo piano</h2><a class="mono" href="#">Web →</a></div>
+    <a class="primo" href="#">
+      <div class="primoImg"><img src="{{img:fdca}}" alt="Il sito del Festival della Canzone Artificiale"></div>
+      <div class="primoTxt">
+        <span class="etich mono">Web · 5 settembre 2026</span>
+        <h3 class="serif">FDCA: il capolavoro non ha una riga di React</h3>
+        <p>Ho rifatto da zero il sito FDCA togliendo React. Sei giorni, dodici versioni, e un televoto che sarebbe crollato la prima sera.</p>
+        <div class="firma"><span class="mono">14 min di lettura</span><span class="mono">12 sezioni</span></div>
+      </div>
+    </a>
+  </div></section>
+
+  <section class="sez"><div class="gab">
+    <div class="sezcap"><h2>Ultimi articoli</h2><a class="mono" href="#">Archivio completo →</a></div>
+    <div class="elenco">
+      <a class="riga" href="#"><div class="data mono">21 ago 2026</div>
+        <div><h3>ESPOSIZIONE: ce l'hai fatta. Ma chi ti ha visto?</h3>
+          <p>Il favore chiesto alla macchinetta e quello chiesto in riunione ricevono lo stesso sì, ma non sono la stessa cosa. Da qui nasce ESPOSIZIONE, ed è ora pubblico.</p>
+          <span class="rigaCat mono">Software · <b>engine · narrativa · rpg testuale</b></span></div>
+        <div class="mini"><img src="{{img:esposiz_s}}" alt=""></div></a>
+      <a class="riga" href="#"><div class="data mono">20 ago 2026</div>
+        <div><h3>La cassaforte adesso è aperta: anche FeedDownloader Pro diventa Open Source</h3>
+          <p>A maggio avevo costruito una cassaforte e provato a scassinarla. Adesso l'ho aperta: FeedDownloader Pro esce dal mercato e passa sotto licenza MIT, codice pubblico.</p>
+          <span class="rigaCat mono">Software · <b>feeddownloader · runtime</b></span></div>
+        <div class="mini"><img src="{{img:feeddl_s}}" alt=""></div></a>
+      <a class="riga" href="#"><div class="data mono">19 ago 2026</div>
+        <div><h3>Runtime Radio: alle tre di notte il sito diceva «In Diretta»</h3>
+          <p>Dalla v2.9.10 alla v2.28.0: tre mesi, quarantacinque versioni. La Live Room, i ruoli della redazione, 567 prove automatiche, e un mucchio di piccole bugie scoperte misurando invece che ricordando.</p>
+          <span class="rigaCat mono">Web · <b>diretta · radio · runtime</b></span></div>
+        <div class="mini"><img src="{{img:runtime_s}}" alt=""></div></a>
+      <a class="riga" href="#"><div class="data mono">14 ago 2026</div>
+        <div><h3>Quattro verbi che non facevano niente</h3>
+          <p>Leonardo ha finito il gioco e mi ha mandato due video muti, senza una parola. Da lì ho scoperto che quattro verbi su nove non facevano niente.</p>
+          <span class="rigaCat mono">Videogiochi · <b>tester · verbi</b></span></div>
+        <div class="mini"><img src="{{img:verbi_s}}" alt=""></div></a>
+      <a class="riga" href="#"><div class="data mono">10 ago 2026</div>
+        <div><h3>Lo sfizio più bello che mi sono tolto</h3>
+          <p>Favella è stato uno sfizio che senza gli LLM non avrei mai potuto togliermi. Adesso è tutto pubblico: motore, sito, manuale e anche l'IDE che non ho mai finito.</p>
+          <span class="rigaCat mono">Software · <b>favella · ide · llm</b></span></div>
+        <div class="mini"><img src="{{img:favella_s}}" alt=""></div></a>
+      <a class="riga" href="#"><div class="data mono">12 lug 2026</div>
+        <div><h3>THE SAFE PLACE CHRONICLES: buon viaggio, Ultimo</h3>
+          <p>Di tutti i progetti che ho costruito, quello a cui tengo di più è anche quello di cui ho perso più pezzi: The Safe Place, il primo, quello da cui è partito tutto.</p>
+          <span class="rigaCat mono">Videogiochi · <b>gdr · open source · testuale</b></span></div>
+        <div class="mini"><img src="{{img:safeplace_s}}" alt=""></div></a>
+    </div>
+  </div></section>
+
+  <section class="sez"><div class="gab">
+    <div class="sezcap"><h2>Progetti</h2><a class="mono" href="#">Tutti e diciotto →</a></div>
+  </div>
+  <div class="prog">
+    <article class="progC">
+      <div class="progImg"><img src="{{img:albero}}" alt="Copertina de L'Albero dei Racconti"></div>
+      <div class="progBody">
+        <span class="etich mono">Pubblicazioni</span>
+        <h3 class="serif">L'Albero dei Racconti</h3>
+        <p>18 racconti scritti tra il 1991 e il 1996 e miracolosamente sopravvissuti ai decenni, ai computer, ai sistemi operativi e agli hard disk che si rompono. Un'opera corretta e revisionata nel totale rispetto della voce originale.</p>
+        <div class="progCta"><a class="btn pieno" href="#">Scopri</a><a class="btn muto" href="#">Leggi l'articolo</a></div>
+      </div>
+    </article>
+    <article class="progC">
+      <div class="progImg"><img src="{{img:titan}}" alt="Banner di Runtime TelegramBot Titan Edition"></div>
+      <div class="progBody">
+        <span class="etich mono">Software</span>
+        <h3 class="serif">WhitePaper di Runtime TelegramBot Titan Edition</h3>
+        <p>Il documento scientifico sul software che ho realizzato per la gestione massiva di bot Telegram e infiniti feed. Tratta tutto l'aspetto tecnico dello sviluppo.</p>
+        <div class="progCta"><a class="btn pieno" href="#">Scarica il documento</a><a class="btn muto" href="#">Leggi l'articolo</a></div>
+      </div>
+    </article>
+  </div></section>
+
+  <section class="sez"><div class="gab news">
+    <div><h3 class="serif">Ogni tanto scrivo una lettera</h3>
+      <p>Nessuna cadenza fissa, nessun riassunto automatico: parte solo quando ho qualcosa da raccontare.</p></div>
+    <form class="campo" onsubmit="return false"><input type="email" placeholder="la-tua@email.it" aria-label="Email"><button>Iscriviti</button></form>
+  </div></section>
+
+  <footer><div class="gab piede">
+    <span class="mono">© 2026 Simone Pizzi</span>
+    <span class="mono">Runtime Radio · Italian Podcast Network</span>
+    <span class="mono">RSS · Contatti · Privacy</span>
+  </div></footer>
+
+</div></div>
+
+<div class="strip">Archivio di categoria <span>/progetti-software</span></div>
+<div class="frame"><div class="A">
+  <nav class="nav"><div class="gab navin">
+    <a class="logo" href="#">Simone <b>Pizzi</b></a>
+    <div class="navlinks"><a href="#">Videogiochi</a><a href="#" class="on">Software</a><a href="#">Pubblicazioni</a><a href="#">Podcast &amp; Radio</a><a href="#">Blog</a><a href="#">Web</a></div>
+    <div class="navtools"><div class="cerca"><span>Cerca</span><kbd>Ctrl K</kbd></div><a class="btn" href="#">Tutti i progetti</a></div>
+  </div></nav>
+  <div class="gab">
+    <div class="briciole mono"><a href="#">Home</a><span>/</span><b>Software</b></div>
+    <header class="testata">
+      <div><h1 class="serif">Software</h1>
+        <p>Motori narrativi, automazioni, strumenti per la radio. Quasi tutto è finito su GitHub sotto licenza MIT, di solito dopo aver provato a venderlo.</p></div>
+      <div class="sotto">
+        <a class="pill mono" href="#">Titan Edition</a><a class="pill mono" href="#">Favella 1</a>
+        <a class="pill mono" href="#">FeedDownloader</a><a class="pill mono" href="#">Live Machine</a><a class="pill mono" href="#">Sbargold</a>
+      </div>
+    </header>
+    <div class="sezcap"><h2>32 articoli</h2><span class="mono">Dal più recente ↓</span></div>
+    <div class="elenco">
+      <a class="riga" href="#"><div class="data mono">21 ago 2026</div>
+        <div><h3>ESPOSIZIONE: ce l'hai fatta. Ma chi ti ha visto?</h3>
+          <p>Il favore chiesto alla macchinetta e quello chiesto in riunione ricevono lo stesso sì, ma non sono la stessa cosa. Da qui nasce ESPOSIZIONE, ed è ora pubblico.</p>
+          <span class="rigaCat mono"><b>engine · narrativa · rpg testuale</b></span></div>
+        <div class="mini"><img src="{{img:esposiz_s}}" alt=""></div></a>
+      <a class="riga" href="#"><div class="data mono">20 ago 2026</div>
+        <div><h3>La cassaforte adesso è aperta: anche FeedDownloader Pro diventa Open Source</h3>
+          <p>A maggio avevo costruito una cassaforte e provato a scassinarla. Adesso l'ho aperta: licenza MIT, codice pubblico.</p>
+          <span class="rigaCat mono"><b>cassaforte · feeddownloader · runtime</b></span></div>
+        <div class="mini"><img src="{{img:feeddl_s}}" alt=""></div></a>
+      <a class="riga" href="#"><div class="data mono">13 ago 2026</div>
+        <div><h3>TelegramBot cambia tutto: ora è Open Source!</h3>
+          <p>TelegramBot ha venduto zero copie: tre download dell'installer, e li ho fatti io. Invece di lasciarlo affondare l'ho aperto. Codice pubblico, licenza MIT, zero euro.</p>
+          <span class="rigaCat mono"><b>github · mit · open source</b></span></div>
+        <div class="mini"><img src="{{img:titan_s}}" alt=""></div></a>
+      <a class="riga" href="#"><div class="data mono">10 ago 2026</div>
+        <div><h3>Lo sfizio più bello che mi sono tolto</h3>
+          <p>Favella è stato uno sfizio che senza gli LLM non avrei mai potuto togliermi. Adesso è tutto pubblico: motore, sito, manuale e anche l'IDE che non ho mai finito.</p>
+          <span class="rigaCat mono"><b>favella · ide · llm · repository</b></span></div>
+        <div class="mini"><img src="{{img:favella_s}}" alt=""></div></a>
+      <a class="riga" href="#"><div class="data mono">16 giu 2026</div>
+        <div><h3>ADDIO SBARGOLD: il lingotto torna in fonderia</h3>
+          <p>Da una scemenza detta per caso era nato un linguaggio esoterico con un piano di sviluppo credibile. Oggi lo archivio: un vezzo da LLM non ripaga ciò che costa.</p>
+          <span class="rigaCat mono"><b>archiviato · linguaggio esoterico · sbargold</b></span></div>
+        <div class="mini"><img src="{{img:sbargold_s}}" alt=""></div></a>
+      <a class="riga" href="#"><div class="data mono">29 apr 2026</div>
+        <div><h3>Runtime TelegramBot Desktop Titan Edition</h3>
+          <p>Il software di automazione per la condivisione di post su infiniti canali Telegram con infiniti feed presi da podcast, siti web e video YouTube.</p>
+          <span class="rigaCat mono"><b>automazione · telegram · runtime</b></span></div>
+        <div class="mini"><img src="{{img:titan_s}}" alt=""></div></a>
+    </div>
+    <nav class="pagina"><a class="mono on" href="#">1</a><a class="mono" href="#">2</a><a class="mono" href="#">3</a><a class="mono" href="#">4</a><a class="mono" href="#">→</a></nav>
+  </div>
+</div></div>
+
+<div class="strip">Articolo lungo con sommario <span>/web/fdca-il-capolavoro-non-ha-una-riga-di-react</span></div>
+<div class="frame"><div class="A">
+  <nav class="nav"><div class="gab navin">
+    <a class="logo" href="#">Simone <b>Pizzi</b></a>
+    <div class="navlinks"><a href="#">Videogiochi</a><a href="#">Software</a><a href="#">Pubblicazioni</a><a href="#">Podcast &amp; Radio</a><a href="#">Blog</a><a href="#" class="on">Web</a></div>
+    <div class="navtools"><div class="cerca"><span>Cerca</span><kbd>Ctrl K</kbd></div><a class="btn" href="#">Tutti i progetti</a></div>
+  </div></nav>
+
+  <header class="artHead">
+    <div class="sfondo"><img src="{{img:fdca}}" alt=""></div>
+    <div class="gab">
+      <div class="briciole mono" style="padding:0"><a href="#">Home</a><span>/</span><a href="#">Web</a><span>/</span><b>FDCA</b></div>
+      <h1 class="serif">FDCA: il capolavoro non ha una riga di React</h1>
+      <p class="somm">Ho rifatto da zero il sito FDCA togliendo React. Sei giorni, dodici versioni, e un televoto che sarebbe crollato la prima sera.</p>
+      <div class="artMeta mono"><span>5 settembre 2026</span><i></i><span>14 min di lettura</span><i></i><span>Web</span><i></i><span>2.412 letture</span></div>
+    </div>
+  </header>
+
+  <div class="gab corpoWrap">
+    <aside class="toc">
+      <h4 class="mono">In questa pagina</h4>
+      <ol>
+        <li><a class="on" href="#a1">Che cos'è il Festival della Canzone Artificiale</a></li>
+        <li><a href="#a2">La decisione che ha ridefinito tutto: via React</a></li>
+        <li><a href="#a3">Il pezzo difficile: il motore della gara</a></li>
+        <li><a href="#a4">Il televoto, e il guaio che ci ha quasi fregati</a></li>
+        <li><a href="#a5">Settantacinque cose che non andavano</a></li>
+        <li><a href="#a6">Dove siamo, e lo spoiler</a></li>
+      </ol>
+    </aside>
+
+    <article class="corpo">
+      <p>In questo periodo sto lavorando a due grandi progetti web, uno più grande dell'altro. Il primo, che è il tema di questo articolo, è allo stato attuale il capolavoro assoluto tra le mie produzioni, e ha ridefinito perfino il mio concetto di Thin Stack React + PHP.</p>
+      <p>Naturalmente questo articolo non vuole essere un annuncio: parla di una cosa che da ieri notte è attiva e pubblica, ma che non abbiamo ancora lanciato sui nostri canali. No, questo è un <a href="#">devlog</a>. È un modo per raccontarvi in modo semplice la complessità che sta dietro il progetto.</p>
+
+      <h2 id="a1">Che cos'è il Festival della Canzone Artificiale</h2>
+      <p>Nel 2024 a Runtime Radio abbiamo fatto una cosa che in Italia non aveva fatto nessuno: un festival di canzoni scritte e cantate dalle macchine. Non un esperimento in una puntata: un festival vero, con le sue serate, i suoi brani in gara e il suo pubblico che vota.</p>
+      <p>Da allora ne abbiamo fatte tre edizioni. La quarta apre le candidature il 20 settembre, le chiude il 25 ottobre, e si tiene a metà novembre in tre serate: due semifinali e una finale.</p>
+      <blockquote>Un festival, dal punto di vista di chi deve costruirgli il sito, non è una vetrina. È un affare complicato: raccoglie brani da estranei, li deve moderare, li deve far ascoltare a una giuria, li deve far votare da un pubblico che sta sul divano col telefono in mano.</blockquote>
+
+      <h2 id="a2">La decisione che ha ridefinito tutto: via React</h2>
+      <p>Qui devo spiegare una cosa a chi non fa questo mestiere, perché è il cuore dell'articolo. Da un paio d'anni un sito web moderno si costruisce quasi sempre in due pezzi. C'è un server, che custodisce i dati, e c'è un programma che gira dentro il vostro browser e disegna le pagine.</p>
+      <figure class="figura">
+        <img src="{{img:runtime}}" alt="La regia di Runtime Radio">
+        <figcaption>La prova generale, tre giorni prima dell'apertura delle candidature</figcaption>
+      </figure>
+      <p>Funziona, ed è quello che ho fatto per anni. Ci ho scritto anche un manuale, <a href="#">React + PHP: The Thin Stack</a>, che spiega come tenere quei due pezzi leggeri invece di lasciarli ingrassare. Poi è arrivato un sito che doveva reggere duemila persone che votano nello stesso minuto.</p>
+
+      <h2 id="a3">Il pezzo difficile: il motore della gara</h2>
+      <p>Il motore fa tre cose che non possono sbagliare: registra un voto una volta sola, somma i punti della giuria con quelli del pubblico secondo una formula che nessuno può contestare, e pubblica una classifica che regge anche se qualcuno ricarica la pagina nel momento sbagliato.</p>
+
+      <div class="reaz">
+        <button>Mi piace <b>34</b></button><button>Utile <b>12</b></button><button>Sorpresa <b>5</b></button>
+        <button style="margin-left:auto">Condividi</button><button>Scrivi a Simone</button>
+      </div>
+      <div class="tagfila">
+        <a class="pill mono" href="#">festival</a><a class="pill mono" href="#">php</a>
+        <a class="pill mono" href="#">react</a><a class="pill mono" href="#">sito</a><a class="pill mono" href="#">web</a>
+      </div>
+    </article>
+    <div></div>
+  </div>
+
+  <footer><div class="gab piede">
+    <span class="mono">© 2026 Simone Pizzi</span><span class="mono">Runtime Radio · Italian Podcast Network</span><span class="mono">RSS · Contatti · Privacy</span>
+  </div></footer>
+</div></div>
+
+<div class="strip">Telefono <span>390 px · stesse regole, gabbia a una colonna</span></div>
+<div class="phones">
+  <div class="phone"><div class="A">
+    <nav class="nav"><div class="gab navin">
+      <a class="logo" href="#">Simone <b>Pizzi</b></a>
+      <div class="navtools"><a class="btn" href="#">Menu</a></div>
+    </div></nav>
+    <header class="hero"><div class="gab heroin"><div class="heroL">
+      <div class="occhio"><i></i><span class="mono">Portfolio &amp; blog</span></div>
+      <h1 class="serif">Creazioni<br>ibride. <em>Na</em></h1>
+      <p>Podcaster dal 2010. Scrittore di storie e racconti. Sviluppatore sperimentale con AI.</p>
+      <div class="heroBtns"><a class="btn pieno" href="#">Scopri di più</a></div>
+    </div>
+    <aside class="heroR"><div class="stat"><span class="mono">Articoli</span><b>214</b></div><div class="stat"><span class="mono">Progetti</span><b>18</b></div></aside>
+    </div></header>
+    <section class="sez"><div class="gab">
+      <div class="sezcap"><h2>In primo piano</h2></div>
+      <a class="primo" href="#">
+        <div class="primoImg"><img src="{{img:fdca_s}}" alt=""></div>
+        <div class="primoTxt"><span class="etich mono">Web · 5 set 2026</span>
+          <h3 class="serif">FDCA: il capolavoro non ha una riga di React</h3>
+          <p>Sei giorni, dodici versioni, e un televoto che sarebbe crollato la prima sera.</p></div>
+      </a>
+      <div class="sezcap"><h2>Ultimi articoli</h2></div>
+      <div class="elenco">
+        <a class="riga" href="#"><div class="data mono">21 ago 2026</div><div><h3>ESPOSIZIONE: ce l'hai fatta. Ma chi ti ha visto?</h3><p>Il favore chiesto alla macchinetta e quello chiesto in riunione ricevono lo stesso sì, ma non sono la stessa cosa.</p><span class="rigaCat mono">Software</span></div><div class="mini"></div></a>
+        <a class="riga" href="#"><div class="data mono">20 ago 2026</div><div><h3>La cassaforte adesso è aperta</h3><p>FeedDownloader Pro esce dal mercato e passa sotto licenza MIT, codice pubblico.</p><span class="rigaCat mono">Software</span></div><div class="mini"></div></a>
+        <a class="riga" href="#"><div class="data mono">14 ago 2026</div><div><h3>Quattro verbi che non facevano niente</h3><p>Leonardo ha finito il gioco e mi ha mandato due video muti, senza una parola.</p><span class="rigaCat mono">Videogiochi</span></div><div class="mini"></div></a>
+      </div>
+    </div></section>
+  </div></div>
+
+  <div class="phone"><div class="A">
+    <nav class="nav"><div class="gab navin"><a class="logo" href="#">Simone <b>Pizzi</b></a><div class="navtools"><a class="btn" href="#">Menu</a></div></div></nav>
+    <header class="artHead">
+      <div class="sfondo"><img src="{{img:fdca_s}}" alt=""></div>
+      <div class="gab">
+        <div class="briciole mono" style="padding:0"><a href="#">Web</a></div>
+        <h1 class="serif">FDCA: il capolavoro non ha una riga di React</h1>
+        <p class="somm">Sei giorni, dodici versioni, e un televoto che sarebbe crollato la prima sera.</p>
+        <div class="artMeta mono"><span>5 set 2026</span><i></i><span>14 min</span></div>
+      </div>
+    </header>
+    <div class="gab corpoWrap"><div></div>
+      <article class="corpo">
+        <p>In questo periodo sto lavorando a due grandi progetti web, uno più grande dell'altro. Il primo, che è il tema di questo articolo, è allo stato attuale il capolavoro assoluto tra le mie produzioni.</p>
+        <h2>Che cos'è il Festival della Canzone Artificiale</h2>
+        <p>Nel 2024 a Runtime Radio abbiamo fatto una cosa che in Italia non aveva fatto nessuno: un festival di canzoni scritte e cantate dalle macchine.</p>
+        <p>Da allora ne abbiamo fatte tre edizioni. La quarta apre le candidature il 20 settembre e si tiene a metà novembre in tre serate.</p>
+        <div class="reaz"><button>Mi piace <b>34</b></button><button>Condividi</button></div>
+      </article><div></div>
+    </div>
+  </div></div>
+</div>
+
+<div class="bfoot">Direzione A · «Segnale» — mockup statico, contenuti veri presi dal sito in produzione</div>
+
+<script>
+/* La traccia del segnale: quel che resta delle particelle. Una riga sola,
+   ferma, che si increspa appena. Disegnata una volta, non animata. */
+(function(){
+  var c = document.getElementById('ondaA'); if(!c) return;
+  var x = c.getContext('2d'), W = c.width, H = c.height;
+  x.clearRect(0,0,W,H);
+  for (var s = 0; s < 3; s++) {
+    x.beginPath();
+    x.strokeStyle = ['rgba(34,197,94,.55)','rgba(34,197,94,.22)','rgba(34,197,94,.12)'][s];
+    x.lineWidth = [1.4,1,1][s];
+    for (var i = 0; i <= W; i += 2) {
+      var t = i / W;
+      var amp = (18 - s * 5) * Math.exp(-Math.pow((t - .42) * 3.2, 2));
+      var y = H * .62 + Math.sin(t * 34 + s * 1.7) * amp + Math.sin(t * 7.3 + s) * (4 - s);
+      i ? x.lineTo(i, y) : x.moveTo(i, y);
+    }
+    x.stroke();
+  }
+})();
+</script>
+
+</div>

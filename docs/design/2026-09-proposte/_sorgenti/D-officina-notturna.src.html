@@ -1,0 +1,612 @@
+<title>Officina Notturna</title>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wdth,wght@12..96,75..100,400..800&family=DM+Sans:wght@300;400;500;700&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+/* ═══ CORNICE DI PRESENTAZIONE — non fa parte del design proposto ═══ */
+html,body{background:#131418;margin:0}
+.board{background:#131418;color:#c9cbd2;font:400 15px/1.6 ui-sans-serif,system-ui,sans-serif;margin:0}
+.board *{box-sizing:border-box}
+.bhead{max-width:1100px;margin:0 auto;padding:64px 28px 48px}
+.bkicker{font:700 11px/1 ui-monospace,Consolas,monospace;letter-spacing:.22em;text-transform:uppercase;color:#6f7480}
+.bname{font:800 clamp(38px,7vw,68px)/1 'Bricolage Grotesque',ui-sans-serif,sans-serif;font-variation-settings:'wdth' 78;
+  color:#fff;margin:18px 0 6px;letter-spacing:-.02em}
+.bsub{font:400 17px/1.7 ui-sans-serif,system-ui,sans-serif;color:#9aa0ab;max-width:62ch;margin:0 0 28px}
+.bwhy{border-left:2px solid #22c55e;padding:2px 0 2px 20px;max-width:68ch;color:#b9bec8;font-size:15.5px;line-height:1.75}
+.bwhy b{color:#e8eaee;font-weight:600}
+.bmeta{display:flex;flex-wrap:wrap;gap:36px;margin-top:34px;padding-top:28px;border-top:1px solid #24262d}
+.bmeta h4{font:700 10px/1 ui-monospace,Consolas,monospace;letter-spacing:.2em;text-transform:uppercase;color:#6f7480;margin:0 0 12px}
+.bsw{display:flex;gap:8px}
+.bsw i{width:34px;height:34px;border-radius:3px;display:block;border:1px solid rgba(255,255,255,.14)}
+.bfonts{font-size:13.5px;color:#9aa0ab;line-height:1.9}
+.bfonts b{color:#dfe2e7;font-weight:500}
+.strip{position:sticky;top:0;z-index:60;background:#0b0c0f;border-top:1px solid #24262d;border-bottom:1px solid #24262d;
+  font:700 10px/1 ui-monospace,Consolas,monospace;letter-spacing:.2em;text-transform:uppercase;color:#7e8492;padding:13px 28px;
+  display:flex;justify-content:space-between;gap:16px}
+.strip span{color:#4d525d;letter-spacing:.12em}
+.frame{container-type:inline-size;overflow:hidden}
+.phones{display:flex;flex-wrap:wrap;gap:34px;justify-content:center;padding:46px 28px 70px;background:#1a1c21}
+.phone{width:390px;max-width:100%;height:760px;overflow:hidden auto;border-radius:26px;border:9px solid #2b2e36;
+  box-shadow:0 26px 60px rgba(0,0,0,.5);container-type:inline-size;scrollbar-width:thin}
+.bfoot{padding:40px 28px 80px;text-align:center;color:#565b66;font:400 13px/1.7 ui-monospace,Consolas,monospace;background:#0b0c0f}
+
+/* ═══════════════════════════════════════════════════════════════════
+   DIREZIONE D — «OFFICINA NOTTURNA»
+   L'impianto di Officina (blocchi pieni, grottesca stretta, stato
+   dichiarato) sui colori di Segnale: nero, filetti, verde di segnale.
+   ═══════════════════════════════════════════════════════════════ */
+.D{
+  --nero:#04070a; --pece:#080e0d; --pannello:#0b1310;
+  --filo:#16241c; --filo2:#0f1a15;
+  --testo:#dce8de; --spento:#7d9b84; --verde:#22c55e; --verde2:#4ade80;
+  --gabbia:1300px;
+  background:var(--nero);color:var(--testo);
+  font:400 16.5px/1.65 'DM Sans',system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.D ::selection{background:var(--verde);color:#04070a}
+.D a{color:inherit;text-decoration:none}
+.D img{display:block;width:100%;height:100%;object-fit:cover}
+.D .gab{max-width:var(--gabbia);margin:0 auto;padding:0 34px}
+.D .eti{font:700 11px/1 'Courier Prime',ui-monospace,monospace;letter-spacing:.17em;text-transform:uppercase}
+.D .gro{font-family:'Bricolage Grotesque',ui-sans-serif,sans-serif;font-variation-settings:'wdth' 78;
+  font-weight:800;letter-spacing:-.028em;line-height:.92;text-wrap:balance}
+
+/* barra: la voce corrente è un campo verde pieno */
+.D .nav{background:var(--pece);border-bottom:1px solid var(--filo)}
+.D .navin{display:flex;align-items:center;justify-content:space-between;gap:20px;height:58px}
+.D .logo{font-family:'Bricolage Grotesque',sans-serif;font-variation-settings:'wdth' 76;font-weight:800;
+  font-size:19px;letter-spacing:-.02em;color:#fff}
+.D .navlinks{display:flex;gap:2px}
+.D .navlinks a{padding:7px 12px;font:500 13.5px/1 'DM Sans',sans-serif;color:var(--spento);transition:background .16s,color .16s}
+.D .navlinks a:hover{color:var(--testo)}
+.D .navlinks a.on{background:var(--verde);color:#04070a;font-weight:700}
+.D .navtools{display:flex;align-items:center;gap:14px;color:var(--spento)}
+
+/* stato: più è acceso, più la cosa è viva. Non è decorazione */
+.D .stato{display:inline-flex;align-items:center;gap:7px;padding:5px 10px;font:700 10.5px/1 'Courier Prime',monospace;
+  letter-spacing:.15em;text-transform:uppercase;border:1.5px solid var(--verde);color:var(--verde);white-space:nowrap}
+.D .stato.attivo{background:var(--verde);border-color:var(--verde);color:#04070a}
+.D .stato.pubb{border-color:var(--filo);background:var(--filo2);color:var(--spento)}
+.D .stato.arch{border-color:#243528;color:#4e6a56;background:transparent}
+
+/* apertura: campo verde pieno, il titolo ci sta dentro */
+.D .hero{background:var(--verde);color:#04070a;border-bottom:1px solid var(--filo)}
+.D .heroin{padding:52px 0 0}
+.D .hero .eti{color:#04361a}
+.D .hero h1{font-size:clamp(56px,12.2cqw,164px);margin:12px 0 0;max-width:13ch}
+.D .heroSub{display:grid;grid-template-columns:1fr auto;gap:40px;align-items:end;
+  border-top:2px solid #04070a;margin-top:40px;padding:22px 0 26px}
+.D .heroSub p{margin:0;max-width:48ch;font-size:18px;line-height:1.55;color:#062a13}
+.D .heroCta{display:flex;gap:10px;flex-wrap:wrap}
+.D .contatori{display:flex;border-top:1px solid rgba(4,7,10,.3)}
+.D .contatori div{flex:1;padding:14px 0;border-right:1px solid rgba(4,7,10,.3)}
+.D .contatori div:last-child{border-right:0}
+.D .contatori b{display:block;font-family:'Bricolage Grotesque',sans-serif;font-variation-settings:'wdth' 76;
+  font-weight:800;font-size:34px;line-height:1;font-variant-numeric:tabular-nums}
+.D .contatori span{color:#04361a}
+/* variante sobria della stessa apertura */
+.D .hero.sobria{background:var(--nero);color:var(--testo);border-bottom:1px solid var(--filo)}
+.D .hero.sobria .eti{color:var(--verde)}
+.D .hero.sobria h1{color:#fff}
+.D .hero.sobria h1 em{font-style:normal;color:var(--verde)}
+.D .hero.sobria .heroSub{border-top-color:var(--verde)}
+.D .hero.sobria .heroSub p{color:var(--spento)}
+.D .hero.sobria .contatori{border-top-color:var(--filo)}
+.D .hero.sobria .contatori div{border-right-color:var(--filo)}
+.D .hero.sobria .contatori b{color:#fff}
+.D .hero.sobria .contatori span{color:var(--spento)}
+.D .hero.sobria .btn{border-color:var(--verde);color:var(--verde)}
+.D .hero.sobria .btn:hover{background:var(--verde);color:#04070a}
+.D .hero.sobria .btn.pieno{background:var(--verde);color:#04070a}
+.D .hero.sobria .btn.pieno:hover{background:var(--verde2)}
+
+/* pulsanti */
+.D .btn{display:inline-flex;align-items:center;gap:8px;padding:13px 22px;border:2px solid #04070a;
+  font:700 12px/1 'Courier Prime',monospace;letter-spacing:.13em;text-transform:uppercase;
+  background:transparent;color:#04070a;cursor:pointer;transition:background .16s,color .16s,border-color .16s}
+.D .btn:hover{background:#04070a;color:var(--verde)}
+.D .btn.pieno{background:#04070a;color:var(--verde)}
+.D .btn.pieno:hover{background:transparent;color:#04070a}
+/* sul fondo scuro i pulsanti si rovesciano */
+.D .sez .btn,.D .lettera .btn,.D .lettura .btn,.D .artHead.sobria .btn{border-color:var(--verde);color:var(--verde)}
+.D .sez .btn:hover,.D .lettera .btn:hover,.D .lettura .btn:hover{background:var(--verde);color:#04070a}
+.D .sez .btn.pieno,.D .lettera .btn.pieno{background:var(--verde);color:#04070a}
+.D .sez .btn.pieno:hover,.D .lettera .btn.pieno:hover{background:var(--verde2)}
+
+/* sezioni */
+.D .sez{padding:0 0 8px}
+.D .sezcap{display:flex;align-items:center;justify-content:space-between;gap:20px;padding:34px 0 16px}
+.D .sezcap h2{margin:0;color:#fff;font-family:'Bricolage Grotesque',sans-serif;font-variation-settings:'wdth' 78;
+  font-weight:800;font-size:clamp(26px,3cqw,38px);letter-spacing:-.025em}
+.D .sezcap a{color:var(--spento);transition:color .16s}
+.D .sezcap a:hover{color:var(--verde)}
+
+/* in primo piano */
+.D .primo{background:var(--pannello);border:1px solid var(--filo);display:grid;grid-template-columns:1fr 1fr;
+  transition:border-color .25s}
+.D .primo:hover{border-color:var(--verde)}
+.D .primoImg{aspect-ratio:16/11;overflow:hidden;background:#0b1310;border-right:1px solid var(--filo)}
+.D .primoImg img{filter:grayscale(1) brightness(.72) contrast(1.1);transition:filter .45s}
+.D .primo:hover .primoImg img{filter:grayscale(0) brightness(1) contrast(1)}
+.D .primoTxt{padding:34px;display:flex;flex-direction:column;gap:16px;justify-content:center}
+.D .primoTxt h3{margin:0;color:#fff;font-size:clamp(28px,3.4cqw,44px);font-family:'Bricolage Grotesque',sans-serif;
+  font-variation-settings:'wdth' 80;font-weight:800;letter-spacing:-.028em;line-height:.98}
+.D .primoTxt p{margin:0;color:#9db6a3;font-size:16.5px;line-height:1.62;max-width:46ch}
+.D .riga1{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.D .grigio{color:var(--spento)}
+
+/* lavorazioni */
+.D .lav{border-top:1px solid var(--verde)}
+.D .lavRiga{display:grid;grid-template-columns:1fr 210px 128px;gap:24px;align-items:center;padding:20px 0;
+  border-bottom:1px solid var(--filo2);transition:background .18s,padding .18s}
+.D .lavRiga:hover{background:var(--pece);padding-left:16px;padding-right:16px}
+.D .lavRiga h3{margin:0;font-size:22px;font-weight:600;line-height:1.24;letter-spacing:-.015em;color:var(--testo);transition:color .18s}
+.D .lavRiga:hover h3{color:var(--verde)}
+.D .lavRiga p{margin:6px 0 0;color:var(--spento);font-size:14.5px;line-height:1.55;max-width:72ch}
+.D .lavMeta{display:flex;gap:12px;color:var(--spento);align-items:center;justify-content:flex-end}
+.D .lavImg{width:128px;height:72px;overflow:hidden;background:var(--filo2);opacity:.4;filter:grayscale(1) brightness(.7);
+  transition:opacity .28s,filter .28s}
+.D .lavRiga:hover .lavImg{opacity:1;filter:grayscale(0) brightness(1)}
+
+/* progetti */
+.D .banco{display:grid;grid-template-columns:repeat(2,1fr);gap:18px}
+.D .pezzo{background:var(--pannello);border:1px solid var(--filo);display:flex;flex-direction:column;transition:border-color .25s}
+.D .pezzo:hover{border-color:var(--verde)}
+.D .pezzoImg{aspect-ratio:21/9;overflow:hidden;border-bottom:1px solid var(--filo);background:#0b1310}
+.D .pezzoImg img{filter:grayscale(1) brightness(.72) contrast(1.1);transition:filter .4s}
+.D .pezzo:hover .pezzoImg img{filter:grayscale(0) brightness(1) contrast(1)}
+.D .pezzoBody{padding:24px;display:flex;flex-direction:column;gap:12px;flex:1}
+.D .pezzoBody h3{margin:0;color:#fff;font-family:'Bricolage Grotesque',sans-serif;font-variation-settings:'wdth' 80;
+  font-weight:800;font-size:26px;letter-spacing:-.025em;line-height:1.02}
+.D .pezzoBody p{margin:0;color:#9db6a3;font-size:15px;line-height:1.6;flex:1}
+.D .pezzoCta{display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--filo);padding-top:16px}
+
+/* lettera */
+.D .lettera{background:var(--pannello);border-top:1px solid var(--verde);margin-top:36px}
+.D .letterain{display:grid;grid-template-columns:1fr 1fr;gap:44px;align-items:center;padding:44px 0}
+.D .lettera h3{margin:0 0 8px;color:#fff;font-family:'Bricolage Grotesque',sans-serif;font-variation-settings:'wdth' 78;
+  font-weight:800;font-size:34px;letter-spacing:-.025em}
+.D .lettera p{margin:0;color:var(--spento);max-width:44ch}
+.D .campo{display:flex;border:2px solid var(--verde)}
+.D .campo input{flex:1;background:transparent;border:0;padding:15px 16px;color:var(--testo);font:400 16px/1 'DM Sans',sans-serif;outline:none}
+.D .campo input::placeholder{color:#4d6a55}
+.D .campo button{border:0;background:var(--verde);color:#04070a;font:700 12px/1 'Courier Prime',monospace;
+  letter-spacing:.13em;text-transform:uppercase;padding:0 22px;cursor:pointer}
+.D .piede{display:flex;justify-content:space-between;gap:24px;flex-wrap:wrap;padding:26px 0;color:var(--spento);
+  border-top:1px solid var(--filo)}
+
+/* ── archivio di categoria ── */
+.D .briciole{display:flex;gap:10px;color:var(--spento);padding:22px 0}
+.D .briciole b{color:var(--testo);font-weight:600}
+.D .testata{display:grid;grid-template-columns:1fr 300px;gap:44px;align-items:end;padding:0 0 26px;border-bottom:1px solid var(--verde)}
+.D .testata h1{margin:0 0 12px;color:#fff;font-size:clamp(46px,7.4cqw,96px)}
+.D .testata p{margin:0;color:#9db6a3;max-width:52ch;font-size:17px;line-height:1.62}
+.D .sotto{display:flex;flex-wrap:wrap;gap:7px;justify-content:flex-end}
+.D .pill{border:1px solid var(--filo);padding:6px 11px;color:var(--spento);font:700 11px/1.3 'Courier Prime',monospace;
+  letter-spacing:.1em;text-transform:uppercase;transition:border-color .16s,color .16s,background .16s}
+.D .pill:hover{border-color:var(--verde);color:#04070a;background:var(--verde)}
+.D .pagina{display:flex;gap:8px;padding:34px 0}
+.D .pagina a{min-width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--filo);
+  font:700 13px/1 'Courier Prime',monospace;color:var(--spento)}
+.D .pagina a.on{background:var(--verde);border-color:var(--verde);color:#04070a}
+
+/* ── articolo ── */
+.D .artHead{background:var(--verde);color:#04070a;padding:30px 0 0;border-bottom:1px solid var(--filo)}
+.D .artHead .eti{color:#04361a}
+.D .artHead .stato.pubb{border-color:rgba(4,7,10,.3);background:rgba(4,7,10,.08);color:#04361a}
+.D .artHead h1{margin:14px 0 0;font-size:clamp(38px,6.8cqw,84px);max-width:16ch}
+.D .artSub{border-top:2px solid #04070a;margin-top:30px;padding:20px 0 24px;display:grid;
+  grid-template-columns:1fr 300px;gap:40px;align-items:start}
+.D .artSub p{margin:0;font-size:19px;line-height:1.55;max-width:52ch;color:#062a13}
+.D .artFatti{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;font-size:14px;align-items:baseline}
+.D .artFatti dt{font:700 10.5px/1.5 'Courier Prime',monospace;letter-spacing:.15em;text-transform:uppercase;color:#04361a}
+.D .artFatti dd{margin:0;text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+.D .artImg{border-bottom:1px solid var(--filo);aspect-ratio:24/9;overflow:hidden;background:#0b1310}
+.D .artImg img{filter:grayscale(1) brightness(.66) contrast(1.12)}
+.D .lettura{display:grid;grid-template-columns:230px minmax(0,66ch);gap:64px;padding:44px 0 20px;align-items:start;justify-content:center}
+.D .toc{position:sticky;top:34px;border-top:1px solid var(--verde);padding-top:14px}
+.D .toc h4{margin:0 0 12px;color:var(--spento)}
+.D .toc ol{list-style:none;margin:0;padding:0;counter-reset:t}
+.D .toc li{counter-increment:t;border-bottom:1px solid var(--filo2)}
+.D .toc li a{display:grid;grid-template-columns:26px 1fr;gap:6px;padding:9px 0;color:var(--spento);
+  font-size:14px;line-height:1.35;transition:color .16s,padding .16s}
+.D .toc li a::before{content:counter(t,decimal-leading-zero);font:700 11px/1.5 'Courier Prime',monospace;letter-spacing:.06em}
+.D .toc li a:hover{color:var(--testo)}
+.D .toc li a.on{color:var(--verde);font-weight:600;box-shadow:inset 3px 0 0 var(--verde);padding-left:8px}
+.D .corpo{font-size:18px;line-height:1.76;color:#cfe0d3}
+.D .corpo p{margin:0 0 1.25em}
+.D .corpo h2{font-family:'Bricolage Grotesque',sans-serif;font-variation-settings:'wdth' 80;font-weight:800;
+  font-size:clamp(25px,2.9cqw,34px);letter-spacing:-.028em;line-height:1.05;margin:2em 0 .6em;color:#fff}
+.D .corpo a{color:var(--verde);box-shadow:inset 0 -.4em 0 rgba(34,197,94,.18);font-weight:500}
+.D .corpo blockquote{margin:1.9em 0;padding:20px 22px;background:var(--pannello);border-left:6px solid var(--verde);
+  font-size:18.5px;line-height:1.55;color:#b7cebc}
+.D .corpo .figura{margin:2.1em 0}
+.D .corpo .figura img{aspect-ratio:16/9;filter:grayscale(1) brightness(.8) contrast(1.08);border:1px solid var(--filo);transition:filter .4s}
+.D .corpo .figura:hover img{filter:grayscale(0) brightness(1) contrast(1)}
+.D .corpo .figura figcaption{margin-top:9px;color:var(--spento);font-size:13.5px}
+.D .reaz{display:flex;flex-wrap:wrap;gap:10px;border-top:1px solid var(--verde);margin-top:40px;padding-top:22px}
+.D .reaz button{background:transparent;border:1px solid var(--filo);color:var(--spento);padding:10px 15px;
+  font:500 13px/1 'DM Sans',sans-serif;cursor:pointer;display:inline-flex;gap:8px;align-items:center;
+  transition:border-color .16s,color .16s,background .16s}
+.D .reaz button:hover{border-color:var(--verde);color:var(--verde)}
+.D .reaz button b{font:700 12px/1 'Courier Prime',monospace;color:#8fb397}
+.D .tagfila{display:flex;flex-wrap:wrap;gap:7px;margin-top:20px}
+
+@container (max-width:900px){
+  .D .gab{padding:0 18px}
+  .D .primo,.D .banco,.D .letterain,.D .testata,.D .heroSub,.D .artSub{grid-template-columns:1fr}
+  .D .lettura{grid-template-columns:1fr;gap:0;padding:26px 0 10px}
+  .D .navlinks,.D .toc,.D .lavImg{display:none}
+  .D .primoImg{border-right:0;border-bottom:1px solid var(--filo)}
+  .D .primoTxt{padding:24px}
+  .D .heroin{padding:32px 0 0}
+  .D .hero h1{font-size:clamp(46px,15cqw,74px)}
+  .D .heroSub{margin-top:24px;gap:20px}
+  .D .lavRiga{grid-template-columns:1fr;gap:8px;padding:18px 0}
+  .D .lavMeta{justify-content:flex-start}
+  .D .sotto{justify-content:flex-start}
+  .D .artFatti dd{text-align:left}
+  .D .corpo{font-size:17px}
+}
+@media (prefers-reduced-motion:reduce){.D *{transition:none!important;animation:none!important}}
+</style>
+
+<div class="board">
+
+<header class="bhead">
+  <div class="bkicker">Proposta D · Simone Pizzi · settembre 2026</div>
+  <h1 class="bname">Officina Notturna</h1>
+  <p class="bsub">L'impianto di «Officina» sui colori di «Segnale»: blocchi pieni, grottesca stretta e stato dichiarato, ma di notte e in verde.</p>
+  <div class="bwhy">
+    <b>Che cosa cambia rispetto alle due di partenza.</b> Da Officina restano tutte le scelte strutturali: il <b>campo pieno</b> in apertura con il titolo dentro, la grottesca stretta e pesante usata a misure grosse, le immagini in bianco e nero che si accendono al passaggio, le righe piene al posto delle card, il sommario numerato in colonna e — soprattutto — l'etichetta di <b>stato</b> su ogni cosa: in corso, open source, pubblicato, archiviato. Da Segnale resta tutto il colore: nero `#04070a`, filetti, grigio-verde, e il verde `#22c55e` che compare solo dove c'è qualcosa di attivo.<br><br>
+    <b>La traduzione che conta.</b> In Officina il campo pieno era giallo; qui è il verde del sito. È l'unico punto in cui questa direzione alza la voce, ed è una scelta che va guardata prima di dire di sì: sotto trovi <b>la stessa apertura in due versioni</b>, campo verde e campo nero. Tutto il resto della pagina non cambia fra le due.<br><br>
+    <b>Un cambio rispetto a Officina.</b> Il carattere del corpo non è più Public Sans ma <b>DM Sans</b>, quello che il sito usa già: la personalità sta tutta in Bricolage Grotesque nei titoli, e così le famiglie nuove da portare in casa diventano una sola. Le etichette tornano a Courier Prime, come oggi.
+  </div>
+  <div class="bmeta">
+    <div><h4>Palette (identica a Segnale)</h4><div class="bsw"><i style="background:#04070a"></i><i style="background:#080e0d"></i><i style="background:#16241c"></i><i style="background:#7d9b84"></i><i style="background:#dce8de"></i><i style="background:#22c55e"></i></div></div>
+    <div class="bfonts"><h4>Caratteri</h4>
+      <b>Bricolage Grotesque</b> — titoli, stretta e pesante (nuovo)<br>
+      <b>DM Sans</b> — corpo e interfaccia (resta)<br>
+      <b>Courier Prime</b> — etichette, stati, dati (resta)<br>
+      Nessuna serif
+    </div>
+    <div class="bfonts"><h4>Impianto</h4>
+      Campo pieno in apertura<br>
+      Stato dichiarato su ogni scheda<br>
+      Immagini spente, accese al passaggio<br>
+      Sommario numerato in colonna
+    </div>
+  </div>
+</header>
+
+<div class="strip">Home <span>1280 px</span></div>
+<div class="frame"><div class="D">
+
+  <nav class="nav"><div class="gab navin">
+    <a class="logo" href="#">SIMONE PIZZI</a>
+    <div class="navlinks">
+      <a href="#" class="on">Videogiochi</a><a href="#">Software</a><a href="#">Pubblicazioni</a>
+      <a href="#">Podcast &amp; Radio</a><a href="#">Blog</a><a href="#">Web</a>
+    </div>
+    <div class="navtools"><span class="eti">Cerca ⌘K</span><span class="eti" style="color:var(--verde)">Tutti i progetti</span></div>
+  </div></nav>
+
+  <header class="hero"><div class="gab heroin">
+    <span class="eti">Portfolio e blog · dal 2010</span>
+    <h1 class="gro">Creazioni ibride</h1>
+    <div class="heroSub">
+      <p>Podcaster dal 2010. Scrittore di storie e racconti. Sviluppatore sperimentale con AI. Fondatore di Runtime Radio e Italian Podcast Network.</p>
+      <div class="heroCta"><a class="btn pieno" href="#">Tutti i progetti</a><a class="btn" href="#">Ultimi articoli</a></div>
+    </div>
+    <div class="contatori">
+      <div><b>214</b><span class="eti">Articoli</span></div>
+      <div><b>18</b><span class="eti">Progetti</span></div>
+      <div><b>9</b><span class="eti">Open source</span></div>
+      <div><b>3</b><span class="eti">In corso</span></div>
+    </div>
+  </div></header>
+
+  <section class="sez"><div class="gab">
+    <div class="sezcap"><h2>In primo piano</h2><a class="eti" href="#">Web →</a></div>
+    <a class="primo" href="#">
+      <div class="primoImg"><img src="{{img:fdca}}" alt="Il sito del Festival della Canzone Artificiale"></div>
+      <div class="primoTxt">
+        <div class="riga1"><span class="stato pubb">Pubblicato</span><span class="eti grigio">Web · 5 settembre 2026</span></div>
+        <h3>FDCA: il capolavoro non ha una riga di React</h3>
+        <p>Ho rifatto da zero il sito FDCA togliendo React. Sei giorni, dodici versioni, e un televoto che sarebbe crollato la prima sera.</p>
+        <div class="riga1"><span class="eti grigio">14 min di lettura</span><span class="eti grigio">12 sezioni</span></div>
+      </div>
+    </a>
+  </div></section>
+
+  <section class="sez"><div class="gab">
+    <div class="sezcap"><h2>Ultime lavorazioni</h2><a class="eti" href="#">Archivio completo →</a></div>
+    <div class="lav">
+      <a class="lavRiga" href="#">
+        <div><h3>ESPOSIZIONE: ce l'hai fatta. Ma chi ti ha visto?</h3>
+          <p>Il favore chiesto alla macchinetta e quello chiesto in riunione ricevono lo stesso sì, ma non sono la stessa cosa. Da qui nasce ESPOSIZIONE, ed è ora pubblico.</p></div>
+        <div class="lavMeta"><span class="stato attivo">In corso</span><span class="eti">21 ago</span></div>
+        <div class="lavImg"><img src="{{img:esposiz_s}}" alt=""></div></a>
+      <a class="lavRiga" href="#">
+        <div><h3>La cassaforte adesso è aperta: anche FeedDownloader Pro diventa Open Source</h3>
+          <p>A maggio avevo costruito una cassaforte e provato a scassinarla. Adesso l'ho aperta: FeedDownloader Pro esce dal mercato e passa sotto licenza MIT.</p></div>
+        <div class="lavMeta"><span class="stato">Open source</span><span class="eti">20 ago</span></div>
+        <div class="lavImg"><img src="{{img:feeddl_s}}" alt=""></div></a>
+      <a class="lavRiga" href="#">
+        <div><h3>Runtime Radio: alle tre di notte il sito diceva «In Diretta»</h3>
+          <p>Dalla v2.9.10 alla v2.28.0: tre mesi, quarantacinque versioni. La Live Room, i ruoli della redazione, 567 prove automatiche.</p></div>
+        <div class="lavMeta"><span class="stato pubb">Pubblicato</span><span class="eti">19 ago</span></div>
+        <div class="lavImg"><img src="{{img:runtime_s}}" alt=""></div></a>
+      <a class="lavRiga" href="#">
+        <div><h3>Quattro verbi che non facevano niente</h3>
+          <p>Leonardo ha finito il gioco e mi ha mandato due video muti, senza una parola. Da lì ho scoperto che quattro verbi su nove non facevano niente.</p></div>
+        <div class="lavMeta"><span class="stato attivo">In corso</span><span class="eti">14 ago</span></div>
+        <div class="lavImg"><img src="{{img:verbi_s}}" alt=""></div></a>
+      <a class="lavRiga" href="#">
+        <div><h3>Lo sfizio più bello che mi sono tolto</h3>
+          <p>Favella è stato uno sfizio che senza gli LLM non avrei mai potuto togliermi. Adesso è tutto pubblico: motore, sito, manuale e anche l'IDE che non ho mai finito.</p></div>
+        <div class="lavMeta"><span class="stato">Open source</span><span class="eti">10 ago</span></div>
+        <div class="lavImg"><img src="{{img:favella_s}}" alt=""></div></a>
+      <a class="lavRiga" href="#">
+        <div><h3>ADDIO SBARGOLD: il lingotto torna in fonderia</h3>
+          <p>Da una scemenza detta per caso era nato un linguaggio esoterico con un piano di sviluppo credibile. Oggi lo archivio.</p></div>
+        <div class="lavMeta"><span class="stato arch">Archiviato</span><span class="eti">16 giu</span></div>
+        <div class="lavImg"><img src="{{img:sbargold_s}}" alt=""></div></a>
+    </div>
+  </div></section>
+
+  <section class="sez"><div class="gab">
+    <div class="sezcap"><h2>Sul banco</h2><a class="eti" href="#">Tutti e diciotto →</a></div>
+    <div class="banco">
+      <article class="pezzo">
+        <div class="pezzoImg"><img src="{{img:titan}}" alt="Banner di Runtime TelegramBot Titan Edition"></div>
+        <div class="pezzoBody">
+          <div class="riga1"><span class="stato">Open source</span><span class="eti grigio">Software</span></div>
+          <h3>WhitePaper di Runtime TelegramBot Titan Edition</h3>
+          <p>Il documento scientifico sul software per la gestione massiva di bot Telegram e infiniti feed presi da podcast, siti e YouTube.</p>
+          <div class="pezzoCta"><a class="btn pieno" href="#">Scarica il documento</a><a class="btn" href="#">Leggi l'articolo</a></div>
+        </div>
+      </article>
+      <article class="pezzo">
+        <div class="pezzoImg"><img src="{{img:relitto}}" alt="Copertina de Il Relitto Silente"></div>
+        <div class="pezzoBody">
+          <div class="riga1"><span class="stato attivo">In corso</span><span class="eti grigio">Videogiochi</span></div>
+          <h3>Il Relitto Silente</h3>
+          <p>Un sistema tecnologico ultramoderno per omaggiare un glorioso passato: quello delle interactive fiction alla Infocom e in stile Bonaventura Di Bello.</p>
+          <div class="pezzoCta"><a class="btn pieno" href="#">Scopri il progetto</a><a class="btn" href="#">Scarica il racconto</a></div>
+        </div>
+      </article>
+    </div>
+  </div></section>
+
+  <section class="lettera"><div class="gab letterain">
+    <div><h3>Ogni tanto scrivo una lettera</h3>
+      <p>Nessuna cadenza fissa, nessun riassunto automatico: parte solo quando ho qualcosa da raccontare.</p></div>
+    <form class="campo" onsubmit="return false"><input type="email" placeholder="la-tua@email.it" aria-label="Email"><button>Iscriviti</button></form>
+  </div>
+  <div class="gab piede">
+    <span class="eti">© 2026 Simone Pizzi</span><span class="eti">Runtime Radio · Italian Podcast Network</span><span class="eti">RSS · Contatti · Privacy</span>
+  </div></section>
+
+</div></div>
+
+<div class="strip">La stessa apertura, campo nero <span>da guardare accanto a quella verde qui sopra</span></div>
+<div class="frame"><div class="D">
+  <nav class="nav"><div class="gab navin">
+    <a class="logo" href="#">SIMONE PIZZI</a>
+    <div class="navlinks"><a href="#" class="on">Videogiochi</a><a href="#">Software</a><a href="#">Pubblicazioni</a><a href="#">Podcast &amp; Radio</a><a href="#">Blog</a><a href="#">Web</a></div>
+    <div class="navtools"><span class="eti">Cerca ⌘K</span><span class="eti" style="color:var(--verde)">Tutti i progetti</span></div>
+  </div></nav>
+  <header class="hero sobria"><div class="gab heroin">
+    <span class="eti">Portfolio e blog · dal 2010</span>
+    <h1 class="gro">Creazioni <em>ibride</em></h1>
+    <div class="heroSub">
+      <p>Podcaster dal 2010. Scrittore di storie e racconti. Sviluppatore sperimentale con AI. Fondatore di Runtime Radio e Italian Podcast Network.</p>
+      <div class="heroCta"><a class="btn pieno" href="#">Tutti i progetti</a><a class="btn" href="#">Ultimi articoli</a></div>
+    </div>
+    <div class="contatori">
+      <div><b>214</b><span class="eti">Articoli</span></div>
+      <div><b>18</b><span class="eti">Progetti</span></div>
+      <div><b>9</b><span class="eti">Open source</span></div>
+      <div><b>3</b><span class="eti">In corso</span></div>
+    </div>
+  </div></header>
+  <section class="sez"><div class="gab">
+    <div class="sezcap"><h2>In primo piano</h2><a class="eti" href="#">Web →</a></div>
+    <a class="primo" href="#">
+      <div class="primoImg"><img src="{{img:fdca}}" alt=""></div>
+      <div class="primoTxt">
+        <div class="riga1"><span class="stato pubb">Pubblicato</span><span class="eti grigio">Web · 5 settembre 2026</span></div>
+        <h3>FDCA: il capolavoro non ha una riga di React</h3>
+        <p>Ho rifatto da zero il sito FDCA togliendo React. Sei giorni, dodici versioni, e un televoto che sarebbe crollato la prima sera.</p>
+      </div>
+    </a>
+  </div></section>
+</div></div>
+
+<div class="strip">Archivio di categoria <span>/progetti-software</span></div>
+<div class="frame"><div class="D">
+  <nav class="nav"><div class="gab navin">
+    <a class="logo" href="#">SIMONE PIZZI</a>
+    <div class="navlinks"><a href="#">Videogiochi</a><a href="#" class="on">Software</a><a href="#">Pubblicazioni</a><a href="#">Podcast &amp; Radio</a><a href="#">Blog</a><a href="#">Web</a></div>
+    <div class="navtools"><span class="eti">Cerca ⌘K</span></div>
+  </div></nav>
+  <div class="gab">
+    <div class="briciole eti"><a href="#">Home</a><span>/</span><b>Software</b></div>
+    <header class="testata">
+      <div><h1 class="gro">Software</h1>
+        <p>Motori narrativi, automazioni, strumenti per la radio. Quasi tutto è finito su GitHub sotto licenza MIT, di solito dopo aver provato a venderlo.</p></div>
+      <div class="sotto">
+        <a class="pill" href="#">Titan Edition</a><a class="pill" href="#">Favella 1</a>
+        <a class="pill" href="#">FeedDownloader</a><a class="pill" href="#">Live Machine</a><a class="pill" href="#">Sbargold</a>
+      </div>
+    </header>
+    <div class="sezcap"><h2 style="font-size:20px">32 articoli</h2><span class="eti grigio">Dal più recente ↓</span></div>
+    <div class="lav">
+      <a class="lavRiga" href="#">
+        <div><h3>ESPOSIZIONE: ce l'hai fatta. Ma chi ti ha visto?</h3>
+          <p>Il favore chiesto alla macchinetta e quello chiesto in riunione ricevono lo stesso sì, ma non sono la stessa cosa.</p></div>
+        <div class="lavMeta"><span class="stato attivo">In corso</span><span class="eti">21 ago</span></div>
+        <div class="lavImg"><img src="{{img:esposiz_s}}" alt=""></div></a>
+      <a class="lavRiga" href="#">
+        <div><h3>La cassaforte adesso è aperta: anche FeedDownloader Pro diventa Open Source</h3>
+          <p>Adesso l'ho aperta: FeedDownloader Pro esce dal mercato e passa sotto licenza MIT, codice pubblico.</p></div>
+        <div class="lavMeta"><span class="stato">Open source</span><span class="eti">20 ago</span></div>
+        <div class="lavImg"><img src="{{img:feeddl_s}}" alt=""></div></a>
+      <a class="lavRiga" href="#">
+        <div><h3>TelegramBot cambia tutto: ora è Open Source!</h3>
+          <p>Ha venduto zero copie: tre download dell'installer, e li ho fatti io. Invece di lasciarlo affondare l'ho aperto.</p></div>
+        <div class="lavMeta"><span class="stato">Open source</span><span class="eti">13 ago</span></div>
+        <div class="lavImg"><img src="{{img:titan_s}}" alt=""></div></a>
+      <a class="lavRiga" href="#">
+        <div><h3>Lo sfizio più bello che mi sono tolto</h3>
+          <p>Favella è stato uno sfizio che senza gli LLM non avrei mai potuto togliermi. Adesso è tutto pubblico.</p></div>
+        <div class="lavMeta"><span class="stato">Open source</span><span class="eti">10 ago</span></div>
+        <div class="lavImg"><img src="{{img:favella_s}}" alt=""></div></a>
+      <a class="lavRiga" href="#">
+        <div><h3>ADDIO SBARGOLD: il lingotto torna in fonderia</h3>
+          <p>Un vezzo da LLM non ripaga ciò che costa: il linguaggio esoterico torna in fonderia.</p></div>
+        <div class="lavMeta"><span class="stato arch">Archiviato</span><span class="eti">16 giu</span></div>
+        <div class="lavImg"><img src="{{img:sbargold_s}}" alt=""></div></a>
+      <a class="lavRiga" href="#">
+        <div><h3>Runtime TelegramBot Desktop Titan Edition</h3>
+          <p>Il software di automazione per la condivisione di post su infiniti canali Telegram con infiniti feed.</p></div>
+        <div class="lavMeta"><span class="stato pubb">Pubblicato</span><span class="eti">29 apr</span></div>
+        <div class="lavImg"><img src="{{img:titan_s}}" alt=""></div></a>
+    </div>
+    <nav class="pagina"><a class="on" href="#">1</a><a href="#">2</a><a href="#">3</a><a href="#">4</a><a href="#">→</a></nav>
+  </div>
+</div></div>
+
+<div class="strip">Articolo lungo con sommario <span>/web/fdca-il-capolavoro-non-ha-una-riga-di-react</span></div>
+<div class="frame"><div class="D">
+  <nav class="nav"><div class="gab navin">
+    <a class="logo" href="#">SIMONE PIZZI</a>
+    <div class="navlinks"><a href="#">Videogiochi</a><a href="#">Software</a><a href="#">Pubblicazioni</a><a href="#">Podcast &amp; Radio</a><a href="#">Blog</a><a href="#" class="on">Web</a></div>
+    <div class="navtools"><span class="eti">Cerca ⌘K</span></div>
+  </div></nav>
+
+  <header class="artHead"><div class="gab">
+    <div class="riga1"><span class="stato pubb">Pubblicato</span><span class="eti">Home / Web / FDCA</span></div>
+    <h1 class="gro">FDCA: il capolavoro non ha una riga di React</h1>
+    <div class="artSub">
+      <p>Ho rifatto da zero il sito FDCA togliendo React. Sei giorni, dodici versioni, e un televoto che sarebbe crollato la prima sera.</p>
+      <dl class="artFatti">
+        <dt>Data</dt><dd>5 settembre 2026</dd>
+        <dt>Lettura</dt><dd>14 minuti</dd>
+        <dt>Versioni</dt><dd>12 in 6 giorni</dd>
+        <dt>Letture</dt><dd>2.412</dd>
+      </dl>
+    </div>
+  </div></header>
+  <div class="artImg"><img src="{{img:fdca}}" alt="Il sito del Festival della Canzone Artificiale"></div>
+
+  <div class="gab lettura">
+    <aside class="toc">
+      <h4 class="eti">In questa pagina</h4>
+      <ol>
+        <li><a class="on" href="#d1">Che cos'è il Festival della Canzone Artificiale</a></li>
+        <li><a href="#d2">La decisione che ha ridefinito tutto: via React</a></li>
+        <li><a href="#d3">Il pezzo difficile: il motore della gara</a></li>
+        <li><a href="#d4">Il televoto, e il guaio che ci ha quasi fregati</a></li>
+        <li><a href="#d5">Settantacinque cose che non andavano</a></li>
+        <li><a href="#d6">Dove siamo, e lo spoiler</a></li>
+      </ol>
+    </aside>
+
+    <article class="corpo">
+      <p>In questo periodo sto lavorando a due grandi progetti web, uno più grande dell'altro. Il primo, che è il tema di questo articolo, è allo stato attuale il capolavoro assoluto tra le mie produzioni, e ha ridefinito perfino il mio concetto di Thin Stack React + PHP.</p>
+      <p>Naturalmente questo articolo non vuole essere un annuncio: parla di una cosa che da ieri notte è attiva e pubblica, ma che non abbiamo ancora lanciato sui nostri canali. No, questo è un <a href="#">devlog</a>. È un modo per raccontarvi in modo semplice la complessità che sta dietro il progetto.</p>
+
+      <h2 id="d1">Che cos'è il Festival della Canzone Artificiale</h2>
+      <p>Nel 2024 a Runtime Radio abbiamo fatto una cosa che in Italia non aveva fatto nessuno: un festival di canzoni scritte e cantate dalle macchine. Non un esperimento in una puntata: un festival vero, con le sue serate, i suoi brani in gara e il suo pubblico che vota.</p>
+      <p>Da allora ne abbiamo fatte tre edizioni. La quarta apre le candidature il 20 settembre, le chiude il 25 ottobre, e si tiene a metà novembre in tre serate: due semifinali e una finale.</p>
+      <blockquote>Un festival, dal punto di vista di chi deve costruirgli il sito, non è una vetrina. È un affare complicato: raccoglie brani da estranei, li deve moderare, li deve far votare da un pubblico che sta sul divano col telefono in mano.</blockquote>
+
+      <h2 id="d2">La decisione che ha ridefinito tutto: via React</h2>
+      <p>Qui devo spiegare una cosa a chi non fa questo mestiere, perché è il cuore dell'articolo. Da un paio d'anni un sito web moderno si costruisce quasi sempre in due pezzi. C'è un server, che custodisce i dati, e c'è un programma che gira dentro il vostro browser e disegna le pagine.</p>
+      <figure class="figura">
+        <img src="{{img:runtime}}" alt="La regia di Runtime Radio">
+        <figcaption>La prova generale, tre giorni prima dell'apertura delle candidature.</figcaption>
+      </figure>
+      <p>Funziona, ed è quello che ho fatto per anni. Ci ho scritto anche un manuale, <a href="#">React + PHP: The Thin Stack</a>, che spiega come tenere quei due pezzi leggeri invece di lasciarli ingrassare. Poi è arrivato un sito che doveva reggere duemila persone che votano nello stesso minuto.</p>
+
+      <h2 id="d3">Il pezzo difficile: il motore della gara</h2>
+      <p>Il motore fa tre cose che non possono sbagliare: registra un voto una volta sola, somma i punti della giuria con quelli del pubblico secondo una formula che nessuno può contestare, e pubblica una classifica che regge anche se qualcuno ricarica la pagina nel momento sbagliato.</p>
+
+      <div class="reaz">
+        <button>Mi piace <b>34</b></button><button>Utile <b>12</b></button><button>Sorpresa <b>5</b></button>
+        <button style="margin-left:auto">Condividi</button><button>Scrivi a Simone</button>
+      </div>
+      <div class="tagfila">
+        <a class="pill" href="#">festival</a><a class="pill" href="#">php</a>
+        <a class="pill" href="#">react</a><a class="pill" href="#">sito</a><a class="pill" href="#">web</a>
+      </div>
+    </article>
+  </div>
+
+  <section class="lettera"><div class="gab piede" style="border-top:0">
+    <span class="eti">© 2026 Simone Pizzi</span><span class="eti">Runtime Radio · Italian Podcast Network</span><span class="eti">RSS · Contatti · Privacy</span>
+  </div></section>
+</div></div>
+
+<div class="strip">Telefono <span>390 px · il campo pieno tiene, il sommario passa in cima</span></div>
+<div class="phones">
+  <div class="phone"><div class="D">
+    <nav class="nav"><div class="gab navin"><a class="logo" href="#">SIMONE PIZZI</a><span class="eti">Menu</span></div></nav>
+    <header class="hero"><div class="gab heroin">
+      <span class="eti">Portfolio e blog · dal 2010</span>
+      <h1 class="gro">Creazioni ibride</h1>
+      <div class="heroSub">
+        <p>Podcaster dal 2010. Scrittore di storie e racconti. Sviluppatore sperimentale con AI.</p>
+        <div class="heroCta"><a class="btn pieno" href="#">Tutti i progetti</a></div>
+      </div>
+      <div class="contatori"><div><b>214</b><span class="eti">Articoli</span></div><div><b>18</b><span class="eti">Progetti</span></div><div><b>9</b><span class="eti">Open source</span></div></div>
+    </div></header>
+    <section class="sez"><div class="gab">
+      <div class="sezcap"><h2>In primo piano</h2></div>
+      <a class="primo" href="#">
+        <div class="primoImg"><img src="{{img:fdca_s}}" alt=""></div>
+        <div class="primoTxt">
+          <div class="riga1"><span class="stato pubb">Pubblicato</span><span class="eti grigio">5 set</span></div>
+          <h3>FDCA: il capolavoro non ha una riga di React</h3>
+          <p>Sei giorni, dodici versioni, e un televoto che sarebbe crollato la prima sera.</p>
+        </div>
+      </a>
+      <div class="sezcap"><h2>Ultime lavorazioni</h2></div>
+      <div class="lav">
+        <a class="lavRiga" href="#"><div><h3>ESPOSIZIONE: ce l'hai fatta. Ma chi ti ha visto?</h3><p>Il favore chiesto alla macchinetta e quello chiesto in riunione ricevono lo stesso sì.</p></div>
+          <div class="lavMeta"><span class="stato attivo">In corso</span><span class="eti">21 ago</span></div><div class="lavImg"></div></a>
+        <a class="lavRiga" href="#"><div><h3>La cassaforte adesso è aperta</h3><p>FeedDownloader Pro esce dal mercato e passa sotto licenza MIT.</p></div>
+          <div class="lavMeta"><span class="stato">Open source</span><span class="eti">20 ago</span></div><div class="lavImg"></div></a>
+        <a class="lavRiga" href="#"><div><h3>ADDIO SBARGOLD: il lingotto torna in fonderia</h3><p>Un vezzo da LLM non ripaga ciò che costa.</p></div>
+          <div class="lavMeta"><span class="stato arch">Archiviato</span><span class="eti">16 giu</span></div><div class="lavImg"></div></a>
+      </div>
+    </div></section>
+  </div></div>
+
+  <div class="phone"><div class="D">
+    <nav class="nav"><div class="gab navin"><a class="logo" href="#">SIMONE PIZZI</a><span class="eti">Menu</span></div></nav>
+    <header class="artHead"><div class="gab">
+      <div class="riga1"><span class="stato pubb">Pubblicato</span><span class="eti">Web</span></div>
+      <h1 class="gro">FDCA: il capolavoro non ha una riga di React</h1>
+      <div class="artSub">
+        <p>Sei giorni, dodici versioni, e un televoto che sarebbe crollato la prima sera.</p>
+        <dl class="artFatti"><dt>Data</dt><dd>5 set 2026</dd><dt>Lettura</dt><dd>14 minuti</dd></dl>
+      </div>
+    </div></header>
+    <div class="artImg"><img src="{{img:fdca_s}}" alt=""></div>
+    <div class="gab lettura">
+      <article class="corpo">
+        <p>In questo periodo sto lavorando a due grandi progetti web, uno più grande dell'altro. Il primo è allo stato attuale il capolavoro assoluto tra le mie produzioni.</p>
+        <h2>Che cos'è il Festival della Canzone Artificiale</h2>
+        <p>Nel 2024 a Runtime Radio abbiamo fatto una cosa che in Italia non aveva fatto nessuno: un festival di canzoni scritte e cantate dalle macchine.</p>
+        <div class="reaz"><button>Mi piace <b>34</b></button><button>Condividi</button></div>
+      </article>
+    </div>
+  </div></div>
+</div>
+
+<div class="bfoot">Direzione D · «Officina Notturna» — impianto di C, colori di A. Mockup statico, contenuti veri presi dal sito in produzione</div>
+
+</div>
