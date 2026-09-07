@@ -33,4 +33,4 @@ if ($percorso !== '/' && is_file($file)) {
     return false;
 }
 
-require __DIR__ . '/sito.php';
+require __DIR__ . '/index.php';

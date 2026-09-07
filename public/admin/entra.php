@@ -41,6 +41,10 @@ testa_pannello('Entra', '', true);
     <button class="btn btn-pieno" type="submit" style="width:100%;justify-content:center">Entra</button>
   </form>
 
+  <p class="aiuto" style="margin-top:18px">
+    <a href="/admin/recupera.php" style="color:var(--verde)">Ho perso la password</a>
+  </p>
+
   <?php if (IN_SVILUPPO): ?>
     <p class="aiuto" style="margin-top:22px;border-top:1px solid var(--filo);padding-top:16px">
       <b>In sviluppo:</b> simone / sviluppo-locale.<br>

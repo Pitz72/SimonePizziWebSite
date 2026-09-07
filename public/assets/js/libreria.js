@@ -42,6 +42,32 @@
     if (!giaCaricata) carica();
   };
 
+  /** Una casella della griglia. */
+  function scheda(m) {
+    var li = document.createElement('li');
+    var b = document.createElement('button');
+    b.type = 'button';
+
+    var box = document.createElement('div');
+    box.className = 'anteprima';
+    var img = document.createElement('img');
+    img.src = m.url; img.alt = ''; img.loading = 'lazy';
+    box.appendChild(img);
+
+    var didascalia = document.createElement('figcaption');
+    didascalia.textContent = m.nome;
+
+    b.appendChild(box);
+    b.appendChild(didascalia);
+    b.addEventListener('click', function () {
+      chiudi(finestraMedia);
+      if (quandoScelta) quandoScelta(m);
+    });
+
+    li.appendChild(b);
+    return li;
+  }
+
   function carica() {
     if (!griglia) return;
     statoMedia.textContent = 'Carico…';
@@ -50,36 +76,53 @@
       .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
       .then(function (d) {
         griglia.innerHTML = '';
-        (d.media || []).forEach(function (m) {
-          var li = document.createElement('li');
-          var b = document.createElement('button');
-          b.type = 'button';
-
-          var box = document.createElement('div');
-          box.className = 'anteprima';
-          var img = document.createElement('img');
-          img.src = m.url; img.alt = ''; img.loading = 'lazy';
-          box.appendChild(img);
-
-          var didascalia = document.createElement('figcaption');
-          didascalia.textContent = m.nome;
-
-          b.appendChild(box);
-          b.appendChild(didascalia);
-          b.addEventListener('click', function () {
-            chiudi(finestraMedia);
-            if (quandoScelta) quandoScelta(m);
-          });
-
-          li.appendChild(b);
-          griglia.appendChild(li);
-        });
+        (d.media || []).forEach(function (m) { griglia.appendChild(scheda(m)); });
         statoMedia.textContent = (d.media || []).length + ' immagini.';
         giaCaricata = true;
       })
       .catch(function () {
         statoMedia.textContent = 'Non sono riuscito a leggere la libreria. Ricarica la pagina.';
       });
+  }
+
+  /* ── Caricare una nuova immagine ───────────────────────────────────────
+     Il ridimensionamento e la conversione in WebP li fa il server: qui si
+     manda il file e si rimette in cima alla griglia quello che torna, così si
+     può usare subito senza ricaricare la finestra. */
+  var moduloCarica = document.getElementById('modulo-carica');
+
+  if (moduloCarica) {
+    moduloCarica.addEventListener('submit', function (ev) {
+      ev.preventDefault();
+      var campo = document.getElementById('file-nuovo');
+      if (!campo.files || !campo.files.length) return;
+
+      var dati = new FormData(moduloCarica);
+      var pulsante = moduloCarica.querySelector('button');
+      pulsante.disabled = true;
+      statoMedia.textContent = 'Carico ' + campo.files[0].name + '…';
+      statoMedia.removeAttribute('data-tipo');
+
+      fetch('/admin/carica.php', { method: 'POST', body: dati })
+        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
+        .then(function (esito) {
+          if (!esito.ok) {
+            statoMedia.textContent = esito.d.errore || 'Il caricamento non è riuscito.';
+            statoMedia.setAttribute('data-tipo', 'no');
+            return;
+          }
+          moduloCarica.reset();
+          statoMedia.textContent = esito.d.nome + ' caricata (' +
+            Math.round(esito.d.peso / 1024) + ' KB). È la prima della griglia.';
+          statoMedia.setAttribute('data-tipo', 'ok');
+          griglia.insertBefore(scheda(esito.d), griglia.firstChild);
+        })
+        .catch(function () {
+          statoMedia.textContent = 'Il caricamento non è riuscito. Riprova.';
+          statoMedia.setAttribute('data-tipo', 'no');
+        })
+        .then(function () { pulsante.disabled = false; });
+    });
   }
 
   /* ── Il cercatore di articoli ──────────────────────────────────────────── */

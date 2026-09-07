@@ -24,8 +24,10 @@ DirectoryIndex index.php index.html
   RewriteRule ^sitemap\.xml$ sitemap.php [L,NC]
   RewriteRule ^robots\.txt$ robots.php [L,NC]
 
-# Mantiene l'accesso ai file reali (immagini, endpoint PHP API, CSS/JS bundles)
-# Dirotta tutte le URL virtuali di React sul motore SEO PHP (v2.0 Dynamic Rendering)
+# I file veri (immagini, endpoint, CSS, JS, caratteri) e le cartelle vere
+# (/admin/) si servono come sono. Tutto il resto va al front controller, che
+# dal 07/09/2026 è il sito in PHP: non c'è più un guscio React da riempire,
+# né una versione diversa della pagina per i crawler.
 
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
@@ -93,5 +95,18 @@ RedirectMatch 301 ^/libri/?$ /narrativa-e-pubblicazioni
 
 # frame-ancestors 'self': equivale a X-Frame-Options SAMEORIGIN ma per browser moderni
 
-  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self'; object-src 'none'; frame-src https://www.youtube-nocookie.com https://www.youtube.com; frame-ancestors 'self'; base-uri 'self'"
+# [07/09/2026] La CSP non si manda più da qui.
+#
+# Il sito nuovo usa un nonce — un numero diverso a ogni richiesta — per
+# ammettere i pochi script scritti dentro la pagina (i dati strutturati, il
+# grafico del pannello) senza aprire la porta a 'unsafe-inline'. Un nonce lo
+# può generare solo PHP: un file di configurazione non cambia a ogni
+# richiesta. La manda partials/head.php, e `Header always set` qui vincerebbe
+# su quella, quindi questa riga resta commentata.
+#
+# Se un giorno il PHP dovesse smettere di mandarla, la rete di sicurezza è
+# ripristinare la riga qui sotto: è la CSP del sito vecchio, senza nonce.
+#
+#  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self'; object-src 'none'; frame-src https://www.youtube-nocookie.com https://www.youtube.com; frame-ancestors 'self'; base-uri 'self'"
+
 </IfModule>

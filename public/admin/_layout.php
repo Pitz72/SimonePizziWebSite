@@ -108,6 +108,13 @@ function finestre_pannello(): void {
         <button class="finestra-chiudi" type="button" data-chiudi>Esc</button>
       </div>
       <div class="finestra-corpo">
+        <form id="modulo-carica" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+                     border-bottom:1px solid var(--filo);padding-bottom:16px;margin-bottom:16px">
+          <?= campo_gettone() ?>
+          <label class="eti spento" for="file-nuovo">Carica una nuova immagine</label>
+          <input id="file-nuovo" name="file" type="file" accept="image/*" style="flex:1;min-width:200px">
+          <button class="btn" type="submit">Carica</button>
+        </form>
         <p class="esito" id="stato-libreria" role="status" aria-live="polite"></p>
         <ul class="griglia-media" id="griglia-libreria"></ul>
       </div>

@@ -17,8 +17,8 @@ if ($cosa === 'media') {
     $righe = array_map(static fn(array $m): array => [
         'id'   => (int)$m['id'],
         'url'  => url_immagine($m['file_path']),
-        'nome' => $m['file_name'],
-        'alt'  => $m['alt_text'] ?? '',
+        'nome' => $m['filename'],
+        'peso' => (int)($m['size'] ?? 0),
     ], admin_media(120));
     echo json_encode(['media' => $righe], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;

@@ -27,6 +27,11 @@
 
 declare(strict_types=1);
 
+// Uno script da riga di comando che fallisce in silenzio è peggio di uno che
+// non gira: qui gli errori si vedono.
+ini_set('display_errors', '1');
+error_reporting(E_ALL);
+
 const FILE_DB = __DIR__ . '/../../scratch/sviluppo.sqlite';
 
 if (!is_file(FILE_DB)) {
@@ -40,6 +45,15 @@ $db = new PDO('sqlite:' . FILE_DB, null, null, [
 ]);
 
 /* ── Le tabelle ──────────────────────────────────────────────────────────── */
+
+/* Queste tabelle appartengono a questo script: se ne rifà lo schema da capo a
+   ogni giro. Senza il DROP, un CREATE IF NOT EXISTS lascerebbe in piedi lo
+   schema vecchio e le colonne nuove non comparirebbero — che è esattamente
+   quello che è successo la prima volta che i nomi sono cambiati. */
+foreach (['users','login_attempts','password_resets','messages','subscribers',
+          'article_reactions','article_views','cta_clicks','media','app_settings'] as $t) {
+    $db->exec("DROP TABLE IF EXISTS $t");
+}
 
 $tabelle = [
     // Chi entra nel pannello.
@@ -78,10 +92,13 @@ $tabelle = [
         id INTEGER PRIMARY KEY, article_id INTEGER NOT NULL, button_label TEXT,
         ip_hash TEXT, created_at TEXT)",
 
-    // La libreria delle immagini.
+    /* La libreria delle immagini. I nomi delle colonne sono quelli veri, cioè
+       quelli che scrive api/upload.php: filename e size, non file_name e
+       file_size. Uno schema di sviluppo che si discosta da quello di produzione
+       nasconde i guai fino al deploy. */
     "CREATE TABLE IF NOT EXISTS media (
-        id INTEGER PRIMARY KEY, file_name TEXT, file_path TEXT, alt_text TEXT,
-        file_size INTEGER, created_at TEXT)",
+        id INTEGER PRIMARY KEY, filename TEXT, file_path TEXT, mime_type TEXT,
+        size INTEGER, created_at TEXT)",
 
     "CREATE TABLE IF NOT EXISTS app_settings (
         setting_key TEXT PRIMARY KEY, setting_value TEXT, updated_at TEXT)",
@@ -109,10 +126,6 @@ foreach ([
 }
 
 $db->beginTransaction();
-foreach (['users','login_attempts','password_resets','messages','subscribers',
-          'article_reactions','article_views','cta_clicks','media','app_settings'] as $t) {
-    $db->exec("DELETE FROM $t");
-}
 
 $adesso = new DateTimeImmutable('now');
 $quando = fn(int $giorniFa, int $ore = 12) =>
@@ -226,10 +239,10 @@ $copertine = $db->query(
      UNION SELECT DISTINCT cover_image FROM projects WHERE cover_image <> ''"
 )->fetchAll(PDO::FETCH_COLUMN);
 
-$q = $db->prepare("INSERT INTO media (file_name,file_path,alt_text,file_size,created_at) VALUES (?,?,?,?,?)");
-foreach ($copertine as $i => $percorso) {
+$q = $db->prepare("INSERT INTO media (filename,file_path,mime_type,size,created_at) VALUES (?,?,?,?,?)");
+foreach ($copertine as $percorso) {
     $nome = basename(parse_url($percorso, PHP_URL_PATH) ?: $percorso);
-    $q->execute([$nome, $percorso, '', random_int(40, 400) * 1024, $quando(random_int(1, 300))]);
+    $q->execute([$nome, $percorso, 'image/webp', random_int(40, 400) * 1024, $quando(random_int(1, 300))]);
 }
 
 /* ── Impostazioni e stato dello schema ───────────────────────────────────── */

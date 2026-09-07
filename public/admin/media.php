@@ -35,7 +35,7 @@ avviso_pannello();
     <li>
       <button type="button" data-copia="<?= e($url) ?>" title="Copia l'indirizzo">
         <div class="anteprima"><img src="<?= e($url) ?>" alt="" loading="lazy"></div>
-        <figcaption><?= e($m['file_name']) ?></figcaption>
+        <figcaption><?= e($m['filename']) ?><br><span class="spento"><?= (int)round(((int)$m['size']) / 1024) ?> KB</span></figcaption>
       </button>
     </li>
   <?php endforeach; ?>

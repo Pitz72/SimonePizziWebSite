@@ -326,7 +326,7 @@ che tocchi il database passa dalle `ensure*` al primo caricamento di una pagina.
 | **2** ✅ | `lib/`, `partials/`, le rotte, `safe_html()`, i caratteri in casa | ✅ 26 rotte su 26, 17 prove su `safe_html()` |
 | **3** ✅ | home, categoria, tag, articolo, progetti + i cinque JS | ✅ 32 rotte su 32, le pagine hanno i blocchi del mockup |
 | **4-6** ✅ | il pannello, l'editor, il verificatore, il cruscotto | ✅ 26 prove: si scrive, si pubblica, si duplica e si cancella davvero |
-| **7** | collaudo e deploy | confronto URL per URL con la sitemap, poi Search Console dopo una settimana |
+| **7** ✅ | collaudo e deploy | ✅ 165 URL della sitemap su 165; resta da premere il pulsante del caricamento |
 
 Il collaudo si fa senza Node, sul modello di `FDCA-PHP/docs/collaudo/`: le funzioni pure
 provate direttamente, `safe_html()` con una batteria di HTML cattivo, le rotte con `curl`
@@ -518,9 +518,78 @@ quel campo vuoto e ogni salvataggio rimetteva l'ordine a zero.
 
 ### Che cosa manca al sito nuovo per andare in produzione
 
-1. **Il taglio**: `sito.php` diventa `index.php`, `api/config.php` si sposta in `lib/`, e
-   dalla CSP in `.htaccess` esce la riga che sovrascrive quella col nonce.
-2. **Il caricamento delle immagini**: `api/upload.php` funziona e non si tocca, ma va
-   agganciato alla libreria del pannello, che oggi mostra e basta.
-3. **Il recupero password**: c'è in `api/auth.php`, va portato su una pagina del pannello.
-4. **Il confronto URL per URL** con la sitemap, e il deploy (§10).
+Niente, tranne premere il pulsante: vedi §16.
+
+---
+
+## 16. Il taglio — pronto per il deploy
+
+Le quattro cose che mancavano sono fatte.
+
+**`sito.php` è diventato `index.php`.** Il vecchio motore — il guscio React con l'HTML
+per i soli crawler — è diventato `index-react.php` e non lo raggiunge più nessuna rotta.
+Resta nel repo, spento, finché non sarà chiaro che non serve: rinominarlo e ricostruire
+`dist/` riporta su il sito di prima in dieci minuti.
+
+**Dalla `.htaccess` è uscita la CSP.** Adesso la manda `partials/head.php` con il nonce,
+che un file di configurazione non può generare perché cambia a ogni richiesta.
+`Header always set` avrebbe vinto su quella di PHP, quindi la riga vecchia è commentata,
+con scritto perché e come si rimette se serve.
+
+**Le immagini si caricano.** `admin/carica.php` fa quello che faceva `api/upload.php` —
+estensione in elenco, byte veri controllati, niente punti nel nome (`shell.php.jpg` con
+certe configurazioni di Apache viene eseguito), ridimensionamento sopra i 1920px e WebP a
+qualità 82 — ma passando da `lib/`, quindi funziona anche in sviluppo. La finestra della
+libreria ha il campo per caricare, e la nuova immagine compare in cima alla griglia senza
+ricaricare la pagina.
+
+**Il recupero password c'è**: `admin/recupera.php` e `admin/reimposta.php`. La risposta è
+sempre la stessa che il nome esista o no, il link vale un'ora, e cambiare la password alza
+`session_version`, cioè butta fuori le sessioni aperte altrove — che è il motivo per cui un
+recupero esiste. In sviluppo, dove non c'è un server di posta, il link si mostra a schermo
+invece di fingere di averlo mandato.
+
+### Il confronto con la sitemap
+
+```bash
+curl -sS -A "Mozilla/5.0 Chrome/128" https://simonepizzi.runtimeradio.it/sitemap.xml      -o scratch/dati-produzione/sitemap.xml
+php docs/collaudo/confronta-con-la-sitemap.php
+```
+
+**165 indirizzi su 165 rispondono 200.** Nessuno si perde, nessuno rimanda altrove, tutti
+hanno un `<title>`. È la prova che conta prima di caricare: un 404 su una URL già
+indicizzata costa mesi, e non se ne accorge nessuno finché non arrivano le segnalazioni.
+
+### Il caricamento
+
+```bash
+python scripts/deploy/carica.py --prova     # dice che cosa farebbe
+python scripts/deploy/carica.py             # carica
+```
+
+116 file, circa 2,9 MB (i caratteri sono la metà). Tre regole scritte dentro allo script:
+
+1. `lib/config.php`, `api/config.php` e `uploads/` **non partono mai**. Il primo
+   staccherebbe il sito dal database, l'ultimo cancellerebbe le copertine.
+2. Ogni file sovrascritto finisce prima in `.backup-AAAAMMGG-HHMMSS/` sul server. Senza una
+   build che controlli la sintassi, un errore di battitura in un `.php` è il sito offline:
+   il ripristino dev'essere una copia, non un ricaricamento a memoria.
+3. `.htaccess` si carica **per ultimo**: se il caricamento si interrompe a metà, quello
+   vecchio continua a servire il sito vecchio, che è ancora tutto lì.
+
+### Il difetto che si sarebbe visto solo in produzione
+
+Lo schema della tabella `media` che avevo simulato aveva le colonne `file_name`,
+`alt_text`, `file_size`. Quelle vere, cioè quelle che scrive `api/upload.php`, sono
+`filename`, `mime_type`, `size`. In sviluppo tutto funzionava; al primo caricamento in
+produzione la libreria si sarebbe rotta. **Uno schema di sviluppo che si discosta da quello
+di produzione non fa risparmiare tempo: lo sposta più avanti, dove costa di più.**
+
+### Dopo il caricamento
+
+1. Home, un articolo, un archivio di categoria, uno di tag.
+2. Il pannello: la prima apertura applica le migrazioni (`seo_title`, `seo_description`,
+   `projects.stato`) — si controlla dalla schermata Sistema.
+3. I sedici stati dei progetti, da mettere a mano una volta sola.
+4. `/sitemap.xml` e `/robots.txt`.
+5. Search Console dopo una settimana.
