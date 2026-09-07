@@ -113,15 +113,18 @@ function esci(): void {
 
 /* ── Il freno ai tentativi ───────────────────────────────────────────────── */
 
+/* La colonna si chiama `attempt_time`, non `attempted_at`: è il nome che ha in
+   produzione da sempre, e che avevo sbagliato a copiare nello schema di
+   sviluppo. Il login dava 500 e nessuno poteva entrare nel pannello. */
 function troppi_tentativi(string $ip): bool {
     $limite = date('Y-m-d H:i:s', time() - TENTATIVI_FINESTRA);
-    $q = db()->prepare("SELECT COUNT(*) FROM login_attempts WHERE ip_address = ? AND attempted_at > ?");
+    $q = db()->prepare("SELECT COUNT(*) FROM login_attempts WHERE ip_address = ? AND attempt_time > ?");
     $q->execute([$ip, $limite]);
     return (int)$q->fetchColumn() >= TENTATIVI_MAX;
 }
 
 function annota_tentativo(string $ip): void {
-    db()->prepare("INSERT INTO login_attempts (ip_address, attempted_at) VALUES (?, ?)")
+    db()->prepare("INSERT INTO login_attempts (ip_address, attempt_time) VALUES (?, ?)")
         ->execute([$ip, date('Y-m-d H:i:s')]);
 }
 

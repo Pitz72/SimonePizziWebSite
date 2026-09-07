@@ -87,6 +87,21 @@ if [ "$stato" = "302" ] || [ "$stato" = "301" ]; then ok "/admin/ rimanda all'in
 else no "/admin/" "stato $stato: dovrebbe rimandare a entra.php"; fi
 controlla 200 "/admin/entra.php"
 
+# Il POST del login: aprire la pagina non basta, perché il guasto sta nel
+# percorso che si attraversa solo premendo «Entra». È successo davvero — una
+# colonna con il nome sbagliato, 500 in faccia a chi provava a entrare — e
+# aprire /admin/entra.php in GET rispondeva 200 come niente fosse.
+# Si prova con credenziali sbagliate apposta: deve rispondere 200 e dire di no.
+BISCOTTI="$(mktemp)"
+G="$(prendi -c "$BISCOTTI" "$SITO/admin/entra.php"      | grep -o 'name="gettone" value="[a-f0-9]*"' | head -1 | sed 's/.*value="//;s/"//')"
+stato="$(prendi -b "$BISCOTTI" -c "$BISCOTTI" -o "$CORPO" -w '%{http_code}'          -d "gettone=$G&nome=nessuno-di-sicuro&password=sbagliata-apposta"          "$SITO/admin/entra.php")"
+if [ "$stato" = "200" ] && grep -qi "non corretti" "$CORPO"; then
+  ok "il login risponde e rifiuta le credenziali sbagliate"
+else
+  no "POST del login" "stato $stato: guarda il log, di solito è una colonna che non c'è"
+fi
+rm -f "$BISCOTTI"
+
 echo
 echo "Gli header"
 INTESTAZIONI="$(prendi -D - -o /dev/null "$SITO/")"

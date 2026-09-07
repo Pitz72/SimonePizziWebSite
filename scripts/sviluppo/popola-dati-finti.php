@@ -62,9 +62,11 @@ $tabelle = [
         password_hash TEXT NOT NULL, session_version INTEGER DEFAULT 1,
         created_at TEXT)",
 
-    // Il freno ai tentativi di indovinare la password.
+    /* Il freno ai tentativi. La colonna della data si chiama `attempt_time`:
+       averla chiamata `attempted_at` qui ha mandato in errore 500 il login in
+       produzione, dove il nome vero è quello. */
     "CREATE TABLE IF NOT EXISTS login_attempts (
-        id INTEGER PRIMARY KEY, ip_address TEXT NOT NULL, attempted_at TEXT)",
+        id INTEGER PRIMARY KEY, ip_address TEXT NOT NULL, attempt_time TEXT)",
 
     "CREATE TABLE IF NOT EXISTS password_resets (
         id INTEGER PRIMARY KEY, user_id INTEGER NOT NULL, token TEXT NOT NULL,
@@ -75,8 +77,9 @@ $tabelle = [
         id INTEGER PRIMARY KEY, name TEXT, email TEXT, subject TEXT, message TEXT,
         ip_hash TEXT, read_at TEXT NULL, created_at TEXT)",
 
+    // `name` c'è anche in produzione, anche se il pannello non la mostra.
     "CREATE TABLE IF NOT EXISTS subscribers (
-        id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE,
+        id INTEGER PRIMARY KEY, email TEXT NOT NULL UNIQUE, name TEXT NULL,
         status TEXT DEFAULT 'pending', confirm_token TEXT, unsubscribe_token TEXT,
         created_at TEXT, confirmed_at TEXT NULL)",
 
