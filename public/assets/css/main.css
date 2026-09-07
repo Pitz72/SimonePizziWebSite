@@ -1,0 +1,64 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   main.css — i blocchi del sito.
+   In questa sessione ci sono la barra, il piede e l'intestazione di pagina:
+   quanto basta perché ogni rotta risponda già vestita. Elenchi, apertura e
+   articolo arrivano con le pagine vere.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── Barra ──────────────────────────────────────────────────────────────
+   La voce corrente è un campo verde pieno, non un sottolineato: è la
+   traduzione più diretta di «il verde dice dove sei». */
+.barra{background:var(--pece);border-bottom:1px solid var(--filo);position:relative;z-index:10}
+.barra-dentro{display:flex;align-items:center;justify-content:space-between;gap:20px;min-height:58px}
+.marchio{
+  font-family:'Bricolage Grotesque',sans-serif;font-variation-settings:'wdth' 76;
+  font-weight:800;font-size:19px;letter-spacing:-.02em;color:var(--bianco);
+  padding:6px 0;
+}
+.marchio:hover{color:var(--verde)}
+.menu{display:flex;gap:2px;list-style:none;margin:0;padding:0}
+.menu a{display:block;padding:7px 12px;font-size:13.5px;font-weight:500;color:var(--spento);
+  transition:background .16s,color .16s}
+.menu a:hover{color:var(--testo)}
+.menu [aria-current="page"]{background:var(--verde);color:var(--nero);font-weight:700}
+.barra-strumenti{display:flex;align-items:center;gap:14px;color:var(--spento)}
+.cerca-scorciatoia{display:inline-flex;align-items:center;gap:8px;background:none;border:0;
+  color:var(--spento);cursor:pointer;padding:6px 0}
+.cerca-scorciatoia:hover{color:var(--testo)}
+.cerca-scorciatoia kbd{border:1px solid var(--filo);padding:3px 6px;font:inherit;font-size:10px;color:#5d7a64}
+/* Il pulsante del menu compare solo dove il menu disteso non ci sta. */
+.apri-menu{display:none}
+
+@media (max-width:900px){
+  .menu,.cerca-scorciatoia kbd{display:none}
+  .apri-menu{display:inline-flex}
+  /* Il menu aperto sul telefono: una colonna sotto la barra. */
+  .barra[data-menu="aperto"] .menu{
+    display:flex;flex-direction:column;gap:0;
+    position:absolute;left:0;right:0;top:100%;
+    background:var(--pece);border-bottom:1px solid var(--filo);padding:8px 18px 16px;
+  }
+  .barra[data-menu="aperto"] .menu a{padding:11px 0;border-bottom:1px solid var(--filo2)}
+  .barra[data-menu="aperto"] .menu [aria-current="page"]{background:transparent;color:var(--verde)}
+}
+
+/* ── Intestazione di pagina ─────────────────────────────────────────────
+   Titolo grande e, sotto, una riga sola che dice di che si tratta. Il filetto
+   verde chiude l'intestazione e apre il contenuto. */
+.testata{padding:6px 0 26px;border-bottom:1px solid var(--verde)}
+.testata h1{font-size:clamp(42px,7vw,92px)}
+.testata p{margin:14px 0 0;color:#9db6a3;max-width:56ch;font-size:17px;line-height:1.62}
+.testata-riga{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px}
+
+/* ── Piede ──────────────────────────────────────────────────────────────── */
+.piede{margin-top:64px;border-top:1px solid var(--filo);background:var(--pece)}
+.piede-dentro{display:flex;flex-wrap:wrap;gap:18px 34px;justify-content:space-between;padding:26px 0;
+  color:var(--spento)}
+.piede a:hover{color:var(--verde)}
+.piede nav{display:flex;flex-wrap:wrap;gap:18px}
+
+/* ── Il posto dove finisce il contenuto di una pagina ───────────────────── */
+.contenuto{min-height:40vh;padding:34px 0 0}
+
+/* Un avviso in mezzo alla pagina: archivio vuoto, ricerca senza risultati. */
+.vuoto{border:1px dashed var(--filo);padding:34px;color:var(--spento);text-align:center}

@@ -1,0 +1,94 @@
+<?php
+/**
+ * L'archivio di una categoria: /{categoria}
+ *
+ * Raccoglie gli articoli della categoria e delle sue figlie — senza questo,
+ * /videogiochi e /progetti-software sarebbero pagine vuote, perché gli
+ * articoli stanno tutti nelle sottocategorie. Il perché sta in query.php,
+ * dentro slug_del_ramo().
+ *
+ * @var array $categoria
+ */
+
+$pagina_num = max(1, (int)($_GET['pagina'] ?? 1));
+const PER_PAGINA = 12;
+
+$totale   = conta_articoli_categoria($categoria);
+$articoli = articoli_di_categoria($categoria, PER_PAGINA, ($pagina_num - 1) * PER_PAGINA);
+$figlie   = sottocategorie((int)$categoria['id']);
+$ultime   = ceil(max(1, $totale) / PER_PAGINA);
+
+// Chiedere la pagina 40 di un archivio che ne ha 3 non è una pagina: è un 404.
+if ($pagina_num > 1 && !$articoli) non_trovata();
+
+$percorso = '/' . $categoria['slug'];
+$descrizione = sprintf(
+    '%s: %d articol%s di Simone Pizzi, dal più recente. Devlog, note di lavorazione e annunci.',
+    $categoria['name'], $totale, $totale === 1 ? 'o' : 'i'
+);
+
+pagina([
+    'title'     => $categoria['name'] . ' — ' . SITO_NOME,
+    'desc'      => $descrizione,
+    'canonical' => $percorso . ($pagina_num > 1 ? '?pagina=' . $pagina_num : ''),
+    // Le pagine dalla seconda in poi ripetono la stessa intestazione con
+    // articoli diversi: restano navigabili, ma fuori dall'indice.
+    'noindex'   => $pagina_num > 1,
+    'briciole'  => [['nome' => 'Home', 'url' => '/'], ['nome' => $categoria['name']]],
+    'jsonld'    => jsonld_raccolta($categoria['name'], $descrizione, $percorso),
+]);
+
+require __DIR__ . '/../partials/head.php';
+?>
+
+<main id="contenuto" class="contenuto">
+  <div class="gab">
+    <nav aria-label="Percorso">
+      <ol class="briciole eti">
+        <li><a href="/">Home</a></li>
+        <li><span aria-current="page"><?= e($categoria['name']) ?></span></li>
+      </ol>
+    </nav>
+
+    <header class="testata">
+      <div class="testata-riga">
+        <div>
+          <h1 class="gro"><?= e($categoria['name']) ?></h1>
+          <p><?= $totale ?> articol<?= $totale === 1 ? 'o' : 'i' ?>, dal più recente.</p>
+        </div>
+        <?php if ($figlie): ?>
+          <div class="pill-fila">
+            <?php foreach ($figlie as $f): ?>
+              <a class="pill" href="/<?= e($f['slug']) ?>"><?= e($f['name']) ?></a>
+            <?php endforeach; ?>
+          </div>
+        <?php endif; ?>
+      </div>
+    </header>
+
+    <?php if (!$articoli): ?>
+      <p class="vuoto">Qui non c'è ancora niente. Succede: vuol dire che il lavoro è in corso.</p>
+    <?php else: ?>
+      <ul style="list-style:none;margin:0;padding:0">
+        <?php foreach ($articoli as $a): ?>
+          <li style="padding:14px 0;border-bottom:1px solid var(--filo2)">
+            <span class="eti spento"><?= e(data_breve($a['published_at'] ?: $a['created_at'])) ?></span><br>
+            <a href="<?= e(url_articolo($a)) ?>"><?= e($a['title']) ?></a>
+            <?php if ($a['excerpt']): ?><br><span class="spento" style="font-size:15px"><?= e(tronca($a['excerpt'], 150)) ?></span><?php endif; ?>
+          </li>
+        <?php endforeach; ?>
+      </ul>
+
+      <?php if ($ultime > 1): ?>
+        <nav class="pill-fila" aria-label="Pagine" style="padding:28px 0">
+          <?php for ($i = 1; $i <= $ultime; $i++): ?>
+            <a class="pill" href="<?= e($percorso) ?><?= $i > 1 ? '?pagina=' . $i : '' ?>"
+               <?= $i === $pagina_num ? 'aria-current="page" style="background:var(--verde);color:var(--nero);border-color:var(--verde)"' : '' ?>><?= $i ?></a>
+          <?php endfor; ?>
+        </nav>
+      <?php endif; ?>
+    <?php endif; ?>
+  </div>
+</main>
+
+<?php require __DIR__ . '/../partials/footer.php'; ?>

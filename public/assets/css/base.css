@@ -1,0 +1,156 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   base.css — i colori, la tipografia, la gabbia e i pochi elementi che
+   compaiono su ogni pagina.
+   Direzione «Officina Notturna», scelta il 7 settembre 2026.
+   Il perché di ogni scelta sta in docs/design/2026-09-proposte/.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+@import url('/assets/css/caratteri.css');
+
+:root{
+  /* Il colore. Identico a quello del sito di prima: cambia l'impianto, non la
+     tinta. Il verde è un SEGNALE: compare solo dove c'è qualcosa di attivo —
+     la voce di menu in cui sei, il link dentro il testo, il pulsante che
+     agisce, lo stato «in corso», il campo pieno dell'apertura. Da nessun'altra
+     parte. Quando un colore sta ovunque smette di indicare qualcosa. */
+  --nero:#04070a;        /* il fondo */
+  --pece:#080e0d;        /* barra, righe al passaggio del mouse */
+  --pannello:#0b1310;    /* schede, citazioni, riquadri */
+  --filo:#16241c;        /* bordo che si vede */
+  --filo2:#0f1a15;       /* separatore fra righe */
+  --testo:#dce8de;
+  --spento:#7d9b84;      /* testo secondario ed etichette */
+  --verde:#22c55e;
+  --verde2:#4ade80;      /* il verde al passaggio del mouse */
+  --bianco:#ffffff;      /* solo i titoli */
+
+  --gabbia:1300px;
+  --lettura:66ch;        /* la larghezza di una colonna di testo lungo */
+
+  color-scheme: dark;
+}
+
+/* ── Azzeramento ────────────────────────────────────────────────────────── */
+*,*::before,*::after{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;
+  background:var(--nero);
+  color:var(--testo);
+  font:400 16.5px/1.65 'DM Sans',system-ui,-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  text-rendering:optimizeLegibility;
+}
+img,svg,video{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{font:inherit}
+::selection{background:var(--verde);color:var(--nero)}
+
+/* La tastiera deve vedere dove si trova. Il contorno sta fuori dall'elemento
+   così non sposta niente e si vede anche sui fondi scuri. */
+:focus-visible{outline:2px solid var(--verde);outline-offset:3px;border-radius:2px}
+
+/* Chi ha chiesto meno movimento non deve vederne. */
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
+    transition-duration:.01ms!important;scroll-behavior:auto!important}
+}
+
+/* Il salto al contenuto: invisibile finché non ci si arriva col tabulatore. */
+.salta{position:absolute;left:-9999px;top:0;z-index:200;background:var(--verde);color:var(--nero);
+  padding:12px 18px;font-weight:700}
+.salta:focus{left:8px;top:8px}
+
+/* ── Tipografia ─────────────────────────────────────────────────────────── */
+.gro{
+  font-family:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+  font-variation-settings:'wdth' 78;   /* stretta: è metà della personalità */
+  font-weight:800;
+  letter-spacing:-.028em;
+  line-height:.92;
+  text-wrap:balance;
+  color:var(--bianco);
+  margin:0;
+}
+h1,h2,h3{margin:0}
+.eti{
+  font:700 11px/1.35 'Courier Prime',ui-monospace,monospace;
+  letter-spacing:.17em;
+  text-transform:uppercase;
+}
+.spento{color:var(--spento)}
+
+/* ── Gabbia ─────────────────────────────────────────────────────────────── */
+.gab{max-width:var(--gabbia);margin:0 auto;padding:0 34px}
+.gab-stretta{max-width:900px;margin:0 auto;padding:0 34px}
+
+/* ── Pulsanti ───────────────────────────────────────────────────────────── */
+.btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:13px 22px;border:2px solid var(--verde);color:var(--verde);
+  background:transparent;cursor:pointer;
+  font:700 12px/1 'Courier Prime',monospace;letter-spacing:.13em;text-transform:uppercase;
+  transition:background .16s,color .16s,border-color .16s;
+}
+.btn:hover{background:var(--verde);color:var(--nero)}
+.btn-pieno{background:var(--verde);color:var(--nero)}
+.btn-pieno:hover{background:var(--verde2);border-color:var(--verde2)}
+.btn-muto{border-color:var(--filo);color:var(--spento)}
+.btn-muto:hover{background:transparent;border-color:var(--spento);color:var(--testo)}
+.btn-fila{display:flex;gap:10px;flex-wrap:wrap}
+
+/* Sul campo verde dell'apertura i pulsanti si rovesciano: il nero diventa
+   il colore che spicca. */
+.su-verde .btn{border-color:var(--nero);color:var(--nero)}
+.su-verde .btn:hover{background:var(--nero);color:var(--verde)}
+.su-verde .btn-pieno{background:var(--nero);color:var(--verde)}
+.su-verde .btn-pieno:hover{background:transparent;color:var(--nero)}
+
+/* ── Stato ──────────────────────────────────────────────────────────────
+   L'etichetta che dice a che punto è una cosa. Non è decorazione: è l'unico
+   dato che il sito di prima non mostrava da nessuna parte, e che invece
+   racconta come si lavora qui — venduto zero copie e poi aperto, uscito dal
+   mercato, archiviato, ancora in corso.
+   L'intensità segue il significato: più una cosa è viva, più è accesa. */
+.stato{
+  display:inline-flex;align-items:center;gap:7px;white-space:nowrap;
+  padding:5px 10px;border:1.5px solid var(--verde);color:var(--verde);
+  font:700 10.5px/1 'Courier Prime',monospace;letter-spacing:.15em;text-transform:uppercase;
+}
+.stato-in-corso{background:var(--verde);border-color:var(--verde);color:var(--nero)}
+.stato-pubblicato{border-color:var(--filo);background:var(--filo2);color:var(--spento)}
+.stato-archiviato{border-color:#243528;color:#4e6a56;background:transparent}
+
+/* ── Etichette cliccabili (tag, sottocategorie) ─────────────────────────── */
+.pill{
+  display:inline-block;border:1px solid var(--filo);padding:6px 11px;color:var(--spento);
+  font:700 11px/1.3 'Courier Prime',monospace;letter-spacing:.1em;text-transform:uppercase;
+  transition:border-color .16s,color .16s,background .16s;
+}
+.pill:hover{border-color:var(--verde);background:var(--verde);color:var(--nero)}
+.pill-fila{display:flex;flex-wrap:wrap;gap:7px}
+
+/* ── Briciole di pane ───────────────────────────────────────────────────── */
+.briciole{display:flex;flex-wrap:wrap;gap:10px;color:var(--spento);padding:22px 0;margin:0;list-style:none}
+.briciole li{display:flex;gap:10px}
+.briciole li+li::before{content:"/";color:var(--filo)}
+.briciole a:hover{color:var(--verde)}
+.briciole [aria-current]{color:var(--testo)}
+
+/* ── Una tabella dentro un articolo ─────────────────────────────────────
+   safe_html() avvolge ogni tabella in .tabella: la pagina non deve mai
+   scorrere in orizzontale, la tabella sì. */
+.tabella{overflow-x:auto;margin:2em 0;border:1px solid var(--filo)}
+.tabella table{border-collapse:collapse;width:100%;min-width:32rem;font-size:15.5px}
+.tabella th,.tabella td{padding:10px 14px;border-bottom:1px solid var(--filo2);text-align:left;vertical-align:top}
+.tabella th{color:var(--bianco);font-weight:600;background:var(--pece);
+  font-size:12px;letter-spacing:.06em;text-transform:uppercase}
+.tabella tr:last-child td{border-bottom:0}
+
+/* ── Utilità ────────────────────────────────────────────────────────────── */
+.solo-lettori-schermo{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+
+@media (max-width:900px){
+  .gab,.gab-stretta{padding:0 18px}
+}

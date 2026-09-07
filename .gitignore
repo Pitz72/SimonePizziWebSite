@@ -45,3 +45,16 @@ PRE-PRODUZIONE/
 
 # Cartella segreti (credenziali FTP/SFTP, mai in repo)
 .secrets/
+
+# Cache Python degli script di manutenzione
+__pycache__/
+*.pyc
+
+# Dati di produzione prodotti dagli script di manutenzione (backup + log)
+scratch/unione_tag_*.txt
+
+# Sviluppo del sito PHP: dati veri presi dalla produzione e database SQLite
+# ricostruibili in due comandi (scripts/sviluppo/), non vanno versionati.
+scratch/dati-produzione/
+scratch/*.sqlite
+scratch/design/
