@@ -10,6 +10,14 @@ $pagina_num = max(1, (int)($_GET['pagina'] ?? 1));
 const PER_PAGINA_TAG = 12;
 
 $articoli = articoli_di_tag((int)$tag['id'], PER_PAGINA_TAG, ($pagina_num - 1) * PER_PAGINA_TAG);
+
+/* Un tag attraversa tutto il sito: qui la categoria di ogni riga è
+   un'informazione vera, non una ripetizione. */
+$nomi_categoria = [];
+foreach (categorie_radice() as $c) {
+    $nomi_categoria[$c['slug']] = $c['name'];
+    foreach (sottocategorie((int)$c['id']) as $f) $nomi_categoria[$f['slug']] = $f['name'];
+}
 if ($pagina_num > 1 && !$articoli) non_trovata();
 
 $percorso    = '/tag/' . $tag['slug'];
@@ -46,15 +54,23 @@ require __DIR__ . '/../partials/head.php';
       <p><?= $totale ?> articol<?= $totale === 1 ? 'o' : 'i' ?>.</p>
     </header>
 
-    <ul style="list-style:none;margin:0;padding:0">
-      <?php foreach ($articoli as $a): ?>
-        <li style="padding:14px 0;border-bottom:1px solid var(--filo2)">
-          <span class="eti spento"><?= e(data_breve($a['published_at'] ?: $a['created_at'])) ?></span><br>
-          <a href="<?= e(url_articolo($a)) ?>"><?= e($a['title']) ?></a>
-        </li>
-      <?php endforeach; ?>
+    <ul class="lavorazioni">
+      <?php foreach ($articoli as $a) blocco_riga($a, true, $nomi_categoria[$a['category']] ?? $a['category']); ?>
     </ul>
+
+    <?php if ($totale > PER_PAGINA_TAG): $ultime = (int)ceil($totale / PER_PAGINA_TAG); ?>
+      <nav aria-label="Pagine">
+        <ol class="pagine">
+          <?php for ($i = 1; $i <= $ultime; $i++): ?>
+            <li><a href="<?= e($percorso) ?><?= $i > 1 ? '?pagina=' . $i : '' ?>"
+                   <?= $i === $pagina_num ? 'aria-current="page"' : '' ?>><?= $i ?></a></li>
+          <?php endfor; ?>
+        </ol>
+      </nav>
+    <?php endif; ?>
   </div>
+
+  <?php blocco_newsletter(); ?>
 </main>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

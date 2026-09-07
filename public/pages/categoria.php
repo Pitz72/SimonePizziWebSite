@@ -16,6 +16,13 @@ const PER_PAGINA = 12;
 $totale   = conta_articoli_categoria($categoria);
 $articoli = articoli_di_categoria($categoria, PER_PAGINA, ($pagina_num - 1) * PER_PAGINA);
 $figlie   = sottocategorie((int)$categoria['id']);
+
+/* Dentro l'archivio di «Videogiochi» ogni riga porta scritto da quale progetto
+   viene: è un dato che cambia da riga a riga. Dentro l'archivio di un singolo
+   progetto no — ripetere la stessa parola dodici volte non dice niente. */
+$nomi_figlie = [];
+foreach ($figlie as $f) $nomi_figlie[$f['slug']] = $f['name'];
+$mostra_sotto = count($figlie) > 0;
 $ultime   = ceil(max(1, $totale) / PER_PAGINA);
 
 // Chiedere la pagina 40 di un archivio che ne ha 3 non è una pagina: è un 404.
@@ -69,26 +76,24 @@ require __DIR__ . '/../partials/head.php';
     <?php if (!$articoli): ?>
       <p class="vuoto">Qui non c'è ancora niente. Succede: vuol dire che il lavoro è in corso.</p>
     <?php else: ?>
-      <ul style="list-style:none;margin:0;padding:0">
-        <?php foreach ($articoli as $a): ?>
-          <li style="padding:14px 0;border-bottom:1px solid var(--filo2)">
-            <span class="eti spento"><?= e(data_breve($a['published_at'] ?: $a['created_at'])) ?></span><br>
-            <a href="<?= e(url_articolo($a)) ?>"><?= e($a['title']) ?></a>
-            <?php if ($a['excerpt']): ?><br><span class="spento" style="font-size:15px"><?= e(tronca($a['excerpt'], 150)) ?></span><?php endif; ?>
-          </li>
-        <?php endforeach; ?>
+      <ul class="lavorazioni">
+        <?php foreach ($articoli as $a) blocco_riga($a, $mostra_sotto, $nomi_figlie[$a['category']] ?? ''); ?>
       </ul>
 
       <?php if ($ultime > 1): ?>
-        <nav class="pill-fila" aria-label="Pagine" style="padding:28px 0">
-          <?php for ($i = 1; $i <= $ultime; $i++): ?>
-            <a class="pill" href="<?= e($percorso) ?><?= $i > 1 ? '?pagina=' . $i : '' ?>"
-               <?= $i === $pagina_num ? 'aria-current="page" style="background:var(--verde);color:var(--nero);border-color:var(--verde)"' : '' ?>><?= $i ?></a>
-          <?php endfor; ?>
+        <nav aria-label="Pagine">
+          <ol class="pagine">
+            <?php for ($i = 1; $i <= $ultime; $i++): ?>
+              <li><a href="<?= e($percorso) ?><?= $i > 1 ? '?pagina=' . $i : '' ?>"
+                     <?= $i === $pagina_num ? 'aria-current="page"' : '' ?>><?= $i ?></a></li>
+            <?php endfor; ?>
+          </ol>
         </nav>
       <?php endif; ?>
     <?php endif; ?>
   </div>
+
+  <?php blocco_newsletter(); ?>
 </main>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

@@ -9,15 +9,19 @@ Questo documento fissa le scelte tecniche. Da qui in poi si scrive codice.
 
 ---
 
-## 0. L'unica cosa ancora aperta
+## 0. L'apertura: campo nero
 
-**L'apertura è a campo verde o a campo nero?** Il mockup mostra le due versioni una
-sotto l'altra. Finché Simone non dice altro **vale il campo verde**, che è la versione
-principale del file: è la mossa che tiene in piedi la direzione, e il nero la ammorbidisce
-fino a farla somigliare a «Segnale». Nel codice è una classe sola sul contenitore
-dell'apertura (`.hero.sobria`), quindi si cambia idea in un minuto anche a sito fatto.
+**Deciso da Simone il 7 settembre 2026: l'apertura è a campo nero**, la seconda delle due
+varianti del mockup. Il titolo grande in bianco con «ibride» in verde, il filetto verde
+sotto, i contatori in fila.
 
-Tutto il resto qui sotto non dipende da questa scelta.
+Il campo verde pieno resta nel mockup come alternativa vista e scartata: era la mossa più
+rumorosa della direzione, e su un sito che vive di articoli lunghi il nero regge meglio la
+lettura. Con questa scelta il verde torna a essere solo segnale, ovunque e senza eccezioni —
+la regola del §1 diventa più semplice, non più debole.
+
+Nel codice è la classe `.apertura` senza modificatori; il campo verde, se un giorno servisse
+per una pagina sola, è `.apertura--piena`.
 
 ---
 
@@ -161,7 +165,7 @@ JavaScript del sito chiama davvero:
 
 | Endpoint | Perché resta |
 |---|---|
-| `api/search.php` | la ricerca con Ctrl+K cerca senza ricaricare la pagina |
+| `api/cerca.php` | la ricerca con Ctrl+K (nuovo: sostituisce `search.php` per il pubblico) |
 | `api/reactions.php` | le reazioni si aggiungono senza ricaricare |
 | `api/subscribers.php` | iscrizione alla newsletter senza ricaricare |
 | `api/analytics.php` | registra la visita |
@@ -320,7 +324,7 @@ che tocchi il database passa dalle `ensure*` al primo caricamento di una pagina.
 | | Che cosa | Come si sa che è finita |
 |---|---|---|
 | **2** ✅ | `lib/`, `partials/`, le rotte, `safe_html()`, i caratteri in casa | ✅ 26 rotte su 26, 17 prove su `safe_html()` |
-| **3** | home, categoria, tag, articolo, progetti, contatti + i cinque JS | ogni URL della sitemap risponde 200 con il suo contenuto |
+| **3** ✅ | home, categoria, tag, articolo, progetti + i cinque JS | ✅ 32 rotte su 32, le pagine hanno i blocchi del mockup |
 | **4-6** | il pannello, l'editor, il verificatore, il cruscotto | si scrive e si pubblica un articolo senza toccare il vecchio |
 | **7** | collaudo e deploy | confronto URL per URL con la sitemap, poi Search Console dopo una settimana |
 
@@ -371,3 +375,62 @@ mezzo alla pagina, dentro una risposta 200. Il test non se ne accorgeva, perché
 `display_errors` scrive `<b>Warning</b>:` e la stringa «Warning:» non compare mai per
 intero. Adesso `prova-rotte.sh` toglie i tag prima di cercare, e nei partial le variabili
 hanno nomi lunghi.
+
+---
+
+## 14. Fine della Sessione 3
+
+Le pagine hanno i blocchi disegnati del mockup, e i moduli JavaScript sono al loro posto.
+
+```bash
+php -S 127.0.0.1:8123 -t public public/dev-router.php
+bash docs/collaudo/prova-rotte.sh        # 32 rotte su 32
+php  docs/collaudo/prova-safe-html.php   # 17 prove su 17
+```
+
+**Le pagine.** Apertura a campo nero con i quattro numeri veri; scheda «in primo piano»
+con la copertina che si accende al passaggio; righe delle lavorazioni al posto delle card;
+schede dei progetti con i due comandi sempre in fondo; articolo con il sommario numerato a
+lato, la barretta verde che segue la lettura, le cinque reazioni e i tag; archivi di
+categoria e di tag con la paginazione; la lettera in fondo a ogni pagina.
+
+**I moduli JavaScript** (`assets/js/`, nessuna libreria, in tutto 18 KB):
+`interfaccia.js` (menu del telefono, finestre), `ricerca.js` (Ctrl+K, frecce e Invio),
+`sommario.js` (IntersectionObserver), `reazioni.js` (aggiornamento ottimistico più
+condivisione), `newsletter.js`. Tutti `defer`: la pagina si legge prima che arrivino.
+
+**`api/cerca.php` è nuovo e sostituisce `search.php` per il pubblico.** Due ragioni:
+`search.php` cerca ancora in `articles.tags`, colonna che la v1.26.0 ha sostituito con la
+tabella `article_tags`, e non passa da `lib/`, quindi in sviluppo non si può nemmeno
+provare. `search.php` resta finché il pannello non è migrato: lo usa ancora lui.
+
+### Quattro difetti trovati guardando le pagine vere
+
+**`.apertura-dentro{padding:52px 0 0}` cancellava il margine laterale della gabbia.** La
+scorciatoia `padding` sovrascrive tutti e quattro i lati, e `.gab` veniva prima nel
+cascade: il titolo toccava il bordo dello schermo su ogni pagina e a ogni larghezza. Le
+classi che convivono con `.gab` adesso usano `padding-block`. È la collisione più banale
+del CSS e non si vede finché non si guarda.
+
+**Le copertine sparivano nel fondo.** `grayscale(1) brightness(.72)` su fotografie già
+scure — palchi, notti, schermi spenti — dava rettangoli neri. Adesso si toglie il colore e
+non la luce: `grayscale(1) contrast(1.04)`.
+
+**La ricerca si apriva con il fuoco sul pulsante «Esc»**, così chi la apriva e cominciava a
+scrivere digitava nel vuoto. Risolto con `autofocus` nel markup più un rimessa a fuoco a
+ogni apertura, perché il browser applica `autofocus` una volta sola.
+
+**Sulla barra del telefono stavano quattro cose e andavano a capo.** «Tutti i progetti» è
+sceso dentro il menu a discesa, e il nome non si spezza più.
+
+### Quello che in locale non si può provare
+
+`reactions.php` e `subscribers.php` parlano ancora con `api/db.php`, cioè con MySQL: in
+sviluppo non rispondono. Il JavaScript lo sa e non se ne lamenta con il lettore — i
+contatori delle reazioni restano a trattino e la pagina funziona lo stesso. Vanno provati
+in produzione, o dopo che `api/config.php` si sarà spostato in `lib/`.
+
+**Le etichette di stato non si vedono ancora**, perché `projects.stato` non esiste: il
+blocco è scritto e funziona, ma finché la colonna è vuota l'etichetta non si stampa. Meglio
+niente che un'etichetta finta — che è esattamente il difetto che questa direzione voleva
+togliere di mezzo.

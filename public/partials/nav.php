@@ -24,6 +24,10 @@ $qui = (string)($GLOBALS['ROTTA_CATEGORIA'] ?? '');
         <?php foreach (categorie_radice() as $voce_menu): ?>
           <li><a href="/<?= e($voce_menu['slug']) ?>"<?= $qui === $voce_menu['slug'] ? ' aria-current="page"' : '' ?>><?= e($voce_menu['name']) ?></a></li>
         <?php endforeach; ?>
+        <!-- Sul telefono «Tutti i progetti» esce dalla barra e rientra qui:
+             nella barra stretta stava insieme a marchio, ricerca e menu, e
+             andavano tutti a capo. -->
+        <li class="solo-telefono"><a href="/tutti-i-progetti">Tutti i progetti</a></li>
       </ul>
     </nav>
 
@@ -32,7 +36,7 @@ $qui = (string)($GLOBALS['ROTTA_CATEGORIA'] ?? '');
         Cerca <kbd>Ctrl K</kbd>
       </button>
       <button class="btn apri-menu" type="button" data-apri="menu" aria-expanded="false">Menu</button>
-      <a class="eti" href="/tutti-i-progetti" style="color:var(--verde)">Tutti i progetti</a>
+      <a class="eti solo-schermo-largo" href="/tutti-i-progetti" style="color:var(--verde)">Tutti i progetti</a>
     </div>
   </div>
 </header>

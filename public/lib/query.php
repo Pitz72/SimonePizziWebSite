@@ -112,13 +112,23 @@ function articoli_recenti(int $quanti = 6, int $salta = 0): array {
  * casella non è mai stata spuntata.
  */
 function articolo_in_apertura(): ?array {
+    // Qui il corpo si legge: è un articolo solo, e serve per i minuti di
+    // lettura e per il riassunto quando l'excerpt manca.
     $q = db()->prepare(
-        "SELECT " . COLONNE_ELENCO . " FROM articles
+        "SELECT " . COLONNE_ELENCO . ", content FROM articles
          WHERE is_featured = 1 AND " . SOLO_PUBBLICATI . "
          ORDER BY published_at DESC LIMIT 1"
     );
     $q->execute([':adesso' => adesso()]);
-    return $q->fetch() ?: (articoli_recenti(1)[0] ?? null);
+    $trovato = $q->fetch();
+    if ($trovato) return $trovato;
+
+    $q = db()->prepare(
+        "SELECT " . COLONNE_ELENCO . ", content FROM articles WHERE " . SOLO_PUBBLICATI . "
+         ORDER BY published_at DESC, id DESC LIMIT 1"
+    );
+    $q->execute([':adesso' => adesso()]);
+    return $q->fetch() ?: null;
 }
 
 function articolo_per_slug(string $slug): ?array {
@@ -236,4 +246,52 @@ function conteggi(): array {
         'tag'      => (int)db()->query("SELECT COUNT(*) FROM tags")->fetchColumn(),
         'ultimo'   => (string)($ultimo->fetchColumn() ?: ''),
     ];
+}
+
+/* ─────────────────────────────── Ricerca ───────────────────────────────── */
+
+/**
+ * La ricerca del Ctrl+K: articoli e progetti insieme.
+ *
+ * Cerca nel titolo, nel riassunto, nel corpo e — cosa che la ricerca di oggi
+ * non fa più davvero — nei tag veri, quelli della tabella article_tags.
+ * `api/search.php` guarda ancora una colonna `articles.tags` che la v1.26.0 ha
+ * sostituito con la tabella di collegamento.
+ *
+ * L'ordine mette prima chi ha la parola nel titolo: chi cerca «favella» vuole
+ * l'articolo che si chiama Favella, non quello che la nomina di sfuggita.
+ */
+function cerca(string $testo, int $limite = 12): array {
+    $testo = trim($testo);
+    if (mb_strlen($testo) < 2) return [];
+
+    $come = '%' . $testo . '%';
+    $limite = max(1, min(30, $limite));
+
+    $q = db()->prepare(
+        "SELECT a.id, a.title, a.slug, a.excerpt, a.category, a.published_at,
+                'articolo' AS genere
+         FROM articles a
+         WHERE " . SOLO_PUBBLICATI . "
+           AND (a.title LIKE :come OR a.excerpt LIKE :come2 OR a.content LIKE :come3
+                OR a.id IN (SELECT x.article_id FROM article_tags x
+                            JOIN tags t ON t.id = x.tag_id WHERE t.name LIKE :come4))
+         ORDER BY CASE WHEN a.title LIKE :come5 THEN 0 ELSE 1 END,
+                  a.published_at DESC
+         LIMIT $limite"
+    );
+    $q->execute([':come' => $come, ':come2' => $come, ':come3' => $come,
+                 ':come4' => $come, ':come5' => $come, ':adesso' => adesso()]);
+    $trovati = $q->fetchAll();
+
+    $p = db()->prepare(
+        "SELECT id, name AS title, description AS excerpt, category,
+                button_a_url AS indirizzo, created_at AS published_at, 'progetto' AS genere
+         FROM projects
+         WHERE is_visible = 1 AND (name LIKE :come OR description LIKE :come2)
+         ORDER BY sort_order ASC LIMIT 5"
+    );
+    $p->execute([':come' => $come, ':come2' => $come]);
+
+    return array_merge($trovati, $p->fetchAll());
 }

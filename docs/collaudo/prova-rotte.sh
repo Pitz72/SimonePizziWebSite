@@ -94,10 +94,19 @@ controlla 404 "/videogiochi/questo-articolo-non-esiste"
 controlla 404 "/uno/due/tre"
 
 echo
+echo "La ricerca"
+controlla 200 "/api/cerca.php?q=favella"  file
+controlla 200 "/api/cerca.php?q=a"        file
+
+echo
 echo "Le pagine di servizio"
 controlla 200 "/assets/css/base.css"     file
 controlla 200 "/assets/css/caratteri.css" file
 controlla 200 "/assets/js/interfaccia.js" file
+controlla 200 "/assets/js/ricerca.js"     file
+controlla 200 "/assets/js/sommario.js"    file
+controlla 200 "/assets/js/reazioni.js"    file
+controlla 200 "/assets/js/newsletter.js"  file
 
 echo
 if [ "$fallite" -eq 0 ]; then

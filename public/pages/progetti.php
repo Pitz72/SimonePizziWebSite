@@ -25,24 +25,12 @@ $elenco = progetti();
       <p><?= count($elenco) ?> lavori fra videogiochi, motori narrativi, software per la radio e libri.</p>
     </header>
 
-    <ul style="list-style:none;margin:0;padding:0">
-      <?php foreach ($elenco as $p): ?>
-        <li style="padding:20px 0;border-bottom:1px solid var(--filo2)">
-          <span class="eti spento"><?= e($p['category']) ?></span>
-          <h2 class="gro" style="font-size:24px;margin:6px 0 8px"><?= e($p['name']) ?></h2>
-          <p class="spento" style="margin:0 0 14px;max-width:70ch"><?= e(tronca($p['description'], 220)) ?></p>
-          <div class="btn-fila">
-            <?php if (trim((string)$p['button_a_label']) !== '' && trim((string)$p['button_a_url']) !== ''): ?>
-              <a class="btn btn-pieno" href="<?= e($p['button_a_url']) ?>"><?= e($p['button_a_label']) ?></a>
-            <?php endif; ?>
-            <?php if (trim((string)$p['button_b_label']) !== '' && trim((string)$p['button_b_url']) !== ''): ?>
-              <a class="btn btn-muto" href="<?= e($p['button_b_url']) ?>"><?= e($p['button_b_label']) ?></a>
-            <?php endif; ?>
-          </div>
-        </li>
-      <?php endforeach; ?>
+    <ul class="banco" style="margin-top:28px">
+      <?php foreach ($elenco as $progetto) blocco_progetto($progetto); ?>
     </ul>
   </div>
+
+  <?php blocco_newsletter(); ?>
 </main>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

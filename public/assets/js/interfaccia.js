@@ -1,30 +1,73 @@
-/* interfaccia.js — le poche cose che sul sito si muovono.
-   Nessuna libreria: sono trenta righe, e una libreria costerebbe più del
+/* interfaccia.js — il menu del telefono e le finestre.
+   Nessuna libreria: sono poche righe, e una libreria costerebbe più del
    problema che risolve.
-   Ricerca, reazioni, newsletter e sommario hanno file loro. */
+
+   Le finestre sono <dialog>: il fuoco della tastiera, la chiusura con Esc e
+   lo sfondo li fa il browser. Qui si aggiunge solo quello che manca — la
+   chiusura cliccando fuori — e si tiene la compatibilità con i browser che
+   showModal() non ce l'hanno. */
 
 (function () {
   'use strict';
 
-  /* Il menu sul telefono. Lo stato sta su un attributo del contenitore, così
-     il CSS lo legge senza che il JavaScript debba conoscere le classi. */
+  /* ── Menu del telefono ────────────────────────────────────────────────
+     Lo stato sta su un attributo del contenitore, così il CSS lo legge senza
+     che il JavaScript debba conoscere le classi. */
   var barra = document.querySelector('.barra');
-  var pulsante = document.querySelector('[data-apri="menu"]');
+  var pulsanteMenu = document.querySelector('[data-apri="menu"]');
 
-  if (barra && pulsante) {
-    pulsante.addEventListener('click', function () {
+  if (barra && pulsanteMenu) {
+    pulsanteMenu.addEventListener('click', function () {
       var aperto = barra.getAttribute('data-menu') === 'aperto';
       barra.setAttribute('data-menu', aperto ? 'chiuso' : 'aperto');
-      pulsante.setAttribute('aria-expanded', String(!aperto));
-      pulsante.textContent = aperto ? 'Menu' : 'Chiudi';
+      pulsanteMenu.setAttribute('aria-expanded', String(!aperto));
+      pulsanteMenu.textContent = aperto ? 'Menu' : 'Chiudi';
     });
 
-    // Chi apre il menu con la tastiera deve poterlo chiudere con la tastiera.
     document.addEventListener('keydown', function (ev) {
       if (ev.key === 'Escape' && barra.getAttribute('data-menu') === 'aperto') {
-        pulsante.click();
-        pulsante.focus();
+        pulsanteMenu.click();
+        pulsanteMenu.focus();
       }
     });
   }
+
+  /* ── Finestre ─────────────────────────────────────────────────────────── */
+  window.SP = window.SP || {};
+
+  window.SP.apri = function (nome) {
+    var f = document.getElementById('finestra-' + nome);
+    if (!f) return null;
+    if (typeof f.showModal === 'function') { if (!f.open) f.showModal(); }
+    else f.setAttribute('open', '');           // ripiego: finestra non modale
+    return f;
+  };
+
+  window.SP.chiudi = function (f) {
+    if (!f) return;
+    if (typeof f.close === 'function') f.close();
+    else f.removeAttribute('open');
+  };
+
+  document.addEventListener('click', function (ev) {
+    var apre = ev.target.closest('[data-apri]');
+    if (apre) {
+      var nome = apre.getAttribute('data-apri');
+      if (nome !== 'menu') { ev.preventDefault(); window.SP.apri(nome); }
+      return;
+    }
+
+    var chiude = ev.target.closest('[data-chiudi]');
+    if (chiude) { window.SP.chiudi(chiude.closest('dialog')); return; }
+
+    /* Cliccare sullo sfondo chiude. Il bersaglio del click sullo sfondo è il
+       <dialog> stesso, perché il contenuto sta dentro un figlio: se il click
+       cade fuori dal rettangolo del contenuto, si chiude. */
+    if (ev.target.tagName === 'DIALOG') {
+      var r = ev.target.getBoundingClientRect();
+      var fuori = ev.clientY < r.top || ev.clientY > r.bottom ||
+                  ev.clientX < r.left || ev.clientX > r.right;
+      if (fuori) window.SP.chiudi(ev.target);
+    }
+  });
 })();

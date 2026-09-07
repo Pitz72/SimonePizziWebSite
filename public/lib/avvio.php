@@ -60,4 +60,6 @@ require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/safe_html.php';
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/query.php';
+require_once __DIR__ . '/sommario.php';
 require_once __DIR__ . '/seo.php';
+require_once __DIR__ . '/../partials/blocchi.php';
