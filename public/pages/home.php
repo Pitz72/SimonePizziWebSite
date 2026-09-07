@@ -85,7 +85,7 @@ require __DIR__ . '/../partials/head.php';
   <?php $vetrina = array_slice(progetti(), 0, 2); if ($vetrina): ?>
     <section class="sezione"><div class="gab">
       <div class="sezione-cima">
-        <h2>Sul banco</h2>
+        <h2>Ultimi progetti</h2>
         <a class="eti" href="/tutti-i-progetti">Tutti e <?= $numeri['progetti'] ?> →</a>
       </div>
       <ul class="banco">
