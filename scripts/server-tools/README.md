@@ -21,6 +21,23 @@ come seconda rete di sicurezza).
 3. Gli script assumono di trovarsi in `/api/` (fanno `require_once 'db.php'`):
    eseguiti da qui non funzionano, è voluto.
 
+## Script con runner automatico
+
+`unisci_tag_doppioni.php` + `esegui_unione_tag.py` sono la versione "fatta bene" di
+questo pattern, da usare come modello per i prossimi fix di dati:
+
+- il runner **carica, esegue e cancella** in un comando solo, con la cancellazione
+  in un `finally` — quindi avviene anche se l'esecuzione fallisce;
+- il **token è casuale a ogni giro** e il nome del file remoto pure, quindi non
+  c'è nessun segreto durevole nel repo e l'URL non è indovinabile;
+- dopo la cancellazione fa una **controprova indipendente** via HTTP: lo script
+  deve rispondere 404;
+- gira in **anteprima** per default (fa tutto il lavoro e poi `ROLLBACK`), e scrive
+  solo con `--applica`;
+- il **backup dei dati toccati torna nella risposta HTTP**, non resta sul server.
+
+Usato in produzione il 20/08/2026 per unire 22 gruppi di tag doppioni.
+
 ## Verifica periodica
 
 Controllare che nessuno script residuo sia raggiungibile in produzione:
