@@ -58,3 +58,8 @@ scratch/unione_tag_*.txt
 scratch/dati-produzione/
 scratch/*.sqlite
 scratch/design/
+
+# File temporanei delle prove di collaudo
+scratch/*.txt
+scratch/*.html
+scratch/*.log

@@ -1,0 +1,316 @@
+/* ═══════════════════════════════════════════════════════════════════════
+   admin.css — il pannello.
+
+   Stessi colori e stessi caratteri del sito pubblico: chi ci lavora dentro
+   non deve avere l'impressione di essere in un'altra applicazione. Cambia
+   l'impianto, perché una schermata di lavoro si opera, non si legge: le cose
+   stanno più fitte, i comandi sono sempre nello stesso posto, e lo stato di
+   ogni riga si vede da lontano.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.pannello{display:block}
+
+/* ── Intestazione ───────────────────────────────────────────────────────── */
+.pannello-cima{
+  display:flex;align-items:center;justify-content:space-between;gap:20px;
+  padding:0 22px;min-height:56px;background:var(--pece);
+  border-bottom:1px solid var(--filo);position:sticky;top:0;z-index:30;
+}
+.pannello-cima .marchio{
+  font-family:'Bricolage Grotesque',sans-serif;font-variation-settings:'wdth' 76;
+  font-weight:800;font-size:17px;letter-spacing:-.02em;color:var(--bianco);
+  display:inline-flex;align-items:baseline;gap:8px;white-space:nowrap;
+}
+.pannello-cima-destra{display:flex;align-items:center;gap:16px;color:var(--spento)}
+.pannello-cima-destra a.eti:hover{color:var(--verde)}
+
+/* ── Impianto a due colonne ─────────────────────────────────────────────── */
+.pannello-corpo{display:grid;grid-template-columns:212px minmax(0,1fr);min-height:calc(100vh - 56px)}
+.pannello-lato{border-right:1px solid var(--filo);background:var(--pece);padding:16px 0}
+.pannello-lato ul{list-style:none;margin:0;padding:0}
+.pannello-lato a{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 22px;color:var(--spento);font-size:14.5px;font-weight:500;
+  border-left:3px solid transparent;transition:color .14s,background .14s,border-color .14s;
+}
+.pannello-lato a:hover{color:var(--testo);background:var(--pannello)}
+.pannello-lato a[aria-current]{color:var(--verde);border-left-color:var(--verde);background:var(--pannello)}
+.pallino{
+  min-width:20px;height:20px;padding:0 6px;border-radius:10px;background:var(--verde);
+  color:var(--nero);font:700 11px/20px 'Courier Prime',monospace;text-align:center;
+}
+.pannello-lavoro{padding:26px 30px 70px;min-width:0}
+
+/* ── Testata di schermata ───────────────────────────────────────────────── */
+.lavoro-cima{
+  display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:20px;
+  border-bottom:1px solid var(--verde);padding-bottom:18px;margin-bottom:22px;
+}
+.lavoro-cima h1{font-size:clamp(28px,3.4vw,44px)}
+.lavoro-cima p{margin:8px 0 0;font-size:15px}
+
+/* ── Avvisi ─────────────────────────────────────────────────────────────── */
+.avviso{
+  border:1px solid var(--verde);border-left-width:5px;background:var(--pannello);
+  padding:13px 16px;margin:0 0 20px;color:var(--testo);font-size:15px;
+}
+.avviso-no{border-color:#e8a0a0;color:#f0c9c9}
+
+/* ── Riquadri dei numeri ────────────────────────────────────────────────── */
+.numeri{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1px;
+  background:var(--filo);border:1px solid var(--filo);margin-bottom:26px}
+.numeri div{background:var(--pece);padding:16px 18px}
+.numeri b{display:block;color:var(--bianco);font-family:'Bricolage Grotesque',sans-serif;
+  font-variation-settings:'wdth' 76;font-weight:800;font-size:30px;line-height:1.1;
+  font-variant-numeric:tabular-nums}
+.numeri span{color:var(--spento)}
+.numeri a{display:block;color:inherit}
+.numeri a:hover b{color:var(--verde)}
+
+/* ── Tabelle ────────────────────────────────────────────────────────────
+   Sono il pezzo forte del pannello: qui si scorre, si cerca e si agisce. */
+.tabella-lavoro{width:100%;border-collapse:collapse;font-size:14.5px}
+.tabella-lavoro th{
+  text-align:left;padding:10px 12px;border-bottom:1px solid var(--verde);
+  color:var(--spento);font:700 10.5px/1.4 'Courier Prime',monospace;
+  letter-spacing:.14em;text-transform:uppercase;white-space:nowrap;
+}
+.tabella-lavoro td{padding:12px;border-bottom:1px solid var(--filo2);vertical-align:top}
+.tabella-lavoro tr:hover td{background:var(--pece)}
+.tabella-lavoro .titolo{color:var(--testo);font-weight:600;font-size:15.5px;line-height:1.3}
+.tabella-lavoro .titolo:hover{color:var(--verde)}
+.tabella-lavoro .sotto{display:block;color:var(--spento);font-size:13px;margin-top:4px}
+.tabella-lavoro .num{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.tabella-lavoro .comandi{white-space:nowrap;text-align:right}
+.avvolgi{overflow-x:auto}
+
+/* Comandi piccoli dentro le righe. */
+.mini{
+  display:inline-flex;align-items:center;gap:6px;padding:6px 10px;
+  border:1px solid var(--filo);background:transparent;color:var(--spento);cursor:pointer;
+  font:700 10.5px/1 'Courier Prime',monospace;letter-spacing:.1em;text-transform:uppercase;
+  transition:border-color .14s,color .14s,background .14s;
+}
+.mini:hover{border-color:var(--verde);color:var(--verde)}
+.mini-pericolo:hover{border-color:#e8a0a0;color:#e8a0a0}
+
+/* ── Filtri ─────────────────────────────────────────────────────────────── */
+.filtri{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin-bottom:18px}
+.filtri label{display:flex;flex-direction:column;gap:6px}
+.filtri .eti{color:var(--spento)}
+
+/* ── Moduli ─────────────────────────────────────────────────────────────── */
+input[type="text"],input[type="email"],input[type="password"],input[type="url"],
+input[type="search"],input[type="datetime-local"],input[type="number"],select,textarea{
+  width:100%;padding:11px 13px;background:var(--pannello);border:1px solid var(--filo);
+  color:var(--testo);font:400 15px/1.45 'DM Sans',system-ui,sans-serif;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--verde);outline:none}
+select{appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--spento) 50%),
+  linear-gradient(135deg,var(--spento) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:36px}
+textarea{resize:vertical;min-height:90px}
+
+.campo{display:flex;flex-direction:column;gap:7px;margin-bottom:18px}
+.campo>.eti{color:var(--spento)}
+.aiuto{color:var(--spento);font-size:13px;line-height:1.5;margin:0}
+.aiuto b{color:var(--testo);font-weight:600}
+.spunta{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;cursor:pointer}
+.spunta input{width:auto;margin-top:3px;accent-color:var(--verde)}
+.spunta span{font-size:14.5px}
+.due-colonne{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}
+
+/* La scheda articolo è una colonna sola: dati, poi editor, poi verificatore.
+   Le due colonne di prima costringevano a saltare avanti e indietro. */
+.scheda{max-width:900px}
+.scheda section{border-top:1px solid var(--filo);padding-top:22px;margin-top:26px}
+.scheda section:first-of-type{border-top:0;padding-top:0;margin-top:0}
+.scheda h2{color:var(--bianco);font-family:'Bricolage Grotesque',sans-serif;
+  font-variation-settings:'wdth' 80;font-weight:800;font-size:20px;letter-spacing:-.02em;
+  margin:0 0 16px}
+
+/* La barra dei comandi resta sotto gli occhi mentre si scrive. */
+.barra-salva{
+  position:sticky;bottom:0;background:var(--pece);border-top:1px solid var(--verde);
+  padding:14px 0;margin-top:26px;display:flex;flex-wrap:wrap;gap:12px;align-items:center;z-index:20;
+}
+.barra-salva .spento{margin-left:auto;font-size:13.5px}
+
+/* ── Come esce su Google ────────────────────────────────────────────────
+   L'anteprima non è un vezzo: senza, il titolo per Google si scrive alla
+   cieca e ci si accorge del taglio solo dopo la pubblicazione. */
+.google{background:#fff;border:1px solid var(--filo);padding:16px 18px;border-radius:6px;
+  font-family:arial,sans-serif;max-width:600px}
+.google .g-url{color:#202124;font-size:12px;line-height:1.4}
+.google .g-titolo{color:#1a0dab;font-size:20px;line-height:1.3;margin:3px 0 2px;
+  overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.google .g-descrizione{color:#4d5156;font-size:14px;line-height:1.58;
+  overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.contatore{font:400 12px/1 'Courier Prime',monospace;color:var(--spento);text-align:right}
+.contatore[data-oltre="si"]{color:#e8a0a0}
+
+/* ── Verificatore SEO ───────────────────────────────────────────────────── */
+.voto{display:flex;align-items:center;gap:16px;margin-bottom:16px}
+.voto b{font-family:'Bricolage Grotesque',sans-serif;font-variation-settings:'wdth' 76;
+  font-weight:800;font-size:38px;line-height:1;color:var(--verde)}
+.voto .barra-voto{flex:1;height:8px;background:var(--filo);position:relative;overflow:hidden}
+.voto .barra-voto i{position:absolute;inset:0 auto 0 0;background:var(--verde);transition:width .4s}
+.controlli{list-style:none;margin:0;padding:0;font-size:14.5px}
+.controlli li{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--filo2);align-items:flex-start}
+.controlli li:last-child{border-bottom:0}
+.controlli .segno{width:18px;flex:none;font-weight:700}
+.controlli .si .segno{color:var(--verde)}
+.controlli .ni .segno{color:#e8c07a}
+.controlli .no .segno{color:#e8a0a0}
+.controlli small{display:block;color:var(--spento);margin-top:2px;font-size:13px;line-height:1.5}
+
+/* ── Editor ─────────────────────────────────────────────────────────────── */
+.editor-comandi{display:flex;flex-wrap:wrap;gap:4px;padding:8px;background:var(--pece);
+  border:1px solid var(--filo);border-bottom:0;position:sticky;top:56px;z-index:15}
+.editor-comandi button{
+  background:transparent;border:1px solid transparent;color:var(--spento);cursor:pointer;
+  padding:7px 10px;font:600 13px/1 'DM Sans',sans-serif;min-width:34px;
+}
+.editor-comandi button:hover{border-color:var(--filo);color:var(--testo);background:var(--pannello)}
+.editor-comandi button[aria-pressed="true"]{background:var(--verde);color:var(--nero);border-color:var(--verde)}
+.editor-comandi .separatore{width:1px;background:var(--filo);margin:2px 6px}
+.editor{
+  border:1px solid var(--filo);background:var(--pannello);padding:22px 24px;min-height:420px;
+  font:400 17px/1.7 'DM Sans',system-ui,sans-serif;color:#cfe0d3;overflow-wrap:break-word;
+}
+.editor:focus{outline:none;border-color:var(--verde)}
+.editor h2{font-size:26px;margin:1.4em 0 .5em;color:var(--bianco)}
+.editor h3{font-size:21px;margin:1.3em 0 .4em;color:var(--bianco)}
+.editor p{margin:0 0 1em}
+.editor a{color:var(--verde);text-decoration:underline}
+.editor blockquote{border-left:4px solid var(--verde);margin:1.2em 0;padding:4px 0 4px 16px;color:#b7cebc}
+.editor pre{background:var(--nero);border:1px solid var(--filo);padding:12px 14px;overflow-x:auto;
+  font:400 14px/1.6 'Courier Prime',monospace}
+.editor code{font:400 .92em/1.5 'Courier Prime',monospace;color:var(--verde2)}
+.editor img{max-width:100%;height:auto;border:1px solid var(--filo);margin:1em 0}
+.editor table{border-collapse:collapse;width:100%;margin:1.2em 0;font-size:15px}
+.editor th,.editor td{border:1px solid var(--filo);padding:8px 10px;text-align:left}
+.editor th{background:var(--pece);color:var(--bianco)}
+.editor:empty::before{content:attr(data-vuoto);color:#4d6a55}
+
+/* ── Immagini ───────────────────────────────────────────────────────────── */
+.griglia-media{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px;
+  list-style:none;margin:0;padding:0}
+.griglia-media li{border:1px solid var(--filo);background:var(--pannello)}
+.griglia-media button{display:block;width:100%;background:none;border:0;padding:0;cursor:pointer;text-align:left}
+.griglia-media .anteprima{aspect-ratio:4/3;overflow:hidden;background:var(--pece)}
+.griglia-media img{width:100%;height:100%;object-fit:cover}
+.griglia-media figcaption{padding:8px 10px;color:var(--spento);font-size:11.5px;line-height:1.4;
+  word-break:break-all}
+.griglia-media li:hover{border-color:var(--verde)}
+.copertina-scelta{display:flex;gap:14px;align-items:flex-start}
+.copertina-scelta .anteprima{width:170px;aspect-ratio:16/10;border:1px solid var(--filo);
+  background:var(--pannello);overflow:hidden;flex:none}
+.copertina-scelta .anteprima img{width:100%;height:100%;object-fit:cover}
+
+/* ── Grafico ────────────────────────────────────────────────────────────── */
+.grafico{display:flex;align-items:flex-end;gap:2px;height:150px;border-bottom:1px solid var(--filo);
+  padding-top:10px}
+.grafico i{flex:1;background:var(--filo);min-height:1px;position:relative;transition:background .14s}
+.grafico i:hover{background:var(--verde)}
+.grafico-legenda{display:flex;justify-content:space-between;color:var(--spento);padding-top:8px}
+
+/* ── Ingresso ───────────────────────────────────────────────────────────── */
+.pannello-nudo{display:grid;place-items:center;min-height:100vh;padding:20px}
+.ingresso{width:min(420px,100%);border:1px solid var(--filo);background:var(--pece);padding:32px}
+.ingresso h1{font-size:30px;margin-bottom:6px}
+.ingresso p.spento{margin:0 0 24px;font-size:14.5px}
+
+@media (max-width:820px){
+  .pannello-corpo{grid-template-columns:1fr}
+  .pannello-lato{border-right:0;border-bottom:1px solid var(--filo);padding:8px 0}
+  .pannello-lato ul{display:flex;overflow-x:auto}
+  .pannello-lato a{border-left:0;border-bottom:3px solid transparent;white-space:nowrap;padding:10px 14px}
+  .pannello-lato a[aria-current]{border-left:0;border-bottom-color:var(--verde)}
+  .pannello-lavoro{padding:20px 16px 60px}
+  .due-colonne{grid-template-columns:1fr}
+  .editor-comandi{position:static}
+}
+
+/* ═══════════════════════════════════════════════════════════════════════
+   L'editor.
+   Le classi ed-* le crea editor.js, che arriva dal Festival: qui si vestono
+   con i colori di questo sito invece di riscrivere il JavaScript.
+   ═══════════════════════════════════════════════════════════════════════ */
+
+.ed{border:1px solid var(--filo);background:var(--pannello);position:relative}
+.ed-src{display:none}                    /* la textarea vera resta, nascosta */
+
+.ed-tools{
+  display:flex;flex-wrap:wrap;gap:4px;align-items:center;
+  padding:8px;background:var(--pece);border-bottom:1px solid var(--filo);
+  position:sticky;top:56px;z-index:15;
+}
+.ed-tools button{
+  background:transparent;border:1px solid transparent;color:var(--spento);cursor:pointer;
+  padding:7px 10px;font:600 13px/1 'DM Sans',sans-serif;min-width:34px;
+  transition:color .14s,background .14s,border-color .14s;
+}
+.ed-tools button:hover{border-color:var(--filo);color:var(--testo);background:var(--pannello)}
+.ed-tools button[aria-pressed="true"]{background:var(--verde);color:var(--nero);border-color:var(--verde)}
+.ed-tools .ed-b{font-weight:800}
+.ed-tools .ed-i{font-style:italic}
+.ed-tools .ed-u{text-decoration:underline}
+.ed-tools .ed-s{text-decoration:line-through}
+.ed-tools .ed-hot{color:var(--verde)}
+.ed-sep{width:1px;align-self:stretch;background:var(--filo);margin:2px 6px}
+.ed-block{width:auto;min-width:130px;padding:7px 30px 7px 10px;font-size:13px}
+
+/* Il riquadro che chiede un indirizzo (link, YouTube). */
+/* display:flex batte l'attributo hidden, e il riquadro restava aperto sempre:
+   la regola con [hidden] va scritta, non data per scontata. */
+.ed-pop{
+  position:absolute;z-index:25;left:10px;right:10px;top:52px;
+  background:var(--pece);border:1px solid var(--verde);padding:14px;
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+}
+.ed-pop[hidden]{display:none}
+.ed-pop-label{color:var(--spento);font:700 11px/1 'Courier Prime',monospace;
+  letter-spacing:.14em;text-transform:uppercase;width:100%}
+.ed-pop-input{flex:1;min-width:220px}
+.ed-pop-err{width:100%;color:#e8a0a0;font-size:13.5px}
+.ed-pop-acts{display:flex;gap:8px}
+
+.ed-area{
+  padding:22px 24px;min-height:420px;outline:none;
+  font:400 17px/1.7 'DM Sans',system-ui,sans-serif;color:#cfe0d3;overflow-wrap:break-word;
+}
+.ed-area h2{font-size:26px;margin:1.4em 0 .5em;color:var(--bianco)}
+.ed-area h3{font-size:21px;margin:1.3em 0 .4em;color:var(--bianco)}
+.ed-area h4{font-size:18px;margin:1.2em 0 .4em;color:var(--bianco)}
+.ed-area p{margin:0 0 1em}
+.ed-area a{color:var(--verde);text-decoration:underline}
+.ed-area blockquote{border-left:4px solid var(--verde);margin:1.2em 0;padding:4px 0 4px 16px;color:#b7cebc}
+.ed-area pre{background:var(--nero);border:1px solid var(--filo);padding:12px 14px;overflow-x:auto;
+  font:400 14px/1.6 'Courier Prime',monospace}
+.ed-area code{font:400 .92em/1.5 'Courier Prime',monospace;color:var(--verde2)}
+.ed-area img{max-width:100%;height:auto;border:1px solid var(--filo)}
+.ed-area figure{margin:1.4em 0}
+.ed-area figcaption{color:var(--spento);font-size:13.5px;margin-top:6px}
+.ed-area figure.video{position:relative;aspect-ratio:16/9}
+.ed-area figure.video iframe{position:absolute;inset:0;width:100%;height:100%;border:1px solid var(--filo)}
+.ed-area hr{border:0;border-top:1px solid var(--filo);margin:1.6em 0}
+.ed-area table{border-collapse:collapse;width:100%;margin:1.2em 0;font-size:15px}
+.ed-area th,.ed-area td{border:1px solid var(--filo);padding:8px 10px;text-align:left;min-width:60px}
+.ed-area th{background:var(--pece);color:var(--bianco);font-weight:600}
+
+.ed-foot{display:flex;justify-content:space-between;gap:16px;padding:9px 14px;
+  border-top:1px solid var(--filo);background:var(--pece);color:var(--spento);
+  font:400 12.5px/1.4 'Courier Prime',monospace}
+.ed-draft{color:var(--verde)}
+
+/* I pulsanti del Festival dentro il popup. */
+.a-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 16px;border:2px solid var(--verde);
+  background:var(--verde);color:var(--nero);cursor:pointer;
+  font:700 11px/1 'Courier Prime',monospace;letter-spacing:.12em;text-transform:uppercase}
+.a-btn:hover{background:var(--verde2);border-color:var(--verde2)}
+.a-btn--ghost{background:transparent;color:var(--spento);border-color:var(--filo)}
+.a-btn--ghost:hover{background:transparent;border-color:var(--spento);color:var(--testo)}
+.a-btn--sm{padding:8px 12px}
+.a-select{padding:9px 30px 9px 12px}

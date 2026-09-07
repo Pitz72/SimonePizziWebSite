@@ -325,7 +325,7 @@ che tocchi il database passa dalle `ensure*` al primo caricamento di una pagina.
 |---|---|---|
 | **2** ✅ | `lib/`, `partials/`, le rotte, `safe_html()`, i caratteri in casa | ✅ 26 rotte su 26, 17 prove su `safe_html()` |
 | **3** ✅ | home, categoria, tag, articolo, progetti + i cinque JS | ✅ 32 rotte su 32, le pagine hanno i blocchi del mockup |
-| **4-6** | il pannello, l'editor, il verificatore, il cruscotto | si scrive e si pubblica un articolo senza toccare il vecchio |
+| **4-6** ✅ | il pannello, l'editor, il verificatore, il cruscotto | ✅ 26 prove: si scrive, si pubblica, si duplica e si cancella davvero |
 | **7** | collaudo e deploy | confronto URL per URL con la sitemap, poi Search Console dopo una settimana |
 
 Il collaudo si fa senza Node, sul modello di `FDCA-PHP/docs/collaudo/`: le funzioni pure
@@ -434,3 +434,93 @@ in produzione, o dopo che `api/config.php` si sarà spostato in `lib/`.
 blocco è scritto e funziona, ma finché la colonna è vuota l'etichetta non si stampa. Meglio
 niente che un'etichetta finta — che è esattamente il difetto che questa direzione voleva
 togliere di mezzo.
+
+---
+
+## 15. Fine delle Sessioni 4-6 — il pannello
+
+```bash
+php -S 127.0.0.1:8123 -t public public/dev-router.php
+bash docs/collaudo/prova-pannello.sh     # 26 prove: entra, apre tutto, scrive e cancella
+bash docs/collaudo/prova-rotte.sh        # 32 rotte
+php  docs/collaudo/prova-safe-html.php   # 17 prove
+```
+
+In sviluppo si entra con **simone / sviluppo-locale**. Il riquadro che lo dice compare solo
+sotto `php -S`: in produzione non esiste.
+
+### Le schermate
+
+| | Che cosa fa |
+|---|---|
+| **Cruscotto** | i sei numeri che contano (cliccabili), il grafico delle visite di trenta giorni, i più letti, gli ultimi toccati, e l'avviso sulla coda dei tag |
+| **Articoli** | elenco con ricerca, filtri per stato e categoria, paginazione, e le azioni in blocco: pubblica, rimetti in bozza, duplica, elimina |
+| **Scheda articolo** | una colonna sola: dati → «come esce su Google» con l'anteprima → editor → verificatore. Sotto, la barra dei comandi che resta a portata mentre si scrive |
+| **Progetti** | elenco e scheda nella stessa pagina, con lo **stato** e i due comandi |
+| **Categorie** | la gerarchia a due livelli; una categoria con articoli dentro non si cancella, e il pannello lo dice prima |
+| **Tag** | rinomina in riga, unione dei doppioni, evidenza degli orfani e di quelli sotto la soglia dell'indice |
+| **Immagini** | la libreria, con la copia dell'indirizzo |
+| **Messaggi** | quelli dal modulo contatti, con il pallino su quelli da leggere |
+| **Newsletter** | iscritti divisi per stato del doppio consenso |
+| **Sistema** | ambiente, schema, migrazioni applicate, e le cinque cose che si rompono in silenzio |
+
+### L'editor
+
+Arriva da `FDCA-PHP/public/assets/js/editor.js`, dove è in produzione dalla v1.14.0, e porta
+con sé quello che costa mesi imparare: l'incolla che riconosce il markdown, la pulizia di
+Word e Google Docs, i video YouTube, la bozza salvata in locale. Tre differenze, tutte di
+questo sito: le **tabelle**, il comando **«Link interno»** che cerca un articolo e ne
+inserisce l'indirizzo giusto invece di farlo copiare a mano, e i nomi globali (`spEditor`,
+`spApriLibreria`).
+
+La lista bianca dell'editor e `HTML_AMMESSO` di `lib/safe_html.php` sono la stessa cosa
+scritta in due linguaggi: se si tocca una, si tocca l'altra. Altrimenti l'autore scrive
+cose che il sito butta via senza dirglielo.
+
+Il **verificatore** è tornato a casa: era nato qui come `SeoScorePanel.tsx`, è passato al
+Festival il 7 settembre, e rientra senza React con le soglie unificate e un decimo controllo
+che gli altri due siti non hanno — i tag, da 2 a 8.
+
+### La sicurezza del pannello
+
+Sessione con `session_version` (una password cambiata invalida le sessioni aperte), freno a
+otto tentativi per indirizzo IP ogni quarto d'ora, hash finto verificato anche quando
+l'utente non esiste (senza, il tempo di risposta direbbe quali nomi utente esistono), un
+messaggio solo per «nome sbagliato» e «password sbagliata», gettone anti-CSRF su ogni
+modulo, e `X-Robots-Tag: noindex` più `Cache-Control: no-store` su tutte le pagine.
+
+### Il database di sviluppo, completo
+
+`scripts/sviluppo/popola-dati-finti.php` aggiunge quello che le API pubbliche non danno:
+un utente, otto messaggi, quarantadue iscritti, settecento reazioni, cinquemila visite
+distribuite su novanta giorni con un profilo credibile, la libreria immagini e le
+impostazioni. **È tutto finto e si riconosce**: gli indirizzi finiscono in `@esempio.it`.
+L'unica eccezione dichiarata è lo stato dei sedici progetti, ricavato dagli articoli veri —
+in produzione la colonna nasce vuota e va riempita a mano una volta sola, dal pannello.
+
+### Quattro difetti trovati aprendo le schermate
+
+**Aprire un articolo la cui categoria è stata cancellata, e premere Salva, gli toglieva la
+categoria.** Il `<select>` non aveva quell'opzione, quindi mandava una stringa vuota:
+l'articolo perdeva il suo indirizzo pubblico senza che nessuno dicesse niente. Adesso la
+categoria orfana resta in elenco, marcata, e il pannello spiega la situazione.
+
+**Il riquadro del link nell'editor era sempre aperto.** `editor.js` lo crea con
+l'attributo `hidden`, ma il CSS gli dava `display:flex`, che vince: la regola `[hidden]`
+va scritta, non data per scontata.
+
+**«Un copia creata».** Il messaggio si componeva incollando «Un » davanti al nome
+dell'operazione. In italiano l'articolo dipende dal nome che segue: adesso il singolare
+arriva scritto per intero.
+
+**`categoria_per_id()` non leggeva `sort_order`**, così la scheda della categoria apriva
+quel campo vuoto e ogni salvataggio rimetteva l'ordine a zero.
+
+### Che cosa manca al sito nuovo per andare in produzione
+
+1. **Il taglio**: `sito.php` diventa `index.php`, `api/config.php` si sposta in `lib/`, e
+   dalla CSP in `.htaccess` esce la riga che sovrascrive quella col nonce.
+2. **Il caricamento delle immagini**: `api/upload.php` funziona e non si tocca, ma va
+   agganciato alla libreria del pannello, che oggi mostra e basta.
+3. **Il recupero password**: c'è in `api/auth.php`, va portato su una pagina del pannello.
+4. **Il confronto URL per URL** con la sitemap, e il deploy (§10).

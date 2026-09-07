@@ -19,6 +19,13 @@ $file     = __DIR__ . $percorso;
 if ($percorso === '/sitemap.xml') { require __DIR__ . '/sitemap.php'; return true; }
 if ($percorso === '/robots.txt')  { require __DIR__ . '/robots.php';  return true; }
 
+/* Una cartella con dentro un index.php: in produzione lo serve Apache con
+   DirectoryIndex, qui bisogna dirlo. È il caso di /admin/. */
+if ($percorso !== '/' && is_dir($file) && is_file(rtrim($file, '/') . '/index.php')) {
+    require rtrim($file, '/') . '/index.php';
+    return true;
+}
+
 // Un file che esiste davvero (css, js, font, immagine, endpoint) si serve.
 if ($percorso !== '/' && is_file($file)) {
     // I .php si eseguono, tutto il resto lo passa al server integrato.

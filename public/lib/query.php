@@ -46,7 +46,9 @@ function categoria_per_slug(string $slug): ?array {
 }
 
 function categoria_per_id(int $id): ?array {
-    $q = db()->prepare("SELECT id, name, slug, parent_id FROM categories WHERE id = ? LIMIT 1");
+    // sort_order serve alla scheda del pannello: senza, il campo dell'ordine
+    // si apriva vuoto e ogni salvataggio rimetteva la categoria a zero.
+    $q = db()->prepare("SELECT id, name, slug, parent_id, sort_order FROM categories WHERE id = ? LIMIT 1");
     $q->execute([$id]);
     return $q->fetch() ?: null;
 }

@@ -63,3 +63,6 @@ require_once __DIR__ . '/query.php';
 require_once __DIR__ . '/sommario.php';
 require_once __DIR__ . '/seo.php';
 require_once __DIR__ . '/../partials/blocchi.php';
+
+/* Il pannello carica in più auth.php, db_maintenance.php e pannello.php:
+   li chiede admin/_avvio.php, non serve che li porti ogni pagina pubblica. */
