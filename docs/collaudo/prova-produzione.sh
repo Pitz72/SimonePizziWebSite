@@ -67,7 +67,17 @@ controlla 200 "/blog-e-riflessioni"
 controlla 200 "/web"
 controlla 200 "/tutti-i-progetti"
 controlla 200 "/contatti"
-controlla 200 "/web/fdca-il-capolavoro-non-ha-una-riga-di-react" 'class="corpo"'
+# Un articolo qualunque, preso dalla sitemap invece che scritto qui dentro.
+# Scriverlo qui dentro è già costato una prova rossa: l'articolo che c'era
+# fisso in questa riga è stato spostato di categoria dal pannello, e da lì il
+# suo indirizzo vecchio risponde 301 — cioè il sito faceva esattamente la cosa
+# giusta, ed era il collaudo a raccontare una bugia. La sitemap dice sempre
+# dove stanno gli articoli oggi.
+prendi "$SITO/sitemap.xml" -o "$SITEMAP"
+articolo="$(grep -o '<loc>[^<]*</loc>' "$SITEMAP" | sed 's/<[^>]*>//g'             | sed 's|https\?://[^/]*||' | grep -E '^/[^/]+/[^/]+$' | head -1)"
+if [ -n "$articolo" ]; then controlla 200 "$articolo" 'class="corpo"'
+else no "articolo" "nella sitemap non c'è un solo indirizzo di articolo"; fi
+
 controlla 200 "/tag/php"
 controlla 404 "/questo-indirizzo-non-esiste"
 
