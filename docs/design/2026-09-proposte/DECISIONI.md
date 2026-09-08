@@ -593,3 +593,123 @@ di produzione non fa risparmiare tempo: lo sposta più avanti, dove costa di pi�
 3. I sedici stati dei progetti, da mettere a mano una volta sola.
 4. `/sitemap.xml` e `/robots.txt`.
 5. Search Console dopo una settimana.
+
+---
+
+## 17. Due difetti trovati pubblicando il primo articolo (8 settembre 2026)
+
+Il primo articolo messo **in programmazione** dopo il taglio ha fatto emergere due cose che
+il collaudo non copriva, perché nessuna delle due si vede fino a quando non si usa il sito
+per il lavoro vero.
+
+### 1. L'anteprima di un articolo programmato dava 404 anche all'amministratore
+
+`SOLO_PUBBLICATI` (`lib/query.php`) taglia via `published_at > adesso`, e un articolo
+programmato è esattamente `status='published'` con la data nel futuro. Quindi
+`articolo_per_slug()` non lo trovava e `index.php` rispondeva 404 — **a chiunque, sessione
+del pannello compresa**, perché nessuna pagina pubblica carica `lib/auth.php` e il sito non
+sa chi sta guardando.
+
+Non era una regressione dello stato dell'arte, era una funzione persa nella migrazione: il
+sito React aveva `?admin=true` sugli endpoint, che scavalcava i filtri di visibilità
+(bozze e articoli futuri). Il sito PHP non l'ha portata dietro.
+
+Peggiorava la confusione il pannello, che offriva il link «Vedi sul sito» per tutti gli
+articoli `published`, programmati compresi, verso un indirizzo che sapeva già rispondere 404.
+
+**Come è stata rimessa.** Tre pezzi, e nessuno tocca né le URL né quello che vede un
+visitatore:
+
+- `admin_in_ascolto()` in `lib/avvio.php` — dice se chi guarda è l'amministratore già
+  entrato nel pannello. Apre la sessione **solo se il browser porta già il cookie
+  `sp_admin`**: senza quel freno, ogni visita di ogni lettore aprirebbe una sessione PHP e
+  ne scriverebbe il file su disco, un costo pagato da tutti per servire uno.
+- `articolo_per_slug_in_anteprima()` in `lib/query.php` — **l'unica lettura del sito
+  pubblico che scavalca `SOLO_PUBBLICATI`**, e va tenuta l'unica. Se anche gli elenchi
+  mostrassero i programmati, nessuno riuscirebbe più a capire che cosa è davvero online.
+- La rotta 4 di `index.php` la prova solo quando la ricerca pubblica ha già fallito, così
+  la strada normale non cambia di una query.
+
+La pagina in anteprima si dichiara `noindex`, mette «Anteprima · » nel `<title>` e stampa
+in cima una **fascia verde piena** che dice quando l'articolo esce e che al pubblico quello
+stesso indirizzo risponde «pagina non trovata». È l'unico verde pieno del sito pubblico
+fuori dall'apertura, ed è voluto: un riquadro discreto qui sarebbe un difetto, perché il
+rischio è credere che una cosa sia online quando non lo è.
+
+Nel pannello «Vedi sul sito ↗» e «Anteprima ↗» sono ora due parole diverse per due cose
+diverse (`link_al_sito()` in `admin/_layout.php`), e le bozze — che prima non avevano
+nessun modo di essere viste — hanno il loro link.
+
+### 2. La tendina delle categorie mescolava sezioni e sottocategorie
+
+`admin_categorie()` torna un elenco piatto ordinato per `sort_order`, che è una **sequenza
+globale in ordine di nascita**, non un ordine dentro il ramo. Le figlie finivano dove le
+aveva messe la data di creazione: le sei di «Software» alle posizioni 11, 12, 15, 17, 22 e
+28, e «Il Mistero della Santa Maria» in fondo alla tendina invece che sotto «Videogiochi».
+Il prefisso `— ` diceva che una voce era figlia, non **di chi**.
+
+La schermata Categorie faceva già la cosa giusta (cicla le radici e annida le figlie); le
+tendine no. Adesso `admin_categorie_ad_albero()` riordina in `sezione → sue figlie` — con
+`sort_order` rispettato dentro ogni ramo, lo stesso ordine che il sito pubblico usa in
+`sottocategorie()` — ed `etichetta_categoria()` rientra le figlie con `↳`. La usano tutti e
+tre i punti che ne avevano bisogno: l'editor degli articoli, quello dei progetti e **il
+filtro per categoria dell'elenco articoli**, che soffriva dello stesso disordine senza che
+nessuno l'avesse segnalato.
+
+Una figlia il cui genitore è stato cancellato non sparisce: va in fondo. Gli articoli che
+ha dentro esistono e vanno pur assegnati a qualcosa.
+
+### Un difetto latente chiuso per strada
+
+`index.php` mandava un `Location` verso `url_articolo()` senza controllare che l'articolo
+avesse una categoria. Con la categoria vuota l'indirizzo è `//slug`, che per un browser non
+è un percorso ma **l'host `slug`**. In anteprima capita spesso — una bozza si comincia a
+scriverla prima di decidere dove va — quindi il controllo c'è ora.
+
+### La cache, che qui è una questione di sostanza
+
+In produzione la pagina di un articolo esce con **`Cache-Control: max-age=600`**, messo a
+livello Apache: non sta in questo repo, è l'`.htaccess` della home — lo stesso che appende
+un `max-age` agli endpoint, annotato alla v1.25.0. Su una risposta d'anteprima quel valore è
+sbagliato due volte: una cache condivisa potrebbe servire a un visitatore un articolo non
+ancora uscito, e il browser dell'amministratore gli mostrerebbe la fascia per dieci minuti
+**dopo** la pubblicazione.
+
+`pages/articolo.php` manda quindi `Cache-Control: private, no-store` prima di `head.php`,
+solo in anteprima. **Da verificare al primo caricamento**, perché un `Header set` di Apache
+vince su un `header()` di PHP e quello della home è fuori dal nostro controllo:
+
+```bash
+curl -sI -b 'sp_admin=…' https://simonepizzi.runtimeradio.it/{categoria}/{slug} | grep -i cache
+```
+
+Se vince Apache, la correzione è una riga nel nostro `.htaccess`, che è più specifico di
+quello della home e quindi si applica dopo:
+
+```apache
+Header always set Cache-Control "private, no-store" "expr=%{HTTP_COOKIE} =~ /sp_admin=/"
+```
+
+Non è stata messa adesso perché un `.htaccess` sbagliato è il sito offline, e va provata
+sapendo già che serve.
+
+### Il collaudo
+
+`prova-pannello.sh` passa da 26 a **32 prove**: la bozza e il programmato danno 404 al
+pubblico e 200 con il cookie del pannello, la fascia c'è, il `noindex` c'è, la fascia nomina
+la data di uscita, e la risposta si dichiara `no-store`.
+
+```bash
+bash docs/collaudo/prova-pannello.sh     # 32 prove
+bash docs/collaudo/prova-rotte.sh        # 32 rotte
+php  docs/collaudo/prova-safe-html.php   # 17 prove
+php  docs/collaudo/confronta-con-la-sitemap.php   # 165 indirizzi
+```
+
+### Restano da fare a mano, dal pannello
+
+Due nomi di categoria hanno una maiuscola di troppo — **«Il Relitto SIlente»** e **«Good
+VIbrations»** — e il nome della categoria finisce nel `<title>`, nella meta description,
+negli `og:` e nel JSON-LD della pagina di sezione. Si correggono da `/admin/categorie.php`
+toccando il solo campo **Nome**: lo slug resta, quindi nessun indirizzo cambia. Da qui non
+si possono correggere, perché MySQL non accetta connessioni da fuori.

@@ -98,9 +98,7 @@ titolo_pannello(
     $nuovo ? 'Nuovo articolo' : 'Modifica articolo',
     $nuovo ? 'Nasce come bozza: si pubblica quando è pronto.'
            : 'Creato il ' . data_lunga($a['created_at']) . ($visite ? ' · ' . number_format($visite, 0, ',', '.') . ' letture' : ''),
-    $id && $a['status'] === 'published'
-        ? '<a class="btn btn-muto" href="' . e(url_articolo($a)) . '" target="_blank" rel="noopener">Vedi sul sito ↗</a>'
-        : ''
+    $id ? link_al_sito($a, 'btn btn-muto') : ''
 );
 avviso_pannello();
 ?>
@@ -137,7 +135,7 @@ avviso_pannello();
       <div class="campo">
         <label class="eti" for="campo-categoria">Categoria</label>
         <?php
-        $categorie = admin_categorie();
+        $categorie = admin_categorie_ad_albero();
         /* Un articolo può stare in una categoria cancellata dopo. Se non la si
            rimettesse in elenco, aprire l'articolo e premere Salva gli
            toglierebbe la categoria senza dire niente — e il suo indirizzo
@@ -154,7 +152,7 @@ avviso_pannello();
           <?php endif; ?>
           <?php foreach ($categorie as $c): ?>
             <option value="<?= e($c['slug']) ?>"<?= $a['category'] === $c['slug'] ? ' selected' : '' ?>>
-              <?= e(($c['parent_id'] ? '— ' : '') . $c['name']) ?>
+              <?= e(etichetta_categoria($c)) ?>
             </option>
           <?php endforeach; ?>
         </select>

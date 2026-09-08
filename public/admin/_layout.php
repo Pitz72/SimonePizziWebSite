@@ -176,13 +176,58 @@ function torna(string $dove, string $messaggio = '', bool $errore = false): neve
     exit;
 }
 
+/**
+ * Un articolo è online per chiunque, adesso?
+ *
+ * «published» da solo non basta a dirlo: un articolo programmato per domattina
+ * ha già quello stato, e per il pubblico non esiste ancora. È la stessa
+ * condizione che il sito applica in SOLO_PUBBLICATI, scritta in PHP perché qui
+ * l'articolo è già in mano.
+ */
+function pubblico_adesso(array $a): bool {
+    if (($a['status'] ?? '') !== 'published') return false;
+    return empty($a['published_at']) || strtotime((string)$a['published_at']) <= time();
+}
+
 /** L'etichetta di stato di un articolo. */
 function stato_articolo(array $a): string {
     if ($a['status'] !== 'published') {
         return '<span class="stato stato-archiviato">Bozza</span>';
     }
-    if (!empty($a['published_at']) && strtotime($a['published_at']) > time()) {
+    if (!pubblico_adesso($a)) {
         return '<span class="stato stato-in-corso">Programmato</span>';
     }
     return '<span class="stato stato-pubblicato">Pubblicato</span>';
+}
+
+/**
+ * Il collegamento alla pagina dell'articolo sul sito.
+ *
+ * Due parole diverse per due cose diverse: «Vedi sul sito» è la pagina che
+ * vedono tutti, «Anteprima» è quella che vede solo chi è nel pannello — una
+ * bozza, o un articolo programmato. Prima il pulsante compariva per tutti gli
+ * articoli «published», programmati compresi, e diceva «Vedi sul sito» anche
+ * quando quell'indirizzo rispondeva 404: il pannello offriva un link rotto.
+ *
+ * Senza categoria l'indirizzo non esiste ancora (sarebbe «//slug»), e senza
+ * slug nemmeno: in quel caso non si stampa niente.
+ *
+ * $breve serve alla colonna dei comandi dell'elenco, che è stretta: la parola
+ * cambia, il titolo che spiega resta.
+ */
+function link_al_sito(array $a, string $classe = 'mini', bool $breve = false): string {
+    if (($a['category'] ?? '') === '' || ($a['slug'] ?? '') === '') return '';
+
+    $pubblico = pubblico_adesso($a);
+    if ($pubblico) {
+        $parola = $breve ? 'Vedi' : 'Vedi sul sito ↗';
+        $perche = 'Apri la pagina che vedono tutti';
+    } else {
+        $parola = $breve ? 'Anteprima' : 'Anteprima ↗';
+        $perche = 'Apri la pagina come la vedi tu: al pubblico risponde «pagina non trovata»';
+    }
+
+    return '<a class="' . $classe . '" href="' . e(url_articolo($a)) . '"'
+         . ' target="_blank" rel="noopener" title="' . e($perche) . '">'
+         . $parola . '</a>';
 }

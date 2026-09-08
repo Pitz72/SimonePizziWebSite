@@ -9,7 +9,14 @@
  *
  * @var array $articolo
  * @var array $categoria
+ * @var bool  $anteprima   true solo per l'amministratore che guarda una bozza
+ *                         o un articolo programmato: vedi index.php, rotta 4.
  */
+
+/* Il valore arriva sempre da index.php, ma la pagina non deve dipendere da
+   quella promessa: senza, un giorno che qualcuno la include da altrove
+   l'anteprima si spegne in silenzio invece di far rumore. */
+$anteprima = $anteprima ?? false;
 
 /* L'articolo è l'unica pagina con le finestre «condividi» e «scrivi»: il
    piede le stampa solo se glielo si dice. */
@@ -24,19 +31,43 @@ $copertina = url_immagine($articolo['cover_image']);
 // e mette gli id sui titoli, così le ancore e le voci nascono insieme.
 ['voci' => $voci, 'corpo' => $corpo] = sommario_e_corpo(safe_html($articolo['content']));
 
+/* In anteprima si arriva anche su una bozza a cui non è stata data ancora una
+   categoria: senza questo controllo il percorso mostrerebbe un anello vuoto e
+   cliccabile che porta in home. */
+$haCategoria = ($categoria['slug'] ?? '') !== '';
+
 pagina([
-    'title'     => titolo_seo($articolo),
+    'title'     => ($anteprima ? 'Anteprima · ' : '') . titolo_seo($articolo),
     'desc'      => descrizione_seo($articolo),
     'canonical' => url_articolo($articolo),
+    /* Un articolo non ancora uscito non deve finire nell'indice se per caso
+       questa pagina arriva a un crawler. Non dovrebbe succedere — ci vuole il
+       cookie del pannello — ma il meta costa una riga e chiude il caso. */
+    'noindex'   => $anteprima,
     'immagine'  => $copertina,
     'tipo'      => 'article',
-    'briciole'  => [
+    'briciole'  => array_values(array_filter([
         ['nome' => 'Home', 'url' => '/'],
-        ['nome' => $categoria['name'], 'url' => '/' . $categoria['slug']],
+        $haCategoria ? ['nome' => $categoria['name'], 'url' => '/' . $categoria['slug']] : null,
         ['nome' => $articolo['title']],
-    ],
+    ])),
     'jsonld'    => jsonld_articolo($articolo, $categoria),
 ]);
+
+/* Un'anteprima non deve finire in nessuna cache.
+   In produzione la pagina di un articolo esce con «Cache-Control: max-age=600»
+   messo a livello Apache (non sta in questo repo: è l'.htaccess della home, lo
+   stesso che appende max-age agli endpoint — vedi la nota della v1.25.0).
+   Su una risposta d'anteprima quel valore è sbagliato due volte: una cache
+   condivisa potrebbe servire a un visitatore un articolo non ancora uscito, e
+   il browser dell'amministratore continuerebbe a mostrargli la fascia per dieci
+   minuti dopo la pubblicazione.
+   Questo header va mandato prima di head.php, che apre la stampa. Se il
+   Header di Apache dovesse vincere su questo, la controprova è immediata:
+   `curl -I` sull'indirizzo con il cookie del pannello. */
+if ($anteprima && !headers_sent()) {
+    header('Cache-Control: private, no-store, no-cache, must-revalidate');
+}
 
 require __DIR__ . '/../partials/head.php';
 ?>
@@ -44,16 +75,38 @@ require __DIR__ . '/../partials/head.php';
 <main id="contenuto" class="contenuto">
 
   <div class="gab">
+    <?php if ($anteprima):
+      $futuro = $articolo['status'] === 'published'
+                && $articolo['published_at']
+                && strtotime($articolo['published_at']) > time(); ?>
+      <p class="fascia-anteprima">
+        <b>Anteprima.</b>
+        <?php if ($futuro): ?>
+          Questo articolo esce il <?= e(data_lunga($articolo['published_at'])) ?>
+          alle <?= e(date('H:i', strtotime($articolo['published_at']))) ?>.
+        <?php elseif ($articolo['status'] !== 'published'): ?>
+          Questo articolo è una bozza.
+        <?php else: ?>
+          Questo articolo non è raggiungibile dal pubblico.
+        <?php endif; ?>
+        Lo stai vedendo perché sei entrato nel pannello: per chiunque altro
+        questo indirizzo risponde «pagina non trovata».
+        <a href="/admin/articolo.php?id=<?= (int)$articolo['id'] ?>">Torna a modificarlo</a>.
+      </p>
+    <?php endif; ?>
+
     <nav aria-label="Percorso">
       <ol class="briciole eti">
         <li><a href="/">Home</a></li>
-        <li><a href="/<?= e($categoria['slug']) ?>"><?= e($categoria['name']) ?></a></li>
+        <?php if ($haCategoria): ?>
+          <li><a href="/<?= e($categoria['slug']) ?>"><?= e($categoria['name']) ?></a></li>
+        <?php endif; ?>
         <li><span aria-current="page"><?= e(tronca($articolo['title'], 40)) ?></span></li>
       </ol>
     </nav>
 
     <header class="articolo-testata">
-      <span class="eti spento"><?= e($categoria['name']) ?></span>
+      <?php if ($haCategoria): ?><span class="eti spento"><?= e($categoria['name']) ?></span><?php endif; ?>
       <h1 class="gro"><?= e($articolo['title']) ?></h1>
       <div class="articolo-sotto">
         <?php if ($articolo['excerpt']): ?>

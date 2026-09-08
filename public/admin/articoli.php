@@ -118,9 +118,9 @@ avviso_pannello();
     <span class="eti">Categoria</span>
     <select name="categoria">
       <option value="">Tutte</option>
-      <?php foreach (admin_categorie() as $c): ?>
+      <?php foreach (admin_categorie_ad_albero() as $c): ?>
         <option value="<?= e($c['slug']) ?>"<?= $filtri['categoria'] === $c['slug'] ? ' selected' : '' ?>>
-          <?= e(($c['parent_id'] ? '— ' : '') . $c['name']) ?>
+          <?= e(etichetta_categoria($c)) ?>
         </option>
       <?php endforeach; ?>
     </select>
@@ -187,9 +187,7 @@ avviso_pannello();
                       onclick="this.form.id.value=<?= (int)$a['id'] ?>;this.form.era.value=<?= $a['is_category_pinned'] ? 1 : '' ?>">
                 <?= $a['is_category_pinned'] ? '★' : '☆' ?>
               </button>
-              <?php if ($a['status'] === 'published'): ?>
-                <a class="mini" href="<?= e(url_articolo($a)) ?>" target="_blank" rel="noopener">Vedi</a>
-              <?php endif; ?>
+              <?= link_al_sito($a, 'mini', true) ?>
               <a class="mini" href="/admin/articolo.php?id=<?= (int)$a['id'] ?>">Apri</a>
             </td>
           </tr>

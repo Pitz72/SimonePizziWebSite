@@ -131,6 +131,23 @@
 .pezzo-comandi{display:flex;gap:10px;flex-wrap:wrap;border-top:1px solid var(--filo);padding-top:16px}
 
 /* ── Articolo ───────────────────────────────────────────────────────────── */
+
+/* La fascia dell'anteprima: la vede solo l'amministratore, su una bozza o su un
+   articolo programmato. È l'unico posto del sito pubblico con il verde pieno
+   fuori dall'apertura, ed è voluto: chi guarda deve capire in un colpo d'occhio
+   che questa pagina non è quella che vedono gli altri. Un riquadro discreto qui
+   sarebbe un difetto, non un pregio. */
+.fascia-anteprima{
+  background:var(--verde);color:var(--nero);
+  margin:18px 0 0;padding:13px 18px;
+  font:700 12.5px/1.55 'Courier Prime',ui-monospace,monospace;
+  letter-spacing:.04em;
+}
+.fascia-anteprima b{text-transform:uppercase;letter-spacing:.14em;margin-right:4px}
+.fascia-anteprima a{text-decoration:underline;text-underline-offset:3px}
+.fascia-anteprima a:hover{color:#04361a}
+.fascia-anteprima :focus-visible{outline-color:var(--nero)}
+
 .articolo-testata{border-bottom:1px solid var(--verde);padding:8px 0 26px}
 .articolo-testata h1{font-size:clamp(34px,5.6vw,76px);margin:14px 0 0;max-width:17ch}
 .articolo-sotto{display:grid;grid-template-columns:1fr 300px;gap:40px;align-items:start;

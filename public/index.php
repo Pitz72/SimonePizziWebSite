@@ -85,14 +85,32 @@ if (count($parti) === 1) {
 /* ── 4. /{categoria}/{articolo} ─────────────────────────────────────────── */
 if (count($parti) === 2) {
     $articolo = articolo_per_slug($parti[1]);
+
+    /* Per il pubblico una bozza o un articolo programmato per domattina non
+       esiste, e così deve restare. L'amministratore però deve poterlo guardare
+       prima che esca, al suo indirizzo vero: è a questo che serve il pulsante
+       «Anteprima» del pannello. Si cerca senza il filtro dello stato soltanto
+       dopo aver verificato che ci sia una sessione del pannello valida. */
+    $anteprima = false;
+    if (!$articolo && admin_in_ascolto()) {
+        $articolo  = articolo_per_slug_in_anteprima($parti[1]);
+        $anteprima = $articolo !== null;
+    }
+
     if (!$articolo) non_trovata();
 
     /* Lo slug dell'articolo è unico in tutto il sito, quindi l'indirizzo giusto
        è uno solo: quello con la categoria a cui l'articolo appartiene davvero.
        Chi arriva con la categoria sbagliata — un vecchio link, un articolo
        spostato — viene portato sull'indirizzo buono invece di vedere la stessa
-       pagina sotto due URL diverse, che a Google sembrano due copie. */
-    if ($parti[0] !== $articolo['category']) {
+       pagina sotto due URL diverse, che a Google sembrano due copie.
+
+       Il controllo sulla categoria vuota non è pignoleria: senza, un articolo
+       a cui non ne è stata data una manderebbe un Location di «//slug», che
+       per il browser non è un percorso ma l'host «slug». Capita davvero, e in
+       anteprima capita spesso: una bozza si comincia a scriverla prima di
+       decidere dove va. */
+    if ($articolo['category'] !== '' && $parti[0] !== $articolo['category']) {
         header('Location: ' . url_articolo($articolo), true, 301);
         exit;
     }
@@ -103,7 +121,7 @@ if (count($parti) === 2) {
         ?? ['id' => 0, 'name' => $articolo['category'], 'slug' => $articolo['category'], 'parent_id' => null];
     $GLOBALS['ROTTA_CATEGORIA'] = slug_radice($categoria);
 
-    servi('articolo', ['articolo' => $articolo, 'categoria' => $categoria]);
+    servi('articolo', ['articolo' => $articolo, 'categoria' => $categoria, 'anteprima' => $anteprima]);
 }
 
 /* ── 5. Tutto il resto ──────────────────────────────────────────────────── */

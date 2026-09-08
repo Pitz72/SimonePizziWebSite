@@ -66,3 +66,25 @@ require_once __DIR__ . '/../partials/blocchi.php';
 
 /* Il pannello carica in più auth.php, db_maintenance.php e pannello.php:
    li chiede admin/_avvio.php, non serve che li porti ogni pagina pubblica. */
+
+/* ── L'anteprima dell'amministratore ──────────────────────────────────────
+   Chi sta guardando il sito è l'amministratore già entrato nel pannello?
+
+   Serve a una cosa sola: lasciargli aprire gli articoli che il pubblico non
+   può vedere — le bozze e quelli programmati nel futuro — al loro indirizzo
+   vero, che è l'unico modo di vedere davvero come verranno. Per tutto il
+   resto il sito si comporta identico per lui e per chiunque altro.
+
+   La sessione si apre SOLO se il browser porta già il cookie del pannello.
+   Senza questo freno ogni visita di ogni lettore aprirebbe una sessione PHP e
+   ne scriverebbe il file su disco: un costo pagato da tutti per servire uno.
+   Il nome del cookie è quello fissato da session_name() in lib/auth.php. */
+function admin_in_ascolto(): bool {
+    static $risposta = null;
+    if ($risposta !== null) return $risposta;
+
+    if (!isset($_COOKIE['sp_admin'])) return $risposta = false;
+
+    require_once __DIR__ . '/auth.php';
+    return $risposta = dentro();
+}

@@ -108,9 +108,9 @@ if ($senzaStato > 0): ?>
       <label class="eti" for="p-categoria">Categoria</label>
       <select id="p-categoria" name="category">
         <option value="">— nessuna —</option>
-        <?php foreach (admin_categorie() as $c): ?>
+        <?php foreach (admin_categorie_ad_albero() as $c): ?>
           <option value="<?= e($c['slug']) ?>"<?= $p['category'] === $c['slug'] ? ' selected' : '' ?>>
-            <?= e(($c['parent_id'] ? '— ' : '') . $c['name']) ?>
+            <?= e(etichetta_categoria($c)) ?>
           </option>
         <?php endforeach; ?>
       </select>

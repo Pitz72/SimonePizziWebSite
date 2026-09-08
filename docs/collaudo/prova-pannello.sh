@@ -5,7 +5,8 @@
 #   bash docs/collaudo/prova-pannello.sh
 #
 # Le prove che contano sono le ultime: creare un articolo, ritrovarlo dal sito
-# pubblico solo dopo averlo pubblicato, duplicarlo, cancellarlo. Aprire una
+# pubblico solo dopo averlo pubblicato, vederne l'anteprima da amministratore
+# mentre al pubblico resta invisibile, duplicarlo, cancellarlo. Aprire una
 # schermata dice poco; scriverci dentro dice tutto.
 
 set -uo pipefail
@@ -98,11 +99,51 @@ stato="$(curl -s -o /dev/null -w '%{http_code}' "$BASE/web/prova-automatica-del-
 if [ "$stato" = "404" ]; then ok "da bozza, sul sito pubblico dà 404"
 else no "bozza" "sul sito risponde $stato invece di 404"; fi
 
+# La stessa bozza, chiesta col biscotto del pannello, deve aprirsi: senza
+# anteprima non c'è modo di vedere come verrà prima di pubblicarla. Il difetto
+# che questa prova blocca: fino all'8 settembre 2026 il pannello offriva il
+# link «Vedi» e il sito rispondeva 404 anche all'amministratore.
+stato="$(curl -s -b "$BISCOTTI" -o "$CORPO" -w '%{http_code}' "$BASE/web/prova-automatica-del-collaudo")"
+if [ "$stato" = "200" ] && grep -q 'fascia-anteprima' "$CORPO"; then
+  ok "da bozza, l'amministratore ne vede l'anteprima"
+else no "anteprima della bozza" "stato $stato, e la fascia dell'anteprima non c'è"; fi
+
+if grep -q 'name="robots" content="noindex' "$CORPO"; then
+  ok "l'anteprima si dichiara noindex"
+else no "anteprima noindex" "manca il meta robots"; fi
+
 G="$(gettone /admin/articoli.php)"
 curl -s -b "$BISCOTTI" -o /dev/null -d "gettone=$G&azione=pubblica&id=$ID" "$BASE/admin/articoli.php"
 stato="$(curl -s -o /dev/null -w '%{http_code}' "$BASE/web/prova-automatica-del-collaudo")"
 if [ "$stato" = "200" ]; then ok "una volta pubblicato, il sito lo mostra"
 else no "pubblicazione" "sul sito risponde $stato invece di 200"; fi
+
+# Programmato per l'anno prossimo: «published» ce l'ha già, ma per il pubblico
+# non esiste ancora. È il caso che il 7 settembre 2026 mandava in 404 anche
+# l'amministratore che premeva «Vedi».
+DOMANI="$(date -d '+1 year' '+%Y-%m-%dT08:00' 2>/dev/null || date -v+1y '+%Y-%m-%dT08:00')"
+G="$(gettone "/admin/articolo.php?id=$ID")"
+curl -s -b "$BISCOTTI" -o /dev/null   -d "gettone=$G" -d "id=$ID" -d "title=Prova automatica del collaudo"   -d "slug=prova-automatica-del-collaudo" -d "content=<p>Testo.</p>"   -d "category=web" -d "status=published" -d "published_at=$DOMANI"   "$BASE/admin/articolo.php"
+
+stato="$(curl -s -o /dev/null -w '%{http_code}' "$BASE/web/prova-automatica-del-collaudo")"
+if [ "$stato" = "404" ]; then ok "programmato, al pubblico dà 404"
+else no "programmato" "sul sito risponde $stato invece di 404"; fi
+
+stato="$(curl -s -b "$BISCOTTI" -o "$CORPO" -w '%{http_code}' "$BASE/web/prova-automatica-del-collaudo")"
+if [ "$stato" = "200" ] && grep -q 'fascia-anteprima' "$CORPO"; then
+  ok "programmato, l'amministratore ne vede l'anteprima"
+else no "anteprima del programmato" "stato $stato, e la fascia dell'anteprima non c'è"; fi
+
+if grep -q 'Questo articolo esce il' "$CORPO"; then
+  ok "l'anteprima dice quando esce"
+else no "data dell'anteprima" "la fascia non nomina la data di uscita"; fi
+
+# In produzione la pagina esce con «max-age=600» appeso da Apache: su un'anteprima
+# quel valore farebbe servire da una cache un articolo non ancora uscito.
+intestazioni="$(curl -s -D- -b "$BISCOTTI" -o /dev/null "$BASE/web/prova-automatica-del-collaudo")"
+if printf '%s' "$intestazioni" | grep -qi 'Cache-Control:.*no-store'; then
+  ok "l'anteprima non è memorizzabile in cache"
+else no "cache dell'anteprima" "manca «no-store» fra le intestazioni"; fi
 
 G="$(gettone /admin/articoli.php)"
 LUOGO="$(curl -s -b "$BISCOTTI" -o /dev/null -w '%{redirect_url}' \

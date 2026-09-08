@@ -272,6 +272,61 @@ function admin_categorie(): array {
         FROM categories c ORDER BY c.sort_order ASC")->fetchAll();
 }
 
+/**
+ * Le stesse categorie, ma nell'ordine in cui una persona le cerca: ogni
+ * sezione seguita dalle sue sottocategorie.
+ *
+ * Serve perché sort_order è una sequenza globale in ordine di nascita, non un
+ * ordine dentro il ramo. Nell'elenco piatto le sei figlie di «Software»
+ * finivano alle posizioni 11, 12, 15, 17, 22 e 28, e «Il Mistero della Santa
+ * Maria» stava in fondo alla tendina invece che sotto «Videogiochi». Il
+ * prefisso «— » diceva che una voce era figlia, non di chi.
+ *
+ * Ogni riga porta in più 'profondita': 0 per una sezione, 1 per una
+ * sottocategoria. Così chi stampa una tendina non deve tornare a guardare
+ * parent_id.
+ */
+function admin_categorie_ad_albero(): array {
+    $tutte = admin_categorie();
+
+    /* Le figlie raggruppate per genitore. Restano nel loro sort_order, che è
+       l'ordine con cui il sito pubblico le mostra in sottocategorie(): la
+       tendina e il sito non devono raccontare due storie diverse. */
+    $figlie = [];
+    foreach ($tutte as $c) {
+        if (!empty($c['parent_id'])) $figlie[(int)$c['parent_id']][] = $c;
+    }
+
+    $albero = [];
+    foreach ($tutte as $c) {
+        if (!empty($c['parent_id'])) continue;   // le figlie arrivano dal genitore
+        $albero[] = $c + ['profondita' => 0];
+        foreach ($figlie[(int)$c['id']] ?? [] as $f) $albero[] = $f + ['profondita' => 1];
+        unset($figlie[(int)$c['id']]);
+    }
+
+    /* Una figlia il cui genitore non c'è più non deve sparire dalla tendina:
+       gli articoli che ha dentro esistono e vanno pur assegnati a qualcosa.
+       Va in fondo, non persa. */
+    foreach ($figlie as $orfane) {
+        foreach ($orfane as $f) $albero[] = $f + ['profondita' => 1];
+    }
+
+    return $albero;
+}
+
+/**
+ * Il nome di una categoria dentro una <option>, rientrato se è una figlia.
+ *
+ * Lo spazio è un NBSP vero e non un &nbsp;: dentro una <option> i browser
+ * mangiano gli spazi normali in testa, e questo testo passa comunque da e().
+ */
+function etichetta_categoria(array $c): string {
+    return ($c['profondita'] ?? 0) > 0
+        ? "\u{00A0}\u{00A0}\u{00A0}\u{21B3}\u{00A0}" . $c['name']
+        : (string)$c['name'];
+}
+
 function salva_categoria(array $d, ?int $id = null): int {
     $campi = [
         'name'       => trim((string)$d['name']),

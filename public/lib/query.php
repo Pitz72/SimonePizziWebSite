@@ -26,6 +26,10 @@ const COLONNE_ELENCO = 'id, title, slug, excerpt, cover_image, category, is_feat
 /** Le stesse, con il prefisso della tabella, per le query con una JOIN. */
 const COLONNE_ELENCO_A = 'a.id, a.title, a.slug, a.excerpt, a.cover_image, a.category, a.is_featured, a.published_at, a.created_at';
 
+/** Tutto quello che serve alla pagina di un articolo, corpo compreso. */
+const COLONNE_ARTICOLO = 'id, title, slug, content, excerpt, focus_keyword, cover_image, category,
+                          is_featured, status, published_at, created_at';
+
 /** Solo quello che il pubblico può vedere: pubblicato e non programmato nel futuro. */
 const SOLO_PUBBLICATI = "status = 'published' AND (published_at IS NULL OR published_at <= :adesso)";
 
@@ -135,11 +139,28 @@ function articolo_in_apertura(): ?array {
 
 function articolo_per_slug(string $slug): ?array {
     $q = db()->prepare(
-        "SELECT id, title, slug, content, excerpt, focus_keyword, cover_image, category,
-                is_featured, status, published_at, created_at
+        "SELECT " . COLONNE_ARTICOLO . "
          FROM articles WHERE slug = :slug AND " . SOLO_PUBBLICATI . " LIMIT 1"
     );
     $q->execute([':slug' => $slug, ':adesso' => adesso()]);
+    return $q->fetch() ?: null;
+}
+
+/**
+ * Lo stesso articolo, ma senza il filtro dello stato: anche una bozza, anche
+ * uno programmato per domattina.
+ *
+ * È l'UNICA lettura del sito pubblico che scavalca SOLO_PUBBLICATI, e la
+ * chiama solo index.php, solo dopo che admin_in_ascolto() ha confermato che
+ * dall'altra parte c'è una sessione del pannello valida. Non aggiungerne
+ * altre: un elenco che mostrasse i programmati renderebbe impossibile capire
+ * che cosa è davvero online.
+ */
+function articolo_per_slug_in_anteprima(string $slug): ?array {
+    $q = db()->prepare(
+        "SELECT " . COLONNE_ARTICOLO . " FROM articles WHERE slug = :slug LIMIT 1"
+    );
+    $q->execute([':slug' => $slug]);
     return $q->fetch() ?: null;
 }
 
