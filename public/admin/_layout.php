@@ -38,7 +38,14 @@ function testa_pannello(string $titolo, string $sezione = '', bool $nuda = false
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title><?= e($titolo) ?> — pannello</title>
-<link rel="icon" href="/favicon.ico" sizes="any">
+<!-- L'ICO va dichiarata per prima e senza type: è il ripiego dei browser che
+     l'SVG non lo sanno leggere, e quelli che lo sanno prendono comunque il
+     secondo. Fino all'8 settembre 2026 qui c'era solo l'ICO, e sul server era
+     un file da zero byte: il sito non aveva favicon. Si rifanno tutte con
+     scripts/sviluppo/crea-favicon.py. -->
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/css/base.css">
 <link rel="stylesheet" href="/assets/css/admin.css">
 </head>

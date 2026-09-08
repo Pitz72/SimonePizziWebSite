@@ -32,6 +32,45 @@
     });
   }
 
+  /* ── Le tendine delle sezioni ──────────────────────────────────────────
+     Il CSS le apre già col mouse sopra e col tabulatore dentro. Qui si
+     aggiunge il click, che è l'unico modo che ha uno schermo tattile, e le
+     due cortesie che il CSS non sa fare: Esc chiude, e aprirne una chiude
+     quella di prima. Lo stato sta su aria-expanded, che è anche il dato che
+     legge un lettore di schermo: uno solo, non due che possono divergere. */
+  var tendine = [].slice.call(document.querySelectorAll('.tendina-apri'));
+
+  function chiudiTendine(tranne) {
+    tendine.forEach(function (b) {
+      if (b !== tranne) b.setAttribute('aria-expanded', 'false');
+    });
+  }
+
+  if (tendine.length) {
+    tendine.forEach(function (bottone) {
+      bottone.addEventListener('click', function () {
+        var aperta = bottone.getAttribute('aria-expanded') === 'true';
+        chiudiTendine(bottone);
+        bottone.setAttribute('aria-expanded', String(!aperta));
+      });
+    });
+
+    document.addEventListener('keydown', function (ev) {
+      if (ev.key !== 'Escape') return;
+      var aperta = document.querySelector('.tendina-apri[aria-expanded="true"]');
+      if (!aperta) return;
+      chiudiTendine(null);
+      aperta.focus();
+    });
+
+    /* Un click fuori chiude. Dentro la tendina no: là ci sono i link, e
+       chiuderla prima che il browser segua il link è un modo di non farlo
+       seguire mai. */
+    document.addEventListener('click', function (ev) {
+      if (!ev.target.closest('.voce-con-tendina')) chiudiTendine(null);
+    });
+  }
+
   /* ── Finestre ─────────────────────────────────────────────────────────── */
   window.SP = window.SP || {};
 

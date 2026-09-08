@@ -77,7 +77,13 @@ if (count($parti) === 1) {
     $categoria = categoria_per_slug($parti[0]);
     if (!$categoria) non_trovata();
 
+    /* ROTTA_CATEGORIA è la SEZIONE da illuminare nella barra: dentro una
+       sottocategoria resta accesa la voce del genitore, altrimenti il lettore
+       non capisce in che parte del sito si trova. ROTTA_ESATTA è invece la
+       categoria vera, e serve alla tendina per segnare quale delle figlie si
+       sta guardando. */
     $GLOBALS['ROTTA_CATEGORIA'] = slug_radice($categoria);
+    $GLOBALS['ROTTA_ESATTA']    = (string)$categoria['slug'];
 
     servi('categoria', ['categoria' => $categoria]);
 }
@@ -120,6 +126,7 @@ if (count($parti) === 2) {
     $categoria = categoria_per_slug($articolo['category'])
         ?? ['id' => 0, 'name' => $articolo['category'], 'slug' => $articolo['category'], 'parent_id' => null];
     $GLOBALS['ROTTA_CATEGORIA'] = slug_radice($categoria);
+    $GLOBALS['ROTTA_ESATTA']    = (string)$categoria['slug'];
 
     servi('articolo', ['articolo' => $articolo, 'categoria' => $categoria, 'anteprima' => $anteprima]);
 }

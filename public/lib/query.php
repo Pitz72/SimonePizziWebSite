@@ -79,6 +79,37 @@ function sottocategorie(int $idGenitore): array {
 }
 
 /**
+ * Le sottocategorie di tutte le sezioni in un colpo, raggruppate per genitore,
+ * e solo quelle che hanno qualcosa dentro.
+ *
+ * La serve la tendina della barra, che ne vuole sei gruppi su ogni pagina del
+ * sito: chiedendoli con sottocategorie() uno per uno sarebbero sei query per
+ * una cosa che ne richiede una.
+ *
+ * Le vuote restano fuori. È la stessa regola che index.php applica ai tag —
+ * «un tag senza articoli pubblicati è una pagina vuota: non esiste» — e vale
+ * uguale qui: alla data di oggi «Pizzi e De Paola» non ha un solo articolo, e
+ * metterla in un menu significa promettere una pagina che non c'è.
+ */
+function sottocategorie_per_sezione(): array {
+    static $per = null;
+    if ($per !== null) return $per;
+
+    $q = db()->prepare(
+        "SELECT c.id, c.name, c.slug, c.parent_id FROM categories c
+         WHERE c.parent_id IS NOT NULL
+           AND (SELECT COUNT(*) FROM articles a
+                WHERE a.category = c.slug AND " . SOLO_PUBBLICATI . ") > 0
+         ORDER BY c.sort_order ASC"
+    );
+    $q->execute([':adesso' => adesso()]);
+
+    $per = [];
+    foreach ($q->fetchAll() as $figlia) $per[(int)$figlia['parent_id']][] = $figlia;
+    return $per;
+}
+
+/**
  * Gli slug che una pagina di categoria deve raccogliere: il suo, più quelli
  * delle figlie.
  *

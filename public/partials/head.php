@@ -58,7 +58,14 @@ $immagine  = (string)p('immagine');
 <meta name="twitter:card" content="summary">
 <?php endif; ?>
 
-<link rel="icon" href="/favicon.ico" sizes="any">
+<!-- L'ICO va dichiarata per prima e senza type: è il ripiego dei browser che
+     l'SVG non lo sanno leggere, e quelli che lo sanno prendono comunque il
+     secondo. Fino all'8 settembre 2026 qui c'era solo l'ICO, e sul server era
+     un file da zero byte: il sito non aveva favicon. Si rifanno tutte con
+     scripts/sviluppo/crea-favicon.py. -->
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="alternate" type="application/rss+xml" title="<?= e(SITO_NOME) ?>" href="/api/rss.php">
 <link rel="stylesheet" href="/assets/css/base.css">
 <link rel="stylesheet" href="/assets/css/main.css">

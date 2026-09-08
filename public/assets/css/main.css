@@ -18,10 +18,53 @@
 /* Il nome non si spezza mai: su 375px andava a capo fra «Simone» e «Pizzi». */
 .marchio{white-space:nowrap}
 .menu{display:flex;gap:2px;list-style:none;margin:0;padding:0}
+.menu>li{display:flex;align-items:center}
 .menu a{display:block;padding:7px 12px;font-size:13.5px;font-weight:500;color:var(--spento);
   transition:background .16s,color .16s}
 .menu a:hover{color:var(--testo)}
-.menu [aria-current="page"]{background:var(--verde);color:var(--nero);font-weight:700}
+/* Solo le voci della barra, non i link dentro la tendina: quelli hanno il
+   loro trattamento più sotto. Vale sia per «page» sia per «true», perché
+   dentro una sottocategoria la sezione è accesa senza essere la pagina. */
+.menu>li>a[aria-current]{background:var(--verde);color:var(--nero);font-weight:700}
+
+/* ── La tendina delle sottocategorie ──────────────────────────────────────
+   Il nome della sezione resta un link; la freccia accanto apre l'elenco delle
+   figlie. Si apre in tre modi, e i primi due non hanno bisogno di JavaScript:
+   col mouse sopra, col tabulatore dentro (:focus-within), e col click sulla
+   freccia — che è l'unico che funziona su uno schermo tattile, dove il mouse
+   sopra non esiste. Lo stato sta su aria-expanded e il CSS lo legge da lì:
+   nessuna classe che ripeta quello che l'attributo già dice. */
+.voce-con-tendina{position:relative}
+.voce-con-tendina>a{padding-right:4px}
+.tendina-apri{
+  background:none;border:0;cursor:pointer;color:var(--spento);
+  font-size:10px;line-height:1;padding:9px 8px 9px 2px;
+  transition:color .16s,transform .16s;
+}
+.tendina-apri:hover{color:var(--testo)}
+.tendina-apri[aria-expanded="true"]{color:var(--verde);transform:rotate(180deg)}
+
+.tendina{
+  display:none;position:absolute;top:100%;left:0;z-index:30;
+  min-width:250px;max-width:min(340px,80vw);
+  margin:0;padding:6px 0;list-style:none;
+  background:var(--pece);border:1px solid var(--filo);
+  box-shadow:0 18px 40px rgba(0,0,0,.55);
+}
+.tendina a{padding:8px 15px;font-size:13px;color:var(--spento);white-space:normal}
+.tendina a:hover{background:var(--pannello);color:var(--testo)}
+.tendina [aria-current]{background:transparent;color:var(--verde);font-weight:700}
+/* «Tutti — Sezione» apre l'elenco ed è staccata dalle figlie da un filetto. */
+.tendina li:first-child a{color:var(--testo)}
+.tendina li:first-child{border-bottom:1px solid var(--filo2);margin-bottom:5px;padding-bottom:5px}
+
+.tendina-apri[aria-expanded="true"]+.tendina{display:block}
+/* Il mouse sopra apre solo dove un mouse c'è: su un telefono
+   :hover si incolla al primo tocco e la tendina non si chiude più. */
+@media (hover:hover) and (min-width:901px){
+  .voce-con-tendina:hover .tendina,
+  .voce-con-tendina:focus-within .tendina{display:block}
+}
 .barra-strumenti{display:flex;align-items:center;gap:14px;color:var(--spento)}
 .cerca-scorciatoia{display:inline-flex;align-items:center;gap:8px;background:none;border:0;
   color:var(--spento);cursor:pointer;padding:6px 0}
@@ -300,7 +343,24 @@ dialog.finestra::backdrop{background:rgba(4,7,10,.82)}
     background:var(--pece);border-bottom:1px solid var(--filo);padding:8px 18px 16px;z-index:20;
   }
   .barra[data-menu="aperto"] .menu a{padding:11px 0;border-bottom:1px solid var(--filo2)}
-  .barra[data-menu="aperto"] .menu [aria-current="page"]{background:transparent;color:var(--verde)}
+  .barra[data-menu="aperto"] .menu>li>a[aria-current]{background:transparent;color:var(--verde)}
+
+  /* Nel menu del telefono le voci stanno in colonna, quindi la tendina non
+     galleggia sopra la pagina: rientra nell'elenco, sotto la sua sezione.
+     Resta chiusa finché non si tocca la freccia — ventinove voci aperte tutte
+     insieme sarebbero un muro da scorrere. */
+  .barra[data-menu="aperto"] .menu>li{flex-wrap:wrap;justify-content:space-between}
+  .barra[data-menu="aperto"] .voce-con-tendina>a{flex:1;padding-right:0}
+  /* Il filetto sotto la freccia dev'essere lo STESSO del filetto sotto il nome:
+     misura e interlinea vanno copiate da .menu a, altrimenti le due righe
+     cadono a due altezze e il bordo si vede spezzato in fondo alla voce. */
+  .barra[data-menu="aperto"] .tendina-apri{font-size:13.5px;line-height:1.65;
+    padding:11px 0 11px 14px;border-bottom:1px solid var(--filo2)}
+  .barra[data-menu="aperto"] .tendina{
+    position:static;width:100%;min-width:0;max-width:none;
+    border:0;box-shadow:none;background:transparent;padding:0 0 6px 14px;
+  }
+  .barra[data-menu="aperto"] .tendina a{padding:9px 0;font-size:13px}
 
   .apertura-dentro{padding-block:32px 0}
   .apertura-sotto,.primo,.lettera-dentro,.articolo-sotto{grid-template-columns:1fr}

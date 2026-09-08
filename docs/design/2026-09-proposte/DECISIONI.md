@@ -713,3 +713,76 @@ VIbrations»** — e il nome della categoria finisce nel `<title>`, nella meta d
 negli `og:` e nel JSON-LD della pagina di sezione. Si correggono da `/admin/categorie.php`
 toccando il solo campo **Nome**: lo slug resta, quindi nessun indirizzo cambia. Da qui non
 si possono correggere, perché MySQL non accetta connessioni da fuori.
+
+---
+
+## 18. La barra ritrova la tendina, e il sito una favicon (9 settembre 2026)
+
+Due cose viste guardando il sito vero dopo il taglio.
+
+### La tendina delle sottocategorie
+
+Il sito React aveva, su ogni sezione con figlie, una tendina: si cliccava il nome e si
+apriva l'elenco dei progetti dentro quella sezione. Nella migrazione la barra è diventata
+sei link e basta, e i ventuno progetti sono rimasti raggiungibili solo dalla pagina di
+sezione o da «Tutti i progetti».
+
+`partials/nav.php` la rimette, con tre differenze volute rispetto a prima:
+
+- **Il nome resta un link.** Nella vecchia tendina React il nome era un `<button>`: per
+  arrivare a `/videogiochi` bisognava aprire il menu e cliccare «Tutti — Videogiochi», due
+  gesti per una pagina. Adesso il nome porta alla sezione e la freccia accanto apre
+  l'elenco. «Tutti — Videogiochi» resta in cima alla tendina, perché su uno schermo tattile
+  è la via naturale.
+- **Funziona senza JavaScript.** Il CSS apre la tendina al passaggio del mouse e con il
+  tabulatore dentro (`:focus-within`); il JavaScript aggiunge solo il click — l'unico modo
+  che ha un telefono — più Esc, la chiusura cliccando fuori, e il fatto che aprirne una
+  chiuda la precedente. Lo stato vive su `aria-expanded`, che il CSS legge: nessuna classe
+  che ripeta quello che l'attributo già dice.
+- **Le sottocategorie vuote non compaiono.** Alla data di oggi «Pizzi e De Paola» non ha un
+  solo articolo pubblicato: metterla in un menu è promettere una pagina che non c'è. È la
+  stessa regola che `index.php` applica ai tag. Le figlie in tendina sono ventuno su
+  ventidue.
+
+Sul telefono la tendina non galleggia: rientra nell'elenco, sotto la sua sezione, e resta
+chiusa finché non si tocca la freccia — ventinove voci aperte insieme sarebbero un muro.
+
+**`aria-current` è stato corretto mentre si passava di lì.** «page» vuol dire «questa è la
+pagina che stai leggendo», e di pagina ce n'è una: dentro `/il-relitto-silente` la barra
+dichiarava corrente anche «Videogiochi». Adesso la sezione contenente prende `true` — il
+CSS la illumina uguale, un lettore di schermo la annuncia per quello che è — e `page` resta
+alla voce esatta, dentro la tendina. Il gancio del campo verde è passato da
+`[aria-current="page"]` a `.menu>li>a[aria-current]`.
+
+Costo: **una query in più per pagina** (`sottocategorie_per_sezione()`), che prende tutte le
+figlie di tutte le sezioni in una volta invece di sei chiamate a `sottocategorie()`.
+
+### La favicon: non era brutta, non c'era
+
+`head.php` e `admin/_layout.php` dichiaravano `/favicon.ico`. Sul server quel file
+**risponde 200 e pesa zero byte**: il sito, dal taglio, non aveva favicon. Nel repo c'era
+solo il `favicon.png` del sito React, che nessuna pagina chiamava più.
+
+Adesso è **SP nel verde sul nero**, e le due lettere sono quelle vere del marchio: Bricolage
+Grotesque, peso 800, larghezza 76 — lo stesso punto del carattere variabile che il CSS
+chiede per «SIMONE PIZZI» in cima alle pagine.
+
+`scripts/sviluppo/crea-favicon.py` li rifà tutti da quella sorgente sola:
+
+```bash
+python scripts/sviluppo/crea-favicon.py
+```
+
+| file | a che serve |
+|---|---|
+| `favicon.svg` | i browser di oggi; le lettere sono **tracciati**, non `<text>` — un SVG usato come icona non carica i caratteri del sito, e un `<text>` uscirebbe con il ripiego di sistema |
+| `favicon.ico` | 16, 32 e 48 px in un file solo: il ripiego che Windows vuole ancora |
+| `apple-touch-icon.png` | 180 px, la schermata iniziale di iOS — senza trasparenza, perché iOS mette il bianco sotto |
+| `favicon.png` | 512 px, per quando serve una PNG grande |
+
+Le PNG non nascono dall'SVG ma di nuovo dal carattere, disegnate a otto volte la misura e
+rimpicciolite: a 16 px fra un contorno rimpicciolito bene e uno rimpicciolito male c'è tutta
+la leggibilità che c'è.
+
+Nel `<head>` l'ICO va dichiarata **per prima e senza `type`**: è il ripiego per chi l'SVG non
+lo legge, e chi lo legge prende comunque la seconda riga.
