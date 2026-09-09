@@ -99,7 +99,10 @@ $problemi = [];
 
 foreach ($CORREZIONI as $i => [$campo, $cerca, $metti]) {
     $n = $i + 1;
-    if (!array_key_exists($campo, $nuovi)) { $problemi[] = "#$n: campo «$campo» non ammesso"; continue; }
+    // Le graffe non sono uno stile: dopo un carattere non ASCII come «, PHP
+    // legge «$campo»» come un nome di variabile — i byte ≥ 0x80 sono validi
+    // negli identificatori — e stampa il vuoto senza avvisare.
+    if (!array_key_exists($campo, $nuovi)) { $problemi[] = "#{$n}: campo «{$campo}» non ammesso"; continue; }
 
     $quante = substr_count($nuovi[$campo], $cerca);
     if ($quante === 0) { $problemi[] = "#$n ($campo): NON TROVATA — «" . mb_substr($cerca, 0, 70) . "…»"; continue; }
