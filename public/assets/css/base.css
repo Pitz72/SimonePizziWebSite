@@ -137,6 +137,20 @@ h1,h2,h3{margin:0}
 .briciole a:hover{color:var(--verde)}
 .briciole [aria-current]{color:var(--testo)}
 
+/* ── Paginazione ─────────────────────────────────────────────────────────
+   Sta qui, e non in main.css, perché la usano tutti e due: il sito
+   (categoria, tag) e il pannello (elenco articoli, libreria immagini). In
+   main.css ci era stata fino al 09/09/2026, e il pannello — che carica solo
+   base.css e admin.css — mostrava la paginazione come un elenco numerato
+   nudo: «1. 1», «2. 2», perché senza list-style:none restavano i marcatori
+   del browser accanto al testo dei link. Un foglio solo, così non può più
+   succedere che una delle due parti se la perda. */
+.pagine{display:flex;gap:8px;padding:34px 0;list-style:none;margin:0}
+.pagine a{min-width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--filo);
+  font:700 13px/1 'Courier Prime',monospace;color:var(--spento);transition:border-color .16s,color .16s}
+.pagine a:hover{border-color:var(--verde);color:var(--verde)}
+.pagine [aria-current]{background:var(--verde);border-color:var(--verde);color:var(--nero)}
+
 /* ── Una tabella dentro un articolo ─────────────────────────────────────
    safe_html() avvolge ogni tabella in .tabella: la pagina non deve mai
    scorrere in orizzontale, la tabella sì. */

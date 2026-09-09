@@ -316,13 +316,6 @@ dialog.finestra::backdrop{background:rgba(4,7,10,.82)}
 .testata p{margin:14px 0 0;color:#9db6a3;max-width:56ch;font-size:17px;line-height:1.62}
 .testata-riga{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px}
 
-/* ── Paginazione ────────────────────────────────────────────────────────── */
-.pagine{display:flex;gap:8px;padding:34px 0;list-style:none;margin:0}
-.pagine a{min-width:40px;height:40px;display:grid;place-items:center;border:1px solid var(--filo);
-  font:700 13px/1 'Courier Prime',monospace;color:var(--spento);transition:border-color .16s,color .16s}
-.pagine a:hover{border-color:var(--verde);color:var(--verde)}
-.pagine [aria-current]{background:var(--verde);border-color:var(--verde);color:var(--nero)}
-
 /* ── Piede ──────────────────────────────────────────────────────────────── */
 .piede{margin-top:0;border-top:1px solid var(--filo);background:var(--pece)}
 .piede-dentro{display:flex;flex-wrap:wrap;gap:18px 34px;justify-content:space-between;
