@@ -161,20 +161,24 @@
    Come nelle righe, l'immagine è spenta e si accende al passaggio.
    I due comandi stanno sempre nello stesso posto, in fondo alla scheda,
    separati dal testo da un filetto: si trovano senza cercarli. */
-.banco{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:18px;
-  list-style:none;margin:0;padding:0}
+.banco{display:grid;grid-template-columns:1fr;gap:18px;list-style:none;margin:0;padding:0}
 .pezzo{position:relative;isolation:isolate;overflow:hidden;display:flex;flex-direction:column;
-  justify-content:flex-end;min-height:520px;background:var(--pannello);border:1px solid var(--filo);
+  justify-content:flex-end;min-height:440px;background:var(--pannello);border:1px solid var(--filo);
   transition:border-color .25s}
 .pezzo:hover,.pezzo:focus-within{border-color:var(--verde)}
 .pezzo-sfondo{position:absolute;inset:0;z-index:-2;width:100%;height:100%;object-fit:cover;
+  object-position:center top;   /* le copertine hanno il titolo disegnato in alto */
   filter:grayscale(1) contrast(1.04) brightness(.85);transition:filter .4s,transform .7s}
 .pezzo:hover .pezzo-sfondo,.pezzo:focus-within .pezzo-sfondo{filter:none;transform:scale(1.035)}
+/* Una scheda per riga: il velo scende da sinistra, dove sta il testo, e lascia
+   l'immagine libera a destra. Sul telefono torna a salire dal basso. */
 .pezzo::before{content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
-  background:linear-gradient(to top,var(--nero) 0%,rgba(4,7,10,.95) 42%,rgba(4,7,10,.6) 64%,rgba(4,7,10,.1) 100%)}
+  background:
+    linear-gradient(to right,var(--nero) 0%,rgba(4,7,10,.93) 36%,rgba(4,7,10,.55) 62%,rgba(4,7,10,.05) 100%),
+    linear-gradient(to top,rgba(4,7,10,.7) 0%,rgba(4,7,10,0) 45%)}
 .pezzo--nuda{min-height:0}
 .pezzo--nuda::before{display:none}
-.pezzo-corpo{padding:26px 24px 24px;display:flex;flex-direction:column;gap:12px}
+.pezzo-corpo{padding:34px 36px 32px;display:flex;flex-direction:column;gap:12px;max-width:680px}
 .pezzo-corpo h3{margin:0;color:var(--bianco);font-family:'Bricolage Grotesque',sans-serif;
   font-variation-settings:'wdth' 80;font-weight:800;font-size:clamp(24px,2.4vw,30px);
   letter-spacing:-.025em;line-height:1.04;text-shadow:0 2px 18px rgba(0,0,0,.55)}
@@ -394,7 +398,9 @@ dialog.finestra::backdrop{background:rgba(4,7,10,.82)}
   .scheda-fatti dd{text-align:left}
   .corpo{font-size:17px}
   .pezzo{min-height:460px}
-  .pezzo-corpo{padding:22px 18px 18px}
+  .pezzo::before{background:linear-gradient(to top,var(--nero) 0%,rgba(4,7,10,.95) 42%,
+    rgba(4,7,10,.6) 64%,rgba(4,7,10,.1) 100%)}
+  .pezzo-corpo{padding:22px 18px 18px;max-width:none}
   .reparto{padding-top:34px}
   .contatori{flex-wrap:wrap}
   .contatori div{flex:1 1 45%;border-right:0}

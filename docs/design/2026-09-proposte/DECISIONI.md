@@ -810,8 +810,11 @@ un filetto; la copertina grande con il titolo sopra.
   una fila di pillole porta alle sezioni, con il conteggio.
 - **Ogni sezione è numerata** (`01`, `02`…) come il sommario degli articoli, con il filetto
   verde sotto il titolo come le testate, e un link agli articoli della sezione.
-- **La scheda ha l'immagine come sfondo.** L'`<img>` riempie tutta la scheda e il testo sta
-  in fondo, su un velo nero che sale dal basso. È un `<img>` e non un `background-image`
+- **Una scheda per riga, con l'immagine come sfondo.** Come nel sito React, le schede stanno
+  una sotto l'altra a tutta larghezza (in un primo giro erano due per riga: Simone le ha
+  volute una per riga). L'`<img>` riempie tutta la scheda; il testo sta a sinistra, largo al
+  massimo 680px, su un velo nero che sfuma verso destra e lascia l'immagine libera. Sul
+  telefono il velo torna a salire dal basso. È un `<img>` e non un `background-image`
   per due ragioni: resta il `loading="lazy"`, e non serve uno `style` in linea. Come nelle
   righe dell'elenco, l'immagine è spenta e si accende al passaggio — anche col tabulatore,
   grazie a `:focus-within`.
