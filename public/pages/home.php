@@ -89,7 +89,7 @@ require __DIR__ . '/../partials/head.php';
         <a class="eti" href="/tutti-i-progetti">Tutti e <?= $numeri['progetti'] ?> →</a>
       </div>
       <ul class="banco">
-        <?php foreach ($vetrina as $p) blocco_progetto($p); ?>
+        <?php foreach ($vetrina as $p) blocco_progetto($p, $nomi_categoria[$p['category']] ?? ''); ?>
       </ul>
     </div></section>
   <?php endif; ?>

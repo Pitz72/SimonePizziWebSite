@@ -84,20 +84,31 @@ function blocco_riga(array $a, bool $mostraCategoria = true, string $nomeCategor
     <?php
 }
 
-/** La scheda di un progetto, con i due comandi sempre in fondo. */
-function blocco_progetto(array $p): void {
+/**
+ * La scheda di un progetto: l'immagine riempie tutta la scheda e il testo le
+ * sta sopra, in fondo, su un velo nero che sale dal basso. I due comandi
+ * restano sempre nello stesso posto, in fondo.
+ *
+ * `$categoria` è il nome da stampare accanto allo stato: in home quello della
+ * sezione, in «Tutti i progetti» quello della sottocategoria — la sezione lì
+ * è già il titolo sopra, e ripeterla su ogni scheda non direbbe niente. Prima
+ * si stampava lo slug grezzo, «narrativa-e-pubblicazioni».
+ */
+function blocco_progetto(array $p, string $categoria = ''): void {
     $copertina = url_immagine($p['cover_image'] ?? '');
     $etichetta = blocco_stato($p['stato'] ?? null);
     ?>
-    <li class="pezzo">
+    <li class="pezzo<?= $copertina === '' ? ' pezzo--nuda' : '' ?>">
       <?php if ($copertina !== ''): ?>
-        <div class="pezzo-figura"><img src="<?= e($copertina) ?>" alt="" loading="lazy"></div>
+        <img class="pezzo-sfondo" src="<?= e($copertina) ?>" alt="" loading="lazy">
       <?php endif; ?>
       <div class="pezzo-corpo">
-        <div class="riga-etichette">
-          <?= $etichetta ?>
-          <span class="eti spento"><?= e($p['category']) ?></span>
-        </div>
+        <?php if ($etichetta !== '' || $categoria !== ''): ?>
+          <div class="riga-etichette">
+            <?= $etichetta ?>
+            <?php if ($categoria !== ''): ?><span class="eti spento"><?= e($categoria) ?></span><?php endif; ?>
+          </div>
+        <?php endif; ?>
         <h3><?= e($p['name']) ?></h3>
         <p><?= e(tronca($p['description'], 200)) ?></p>
         <?php

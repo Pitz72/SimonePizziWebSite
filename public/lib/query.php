@@ -280,15 +280,65 @@ function articoli_di_tag(int $idTag, int $quanti = 12, int $salta = 0): array {
 
 /* ──────────────────────────────── Progetti ─────────────────────────────── */
 
+/**
+ * I progetti visibili, dal più recente.
+ *
+ * L'ordine non si decide più dal pannello: `projects.sort_order` resta nella
+ * tabella (lo legge ancora il vecchio api/projects.php) ma qui non conta. Un
+ * numero da tenere in fila a mano su sedici schede era un lavoro che nessuno
+ * faceva, e l'ordine vero lo dà la sezione in cui sta il progetto.
+ */
 function progetti(?string $categoria = null): array {
     if ($categoria !== null) {
         $q = db()->prepare("SELECT * FROM projects WHERE is_visible = 1 AND category = ?
-            ORDER BY sort_order ASC, created_at DESC");
+            ORDER BY created_at DESC, id DESC");
         $q->execute([$categoria]);
         return $q->fetchAll();
     }
     return db()->query("SELECT * FROM projects WHERE is_visible = 1
-        ORDER BY sort_order ASC, created_at DESC")->fetchAll();
+        ORDER BY created_at DESC, id DESC")->fetchAll();
+}
+
+/**
+ * I progetti divisi per categoria principale, nell'ordine del menu.
+ *
+ * Un progetto può stare in una sottocategoria («L'Albero dei Racconti» sta
+ * sotto «Pubblicazioni»): risale alla sua sezione e si porta dietro il nome
+ * della figlia in `sottocategoria`, che la scheda mostra come etichetta. Chi ha
+ * una categoria che non esiste più finisce in un gruppo «Altro» in fondo,
+ * invece di sparire dalla pagina. Le sezioni senza progetti non compaiono.
+ */
+function progetti_per_sezione(): array {
+    $categorie = db()->query("SELECT id, name, slug, parent_id FROM categories
+        ORDER BY sort_order ASC")->fetchAll();
+
+    $gruppi = [];
+    $radice_di = [];   // slug → [id della radice, nome della sottocategoria]
+    foreach ($categorie as $c) {
+        if (empty($c['parent_id'])) {
+            $gruppi[(int)$c['id']] = ['categoria' => $c, 'progetti' => []];
+            $radice_di[$c['slug']] = [(int)$c['id'], ''];
+        }
+    }
+    foreach ($categorie as $c) {
+        if (!empty($c['parent_id']) && isset($gruppi[(int)$c['parent_id']])) {
+            $radice_di[$c['slug']] = [(int)$c['parent_id'], (string)$c['name']];
+        }
+    }
+
+    $altro = [];
+    foreach (progetti() as $p) {
+        [$radice, $sotto] = $radice_di[(string)$p['category']] ?? [null, ''];
+        $p['sottocategoria'] = $sotto;
+        if ($radice === null) $altro[] = $p;
+        else $gruppi[$radice]['progetti'][] = $p;
+    }
+
+    $gruppi = array_values(array_filter($gruppi, fn($g) => $g['progetti'] !== []));
+    if ($altro !== []) {
+        $gruppi[] = ['categoria' => ['id' => 0, 'name' => 'Altro', 'slug' => ''], 'progetti' => $altro];
+    }
+    return $gruppi;
 }
 
 /* ──────────────────────────────── Conteggi ─────────────────────────────── */
@@ -358,7 +408,7 @@ function cerca(string $testo, int $limite = 12): array {
                 button_a_url AS indirizzo, created_at AS published_at, 'progetto' AS genere
          FROM projects
          WHERE is_visible = 1 AND (name LIKE :come OR description LIKE :come2)
-         ORDER BY sort_order ASC LIMIT 5"
+         ORDER BY created_at DESC LIMIT 5"
     );
     $p->execute([':come' => $come, ':come2' => $come]);
 

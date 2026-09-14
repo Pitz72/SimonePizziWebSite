@@ -223,7 +223,7 @@ function elimina_tag(int $id): void {
 /* ═══════════════════════════════ Progetti ═══════════════════════════════ */
 
 function admin_progetti(): array {
-    return db()->query("SELECT * FROM projects ORDER BY sort_order ASC, created_at DESC")->fetchAll();
+    return db()->query("SELECT * FROM projects ORDER BY created_at DESC, id DESC")->fetchAll();
 }
 
 function admin_progetto(int $id): ?array {
@@ -245,7 +245,8 @@ function salva_progetto(array $d, ?int $id = null): int {
         'button_b_label' => trim((string)($d['button_b_label'] ?? '')),
         'button_b_url'   => trim((string)($d['button_b_url'] ?? '')),
         'is_visible'     => !empty($d['is_visible']) ? 1 : 0,
-        'sort_order'     => (int)($d['sort_order'] ?? 0),
+        // sort_order non si scrive più: l'ordine pubblico è per sezione e per
+        // data. La colonna resta, e un progetto nuovo prende il suo default.
     ];
 
     if ($id) {

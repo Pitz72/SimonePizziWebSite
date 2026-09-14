@@ -32,7 +32,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'button_b_label' => (string)($_POST['button_b_label'] ?? ''),
         'button_b_url'   => (string)($_POST['button_b_url'] ?? ''),
         'is_visible'     => !empty($_POST['is_visible']),
-        'sort_order'     => (int)($_POST['sort_order'] ?? 0),
     ], $id);
 
     torna('/admin/progetti.php?id=' . $nuovo, $id ? 'Progetto salvato.' : 'Progetto creato.');
@@ -45,7 +44,7 @@ $nuovo = isset($_GET['nuovo']) || ($id && !$p);
 
 $vuoto = ['id'=>0,'name'=>'','description'=>'','category'=>'','stato'=>'','cover_image'=>'',
           'button_a_label'=>'','button_a_url'=>'','button_b_label'=>'','button_b_url'=>'',
-          'is_visible'=>1,'sort_order'=>0];
+          'is_visible'=>1];
 $p = $p ?: $vuoto;
 
 $senzaStato = count(array_filter($elenco, fn($x) => empty($x['stato'])));
@@ -65,7 +64,7 @@ if ($senzaStato > 0): ?>
 
 <div class="avvolgi">
   <table class="tabella-lavoro">
-    <thead><tr><th>Progetto</th><th>Categoria</th><th>Stato</th><th>Visibile</th><th class="num">Ordine</th><th class="comandi"></th></tr></thead>
+    <thead><tr><th>Progetto</th><th>Categoria</th><th>Stato</th><th>Visibile</th><th class="comandi"></th></tr></thead>
     <tbody>
       <?php foreach ($elenco as $riga): ?>
         <tr>
@@ -74,7 +73,6 @@ if ($senzaStato > 0): ?>
           <td><?= e($riga['category']) ?></td>
           <td><?= blocco_stato($riga['stato'] ?? null) ?: '<span class="spento">—</span>' ?></td>
           <td><?= $riga['is_visible'] ? 'sì' : '<span class="spento">no</span>' ?></td>
-          <td class="num"><?= (int)$riga['sort_order'] ?></td>
           <td class="comandi"><a class="mini" href="/admin/progetti.php?id=<?= (int)$riga['id'] ?>#scheda">Apri</a></td>
         </tr>
       <?php endforeach; ?>
@@ -172,16 +170,12 @@ if ($senzaStato > 0): ?>
     </div>
   </section>
 
-  <div class="due-colonne">
-    <div class="campo">
-      <label class="eti" for="p-ordine">Ordine</label>
-      <input id="p-ordine" name="sort_order" type="number" value="<?= (int)$p['sort_order'] ?>">
-      <p class="aiuto">Più basso viene prima.</p>
-    </div>
-    <label class="spunta" style="align-self:center">
+  <div class="campo">
+    <label class="spunta">
       <input type="checkbox" name="is_visible" value="1"<?= $p['is_visible'] ? ' checked' : '' ?>>
       <span>Visibile sul sito</span>
     </label>
+    <p class="aiuto">Sul sito i progetti stanno nella sezione della loro categoria, dal più recente.</p>
   </div>
 
   <div class="barra-salva">

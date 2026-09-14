@@ -786,3 +786,43 @@ la leggibilità che c'è.
 
 Nel `<head>` l'ICO va dichiarata **per prima e senza `type`**: è il ripiego per chi l'SVG non
 lo legge, e chi lo legge prende comunque la seconda riga.
+
+## 19. «Tutti i progetti» torna divisa per sezione (14 settembre 2026)
+
+Richiesta di Simone: la pagina pubblica dei progetti deve somigliare di più a quella del
+sito React, restando nello stile dell'Officina.
+
+**Com'era dopo il taglio.** Un'unica griglia di sedici schede, nell'ordine di
+`projects.sort_order`, un numero da impostare a mano dal pannello. Sulla scheda l'immagine
+stava in una fascia 21:9 sopra il testo, e accanto allo stato si leggeva lo slug grezzo
+della categoria («narrativa-e-pubblicazioni»).
+
+**Com'era nel sito React.** I progetti divisi per categoria, con il titolo della sezione e
+un filetto; la copertina grande con il titolo sopra.
+
+**Com'è adesso.**
+
+- **Divisa per categoria principale**, nell'ordine del menu. `progetti_per_sezione()` in
+  `lib/query.php` fa risalire i progetti delle sottocategorie alla loro sezione («L'Albero
+  dei Racconti» finisce sotto «Pubblicazioni») e sulla scheda mette il nome della figlia
+  come etichetta. Le sezioni vuote non compaiono; un progetto con una categoria che non
+  esiste più va in un gruppo «Altro» in fondo invece di sparire. In testa alla pagina,
+  una fila di pillole porta alle sezioni, con il conteggio.
+- **Ogni sezione è numerata** (`01`, `02`…) come il sommario degli articoli, con il filetto
+  verde sotto il titolo come le testate, e un link agli articoli della sezione.
+- **La scheda ha l'immagine come sfondo.** L'`<img>` riempie tutta la scheda e il testo sta
+  in fondo, su un velo nero che sale dal basso. È un `<img>` e non un `background-image`
+  per due ragioni: resta il `loading="lazy"`, e non serve uno `style` in linea. Come nelle
+  righe dell'elenco, l'immagine è spenta e si accende al passaggio — anche col tabulatore,
+  grazie a `:focus-within`.
+- **Nessun ordine dal pannello.** Dentro ogni sezione i progetti vanno dal più recente
+  (`created_at`). Dal pannello sono spariti il campo «Ordine» e la sua colonna nell'elenco,
+  e `salva_progetto()` non scrive più `sort_order`. **La colonna resta nella tabella**:
+  la legge ancora il vecchio `api/projects.php`, e toglierla non porta niente.
+
+In home «Ultimi progetti» usa la stessa scheda; con l'ordine per data le due schede
+mostrate adesso sono davvero le ultime, e l'etichetta è il nome della sezione.
+
+**Un limite da sapere.** Diverse copertine sono icone quadrate (`icon.webp` dei programmi
+Runtime): come sfondo di una scheda larga vengono ritagliate e ingrandite. Il velo le
+tiene leggibili, ma per quei progetti un'immagine orizzontale renderebbe meglio.
