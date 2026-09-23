@@ -58,8 +58,13 @@ def main():
     for campo in ("title", "excerpt", "seo_title", "seo_description"):
         if "'" in meta[campo]:
             sys.exit(f"apostrofo dritto in {campo}")
-    if len(meta["seo_title"]) > 70 or len(meta["seo_description"]) > 200:
-        sys.exit("seo_title oltre 70 o seo_description oltre 200 caratteri: la colonna li taglierebbe")
+    # I limiti sono quelli del verificatore SEO del pannello (assets/js/seo-check.js),
+    # non quelli delle colonne (70 e 200): la bozza 89 era a 62 e 166, e il
+    # pannello ha segnalato tutti e due i campi.
+    if len(meta["seo_title"]) > 60:
+        sys.exit(f"seo_title di {len(meta['seo_title'])} caratteri: oltre 60 Google lo taglia")
+    if not 80 <= len(meta["seo_description"]) <= 165:
+        sys.exit(f"seo_description di {len(meta['seo_description'])} caratteri: va fra 80 e 165")
 
     import paramiko
     cfg = json.load(io.open(os.path.join(RADICE, ".secrets", "deploy.json"), encoding="utf-8"))
