@@ -38,6 +38,19 @@ questo pattern, da usare come modello per i prossimi fix di dati:
 
 Usato in produzione il 20/08/2026 per unire 22 gruppi di tag doppioni.
 
+## Un articolo scritto fuori dal pannello, in bozza
+
+`prepara_bozza.py` + `crea_bozza_articolo.template.php`. La cartella
+dell'articolo (in `scratch/articolo-*/`, fuori da git) ha `corpo.html` con le
+immagini come `src="__IMG_chiave__"`, `meta.json`, `immagini.json` e `img/`
+coi .webp. Il primo comando carica le immagini via SFTP e genera
+`crea_bozza.php`; poi `esegui.py` col percorso ASSOLUTO, prima in anteprima e
+poi con `--applica`. Lo script si ferma se lo slug è già preso, se la
+categoria non esiste o se manca un'immagine sul server.
+
+Usato il 23/09/2026 per la bozza 89, «Il Viaggiatore, da demo di FAVELLA a
+gioco da installare».
+
 ## Verifica periodica
 
 Controllare che nessuno script residuo sia raggiungibile in produzione:

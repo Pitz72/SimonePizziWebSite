@@ -63,3 +63,4 @@ scratch/design/
 scratch/*.txt
 scratch/*.html
 scratch/*.log
+scratch/articolo-*/
