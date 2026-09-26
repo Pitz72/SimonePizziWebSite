@@ -64,3 +64,4 @@ scratch/*.txt
 scratch/*.html
 scratch/*.log
 scratch/articolo-*/
+scratch/runtime-cat/
