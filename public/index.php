@@ -42,6 +42,16 @@ function non_trovata(): never {
     servi('404');
 }
 
+/* ── 0. Le due pagine legali ────────────────────────────────────────────────
+   Sono documenti a sé, con il loro <head> e il loro stile, e la loro canonica
+   dice /privacy e /cookie-policy: così si linkano fra loro, e così le linka il
+   modulo dei contatti. Il motore vecchio le serviva a quell'indirizzo; qui, dal
+   taglio del 7 settembre, nessuna rotta lo faceva, e rispondevano 404. */
+if ($percorso === 'privacy' || $percorso === 'cookie-policy') {
+    require __DIR__ . '/' . $percorso . '.php';
+    exit;
+}
+
 /* ── 1. Le rotte fisse ──────────────────────────────────────────────────── */
 if (isset($rotte[$percorso])) {
     $r = $rotte[$percorso];
