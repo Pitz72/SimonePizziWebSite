@@ -12,7 +12,10 @@
  *
  * Nessun cerca-e-sostituisci: è testo d'autore. Ogni passaggio deve comparire
  * UNA volta sola, identico al carattere; se in produzione il testo è cambiato
- * nel frattempo, lo script non lo tocca e lo dice. Poi guarda TUTTO il testo dei
+ * nel frattempo, lo script non lo tocca e lo dice. Poi porta al modulo i PULSANTI
+ * degli articoli (button_a_link e button_b_link) che puntano esattamente a quel
+ * mailto: il dato sta in colonne a parte e nessuna ricerca nel testo lo trova.
+ * Infine guarda TUTTO il testo dei
  * contenuti (articoli, progetti, categorie) e riferisce ogni altro indirizzo
  * che trova, senza toccarlo: quelli si decidono a mano.
  *
@@ -105,6 +108,43 @@ foreach ($SOSTITUZIONI as [$id, $vecchio, $nuovo]) {
     }
 }
 
+/* ── I pulsanti degli articoli ───────────────────────────────────────────── */
+echo str_repeat('─', 72) . "
+I PULSANTI (button_a_link, button_b_link)
+" . str_repeat('─', 72) . "
+";
+
+$MAILTO = 'mailto:simonepizzi.1972@proton.me';
+$NUOVO_LINK = '/contatti';
+$pulsanti = [];   // id => [colonna => vecchio]
+$etichette = [];  // id => [colonna => [vecchia, nuova]]: «una mail» non è più quello che il pulsante fa
+$ETICHETTE_NUOVE = ['Scrivimi una mail!' => 'Scrivimi!'];
+$q = $pdo->prepare('SELECT id, title, button_a_label, button_a_link, button_b_label, button_b_link FROM articles
+                    WHERE BINARY button_a_link = ? OR BINARY button_b_link = ?');
+$q->execute([$MAILTO, $MAILTO]);
+foreach ($q->fetchAll() as $r) {
+    echo "#{$r['id']}  {$r['title']}
+";
+    foreach (['a', 'b'] as $x) {
+        if ((string)$r["button_{$x}_link"] !== $MAILTO) continue;
+        $pulsanti[(int)$r['id']]["button_{$x}_link"] = $MAILTO;
+        $backup[] = ['id' => (int)$r['id'], 'colonna' => "button_{$x}_link", 'prima' => $MAILTO, 'dopo' => $NUOVO_LINK];
+        echo "    pulsante {$x}: «{$r["button_{$x}_label"]}»   {$MAILTO}  →  {$NUOVO_LINK}
+";
+        $et = (string)$r["button_{$x}_label"];
+        if (isset($ETICHETTE_NUOVE[$et])) {
+            $etichette[(int)$r['id']]["button_{$x}_label"] = [$et, $ETICHETTE_NUOVE[$et]];
+            $backup[] = ['id' => (int)$r['id'], 'colonna' => "button_{$x}_label", 'prima' => $et, 'dopo' => $ETICHETTE_NUOVE[$et]];
+            echo "                etichetta: «{$et}»  →  «{$ETICHETTE_NUOVE[$et]}»
+";
+        }
+    }
+}
+if (!$pulsanti) echo "  nessun pulsante punta a quell'indirizzo (già fatto?)
+";
+echo "
+";
+
 /* ── Tutto il resto: si guarda e si riferisce ────────────────────────────── */
 echo str_repeat('─', 72) . "\nALTRI INDIRIZZI NEI CONTENUTI (non li tocco)\n" . str_repeat('─', 72) . "\n";
 
@@ -126,6 +166,9 @@ foreach ($tabelle as $tab => $_) {
             if ($tab === 'articles' && $c === 'content' && isset($nuovoPerId[(int)$r['id']])) {
                 $testo = $nuovoPerId[(int)$r['id']];
             }
+            if ($tab === 'articles' && isset($pulsanti[(int)$r['id']][$c])) {
+                $testo = $NUOVO_LINK;
+            }
             if ($testo === '' || !preg_match_all($RE_EMAIL, $testo, $m)) continue;
             $residui++;
             $titolo = $r['title'] ?? $r['name'] ?? $r['slug'] ?? '';
@@ -136,7 +179,7 @@ foreach ($tabelle as $tab => $_) {
 if ($residui === 0) echo "  nessuno: dopo questi quattro passaggi il sito non ha più indirizzi nel testo.\n";
 echo "\n";
 
-if (!$daScrivere) exit("Niente da scrivere.\nESITO: " . ($problemi ? 'CON PROBLEMI' : 'OK') . "\n");
+if (!$daScrivere && !$pulsanti) exit("Niente da scrivere.\nESITO: " . ($problemi ? 'CON PROBLEMI' : 'OK') . "\n");
 
 /* ── Il backup, dentro la risposta ───────────────────────────────────────── */
 echo str_repeat('═', 72) . "\nBACKUP — i passaggi PRIMA e DOPO (per tornare indietro: si rimette «prima»)\n" . str_repeat('═', 72) . "\n";
@@ -151,9 +194,24 @@ try {
         $u->execute([$contenuto, $id]);
         $toccate += $u->rowCount();
     }
+    foreach ($etichette as $id => $colonne) {
+        foreach ($colonne as $colonna => [$prima, $dopo]) {
+            $p = $pdo->prepare("UPDATE articles SET `{$colonna}` = ? WHERE id = ? AND BINARY `{$colonna}` = ?");
+            $p->execute([$dopo, $id, $prima]);
+            $toccate += $p->rowCount();
+        }
+    }
+    foreach ($pulsanti as $id => $colonne) {
+        foreach ($colonne as $colonna => $vecchio) {
+            // Il nome della colonna viene da questo script, mai da fuori; il valore si ricontrolla esatto.
+            $p = $pdo->prepare("UPDATE articles SET `{$colonna}` = ? WHERE id = ? AND BINARY `{$colonna}` = ?");
+            $p->execute([$NUOVO_LINK, $id, $vecchio]);
+            $toccate += $p->rowCount();
+        }
+    }
     if ($APPLICA) {
         $pdo->commit();
-        echo "SCRITTO davvero. Articoli toccati: {$toccate}.\n";
+        echo "SCRITTO davvero. Modifiche scritte: {$toccate} (testi e pulsanti).\n";
     } else {
         $pdo->rollBack();
         echo "ANTEPRIMA: rollback fatto, il database non è cambiato.\nPer scrivere davvero: aggiungere --applica.\n";

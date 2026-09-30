@@ -62,16 +62,41 @@ Provato dal sito vero: un messaggio di prova dal modulo è stato accettato e sal
   descrivono il percorso dei messaggi.
 - Il modulo non ha più il campo «oggetto». I messaggi vecchi lo conservano e il pannello lo mostra.
 
+## Conservazione: sei mesi
+
+I messaggi si cancellano da soli **sei mesi dopo l'ultima attività** della conversazione (il
+messaggio di partenza o l'ultima risposta, di chiunque). Una conversazione viva non sparisce perché è
+cominciata sette mesi fa. Il codice è `lib/messaggi_pulizia.php`. Il sito non ha un cron, quindi la
+pulizia parte da sola, al massimo una volta al giorno, dal pannello, dal modulo, da `/messaggio` e
+dalla registrazione di una visita a un articolo. Privacy e modulo dicono sei mesi.
+
+## Nel pannello
+
+L'elenco dei messaggi ha le caselle di selezione, «Seleziona tutti» e i comandi «Segna come letti»,
+«Archivia», «Elimina selezionati» (con conferma). La barra dei comandi resta in vista sotto
+l'intestazione mentre si scorre.
+
+## Indirizzi nei contenuti (30/09/2026)
+
+Sono stati tolti con `scripts/server-tools/togli_email_articoli.php`: quattro passaggi nel testo di
+articoli (15, 30, 78, 79) e tre pulsanti di invito all'azione (articoli 28, 32, 38) che puntavano a un
+`mailto:`, ora a `/contatti`. Il backup dei passaggi sta in `scratch/togli_email_articoli_applicato.txt`.
+Restano solo testi di esempio come «la-tua@email.it» nel modulo della newsletter.
+
+## Backup del deploy
+
+`carica.py` mette i backup in `~/backup-sito/DATA/`, **fuori** dalla cartella pubblica. Fino al
+30/09/2026 stavano in `.backup-DATA/` dentro il sito, leggibili da fuori: le sei cartelle vecchie sono
+state spostate.
+
 ## Fuori portata, di proposito
 
 - **Coda e tetto orario** del Festival (`mail_queue`, contatore dell'ora): qui la posta è poca.
-  Se una newsletter dovesse superare la quota di DreamHost, il pezzo si prende da
+  Se una newsletter dovesse superare la quota di Gmail, il pezzo si prende da
   `FDCA-PHP/public/lib/mailer.php`.
-- **Articoli con indirizzi nel testo**: alcuni articoli pubblicati citano una casella nel corpo
-  (Ecosystem.runtime, Runtime Live Machine Pro, La Santa Maria ha un indirizzo, Quattro verbi che
-  non facevano niente). Sono testo editoriale: vanno riscritti a mano, non con un cerca-e-sostituisci.
-- **Cancellazione dopo 12 mesi**: la privacy policy lo promette per i messaggi del modulo, ma
-  nessun giro di manutenzione lo fa ancora.
+- **Invio della newsletter dal pannello**: `admin/newsletter.php` elenca gli iscritti ma non ha una
+  pagina per scrivere e spedire; l'invio passa ancora da `api/newsletter_send.php`, nato per il
+  pannello React. Da costruire.
 
 ## Come si prova
 
@@ -81,7 +106,7 @@ Il collaudo scrive nel database di sviluppo e cancella quello che crea:
 php scripts/sviluppo/popola-dati-finti.php      # una volta: aggiunge le tabelle nuove
 printf '<?php\ndefine("MAIL_INFO","prova@esempio.it");\nreturn require "%s/public/dev-router.php";\n' "$PWD" > /tmp/router.php
 php -S 127.0.0.1:8124 -t public /tmp/router.php &
-bash docs/collaudo/prova-messaggi.sh http://127.0.0.1:8124      # 24 prove
+bash docs/collaudo/prova-messaggi.sh http://127.0.0.1:8124      # 34 prove
 ```
 
 In sviluppo le email non partono: si scrivono come file in `scratch/posta/`.
