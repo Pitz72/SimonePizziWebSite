@@ -159,6 +159,66 @@ if grep -q 'scaduto' "$CORPO" && [ "$(sql "SELECT COUNT(*) FROM message_replies 
 else no "scadenza in scrittura" "ha scritto"; fi
 
 echo
+echo "La pulizia a sei mesi"
+sql "DELETE FROM messages WHERE email LIKE 'pulizia-%@esempio.it'" >/dev/null
+crea() {  # crea <sigla> <messaggio: mesi fa>
+  sql "INSERT INTO messages (name, email, subject, message, ip_hash, status, created_at) VALUES ('Pulizia $1', 'pulizia-$1@esempio.it', '', 'prova di pulizia', 'x', 'read', datetime('now', '-$2 months'))" >/dev/null
+  sql "SELECT id FROM messages WHERE email = 'pulizia-$1@esempio.it'"
+}
+rispondi() {  # rispondi <id> <quando: mesi fa> <in|out>
+  sql "INSERT INTO message_replies (message_id, body, sent_by, sent_at, delivered, direction) VALUES ($1, 'risposta', 'x', datetime('now', '-$2 months'), 1, '$3')" >/dev/null
+}
+A="$(crea a 7)"                                 # vecchio, nessuna risposta: si cancella
+B="$(crea b 8)"; rispondi "$B" 1 in             # vecchio ma con una risposta di un mese fa: resta
+C="$(crea c 8)"; rispondi "$C" 7 out; rispondi "$C" 7 in   # tutto fermo da sette mesi: si cancella con le risposte
+D="$(crea d 0)"                                 # di oggi: resta
+MARCA="$(php -r 'echo sys_get_temp_dir() . "/sp_messaggi_pulizia_" . date("Ymd");')"
+rm -f "$MARCA"
+posta "$BASE/messaggio" >/dev/null              # la pagina fa partire la pulizia
+esiste() { sql "SELECT COUNT(*) FROM messages WHERE id = $1"; }
+if [ "$(esiste "$A")" = "0" ]; then ok "un messaggio fermo da sette mesi si cancella"; else no "vecchio" "c'è ancora"; fi
+if [ "$(esiste "$B")" = "1" ]; then ok "una conversazione con una risposta recente resta, anche se è cominciata otto mesi fa"; else no "viva" "cancellata"; fi
+if [ "$(esiste "$C")" = "0" ] && [ "$(sql "SELECT COUNT(*) FROM message_replies WHERE message_id = $C")" = "0" ]; then
+  ok "una conversazione ferma da sette mesi si cancella con tutte le sue risposte"
+else no "ferma" "restano righe"; fi
+if [ "$(esiste "$D")" = "1" ]; then ok "un messaggio di oggi resta"; else no "recente" "cancellato"; fi
+sql "UPDATE messages SET created_at = datetime('now', '-9 months') WHERE id = $D" >/dev/null
+posta "$BASE/messaggio" >/dev/null
+if [ "$(esiste "$D")" = "1" ]; then ok "la pulizia parte una volta al giorno: la seconda richiesta non cancella"; else no "una volta al giorno" "ha rigirato"; fi
+sql "DELETE FROM message_replies WHERE message_id IN ($B, $D)" >/dev/null
+sql "DELETE FROM messages WHERE email LIKE 'pulizia-%@esempio.it'" >/dev/null
+
+echo
+echo "Le azioni in blocco"
+nuovo() { sql "INSERT INTO messages (name, email, subject, message, ip_hash, status, created_at) VALUES ('Blocco $1', 'blocco-$1@esempio.it', '', 'prova in blocco', 'x', 'new', datetime('now'))" >/dev/null
+          sql "SELECT id FROM messages WHERE email = 'blocco-$1@esempio.it'"; }
+sql "DELETE FROM messages WHERE email LIKE 'blocco-%@esempio.it'" >/dev/null
+X="$(nuovo x)"; Y="$(nuovo y)"; Z="$(nuovo z)"
+stato_di() { sql "SELECT status FROM messages WHERE id = $1"; }
+curl -s -b "$BISCOTTI" -c "$BISCOTTI" -o "$CORPO" "$BASE/admin/messaggi.php"
+if grep -q 'name="scelti\[\]"' "$CORPO" && grep -q 'id="scegli-tutti"' "$CORPO" && grep -q 'Elimina selezionati' "$CORPO"; then
+  ok "l'elenco ha le caselle, «Seleziona tutti» e i comandi"
+else no "caselle" "mancano nell'elenco"; fi
+G="$(gettone /admin/messaggi.php)"
+blocco() { curl -s -b "$BISCOTTI" -c "$BISCOTTI" -o /dev/null -w '%{http_code}' --data-urlencode "gettone=$G" -d azione=massa -d "fare=$1" "${@:2}" "$BASE/admin/messaggi.php"; }
+blocco letti -d "scelti[]=$X" -d "scelti[]=$Y" >/dev/null
+if [ "$(stato_di "$X")" = "read" ] && [ "$(stato_di "$Y")" = "read" ] && [ "$(stato_di "$Z")" = "new" ]; then
+  ok "«Segna come letti» cambia solo i messaggi scelti"
+else no "letti" "$(stato_di "$X") $(stato_di "$Y") $(stato_di "$Z")"; fi
+blocco archivia -d "scelti[]=$Y" >/dev/null
+if [ "$(stato_di "$Y")" = "archived" ] && [ "$(stato_di "$X")" = "read" ]; then ok "«Archivia» archivia solo quello scelto"; else no "archivia" "$(stato_di "$Y")"; fi
+blocco elimina >/dev/null
+if [ "$(esiste "$X")" = "1" ] && [ "$(esiste "$Y")" = "1" ] && [ "$(esiste "$Z")" = "1" ]; then
+  ok "senza nessuna selezione non si cancella niente"
+else no "nessuna selezione" "ha cancellato"; fi
+sql "INSERT INTO message_replies (message_id, body, sent_by, sent_at, delivered, direction) VALUES ($X, 'r', 'x', datetime('now'), 1, 'out')" >/dev/null
+blocco elimina -d "scelti[]=$X" -d "scelti[]=$Z" -d "scelti[]=abc" -d "scelti[]=0" >/dev/null
+if [ "$(esiste "$X")" = "0" ] && [ "$(esiste "$Z")" = "0" ] && [ "$(esiste "$Y")" = "1" ]    && [ "$(sql "SELECT COUNT(*) FROM message_replies WHERE message_id = $X")" = "0" ]; then
+  ok "«Elimina selezionati» cancella i due scelti con le risposte, ignora i valori sbagliati e lascia l'altro"
+else no "elimina in blocco" "stato inatteso"; fi
+sql "DELETE FROM messages WHERE email LIKE 'blocco-%@esempio.it'" >/dev/null
+
+echo
 echo "Pulizia"
 G="$(gettone "/admin/messaggi.php?vedi=$ID")"
 curl -s -b "$BISCOTTI" -c "$BISCOTTI" -o /dev/null --data-urlencode "gettone=$G" -d azione=elimina -d "id=$ID" "$BASE/admin/messaggi.php"

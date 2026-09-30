@@ -434,6 +434,36 @@ function elimina_messaggio(int $id): void {
     db()->prepare("DELETE FROM messages WHERE id = ?")->execute([$id]);
 }
 
+/** Numeri di messaggio validi, senza doppioni: quello che arriva da un modulo non si fida. */
+function id_messaggi(array $ids): array {
+    return array_values(array_unique(array_filter(array_map('intval', $ids), fn($n) => $n > 0)));
+}
+
+/** Elimina più conversazioni insieme, con le loro risposte. Dice quante. */
+function elimina_messaggi(array $ids): int {
+    $ids = id_messaggi($ids);
+    foreach (array_chunk($ids, 100) as $gruppo) {
+        $segni = implode(',', array_fill(0, count($gruppo), '?'));
+        db()->prepare("DELETE FROM message_replies WHERE message_id IN ($segni)")->execute($gruppo);
+        db()->prepare("DELETE FROM messages WHERE id IN ($segni)")->execute($gruppo);
+    }
+    return count($ids);
+}
+
+/** Cambia lo stato a più messaggi insieme. `read_at` segue lo stato, come in imposta_stato_messaggio(). */
+function imposta_stato_messaggi(array $ids, string $stato): int {
+    if (!isset(STATI_MESSAGGIO[$stato])) return 0;
+    $ids = id_messaggi($ids);
+    foreach (array_chunk($ids, 100) as $gruppo) {
+        $segni = implode(',', array_fill(0, count($gruppo), '?'));
+        $letto = $stato === 'new' ? 'NULL' : 'COALESCE(read_at, ?)';
+        $val = $stato === 'new' ? [$stato] : [$stato, date('Y-m-d H:i:s')];
+        db()->prepare("UPDATE messages SET status = ?, read_at = $letto WHERE id IN ($segni)")
+            ->execute(array_merge($val, $gruppo));
+    }
+    return count($ids);
+}
+
 function messaggi_da_leggere(): int {
     return (int)db()->query("SELECT COUNT(*) FROM messages WHERE status = 'new'")->fetchColumn();
 }
