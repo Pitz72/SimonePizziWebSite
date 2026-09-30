@@ -39,6 +39,12 @@ Lo schema si aggiorna da solo (`assicura_messaggistica()` in `lib/db_maintenance
 prendono lo stato da `read_at`. Si applica alla prima visita di `/contatti`, di `/messaggio` o
 del pannello.
 
+**Fatto il 30/09/2026.** Le cinque costanti sono già nel `config.php` di produzione (`api/config.php`),
+aggiunte con `scripts/deploy/configura_posta.py`, che legge `.secrets/smtp.txt` (fuori da git), copia
+prima il file in `~/backup-config/` sul server e rimette la copia se il sito smette di rispondere.
+La casella è quella Gmail di Simone, con una password per app dedicata («sito simonepizzi»); la prova di
+invio è arrivata. Resta da caricare il codice.
+
 ## Cosa è cambiato in giro
 
 - `api/messages.php` (POST pubblico del sito React, `mail()` nudo, indirizzo scritto nel codice)
