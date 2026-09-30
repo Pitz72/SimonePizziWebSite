@@ -11,6 +11,7 @@
 
 require_once 'db.php';
 require_once 'auth_helper.php';
+require_once dirname(__DIR__) . '/lib/mailer.php';
 
 date_default_timezone_set('Europe/Rome');
 
@@ -284,10 +285,7 @@ echo json_encode(['error' => 'Metodo non supportato.']);
 function sendConfirmEmail(string $email, string $name, string $token): void
 {
     // [v1.19.0] URL canonico hardcoded (SITE_URL), mai da HTTP_HOST (link poisoning)
-    $host        = parse_url(SITE_URL, PHP_URL_HOST);
     $confirmLink = SITE_URL . '/newsletter/confermato?token=' . urlencode($token);
-    $from        = 'newsletter@' . $host;
-    $subject     = '=?UTF-8?B?' . base64_encode('Conferma la tua iscrizione — Simone Pizzi') . '?=';
 
     $html = '<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8">
 <title>Conferma iscrizione</title></head>
@@ -325,11 +323,5 @@ function sendConfirmEmail(string $email, string $name, string $token): void
 </td></tr></table>
 </body></html>';
 
-    $headers  = "MIME-Version: 1.0\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-    $headers .= "From: Simone Pizzi <{$from}>\r\n";
-    $headers .= "Reply-To: {$from}\r\n";
-    $headers .= "X-Mailer: PHP/" . phpversion();
-
-    mail($email, $subject, $html, $headers);
+    manda_posta($email, 'Conferma la tua iscrizione — Simone Pizzi', $html, ['from_name' => 'Simone Pizzi']);
 }

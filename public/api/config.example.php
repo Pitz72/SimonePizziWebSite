@@ -16,3 +16,20 @@ define('BACKUP_CRON_SECRET', 'SOSTITUIRE_CON_STRINGA_CASUALE_64_CHAR');
 // (Opzionale) URL canonico del sito per i link nelle email.
 // Se non definito, db.php usa il default di produzione.
 // define('SITE_URL', 'https://simonepizzi.runtimeradio.it');
+
+// -----------------------------------------------------------------
+// Posta in uscita (lib/mailer.php). Senza SMTP_HOST e SMTP_USER il sito
+// ricade su mail(), che su DreamHost perde un messaggio su due.
+// Serve una casella vera, dello stesso dominio del mittente.
+// -----------------------------------------------------------------
+define('SMTP_HOST', 'smtp.dreamhost.com');
+define('SMTP_PORT', 587);                          // 587 = STARTTLS, 465 = SSL
+define('SMTP_USER', 'no-reply@YOUR_DOMAIN');
+define('SMTP_PASS', 'YOUR_MAILBOX_PASSWORD');
+// define('MAIL_FROM', 'no-reply@YOUR_DOMAIN');    // facoltativo: default = SMTP_USER
+
+// Dove il sito avvisa Simone (nuovo messaggio, risposta arrivata) e dove vanno
+// le risposte di chi preme «Rispondi» invece del pulsante. Non compare in
+// nessuna pagina del sito. Vuoto = nessun avviso per email: i messaggi restano
+// comunque nel pannello.
+define('MAIL_INFO', 'YOUR_PRIVATE_INBOX@example.com');

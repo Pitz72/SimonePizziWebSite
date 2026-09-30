@@ -10,6 +10,8 @@
 
 declare(strict_types=1);
 
+require_once __DIR__ . '/mailer.php';
+
 const TENTATIVI_MAX      = 8;      // per indirizzo IP
 const TENTATIVI_FINESTRA = 900;    // 15 minuti, in secondi
 
@@ -223,17 +225,11 @@ function manda_link_recupero(string $email, string $link): bool {
         return false;
     }
 
-    $oggetto = '=?UTF-8?B?' . base64_encode('Reimposta la password del pannello') . '?=';
     $corpo = '<p>Qualcuno ha chiesto di reimpostare la password del pannello di '
            . e(SITO_NOME) . '.</p>'
            . '<p><a href="' . e($link) . '">Scegli una password nuova</a></p>'
            . '<p>Il link vale un\'ora. Se non sei stato tu, non serve fare niente: '
            . 'senza il link non cambia nulla.</p>';
 
-    $intestazioni = "MIME-Version: 1.0\r\n"
-                  . "Content-Type: text/html; charset=UTF-8\r\n"
-                  . 'From: ' . SITO_NOME . ' <no-reply@' . parse_url(SITO_URL, PHP_URL_HOST) . ">\r\n"
-                  . 'X-Mailer: PHP/' . phpversion();
-
-    return @mail($email, $oggetto, $corpo, $intestazioni);
+    return manda_posta($email, 'Reimposta la password del pannello', $corpo);
 }

@@ -65,3 +65,6 @@ scratch/*.html
 scratch/*.log
 scratch/articolo-*/
 scratch/runtime-cat/
+
+# Le email che il sito di sviluppo "spedisce": file HTML da guardare, non posta
+scratch/posta/

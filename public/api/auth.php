@@ -1,5 +1,6 @@
 <?php
 require_once 'db.php';
+require_once dirname(__DIR__) . '/lib/mailer.php';
 
 // [v1.5.8] Cookie di sessione con flag di sicurezza: HttpOnly, Secure, SameSite=Strict
 ini_set('session.cookie_httponly', 1);
@@ -226,14 +227,9 @@ try {
 function sendRecoveryEmail($to, $username, $token) {
     // [v1.19.0] URL canonico hardcoded (SITE_URL), mai da HTTP_HOST:
     // previene il password reset poisoning via header Host falsificato.
-    $host = parse_url(SITE_URL, PHP_URL_HOST);
     $link = SITE_URL . "/admin/reset-password/{$token}";
     
-    $subject = "Recupero Password — Simone Pizzi";
-    $subjectEncoded = '=?UTF-8?B?' . base64_encode($subject) . '?=';
     
-    $from = 'noreply@' . $host;
-    $replyTo = 'simonepizzi.1972@proton.me';
 
     $html = "<!DOCTYPE html><html><body style='background:#0a0a0a; color:#fff; font-family:sans-serif; padding:40px;'>";
     $html .= "<div style='max-width:600px; margin:0 auto; background:#111; border:1px solid #222; border-radius:12px; padding:30px;'>";
@@ -247,13 +243,7 @@ function sendRecoveryEmail($to, $username, $token) {
     $html .= "<p style='font-size:12px; color:#666;'>Se non hai richiesto tu questo reset, ignora pure questa email.</p>";
     $html .= "</div></body></html>";
 
-    $headers  = "MIME-Version: 1.0\r\n";
-    $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-    $headers .= "From: Simone Pizzi <{$from}>\r\n";
-    $headers .= "Reply-To: {$replyTo}\r\n";
-    $headers .= "X-Mailer: PHP/" . phpversion();
-
-    return mail($to, $subjectEncoded, $html, $headers);
+    return manda_posta($to, 'Recupero Password — Simone Pizzi', $html, ['from_name' => 'Simone Pizzi']);
 }
 ?>
 

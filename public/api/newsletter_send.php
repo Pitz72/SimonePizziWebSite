@@ -8,6 +8,7 @@
 
 require_once 'db.php';
 require_once 'auth_helper.php';
+require_once dirname(__DIR__) . '/lib/mailer.php';
 
 date_default_timezone_set('Europe/Rome');
 
@@ -67,21 +68,16 @@ if ($method === 'POST') {
         // [v1.19.0] URL canonico hardcoded (SITE_URL), mai da HTTP_HOST (link poisoning)
         $protocol = parse_url(SITE_URL, PHP_URL_SCHEME);
         $host     = parse_url(SITE_URL, PHP_URL_HOST);
-        $from     = 'newsletter@' . $host;
-        $replyTo  = 'simonepizzi.1972@proton.me';
 
         $sent = 0;
         foreach ($recipients as $r) {
             $html = buildNewsletterHtml($subject, $body, $r['name'] ?: 'Amico', $r['unsubscribe_token'], $protocol, $host);
-            $encodedSubject = '=?UTF-8?B?' . base64_encode($subject . ' — Simone Pizzi') . '?=';
-
-            $headers  = "MIME-Version: 1.0\r\n";
-            $headers .= "Content-Type: text/html; charset=UTF-8\r\n";
-            $headers .= "From: Simone Pizzi <{$from}>\r\n";
-            $headers .= "Reply-To: {$replyTo}\r\n";
-            $headers .= "X-Mailer: PHP/" . phpversion();
-
-            if (mail($r['email'], $encodedSubject, $html, $headers)) {
+            /* Da SMTP autenticato, come ogni altra email del sito (lib/mailer.php).
+               Le risposte di chi preme «Rispondi» vanno alla casella di Simone, che
+               non compare in nessuna pagina: sta in api/config.php (MAIL_INFO). */
+            $opz = ['from_name' => 'Simone Pizzi'];
+            if (posta_info() !== '') $opz['reply_to'] = posta_info();
+            if (manda_posta($r['email'], $subject . ' — Simone Pizzi', $html, $opz)) {
                 $sent++;
             }
         }
