@@ -117,8 +117,81 @@ function assicura_stato_progetti(PDO $db): bool {
     return $ok;
 }
 
+/**
+ * La messaggistica: `messages.status`, `messages.reply_token` e la tabella
+ * `message_replies`.
+ *
+ * Il modulo contatti era un elenco da leggere: il messaggio arrivava, Simone lo
+ * leggeva nel pannello e rispondeva dal suo programma di posta, con il suo
+ * indirizzo. Adesso la conversazione resta dentro il sito (lib/contatti.php):
+ * la risposta parte dal pannello, e chi la riceve continua da una pagina del
+ * sito con un link personale. Servono tre cose che prima non c'erano.
+ *
+ *  - `status` (new / read / replied / archived): dice a che punto è la
+ *    conversazione. `read_at` resta com'è, per lo storico. Le righe già
+ *    presenti prendono lo stato dalla loro `read_at`.
+ *  - `reply_token`: il gettone della pagina /messaggio, 32 caratteri
+ *    esadecimali, uno per conversazione, creato alla prima risposta.
+ *  - `message_replies`: le risposte, con `direction` = 'out' se le ha scritte
+ *    Simone e 'in' se le ha scritte chi aveva scritto.
+ *
+ * La chiamano sia il pannello sia le due pagine pubbliche (/contatti e
+ * /messaggio): il primo messaggio può arrivare prima che qualcuno entri.
+ * Chi la chiama da lì paga un SHOW COLUMNS una volta per richiesta, e solo su
+ * quelle due pagine.
+ */
+function assicura_messaggistica(PDO $db): bool {
+    static $ok = null;
+    if ($ok !== null) return $ok;
+    if (IN_SVILUPPO) return $ok = true;
+
+    try {
+        // La tabella di partenza c'è in produzione da sempre; qui è la rete di sicurezza.
+        $db->exec("CREATE TABLE IF NOT EXISTS messages (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(120) NOT NULL,
+            email VARCHAR(254) NOT NULL,
+            subject VARCHAR(200) NOT NULL DEFAULT '',
+            message TEXT NOT NULL,
+            ip_hash VARCHAR(64) DEFAULT NULL,
+            read_at DATETIME DEFAULT NULL,
+            created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+        if (!colonna_esiste($db, 'messages', 'status')) {
+            $db->exec("ALTER TABLE messages ADD COLUMN status VARCHAR(12) NOT NULL DEFAULT 'new'");
+            $db->exec("UPDATE messages SET status = 'read' WHERE read_at IS NOT NULL");
+            error_log('db_maintenance: creata colonna messages.status');
+        }
+        if (!colonna_esiste($db, 'messages', 'reply_token')) {
+            $db->exec("ALTER TABLE messages ADD COLUMN reply_token CHAR(32) NULL,
+                       ADD UNIQUE KEY uq_messages_reply_token (reply_token)");
+            error_log('db_maintenance: creata colonna messages.reply_token');
+        }
+        $db->exec("CREATE TABLE IF NOT EXISTS message_replies (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            message_id INT NOT NULL,
+            body TEXT NOT NULL,
+            sent_by VARCHAR(120) NOT NULL DEFAULT '',
+            sent_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            delivered TINYINT(1) NOT NULL DEFAULT 1,
+            direction VARCHAR(3) NOT NULL DEFAULT 'out',
+            KEY idx_message_replies_message (message_id, sent_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+        annota_migrazione($db, '2026-09-30_messaggistica',
+            'Conversazioni: messages.status, messages.reply_token, tabella message_replies');
+        $ok = true;
+    } catch (Throwable $e) {
+        error_log('db_maintenance [messaggistica] FALLITA: ' . $e->getMessage());
+        $ok = false;
+    }
+    return $ok;
+}
+
 /** Tutte insieme, all'ingresso nel pannello: è il primo momento utile. */
 function assicura_schema(PDO $db): void {
     assicura_colonne_seo($db);
     assicura_stato_progetti($db);
+    assicura_messaggistica($db);
 }

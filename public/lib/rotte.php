@@ -42,6 +42,17 @@ return [
         'desc'    => 'Scrivere a Simone Pizzi per collaborazioni, domande sui progetti, segnalazioni di errori nei giochi o per raccontare che qualcosa non funziona.',
     ],
 
+    /* La conversazione con Simone: ci si arriva solo dal pulsante nelle sue
+       email, con un gettone nell'indirizzo. Fuori dall'indice, e non nella
+       sitemap: è una pagina personale, non un contenuto. */
+    'messaggio' => [
+        'pagina'  => 'messaggio',
+        'briciola' => 'Conversazione',
+        'title'   => 'La conversazione — Simone Pizzi',
+        'desc'    => 'La conversazione con Simone Pizzi, aperta dal link ricevuto per email.',
+        'noindex' => true,
+    ],
+
     /* Le due pagine di esito della newsletter esistono per chi arriva dal link
        nella email. Non hanno niente da offrire a un motore di ricerca, e una
        di esse è per definizione la fine di un rapporto: restano fuori dall'indice. */

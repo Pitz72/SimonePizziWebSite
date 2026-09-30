@@ -380,21 +380,62 @@ function conta_media(): int {
 
 /* ══════════════════════════════ Messaggi ════════════════════════════════ */
 
-function admin_messaggi(): array {
-    return db()->query("SELECT * FROM messages ORDER BY created_at DESC")->fetchAll();
+/** Gli stati di una conversazione, con l'etichetta che il pannello mostra. */
+const STATI_MESSAGGIO = ['new' => 'Nuovi', 'read' => 'Letti', 'replied' => 'Risposti', 'archived' => 'Archiviati'];
+
+/**
+ * I messaggi, con quanti ne ho risposto. Prima i nuovi, poi per data.
+ * «Risposte» conta solo quelle di Simone: nella stessa tabella stanno anche
+ * quelle arrivate dalla pagina pubblica.
+ */
+function admin_messaggi(string $stato = ''): array {
+    $sql = "SELECT m.*, (SELECT COUNT(*) FROM message_replies r
+                          WHERE r.message_id = m.id AND r.direction = 'out') AS n_risposte
+            FROM messages m";
+    $val = [];
+    if (isset(STATI_MESSAGGIO[$stato])) { $sql .= ' WHERE m.status = ?'; $val[] = $stato; }
+    $sql .= " ORDER BY CASE WHEN m.status = 'new' THEN 0 ELSE 1 END, m.created_at DESC";
+    $st = db()->prepare($sql);
+    $st->execute($val);
+    return $st->fetchAll();
+}
+
+function admin_messaggio(int $id): ?array {
+    $st = db()->prepare("SELECT * FROM messages WHERE id = ?");
+    $st->execute([$id]);
+    return $st->fetch() ?: null;
+}
+
+/** Quanti messaggi per stato, più il totale. */
+function conteggi_messaggi(): array {
+    $c = ['totale' => 0] + array_fill_keys(array_keys(STATI_MESSAGGIO), 0);
+    foreach (db()->query("SELECT status, COUNT(*) n FROM messages GROUP BY status") as $r) {
+        if (isset($c[$r['status']])) $c[$r['status']] = (int)$r['n'];
+        $c['totale'] += (int)$r['n'];
+    }
+    return $c;
 }
 
 function segna_messaggio_letto(int $id): void {
-    db()->prepare("UPDATE messages SET read_at = ? WHERE id = ? AND read_at IS NULL")
+    db()->prepare("UPDATE messages SET status = 'read', read_at = ? WHERE id = ? AND status = 'new'")
         ->execute([date('Y-m-d H:i:s'), $id]);
 }
 
+function imposta_stato_messaggio(int $id, string $stato): void {
+    if (!isset(STATI_MESSAGGIO[$stato])) return;
+    /* `read_at` segue lo stato: «nuovo» vuol dire non ancora letto. */
+    db()->prepare("UPDATE messages SET status = ?, read_at = " . ($stato === 'new' ? 'NULL' : 'COALESCE(read_at, ?)') . " WHERE id = ?")
+        ->execute($stato === 'new' ? [$stato, $id] : [$stato, date('Y-m-d H:i:s'), $id]);
+}
+
+/** Elimina la conversazione intera: il messaggio e tutte le risposte. */
 function elimina_messaggio(int $id): void {
+    db()->prepare("DELETE FROM message_replies WHERE message_id = ?")->execute([$id]);
     db()->prepare("DELETE FROM messages WHERE id = ?")->execute([$id]);
 }
 
 function messaggi_da_leggere(): int {
-    return (int)db()->query("SELECT COUNT(*) FROM messages WHERE read_at IS NULL")->fetchColumn();
+    return (int)db()->query("SELECT COUNT(*) FROM messages WHERE status = 'new'")->fetchColumn();
 }
 
 /* ═════════════════════════════ Newsletter ═══════════════════════════════ */

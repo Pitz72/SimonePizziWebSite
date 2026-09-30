@@ -50,7 +50,7 @@ $db = new PDO('sqlite:' . FILE_DB, null, null, [
    ogni giro. Senza il DROP, un CREATE IF NOT EXISTS lascerebbe in piedi lo
    schema vecchio e le colonne nuove non comparirebbero — che è esattamente
    quello che è successo la prima volta che i nomi sono cambiati. */
-foreach (['users','login_attempts','password_resets','messages','subscribers',
+foreach (['users','login_attempts','password_resets','messages','message_replies','subscribers',
           'article_reactions','article_views','cta_clicks','media','app_settings'] as $t) {
     $db->exec("DROP TABLE IF EXISTS $t");
 }
@@ -73,9 +73,17 @@ $tabelle = [
         expires_at TEXT)",
 
     // Chi scrive dal modulo contatti.
+    /* Le conversazioni (lib/contatti.php): `status` e `reply_token` li crea in
+       produzione assicura_messaggistica(), che in sviluppo non gira. */
     "CREATE TABLE IF NOT EXISTS messages (
         id INTEGER PRIMARY KEY, name TEXT, email TEXT, subject TEXT, message TEXT,
-        ip_hash TEXT, read_at TEXT NULL, created_at TEXT)",
+        ip_hash TEXT, read_at TEXT NULL, created_at TEXT,
+        status TEXT NOT NULL DEFAULT 'new', reply_token TEXT NULL UNIQUE)",
+
+    "CREATE TABLE IF NOT EXISTS message_replies (
+        id INTEGER PRIMARY KEY, message_id INTEGER NOT NULL, body TEXT NOT NULL,
+        sent_by TEXT NOT NULL DEFAULT '', sent_at TEXT NOT NULL,
+        delivered INTEGER NOT NULL DEFAULT 1, direction TEXT NOT NULL DEFAULT 'out')",
 
     // `name` c'è anche in produzione, anche se il pannello non la mostra.
     "CREATE TABLE IF NOT EXISTS subscribers (
@@ -162,12 +170,12 @@ $messaggi = [
      "Nell'articolo su Sbargold c'è scritto «lingoutto» invece di «lingotto», nel terzo paragrafo. Cosa da niente, ma tant'è.", 45, true],
 ];
 
-$q = $db->prepare("INSERT INTO messages (name,email,subject,message,ip_hash,read_at,created_at)
-                   VALUES (?,?,?,?,?,?,?)");
+$q = $db->prepare("INSERT INTO messages (name,email,subject,message,ip_hash,read_at,created_at,status)
+                   VALUES (?,?,?,?,?,?,?,?)");
 foreach ($messaggi as [$nome, $email, $oggetto, $testo, $giorniFa, $letto]) {
     $creato = $quando($giorniFa);
     $q->execute([$nome, $email, $oggetto, $testo, hash('sha256', $email),
-                 $letto ? $quando($giorniFa - 1) : null, $creato]);
+                 $letto ? $quando($giorniFa - 1) : null, $creato, $letto ? 'read' : 'new']);
 }
 
 /* ── Gli iscritti alla newsletter ────────────────────────────────────────── */
