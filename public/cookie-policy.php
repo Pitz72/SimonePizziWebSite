@@ -100,7 +100,7 @@ $year     = date('Y');
     </div>
     <div class="section">
         <h2><span>📞</span> Contatti</h2>
-        <p><strong>Simone Pizzi</strong> — <a href="mailto:simonepizzi.1972@proton.me">simonepizzi.1972@proton.me</a></p>
+        <p><strong>Simone Pizzi</strong> — <a href="<?= $baseUrl ?>/contatti">modulo dei contatti del sito</a></p>
         <p>Per l'informativa completa: <a href="<?= $baseUrl ?>/privacy">Privacy Policy</a>.</p>
     </div>
 </main>

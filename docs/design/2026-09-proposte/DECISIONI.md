@@ -176,6 +176,10 @@ JavaScript del sito chiama davvero:
 post/redirect/get): funziona anche senza JavaScript, e `api/messages.php` resta solo per il
 pannello.
 
+> **Aggiornamento 30/09/2026.** Il gestore del POST non era mai stato scritto, e il pannello
+> non usa più `api/messages.php`: il file è stato tolto. Il modulo, le risposte e la pagina
+> `/messaggio` sono descritti in [../../2026-09-30-messaggistica.md](../../2026-09-30-messaggistica.md).
+
 Tutti gli altri (`articles`, `projects`, `categories`, `tags`, `media`, `upload`,
 `navigation`, `stats`, `settings`, `auth`, `backup`, `optimize_db`, `newsletter_send`)
 diventano **endpoint di solo pannello**: restano dove sono, ma non li chiama più nessuna

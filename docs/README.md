@@ -8,6 +8,11 @@ Benvenuto nel repository della documentazione. In linea con la filosofia di semp
   di quello che c'è, e il lavoro deciso da Simone: **prima due o tre proposte di design da mostrare
   visivamente**, poi la migrazione abbandonando React. Niente codice prima della scelta del design.
 
+## ✉️ Messaggistica (30/09/2026)
+- **[Messaggistica: niente email in pagina](2026-09-30-messaggistica.md)** — il modulo contatti,
+  le risposte dal pannello e la pagina `/messaggio`, portati dal Festival. Cosa mettere in
+  `api/config.php` prima del caricamento, e come si prova (`docs/collaudo/prova-messaggi.sh`).
+
 ## 📌 Backlog e pianificazione
 Il documento vivo su cosa è fatto e cosa manca è la **roadmap**:
 - **[Roadmap evolutiva](25-04-2026-roadmap.md)** — feature completate, backlog per priorità, minori aperti.

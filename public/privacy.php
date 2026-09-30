@@ -193,7 +193,7 @@ $year     = date('Y');
     <div class="section">
         <h2><span class="icon">👤</span> Titolare del Trattamento</h2>
         <p><strong>Simone Pizzi</strong><br>
-        Indirizzo email: <a href="mailto:simonepizzi.1972@proton.me">simonepizzi.1972@proton.me</a></p>
+        Contatto: <a href="<?= $baseUrl ?>/contatti">modulo dei contatti del sito</a></p>
         <p>Il Titolare può essere contattato in qualsiasi momento per esercitare i diritti previsti dal GDPR o per qualsiasi richiesta relativa al trattamento dei dati personali.</p>
     </div>
 
@@ -213,7 +213,7 @@ $year     = date('Y');
                 <tbody>
                     <tr>
                         <td><strong>Form Contatti</strong></td>
-                        <td>Nome, Email, Oggetto, Messaggio</td>
+                        <td>Nome, Email, Messaggio (e le risposte scambiate)</td>
                         <td>Rispondere alla richiesta dell'utente</td>
                         <td>Consenso esplicito (checkbox obbligatoria)</td>
                         <td>Fino a 12 mesi, o su richiesta di cancellazione</td>
@@ -261,13 +261,13 @@ $year     = date('Y');
             <li>L'iscrizione si attiva solo dopo il click sul link di conferma</li>
             <li>Ogni email inviata contiene un link di disiscrizione immediata</li>
         </ul>
-        <p style="margin-top:12px;">Per disiscriversi è sufficiente cliccare il link in fondo a qualsiasi email ricevuta, oppure inviare richiesta a <a href="mailto:simonepizzi.1972@proton.me">simonepizzi.1972@proton.me</a>.</p>
+        <p style="margin-top:12px;">Per disiscriversi è sufficiente cliccare il link in fondo a qualsiasi email ricevuta, oppure scrivere dal <a href="<?= $baseUrl ?>/contatti">modulo dei contatti</a>.</p>
     </div>
 
     <div class="section">
         <h2><span class="icon">🔒</span> Comunicazione e Trasferimento dei Dati</h2>
         <p>I dati personali sono conservati su server situati in Europa e <strong>non vengono ceduti, venduti o comunicati a terze parti</strong>, salvo obblighi di legge.</p>
-        <p>I messaggi ricevuti tramite il form contatti vengono inoltrati via email al Titolare e conservati nel database del sito. Non vengono condivisi con soggetti esterni.</p>
+        <p>I messaggi ricevuti tramite il form contatti vengono salvati nel database del sito, e al Titolare ne arriva un avviso per email. La risposta parte per email dal sito; chi la riceve può continuare la conversazione da una pagina del sito, raggiunta con un link personale che vale 60 giorni dall'ultima risposta del Titolare. Il sito non pubblica nessun indirizzo email. I messaggi non vengono condivisi con soggetti esterni.</p>
     </div>
 
     <div class="section">
@@ -282,7 +282,7 @@ $year     = date('Y');
             <li><strong>Opposizione</strong> — opporsi al trattamento basato su legittimo interesse</li>
             <li><strong>Revoca del consenso</strong> — in qualsiasi momento, senza pregiudicare la liceità del trattamento precedente</li>
         </ul>
-        <p style="margin-top:12px;">Per esercitare questi diritti, scrivi a: <a href="mailto:simonepizzi.1972@proton.me">simonepizzi.1972@proton.me</a><br>
+        <p style="margin-top:12px;">Per esercitare questi diritti, scrivi dal <a href="<?= $baseUrl ?>/contatti">modulo dei contatti</a>.<br>
         Il Titolare risponderà entro 30 giorni dalla ricezione della richiesta.</p>
         <p>In caso di risposta insoddisfacente, hai il diritto di presentare reclamo al <a href="https://www.garanteprivacy.it" target="_blank" rel="noopener noreferrer">Garante per la protezione dei dati personali</a>.</p>
     </div>
