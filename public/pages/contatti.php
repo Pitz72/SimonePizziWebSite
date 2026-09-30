@@ -78,7 +78,7 @@ require __DIR__ . '/../partials/head.php';
       <label class="consenso">
         <input type="checkbox" name="consenso" value="1" required>
         <span>Ho letto l'<a href="/privacy" target="_blank" rel="noopener">informativa privacy</a>:
-          i dati che scrivo servono solo a rispondermi.</span>
+          i dati che scrivo servono solo a rispondermi e si cancellano da soli sei mesi dopo l'ultimo messaggio.</span>
       </label>
 
       <div><button class="btn btn-pieno" type="submit">Manda il messaggio</button></div>

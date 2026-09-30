@@ -25,3 +25,7 @@ header('X-Robots-Tag: noindex, nofollow');
 header('Cache-Control: no-store, no-cache, must-revalidate');
 
 assicura_schema(db());
+
+// La promessa della privacy: i messaggi si cancellano sei mesi dopo l'ultimo scambio.
+require_once __DIR__ . '/../lib/messaggi_pulizia.php';
+messaggi_pulizia(db());

@@ -36,6 +36,12 @@ try {
         }
 
         if ($type === 'view') {
+            // La pulizia dei messaggi (lib/messaggi_pulizia.php) non ha un cron: parte dalle visite, al massimo una volta al giorno.
+            try {
+                require_once dirname(__DIR__) . '/lib/messaggi_pulizia.php';
+                messaggi_pulizia($pdo);
+            } catch (Throwable $_) { /* la pulizia non deve mai fermare il conteggio */ }
+
             // Dedup: stesso IP (hashed) + stesso articolo + stesso giorno -> non conta
             $ip_hash   = hash('sha256', ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . date('Y-m-d'));
             $view_date = date('Y-m-d');

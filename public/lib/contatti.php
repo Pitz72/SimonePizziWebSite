@@ -43,6 +43,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/mailer.php';
 require_once __DIR__ . '/db_maintenance.php';
+require_once __DIR__ . '/messaggi_pulizia.php';
 
 const CONTATTI_VALIDITA_GIORNI = 60;
 /** Quanti messaggi nuovi in un'ora dalla stessa rete. */
@@ -244,6 +245,7 @@ function contatti_invia(array $post): array {
 
     $db = db();
     if (!assicura_messaggistica($db)) return [false, 'Non riesco a registrare il messaggio adesso. Riprova fra qualche minuto.'];
+    messaggi_pulizia($db);   // sei mesi dall'ultimo scambio, poi si cancella: vedi lib/messaggi_pulizia.php
 
     $rete = hash('sha256', (string)($_SERVER['REMOTE_ADDR'] ?? 'sconosciuto'));
     try {

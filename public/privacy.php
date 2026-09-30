@@ -216,7 +216,7 @@ $year     = date('Y');
                         <td>Nome, Email, Messaggio (e le risposte scambiate)</td>
                         <td>Rispondere alla richiesta dell'utente</td>
                         <td>Consenso esplicito (checkbox obbligatoria)</td>
-                        <td>Fino a 12 mesi, o su richiesta di cancellazione</td>
+                        <td>6 mesi dall'ultimo scambio di messaggi, poi si cancellano da soli; oppure prima, su richiesta di cancellazione</td>
                     </tr>
                     <tr>
                         <td><strong>Newsletter</strong></td>
@@ -267,7 +267,7 @@ $year     = date('Y');
     <div class="section">
         <h2><span class="icon">🔒</span> Comunicazione e Trasferimento dei Dati</h2>
         <p>I dati personali sono conservati su server situati in Europa e <strong>non vengono ceduti, venduti o comunicati a terze parti</strong>, salvo obblighi di legge.</p>
-        <p>I messaggi ricevuti tramite il form contatti vengono salvati nel database del sito, e al Titolare ne arriva un avviso per email. La risposta parte per email dal sito; chi la riceve può continuare la conversazione da una pagina del sito, raggiunta con un link personale che vale 60 giorni dall'ultima risposta del Titolare. Il sito non pubblica nessun indirizzo email. I messaggi non vengono condivisi con soggetti esterni.</p>
+        <p>I messaggi ricevuti tramite il form contatti vengono salvati nel database del sito, e al Titolare ne arriva un avviso per email. La risposta parte per email dal sito; chi la riceve può continuare la conversazione da una pagina del sito, raggiunta con un link personale che vale 60 giorni dall'ultima risposta del Titolare. Il sito non pubblica nessun indirizzo email. Le conversazioni si cancellano da sole, con tutte le risposte, sei mesi dopo l'ultimo messaggio scambiato. I messaggi non vengono condivisi con soggetti esterni.</p>
     </div>
 
     <div class="section">

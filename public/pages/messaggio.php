@@ -22,6 +22,7 @@ $esito = null;
 
 /* Prima di leggere qualunque cosa: la pagina esiste solo con le tabelle a posto. */
 assicura_messaggistica(db());
+messaggi_pulizia(db());
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $esito = contatti_rispondi_da_sito($gettone, (string)($_POST['risposta'] ?? ''), (string)($_POST['hp_check'] ?? ''));
