@@ -155,6 +155,7 @@ function buildNewsletterHtml(
       <p style="margin:0;color:#4b5563;font-size:12px;line-height:1.6;">
         Hai ricevuto questa email perché sei iscritto alla newsletter di
         <a href="' . $siteLink . '" style="color:#22c55e;text-decoration:none;">simonepizzi.runtimeradio.it</a>.<br>
+        Vuoi rispondermi? Usa il <a href="' . $siteLink . '/contatti" style="color:#22c55e;text-decoration:none;">modulo dei contatti</a>: i messaggi li leggo tutti.<br>
         <a href="' . htmlspecialchars($unsubLink) . '" style="color:#6b7280;text-decoration:underline;">Cancella iscrizione</a>
         &nbsp;·&nbsp; &copy; ' . date('Y') . ' Simone Pizzi
       </p>

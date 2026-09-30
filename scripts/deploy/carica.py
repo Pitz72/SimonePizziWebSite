@@ -18,7 +18,10 @@ TRE REGOLE, e ognuna viene da un modo di rompere il sito:
    database e cancellare le copertine.
 
 2. Ogni file che viene sovrascritto si copia prima in una cartella di backup
-   sul server, datata. Senza una build che controlla la sintassi, un errore di
+   sul server, datata, FUORI dalla cartella del sito (~/backup-sito/). Fino al
+   30 settembre 2026 stava dentro, in .backup-DATA/: da fuori i file non-PHP si
+   scaricavano e i PHP vecchi si potevano eseguire, compresi quelli con i buchi
+   che il deploy aveva appena chiuso. Senza una build che controlla la sintassi, un errore di
    battitura in un .php è il sito offline: il ripristino dev'essere una
    copia-incolla, non un ricaricamento a memoria.
 
@@ -58,6 +61,9 @@ ESTENSIONI_ESCLUSE = {".map", ".log", ".sqlite"}
 
 # Per ultimo, e da solo.
 ULTIMO = ".htaccess"
+
+# Fuori dal docroot, nella home dell'utente: nessun indirizzo web ci arriva.
+BACKUP_RADICE = "backup-sito"
 
 
 def file_da_caricare() -> list[Path]:
@@ -105,7 +111,7 @@ def main() -> int:
         return 0
 
     quando = datetime.now().strftime("%Y%m%d-%H%M%S")
-    backup = f"{remoto}/.backup-{quando}"
+    backup = f"{BACKUP_RADICE}/{quando}"
 
     ssh = paramiko.SSHClient()
     ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
@@ -114,6 +120,12 @@ def main() -> int:
     sftp = ssh.open_sftp()
 
     cartelle_fatte: set[str] = set()
+
+    # La cartella madre dei backup è riservata a chi ha l'utenza.
+    try:
+        sftp.stat(BACKUP_RADICE)
+    except FileNotFoundError:
+        sftp.mkdir(BACKUP_RADICE, 0o700)
 
     def assicura(cartella: str) -> None:
         if cartella in ("", ".", remoto) or cartella in cartelle_fatte:
@@ -149,7 +161,7 @@ def main() -> int:
 
         print(f"\nCaricati {caricati} file.")
         if salvati:
-            print(f"I {salvati} che c'erano prima stanno in {backup}")
+            print(f"I {salvati} che c'erano prima stanno in ~/{backup} (fuori dal sito)")
         print("\nAdesso, in quest'ordine:")
         print("  1. apri il sito e guarda la home")
         print("  2. apri un articolo e una categoria")
