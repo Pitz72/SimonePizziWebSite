@@ -27,4 +27,4 @@ Il documento vivo su cosa è fatto e cosa manca è la **roadmap**:
 - **[Archive (archive/)](archive/)**: Documenti di analisi passate, vecchie roadmap e studi tecnici archiviati.
 
 ---
-*Ultimo aggiornamento: 12 Agosto 2026 — v1.26.0*
+*Ultimo aggiornamento: 3 Ottobre 2026 — v1.28.0*
