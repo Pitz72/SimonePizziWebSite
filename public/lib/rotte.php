@@ -72,4 +72,21 @@ return [
         'noindex' => true,
     ],
 
+    /* Le due pagine del consenso: il link nella email porta qui, e il clic vero è un pulsante. */
+    'newsletter/conferma' => [
+        'pagina'  => 'nl-conferma',
+        'briciola' => 'Conferma',
+        'title'   => 'Conferma l’iscrizione — Simone Pizzi',
+        'desc'    => 'Conferma la tua iscrizione alla newsletter di Simone Pizzi.',
+        'noindex' => true,
+    ],
+
+    'newsletter/disiscrivi' => [
+        'pagina'  => 'nl-disiscrizione',
+        'briciola' => 'Disiscrizione',
+        'title'   => 'Cancella iscrizione — Simone Pizzi',
+        'desc'    => 'Esci dalla newsletter con un clic.',
+        'noindex' => true,
+    ],
+
 ];

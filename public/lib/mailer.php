@@ -111,13 +111,131 @@ function posta_chiudi(): void {
     $GLOBALS['sp_posta_trasporto'] = null;
 }
 
+/* ── Il tetto orario e la coda ─────────────────────────────────────────────
+   DreamHost accetta ottanta email l'ora da questa casella. Tutta la posta del
+   sito esce da lì, quindi il contatore conta tutto. Le priorità sono tre, con
+   tetti a scalare: la posta generale può usare tutta la quota, le notifiche si
+   fermano al 90 %, la newsletter all'80 %. Quello che non entra nel tetto va
+   nella tabella mail_coda, e lo spedisce il giro di manutenzione. */
+
+const MAIL_RITENTA_DOPO = [1 => 300, 2 => 900, 3 => 3600];   // secondi dopo il primo, il secondo, il terzo tentativo
+
+function mail_per_ora(): int {
+    return max(10, min(1000, (int)posta_costante('MAIL_PER_ORA', 80)));
+}
+
+function mail_tetto(string $priorita): int {
+    $l = mail_per_ora();
+    return match ($priorita) {
+        'alta'  => $l,
+        'bassa' => (int)floor($l * 0.8),
+        default => (int)floor($l * 0.9),
+    };
+}
+
+/** Quante email sono partite nell'ultima ora, da tutte le priorità. */
+function mail_usate_ultima_ora(PDO $db): int {
+    $q = $db->prepare("SELECT COUNT(*) FROM mail_invii WHERE at >= ?");
+    $q->execute([date('Y-m-d H:i:s', time() - 3600)]);
+    return (int)$q->fetchColumn();
+}
+
+/** C'è posto, per questa priorità, nell'ora che passa? */
+function mail_posto(string $priorita): bool {
+    return mail_usate_ultima_ora(db()) < mail_tetto($priorita);
+}
+
+function mail_registra_invio(string $priorita): void {
+    db()->prepare("INSERT INTO mail_invii (at, priorita) VALUES (?, ?)")
+        ->execute([date('Y-m-d H:i:s'), $priorita]);
+}
+
 /**
- * Spedisce una email.
+ * Mette una email in coda, per il giro di manutenzione. Ritorna true: per chi
+ * ha chiesto, «accodata» vuol dire «arriverà».
+ */
+function mail_accoda(string $a, string $oggetto, string $html, array $opz, string $priorita, int $tentativi = 0): bool {
+    // Accodata per mancanza di posto: è dovuta subito, e il giro la spedisce appena c'è posto.
+    // Accodata dopo un rifiuto del server: si aspetta, secondo la tabella dei tentativi.
+    $attesa = $tentativi === 0 ? 0 : (MAIL_RITENTA_DOPO[$tentativi] ?? 300);
+    $prossimo = date('Y-m-d H:i:s', time() + $attesa);
+    db()->prepare("INSERT INTO mail_coda (a, oggetto, html, opz, priorita, tentativi, prossimo, creato)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+        ->execute([$a, $oggetto, $html, json_encode($opz, JSON_UNESCAPED_UNICODE), $priorita,
+                   $tentativi, $prossimo, date('Y-m-d H:i:s')]);
+    return true;
+}
+
+/**
+ * Spedisce dalla coda ciò che è dovuto, per priorità, finché c'è posto.
+ * @return array{spedite: int, rimaste: int}
+ */
+function mail_coda_spedisci(int $massimo = 20): array {
+    $db = db();
+    $q = $db->prepare("SELECT * FROM mail_coda WHERE prossimo <= ? ORDER BY id LIMIT 200");
+    $q->execute([date('Y-m-d H:i:s')]);
+    $righe = $q->fetchAll();
+    $rango = ['alta' => 0, 'normale' => 1, 'bassa' => 2];
+    usort($righe, fn($x, $y) => ($rango[$x['priorita']] ?? 1) <=> ($rango[$y['priorita']] ?? 1) ?: $x['id'] <=> $y['id']);
+
+    $spedite = 0;
+    foreach (array_slice($righe, 0, $massimo) as $r) {
+        if (!mail_posto($r['priorita'])) break;
+        $opz = json_decode((string)$r['opz'], true) ?: [];
+        if (mail_trasmetti_diretta($r['a'], $r['oggetto'], $r['html'], $opz)) {
+            mail_registra_invio($r['priorita']);
+            $db->prepare("DELETE FROM mail_coda WHERE id = ?")->execute([$r['id']]);
+            $spedite++;
+        } else {
+            $tentativi = (int)$r['tentativi'] + 1;
+            $db->prepare("DELETE FROM mail_coda WHERE id = ?")->execute([$r['id']]);
+            if ($tentativi <= count(MAIL_RITENTA_DOPO)) {
+                $prossimo = date('Y-m-d H:i:s', time() + MAIL_RITENTA_DOPO[$tentativi]);
+                $db->prepare("INSERT INTO mail_coda (a, oggetto, html, opz, priorita, tentativi, prossimo, creato)
+                              VALUES (?, ?, ?, ?, ?, ?, ?, ?)")
+                    ->execute([$r['a'], $r['oggetto'], $r['html'], $r['opz'], $r['priorita'],
+                               $tentativi, $prossimo, $r['creato']]);
+            } else {
+                error_log('posta: rinuncio a ' . $r['a'] . ' dopo ' . $tentativi . ' tentativi');
+            }
+        }
+    }
+    $rimaste = (int)$db->query("SELECT COUNT(*) FROM mail_coda")->fetchColumn();
+    return ['spedite' => $spedite, 'rimaste' => $rimaste];
+}
+
+/**
+ * Spedisce una email. Passa dal contatore: se non c'è posto per la sua
+ * priorità, va in coda (salvo `nessuna_coda`, che la usano i lotti della
+ * newsletter: lì il posto si chiede e basta).
  *
+ * @param array $opz  reply_to, from_name, list_unsubscribe (URL), text,
+ *                    priorita ('alta' | 'normale' | 'bassa'), nessuna_coda (bool)
+ * @return bool  true se è partita o è in coda. Con nessuna_coda, false se non c'era posto.
+ */
+function manda_posta(string $a, string $oggetto, string $html, array $opz = []): bool {
+    $priorita = (string)($opz['priorita'] ?? 'normale');
+    if (!in_array($priorita, ['alta', 'normale', 'bassa'], true)) { $priorita = 'normale'; }
+    unset($opz['priorita']);
+
+    if (!mail_posto($priorita)) {
+        if (!empty($opz['nessuna_coda'])) { return false; }
+        return mail_accoda($a, $oggetto, $html, $opz, $priorita);
+    }
+    if (mail_trasmetti_diretta($a, $oggetto, $html, $opz)) {
+        mail_registra_invio($priorita);
+        return true;
+    }
+    if (!empty($opz['nessuna_coda'])) { return false; }
+    return mail_accoda($a, $oggetto, $html, $opz, $priorita, 1);
+}
+
+/**
+ * Spedisce una email, senza contatore e senza coda: il trasporto vero.
  * @param array $opz  reply_to, from_name, list_unsubscribe (URL), text
  * @return bool  true se il server l'ha accettata. Su false l'errore è nel log.
  */
-function manda_posta(string $a, string $oggetto, string $html, array $opz = []): bool {
+function mail_trasmetti_diretta(string $a, string $oggetto, string $html, array $opz = []): bool {
     if (defined('IN_SVILUPPO') && IN_SVILUPPO) {
         $dir = posta_cartella_sviluppo();
         if (!is_dir($dir)) @mkdir($dir, 0755, true);

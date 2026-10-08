@@ -95,6 +95,7 @@ require __DIR__ . '/../partials/head.php';
   <?php endif; ?>
 
   <?php blocco_newsletter(); ?>
+  <?php blocco_contatto(); ?>
 </main>
 
 <?php require __DIR__ . '/../partials/footer.php'; ?>

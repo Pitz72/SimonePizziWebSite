@@ -9,6 +9,34 @@
  * DELETE ?id=N (admin)            — Elimina iscritto
  */
 
+// ──────────────────────────────────────────────────────────────────────────────
+// POST — iscrizione dal sito. Prima dei require della vecchia API: questo ramo
+// non deve dipendere dalla connessione MySQL di api/db.php.
+// Il consenso è una casella da spuntare, e la prova si scrive nella libreria
+// (lib/newsletter.php). Il GET più sotto resta per i link delle email già inviate.
+// ──────────────────────────────────────────────────────────────────────────────
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    header('Content-Type: application/json');
+    require_once dirname(__DIR__) . '/lib/avvio.php';
+    require_once dirname(__DIR__) . '/lib/newsletter.php';
+
+    if (!newsletter_richiesta_ammessa($_SERVER['REMOTE_ADDR'] ?? 'sconosciuto')) {
+        http_response_code(429);
+        echo json_encode(['status' => 'error', 'message' => 'Troppe richieste. Riprova tra qualche minuto.']);
+        exit;
+    }
+    $data     = json_decode(file_get_contents('php://input'), true) ?? [];
+    $consenso = in_array($data['consent'] ?? null, [true, '1', 1, 'on'], true);
+    [$ok, $messaggio] = newsletter_iscrivi((string)($data['email'] ?? ''), (string)($data['name'] ?? ''), $consenso, 'sito');
+    if (!$ok) {
+        http_response_code(400);
+        echo json_encode(['status' => 'error', 'message' => $messaggio]);
+        exit;
+    }
+    echo json_encode(['status' => 'success', 'message' => $messaggio]);
+    exit;
+}
+
 require_once 'db.php';
 require_once 'auth_helper.php';
 require_once dirname(__DIR__) . '/lib/mailer.php';
@@ -122,206 +150,3 @@ if ($method === 'GET') {
 // ──────────────────────────────────────────────────────────────────────────────
 // POST — nuova iscrizione (pubblico, double opt-in o admin diretto)
 // ──────────────────────────────────────────────────────────────────────────────
-if ($method === 'POST') {
-    header('Content-Type: application/json');
-    $data  = json_decode(file_get_contents('php://input'), true) ?? [];
-    $email = trim(filter_var($data['email'] ?? '', FILTER_SANITIZE_EMAIL));
-    $name  = trim(strip_tags($data['name'] ?? ''));
-
-    // Verifica se l'azione è compiuta da un admin per forzare la conferma
-    $isAdmin      = isset($_SESSION['user_id']);
-    $forceConfirm = $isAdmin && isset($data['force_confirm']) && $data['force_confirm'] === true;
-
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => 'Indirizzo email non valido.']);
-        exit;
-    }
-
-    try {
-        $pdo = Database::connect();
-
-        // [v1.19.0] Rate limiting per-IP sulle iscrizioni pubbliche: max 3 ogni 15 minuti.
-        // Senza questo limite chiunque può usare il form per mail-bombing verso terzi
-        // (l'email di conferma parte verso indirizzi arbitrari) bruciando la reputazione del dominio.
-        if (!$isAdmin) {
-            $rl_key = 'sub:' . substr(hash('sha256', $_SERVER['REMOTE_ADDR'] ?? 'unknown'), 0, 40);
-            $pdo->exec("DELETE FROM login_attempts WHERE attempt_time < DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
-            $stmtRl = $pdo->prepare("SELECT COUNT(*) FROM login_attempts WHERE ip_address = ?");
-            $stmtRl->execute([$rl_key]);
-            if ((int)$stmtRl->fetchColumn() >= 3) {
-                http_response_code(429);
-                echo json_encode(['status' => 'error', 'message' => 'Troppe richieste. Riprova tra qualche minuto.']);
-                exit;
-            }
-            $pdo->prepare("INSERT INTO login_attempts (ip_address) VALUES (?)")->execute([$rl_key]);
-        }
-
-        // Controlla se esiste già
-        $check = $pdo->prepare("SELECT id, status FROM subscribers WHERE email = :email LIMIT 1");
-        $check->execute([':email' => $email]);
-        $existing = $check->fetch();
-
-        if ($existing) {
-            if ($existing['status'] === 'confirmed') {
-                echo json_encode(['status' => 'already', 'message' => 'Questa email è già iscritta.']);
-            } else {
-                if ($forceConfirm) {
-                    // Approva forzatamente se esistente ma pending/unsub
-                    $pdo->prepare("UPDATE subscribers SET status='confirmed', confirmed_at=NOW(), confirm_token=NULL WHERE id=:id")
-                        ->execute([':id' => $existing['id']]);
-                    echo json_encode(['status' => 'success', 'message' => 'Iscrizione esistente confermata manualmente.']);
-                } else {
-                    // Re-invia email di conferma standard
-                    $ct = bin2hex(random_bytes(32));
-                    $pdo->prepare("UPDATE subscribers SET confirm_token=:ct, status='pending' WHERE id=:id")
-                        ->execute([':ct' => $ct, ':id' => $existing['id']]);
-                    sendConfirmEmail($email, $name ?: 'Amico', $ct);
-                    echo json_encode(['status' => 'pending', 'message' => 'Controlla la tua email per confermare l\'iscrizione.']);
-                }
-            }
-            exit;
-        }
-
-        // Nuova iscrizione
-        $confirmToken     = $forceConfirm ? null : bin2hex(random_bytes(32));
-        $unsubscribeToken = bin2hex(random_bytes(32));
-        $status           = $forceConfirm ? 'confirmed' : 'pending';
-        $confirmedAt      = $forceConfirm ? date('Y-m-d H:i:s') : null;
-
-        $stmt = $pdo->prepare(
-            "INSERT INTO subscribers (email, name, status, confirm_token, unsubscribe_token, confirmed_at)
-             VALUES (:email, :name, :status, :ct, :ut, :ca)"
-        );
-        $stmt->execute([
-            ':email'  => $email,
-            ':name'   => $name ?: null,
-            ':status' => $status,
-            ':ct'     => $confirmToken,
-            ':ut'     => $unsubscribeToken,
-            ':ca'     => $confirmedAt
-        ]);
-
-        if (!$forceConfirm) {
-            sendConfirmEmail($email, $name ?: 'Amico', $confirmToken);
-            echo json_encode([
-                'status'  => 'success',
-                'message' => 'Quasi fatto! Controlla la tua email e clicca il link per confermare l\'iscrizione.',
-            ]);
-        } else {
-            echo json_encode([
-                'status'  => 'success',
-                'message' => 'Iscritto aggiunto correttamente come confermato.',
-            ]);
-        }
-    } catch (Throwable $e) {
-        http_response_code(500);
-        error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
-        echo json_encode(['status' => 'error', 'message' => 'Errore interno del server.']);
-    }
-    exit;
-}
-
-// ──────────────────────────────────────────────────────────────────────────────
-// PATCH — approvazione manuale (admin)
-// ──────────────────────────────────────────────────────────────────────────────
-if ($method === 'PATCH') {
-    header('Content-Type: application/json');
-    Auth::check();
-    $data = json_decode(file_get_contents('php://input'), true) ?? [];
-    $id   = (int)($data['id'] ?? 0);
-
-    if (!$id) {
-        http_response_code(400);
-        echo json_encode(['error' => 'ID mancante.']);
-        exit;
-    }
-
-    try {
-        $pdo = Database::connect();
-        $upd = $pdo->prepare(
-            "UPDATE subscribers SET status='confirmed', confirmed_at=NOW(), confirm_token=NULL WHERE id=:id"
-        );
-        $upd->execute([':id' => $id]);
-        echo json_encode(['status' => 'success', 'message' => 'Iscritto approvato con successo.']);
-    } catch (Throwable $e) {
-        http_response_code(500);
-        error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
-        echo json_encode(['error' => 'Errore interno del server.']);
-    }
-    exit;
-}
-
-// ──────────────────────────────────────────────────────────────────────────────
-// DELETE — elimina iscritto (admin)
-// ──────────────────────────────────────────────────────────────────────────────
-if ($method === 'DELETE') {
-    header('Content-Type: application/json');
-    Auth::check();
-    $id = (int)($_GET['id'] ?? 0);
-    if (!$id) {
-        http_response_code(400);
-        echo json_encode(['error' => 'ID mancante.']);
-        exit;
-    }
-    try {
-        $pdo = Database::connect();
-        $pdo->prepare("DELETE FROM subscribers WHERE id=:id")->execute([':id' => $id]);
-        echo json_encode(['status' => 'success']);
-    } catch (Throwable $e) {
-        http_response_code(500);
-        error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
-        echo json_encode(['error' => 'Errore interno del server.']);
-    }
-    exit;
-}
-
-http_response_code(405);
-echo json_encode(['error' => 'Metodo non supportato.']);
-
-// ──────────────────────────────────────────────────────────────────────────────
-// Helper — email di conferma iscrizione
-// ──────────────────────────────────────────────────────────────────────────────
-function sendConfirmEmail(string $email, string $name, string $token): void
-{
-    // [v1.19.0] URL canonico hardcoded (SITE_URL), mai da HTTP_HOST (link poisoning)
-    $confirmLink = SITE_URL . '/newsletter/confermato?token=' . urlencode($token);
-
-    $html = '<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8">
-<title>Conferma iscrizione</title></head>
-<body style="margin:0;padding:0;background:#0a0a0a;font-family:\'Segoe UI\',Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#0a0a0a;padding:40px 20px;">
-<tr><td align="center">
-  <table width="580" cellpadding="0" cellspacing="0" style="background:#111;border:1px solid #222;border-radius:12px;overflow:hidden;">
-    <tr><td style="background:#111;padding:32px 40px;border-bottom:1px solid #1a1a1a;">
-      <p style="margin:0;color:#22c55e;font-weight:700;font-size:18px;letter-spacing:2px;text-transform:uppercase;">Simone Pizzi</p>
-    </td></tr>
-    <tr><td style="padding:40px;">
-      <h1 style="margin:0 0 16px;color:#fff;font-size:24px;font-weight:700;">Ciao, ' . htmlspecialchars($name) . '!</h1>
-      <p style="margin:0 0 24px;color:#9ca3af;font-size:16px;line-height:1.6;">
-        Hai richiesto di iscriverti alla newsletter di <strong style="color:#fff;">simonepizzi.runtimeradio.it</strong>.<br>
-        Clicca il pulsante qui sotto per confermare e iniziare a ricevere gli aggiornamenti.
-      </p>
-      <table cellpadding="0" cellspacing="0"><tr><td>
-        <a href="' . htmlspecialchars($confirmLink) . '"
-           style="display:inline-block;background:#22c55e;color:#000;font-weight:700;font-size:16px;
-                  padding:14px 32px;border-radius:8px;text-decoration:none;letter-spacing:0.5px;">
-          Conferma Iscrizione
-        </a>
-      </td></tr></table>
-      <p style="margin:32px 0 0;color:#6b7280;font-size:13px;line-height:1.5;">
-        Se non sei stato tu a richiedere l\'iscrizione, ignora questa email.<br>
-        Il link scade se non viene utilizzato. Non verrà inviato nulla prima della conferma.
-      </p>
-    </td></tr>
-    <tr><td style="padding:24px 40px;border-top:1px solid #1a1a1a;">
-      <p style="margin:0;color:#4b5563;font-size:12px;">
-        &copy; ' . date('Y') . ' Simone Pizzi · simonepizzi.runtimeradio.it
-      </p>
-    </td></tr>
-  </table>
-</td></tr></table>
-</body></html>';
-
-    manda_posta($email, 'Conferma la tua iscrizione — Simone Pizzi', $html, ['from_name' => 'Simone Pizzi']);
-}

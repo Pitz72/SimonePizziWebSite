@@ -29,3 +29,7 @@ assicura_schema(db());
 // La promessa della privacy: i messaggi si cancellano sei mesi dopo l'ultimo scambio.
 require_once __DIR__ . '/../lib/messaggi_pulizia.php';
 messaggi_pulizia(db());
+
+// Il giro di manutenzione: dal pannello lo fa chi aspetta, quindi anche senza fastcgi.
+require_once __DIR__ . '/../lib/manutenzione.php';
+manutenzione_di_passaggio();

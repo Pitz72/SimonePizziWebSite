@@ -16,6 +16,10 @@ declare(strict_types=1);
 
 require __DIR__ . '/lib/avvio.php';
 
+/* La manutenzione che il sito fa da sé (lotti della newsletter, coda, backup): dopo la pagina, e al massimo ogni dieci minuti. */
+require __DIR__ . '/lib/manutenzione.php';
+manutenzione_di_passaggio();
+
 /* ── Che cosa è stato chiesto ───────────────────────────────────────────── */
 $percorso = (string)parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $percorso = trim(rawurldecode($percorso), '/');

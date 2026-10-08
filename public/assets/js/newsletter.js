@@ -12,6 +12,7 @@
   var esito = document.getElementById('esito-newsletter');
   var campo = modulo.querySelector('input[type="email"]');
   var pulsante = modulo.querySelector('button');
+  var consenso = document.getElementById('consenso-newsletter');
 
   function scrivi(testo, tipo) {
     if (!esito) return;
@@ -25,6 +26,10 @@
 
     var email = campo.value.trim();
     if (!email) return;
+    if (!consenso.checked) {
+      scrivi('Per iscriverti devi accettare l’informativa privacy.', 'no');
+      return;
+    }
 
     pulsante.disabled = true;
     scrivi('Un momento…', null);
@@ -32,11 +37,11 @@
     fetch(modulo.action, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({ email: email })
+      body: JSON.stringify({ email: email, consent: true })
     })
       .then(function (r) { return r.json(); })
       .then(function (dati) {
-        var ok = dati && (dati.status === 'success' || dati.status === 'already');
+        var ok = dati && dati.status === 'success';
         var messaggio = (dati && dati.message)
           ? dati.message
           : 'Controlla la posta: c’è un link da confermare.';

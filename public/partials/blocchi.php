@@ -131,8 +131,9 @@ function blocco_progetto(array $p, string $categoria = ''): void {
     <?php
 }
 
-/** Il modulo della newsletter. */
+/** Il modulo della newsletter: l'email, e il consenso da spuntare (mai precompilato). */
 function blocco_newsletter(): void {
+    require_once __DIR__ . '/../lib/consenso.php';
     ?>
     <section class="lettera">
       <div class="gab lettera-dentro">
@@ -148,7 +149,31 @@ function blocco_newsletter(): void {
                    placeholder="la-tua@email.it" autocomplete="email">
             <button type="submit">Iscriviti</button>
           </form>
+          <label class="consenso-newsletter">
+            <input id="consenso-newsletter" name="consenso" type="checkbox" value="1" required>
+            <span><?= e(NEWSLETTER_CONSENSO_TESTO) ?> <a href="/privacy">Leggi l’informativa</a>.</span>
+          </label>
           <p class="esito" id="esito-newsletter" role="status" aria-live="polite"></p>
+        </div>
+      </div>
+    </section>
+    <?php
+}
+
+/** «Entriamo in contatto»: il sostegno, i social e il modulo dei contatti. Com'era nella home del sito React. */
+function blocco_contatto(): void {
+    ?>
+    <section class="contatto">
+      <div class="gab">
+        <h2>Entriamo in contatto</h2>
+        <p>Sostieni il mio lavoro, resta aggiornato sulle ultime uscite o connettiamoci sui social per scambiare due chiacchiere.</p>
+        <div class="btn-fila">
+          <a class="btn btn-pieno" href="https://www.paypal.com/paypalme/runtimeradio" target="_blank" rel="noopener">Sostieni il lavoro</a>
+          <a class="btn btn-muto" href="https://github.com/Pitz72" target="_blank" rel="noopener">GitHub</a>
+          <a class="btn btn-muto" href="https://t.me/simonepizzi72" target="_blank" rel="noopener">Telegram</a>
+          <a class="btn btn-muto" href="https://www.facebook.com/simonepizzi72" target="_blank" rel="noopener">Facebook</a>
+          <a class="btn btn-muto" href="https://www.instagram.com/pizzisimone1972/" target="_blank" rel="noopener">Instagram</a>
+          <a class="btn btn-muto" href="/contatti">Scrivimi</a>
         </div>
       </div>
     </section>

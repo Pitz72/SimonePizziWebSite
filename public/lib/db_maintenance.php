@@ -189,9 +189,95 @@ function assicura_messaggistica(PDO $db): bool {
     return $ok;
 }
 
+/**
+ * La newsletter e la posta in uscita (8 ottobre 2026): il consenso si registra
+ * con la sua prova, gli invii vanno a lotti con un registro per destinatario, la
+ * posta eccedente il tetto orario si accoda, e le impostazioni stanno in
+ * app_settings (la tabella che il vecchio pannello già usava per il backup).
+ */
+function assicura_newsletter(PDO $db): bool {
+    static $ok = null;
+    if ($ok !== null) return $ok;
+    if (IN_SVILUPPO) return $ok = true;
+
+    $colonne = [
+        'subscribers' => [
+            'consent_at'      => 'DATETIME NULL',
+            'consent_text'    => 'TEXT NULL',
+            'consent_version' => 'VARCHAR(20) NULL',
+            'consent_source'  => 'VARCHAR(40) NULL',
+            'confirm_sent_at' => 'DATETIME NULL',
+            'unsubscribed_at' => 'DATETIME NULL',
+        ],
+        'newsletter_sends' => [
+            'tipo'           => "VARCHAR(12) NOT NULL DEFAULT 'news'",
+            'stato'          => "VARCHAR(12) NOT NULL DEFAULT 'inviata'",
+            'html'           => 'MEDIUMTEXT NULL',
+            'articoli'       => 'TEXT NULL',
+            'cursore'        => 'INT NOT NULL DEFAULT 0',
+            'totale'         => 'INT NOT NULL DEFAULT 0',
+            'inviate'        => 'INT NOT NULL DEFAULT 0',
+            'fallite'        => 'INT NOT NULL DEFAULT 0',
+            'prossimo_lotto' => 'DATETIME NULL',
+            'avviata_il'     => 'DATETIME NULL',
+        ],
+    ];
+    try {
+        foreach ($colonne as $tabella => $cols) {
+            foreach ($cols as $colonna => $definizione) {
+                if (!colonna_esiste($db, $tabella, $colonna)) {
+                    $db->exec("ALTER TABLE `$tabella` ADD COLUMN `$colonna` $definizione");
+                    error_log("db_maintenance: creata colonna $tabella.$colonna");
+                }
+            }
+        }
+        $db->exec("CREATE TABLE IF NOT EXISTS newsletter_destinatari (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            send_id INT NOT NULL,
+            subscriber_id INT NOT NULL,
+            email VARCHAR(254) NOT NULL,
+            esito VARCHAR(8) NOT NULL,
+            errore VARCHAR(255) NULL,
+            at DATETIME NOT NULL,
+            UNIQUE KEY uq_nl_destinatario (send_id, subscriber_id)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        $db->exec("CREATE TABLE IF NOT EXISTS mail_invii (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            at DATETIME NOT NULL,
+            priorita VARCHAR(8) NOT NULL,
+            KEY ix_mail_invii_at (at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        $db->exec("CREATE TABLE IF NOT EXISTS mail_coda (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            a VARCHAR(254) NOT NULL,
+            oggetto VARCHAR(255) NOT NULL,
+            html MEDIUMTEXT NOT NULL,
+            opz TEXT NULL,
+            priorita VARCHAR(8) NOT NULL,
+            tentativi INT NOT NULL DEFAULT 0,
+            prossimo DATETIME NOT NULL,
+            creato DATETIME NOT NULL,
+            KEY ix_mail_coda_prossimo (prossimo)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        $db->exec("CREATE TABLE IF NOT EXISTS app_settings (
+            setting_key VARCHAR(100) PRIMARY KEY,
+            setting_value TEXT,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+        annota_migrazione($db, '2026-10-08_newsletter_consenso_lotti',
+            'Consenso con prova, registro dei destinatari, coda della posta, impostazioni');
+        $ok = true;
+    } catch (Throwable $e) {
+        error_log('db_maintenance [newsletter] FALLITA: ' . $e->getMessage());
+        $ok = false;
+    }
+    return $ok;
+}
+
 /** Tutte insieme, all'ingresso nel pannello: è il primo momento utile. */
 function assicura_schema(PDO $db): void {
     assicura_colonne_seo($db);
     assicura_stato_progetti($db);
     assicura_messaggistica($db);
+    assicura_newsletter($db);
 }

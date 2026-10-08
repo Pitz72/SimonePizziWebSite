@@ -20,6 +20,7 @@ function voci_pannello(): array {
         'media'      => ['Immagini',    '/admin/media.php'],
         'messaggi'   => ['Messaggi',    '/admin/messaggi.php'],
         'newsletter' => ['Newsletter',  '/admin/newsletter.php'],
+        'impostazioni' => ['Impostazioni', '/admin/impostazioni.php'],
         'sistema'    => ['Sistema',     '/admin/sistema.php'],
     ];
 }
