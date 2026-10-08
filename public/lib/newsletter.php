@@ -54,9 +54,10 @@ function newsletter_link_disiscrizione(string $token): string {
  * L'email come arriva all'iscritto. Il testo è sempre escapato: qui non si
  * passa HTML, nemmeno se qualcuno lo scrive nel campo.
  */
-function newsletter_html(string $oggetto, string $testo, string $nome, string $linkDisiscrizione): string {
+function newsletter_html(string $oggetto, string $testo, string $nome, string $linkDisiscrizione, bool $corpoHtml = false): string {
     $sito   = posta_sito_url();
-    $corpo  = nl2br(e($testo), false);
+    // $corpoHtml vale solo per gli invii d'archivio, scritti con l'HTML del vecchio invio.
+    $corpo  = $corpoHtml ? $testo : nl2br(e($testo), false);
     $saluto = trim($nome) !== '' ? $nome : 'amico';
 
     return '<!DOCTYPE html><html lang="it"><head><meta charset="UTF-8">
@@ -143,6 +144,16 @@ function newsletter_storico(int $quanti = 50): array {
         "SELECT id, subject, sent_at, recipient_count, LENGTH(body) AS lunghezza
          FROM newsletter_sends ORDER BY sent_at DESC, id DESC LIMIT " . (int)$quanti
     )->fetchAll();
+}
+
+/**
+ * Com'è arrivato un invio d'archivio. Il vecchio invio lasciava passare l'HTML
+ * del corpo così com'era, e lo stesso faceva il pannello: qui si riproduce la
+ * regola. Il risultato va in un riquadro senza script (vedi il pannello).
+ */
+function newsletter_come_arrivata(array $invio): string {
+    $html = (bool)preg_match('/<[a-zA-Z][\s\S]*>/', (string)$invio['body']);
+    return newsletter_html((string)$invio['subject'], (string)$invio['body'], 'Nome Iscritto', '#', $html);
 }
 
 /** Un invio passato, col suo testo. */

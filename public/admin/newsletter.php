@@ -234,7 +234,9 @@ $letto = $apri ? newsletter_invio($apri) : null;
   <section class="scheda" style="max-width:720px;margin-bottom:28px">
     <span class="sotto spento"><?= e(data_breve($letto['sent_at'])) ?> · a <?= (int)$letto['recipient_count'] ?> iscritti</span>
     <h2 class="gro" style="margin-top:6px"><?= e($letto['subject']) ?></h2>
-    <p style="white-space:pre-wrap;color:#cfe0d3;line-height:1.65;margin-top:14px"><?= e($letto['body']) ?></p>
+    <p class="aiuto" style="margin:14px 0 10px">Com'è arrivata agli iscritti. Riquadro isolato: niente script, e i link non si seguono.</p>
+    <iframe sandbox="" title="Testo dell'invio" srcdoc="<?= e(newsletter_come_arrivata($letto)) ?>"
+            style="width:100%;height:640px;border:1px solid var(--filo);background:#0a0a0a"></iframe>
     <p class="aiuto" style="margin-top:14px"><a href="/admin/newsletter.php?vista=storico" style="color:var(--verde)">← Tutti gli invii</a></p>
   </section>
 <?php endif; ?>
