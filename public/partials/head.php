@@ -33,6 +33,10 @@ $titolo    = (string)p('title');
 $descr     = (string)p('desc');
 $canonico  = base_url() . (string)p('canonical');
 $immagine  = (string)p('immagine');
+// Telegram e Facebook vogliono l'indirizzo completo dell'immagine: il percorso relativo non lo leggono.
+if ($immagine !== '' && str_starts_with($immagine, '/')) {
+    $immagine = SITO_URL . $immagine;
+}
 ?>
 <!doctype html>
 <html lang="it">

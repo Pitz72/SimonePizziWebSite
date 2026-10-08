@@ -30,6 +30,7 @@ $con_condivisione = !empty($GLOBALS['FINESTRE_CONDIVISIONE']);
 <?php if ($con_condivisione): ?>
 <script nonce="<?= e(nonce()) ?>" src="/assets/js/sommario.js" defer></script>
 <script nonce="<?= e(nonce()) ?>" src="/assets/js/reazioni.js" defer></script>
+<script nonce="<?= e(nonce()) ?>" src="/assets/js/visite.js" defer></script>
 <?php endif; ?>
 </body>
 </html>
