@@ -28,7 +28,8 @@ const COLONNE_ELENCO_A = 'a.id, a.title, a.slug, a.excerpt, a.cover_image, a.cat
 
 /** Tutto quello che serve alla pagina di un articolo, corpo compreso. */
 const COLONNE_ARTICOLO = 'id, title, slug, content, excerpt, focus_keyword, cover_image, category,
-                          is_featured, status, published_at, created_at';
+                          is_featured, status, published_at, created_at,
+                          button_a_label, button_a_link, button_b_label, button_b_link';
 
 /** Solo quello che il pubblico può vedere: pubblicato e non programmato nel futuro. */
 const SOLO_PUBBLICATI = "status = 'published' AND (published_at IS NULL OR published_at <= :adesso)";

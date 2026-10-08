@@ -131,6 +131,45 @@ function blocco_progetto(array $p, string $categoria = ''): void {
     <?php
 }
 
+/**
+ * I due pulsanti di un articolo: quelli che il vecchio sito mostrava in fondo al
+ * testo (un link principale e uno secondario, spesso un file da scaricare).
+ * Un link senza schema diventa un indirizzo del sito, o https per un dominio:
+ * il vecchio sito lo rendeva sempre https://, e i percorsi come /contatti si rompevano.
+ */
+function pulsante_articolo(string $url, string $etichetta, string $predefinita): ?array {
+    $url = trim($url);
+    if ($url === '' || $url === '#') { return null; }
+    if (!preg_match('#^(https?://|mailto:|/)#i', $url)) {
+        $url = preg_match('#^[a-z0-9.-]+\.[a-z]{2,}(/|$)#i', $url) ? 'https://' . $url : '/' . ltrim($url, '/');
+    }
+    $esterno = preg_match('#^https?://#i', $url) && !str_starts_with($url, SITO_URL);
+    return [
+        'url'     => $url,
+        'testo'   => trim($etichetta) !== '' ? trim($etichetta) : $predefinita,
+        'esterno' => $esterno,
+        'file'    => (bool)preg_match('#(download\.php|\.(pdf|zip|epub|docx?|odt)(\?|$)|^/downloads/)#i', $url),
+    ];
+}
+
+/** Il blocco dei pulsanti in fondo al testo dell'articolo. Non stampa niente se non ce ne sono. */
+function blocco_pulsanti_articolo(array $a, bool $conta = true): void {
+    $primo   = pulsante_articolo((string)($a['button_a_link'] ?? ''), (string)($a['button_a_label'] ?? ''), 'Naviga');
+    $secondo = pulsante_articolo((string)($a['button_b_link'] ?? ''), (string)($a['button_b_label'] ?? ''), 'File aggiuntivo');
+    if (!$primo && !$secondo) { return; }
+    $voci = [];
+    if ($primo)   { $voci[] = ['p' => $primo,   'cosa' => 'primo',   'classe' => 'btn btn-pieno']; }
+    if ($secondo) { $voci[] = ['p' => $secondo, 'cosa' => 'secondo', 'classe' => 'btn btn-muto']; }
+    ?>
+    <div class="pulsanti-articolo" data-conta="<?= $conta ? (int)$a['id'] : 0 ?>">
+      <?php foreach ($voci as $v): $p = $v['p']; ?>
+        <a class="<?= e($v['classe']) ?>" href="<?= e($p['url']) ?>" data-clic="<?= e($p['testo']) ?>"
+           <?= $p['esterno'] ? 'target="_blank" rel="noopener"' : '' ?><?= $p['file'] ? ' download' : '' ?>><?= e($p['testo']) ?></a>
+      <?php endforeach; ?>
+    </div>
+    <?php
+}
+
 /** Il modulo della newsletter: l'email, e il consenso da spuntare (mai precompilato). */
 function blocco_newsletter(): void {
     require_once __DIR__ . '/../lib/consenso.php';

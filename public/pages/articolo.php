@@ -142,8 +142,9 @@ require __DIR__ . '/../partials/head.php';
 
     <div>
       <article class="corpo"><?= $corpo ?></article>
+      <?php blocco_pulsanti_articolo($articolo, !$anteprima); ?>
 
-      <div class="reazioni" id="reazioni" data-articolo="<?= (int)$articolo['id'] ?>">
+      <div class="reazioni" id="reazioni" data-articolo="<?= (int)$articolo['id'] ?>" data-conta="<?= $anteprima ? 0 : (int)$articolo['id'] ?>">
         <?php
         /* Le cinque reazioni e i loro nomi sono quelli di oggi (ReactionBar.tsx
            e ALLOWED_REACTIONS in api/reactions.php): cambiarli qui vorrebbe dire
