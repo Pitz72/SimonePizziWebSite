@@ -13,8 +13,9 @@
  *    prima dell'invio;
  *  - il testo è testo semplice: dentro l'email non entra HTML, né dall'autore
  *    né da chi scrive nel modulo;
- *  - ogni messaggio porta List-Unsubscribe, che le caselle moderne usano per il
- *    pulsante «annulla iscrizione»;
+ *  - il link di disiscrizione è nel corpo di ogni email. L'intestazione per il
+ *    pulsante «annulla iscrizione» della casella arriverà con un endpoint che
+ *    accetta la richiesta POST: finché non c'è, non si dichiara;
  *  - l'invio parte solo dopo un'anteprima e una prova: lo decide la pagina,
  *    con un'impronta del testo e un gettone usato una volta sola.
  */
@@ -107,7 +108,7 @@ function newsletter_invia(array $destinatari, string $oggetto, string $testo): a
     foreach ($destinatari as $r) {
         $link = newsletter_link_disiscrizione((string)$r['unsubscribe_token']);
         $html = newsletter_html($oggetto, $testo, (string)($r['name'] ?? ''), $link);
-        $opz  = ['from_name' => posta_sito_nome(), 'list_unsubscribe' => $link];
+        $opz  = ['from_name' => posta_sito_nome()];
         if (posta_info() !== '') $opz['reply_to'] = posta_info();
 
         if (manda_posta((string)$r['email'], $titolo, $html, $opz)) $inviate++;
@@ -127,8 +128,7 @@ function newsletter_prova(string $oggetto, string $testo): bool {
     $link = newsletter_link_disiscrizione('prova');
     $html = newsletter_html($oggetto, $testo, 'Simone', $link);
     return manda_posta($casella, '[PROVA] ' . $oggetto . ' — ' . posta_sito_nome(), $html, [
-        'from_name'        => posta_sito_nome(),
-        'list_unsubscribe' => $link,
+        'from_name' => posta_sito_nome(),
     ]);
 }
 
