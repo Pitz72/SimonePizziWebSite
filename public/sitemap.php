@@ -68,7 +68,7 @@ while ($cat = $stmtCat->fetch()) {
     echo "  </url>" . PHP_EOL;
 }
 
-// 4. SOTTOCATEGORIE (se esistono)
+// 4. SOTTOCATEGORIE (solo quelle con almeno un articolo pubblicato)
 $stmtSubCat = $pdo->query(
     "SELECT c.slug, p.slug as parent_slug,
             (SELECT MAX(COALESCE(a.published_at, a.created_at)) 
@@ -80,6 +80,8 @@ $stmtSubCat = $pdo->query(
 );
 
 while ($sub = $stmtSubCat->fetch()) {
+    // Una sottocategoria senza articoli è una pagina vuota: non va proposta ai motori di ricerca.
+    if (!$sub['latest_article']) { continue; }
     echo "  <url>" . PHP_EOL;
     echo "    <loc>$baseUrl/{$sub['slug']}</loc>" . PHP_EOL;
     if ($sub['latest_article']) {
