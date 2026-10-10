@@ -72,7 +72,7 @@
 .cerca-scorciatoia kbd{border:1px solid var(--filo);padding:3px 6px;font:inherit;font-size:10px;color:#5d7a64}
 .apri-menu{display:none}
 /* Le voci che compaiono solo da una parte. */
-.solo-telefono{display:none}
+.solo-telefono,.menu>li.solo-telefono{display:none}
 
 /* ── Apertura ───────────────────────────────────────────────────────────
    Campo nero (scelta del 7 settembre 2026). Il titolo grande, il filetto
