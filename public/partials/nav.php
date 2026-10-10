@@ -58,10 +58,10 @@ $le_figlie   = sottocategorie_per_sezione();
             <?php endif; ?>
           </li>
         <?php endforeach; ?>
-        <!-- Sul telefono «Tutti i progetti» esce dalla barra e rientra qui:
+        <!-- Sul telefono «Progetti» esce dalla barra e rientra qui:
              nella barra stretta stava insieme a marchio, ricerca e menu, e
-             andavano tutti a capo. -->
-        <li class="solo-telefono"><a href="/tutti-i-progetti">Tutti i progetti</a></li>
+             andavano tutti a capo. I progetti vivono su Ecosystem. -->
+        <li class="solo-telefono"><a href="https://ecosystem.runtimeradio.com/it/" target="_blank" rel="noopener">Progetti ↗</a></li>
       </ul>
     </nav>
 
@@ -70,7 +70,7 @@ $le_figlie   = sottocategorie_per_sezione();
         Cerca <kbd>Ctrl K</kbd>
       </button>
       <button class="btn apri-menu" type="button" data-apri="menu" aria-expanded="false">Menu</button>
-      <a class="eti solo-schermo-largo" href="/tutti-i-progetti" style="color:var(--verde)">Tutti i progetti</a>
+      <a class="eti solo-schermo-largo" href="https://ecosystem.runtimeradio.com/it/" target="_blank" rel="noopener" style="color:var(--verde)">Progetti ↗</a>
     </div>
   </div>
 </header>

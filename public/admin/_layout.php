@@ -14,7 +14,6 @@ function voci_pannello(): array {
     return [
         'cruscotto'  => ['Cruscotto',   '/admin/'],
         'articoli'   => ['Articoli',    '/admin/articoli.php'],
-        'progetti'   => ['Progetti',    '/admin/progetti.php'],
         'categorie'  => ['Categorie',   '/admin/categorie.php'],
         'tag'        => ['Tag',         '/admin/tag.php'],
         'media'      => ['Immagini',    '/admin/media.php'],

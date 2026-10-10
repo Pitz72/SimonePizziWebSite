@@ -85,53 +85,6 @@ function blocco_riga(array $a, bool $mostraCategoria = true, string $nomeCategor
 }
 
 /**
- * La scheda di un progetto: l'immagine riempie tutta la scheda e il testo le
- * sta sopra, in fondo, su un velo nero che sale dal basso. I due comandi
- * restano sempre nello stesso posto, in fondo.
- *
- * `$categoria` è il nome da stampare accanto allo stato: in home quello della
- * sezione, in «Tutti i progetti» quello della sottocategoria — la sezione lì
- * è già il titolo sopra, e ripeterla su ogni scheda non direbbe niente. Prima
- * si stampava lo slug grezzo, «narrativa-e-pubblicazioni».
- */
-function blocco_progetto(array $p, string $categoria = ''): void {
-    $copertina = url_immagine($p['cover_image'] ?? '');
-    $etichetta = blocco_stato($p['stato'] ?? null);
-    ?>
-    <li class="pezzo<?= $copertina === '' ? ' pezzo--nuda' : '' ?>">
-      <?php if ($copertina !== ''): ?>
-        <img class="pezzo-sfondo" src="<?= e($copertina) ?>" alt="" loading="lazy">
-      <?php endif; ?>
-      <div class="pezzo-corpo">
-        <?php if ($etichetta !== '' || $categoria !== ''): ?>
-          <div class="riga-etichette">
-            <?= $etichetta ?>
-            <?php if ($categoria !== ''): ?><span class="eti spento"><?= e($categoria) ?></span><?php endif; ?>
-          </div>
-        <?php endif; ?>
-        <h3><?= e($p['name']) ?></h3>
-        <p><?= e(tronca($p['description'], 200)) ?></p>
-        <?php
-        // Un pulsante senza indirizzo è un pulsante rotto: si stampa solo
-        // quello che porta davvero da qualche parte.
-        $a_ok = trim((string)$p['button_a_label']) !== '' && trim((string)$p['button_a_url']) !== '';
-        $b_ok = trim((string)$p['button_b_label']) !== '' && trim((string)$p['button_b_url']) !== '';
-        if ($a_ok || $b_ok): ?>
-          <div class="pezzo-comandi">
-            <?php if ($a_ok): ?>
-              <a class="btn btn-pieno" href="<?= e($p['button_a_url']) ?>"><?= e($p['button_a_label']) ?></a>
-            <?php endif; ?>
-            <?php if ($b_ok): ?>
-              <a class="btn btn-muto" href="<?= e($p['button_b_url']) ?>"><?= e($p['button_b_label']) ?></a>
-            <?php endif; ?>
-          </div>
-        <?php endif; ?>
-      </div>
-    </li>
-    <?php
-}
-
-/**
  * I due pulsanti di un articolo: quelli che il vecchio sito mostrava in fondo al
  * testo (un link principale e uno secondario, spesso un file da scaricare).
  * Un link senza schema diventa un indirizzo del sito, o https per un dominio:

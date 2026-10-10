@@ -12,11 +12,11 @@ $con_condivisione = !empty($GLOBALS['FINESTRE_CONDIVISIONE']);
 <footer class="piede">
   <div class="gab piede-dentro">
     <span class="eti">© <?= date('Y') ?> Simone Pizzi</span>
-    <span class="eti"><?= $conteggi_piede['articoli'] ?> articoli · <?= $conteggi_piede['progetti'] ?> progetti</span>
+    <span class="eti"><?= $conteggi_piede['articoli'] ?> articoli</span>
     <nav class="eti" aria-label="Collegamenti di servizio">
       <a href="/api/rss.php">RSS</a>
       <a href="/contatti">Contatti</a>
-      <a href="/tutti-i-progetti">Progetti</a>
+      <a href="https://ecosystem.runtimeradio.com/it/" target="_blank" rel="noopener">Progetti</a>
     </nav>
     <span class="eti">Runtime Radio · Italian Podcast Network</span>
   </div>

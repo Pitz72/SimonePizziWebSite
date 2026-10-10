@@ -31,6 +31,13 @@ if ($percorso !== '' && str_ends_with((string)parse_url($_SERVER['REQUEST_URI'] 
     exit;
 }
 
+/* La sezione Progetti non c'è più: i progetti vivono su Ecosystem. Il vecchio indirizzo
+   (e il suo ramo /tutti-i-progetti/…) porta lì, in modo permanente, perché è linkato da molti articoli. */
+if ($percorso === 'tutti-i-progetti' || str_starts_with($percorso, 'tutti-i-progetti/')) {
+    header('Location: https://ecosystem.runtimeradio.com/it/', true, 301);
+    exit;
+}
+
 $rotte = require __DIR__ . '/lib/rotte.php';
 
 /** Stampa una pagina e finisce. */

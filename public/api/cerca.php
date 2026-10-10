@@ -41,9 +41,7 @@ try {
     }
 
     $esiti = array_map(static function (array $r) use ($nomi): array {
-        $indirizzo = $r['genere'] === 'progetto'
-            ? (trim((string)($r['indirizzo'] ?? '')) ?: '/tutti-i-progetti')
-            : url_articolo($r);
+        $indirizzo = url_articolo($r);
         return [
             'titolo'    => $r['title'],
             'indirizzo' => $indirizzo,

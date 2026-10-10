@@ -20,7 +20,7 @@ require __DIR__ . '/../partials/head.php';
     </header>
     <div class="btn-fila" style="margin-top:28px">
       <a class="btn btn-pieno" href="/">Home</a>
-      <a class="btn btn-muto" href="/tutti-i-progetti">Tutti i progetti</a>
+      <a class="btn btn-muto" href="https://ecosystem.runtimeradio.com/it/" target="_blank" rel="noopener">Progetti ↗</a>
     </div>
     <div class="pill-fila" style="margin-top:24px">
       <?php foreach (categorie_radice() as $voce_404): ?>

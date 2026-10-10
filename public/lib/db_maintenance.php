@@ -277,7 +277,6 @@ function assicura_newsletter(PDO $db): bool {
 /** Tutte insieme, all'ingresso nel pannello: è il primo momento utile. */
 function assicura_schema(PDO $db): void {
     assicura_colonne_seo($db);
-    assicura_stato_progetti($db);
     assicura_messaggistica($db);
     assicura_newsletter($db);
 }

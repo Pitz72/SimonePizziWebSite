@@ -34,7 +34,6 @@ $q = db()->prepare("SELECT COUNT(*) FROM articles WHERE (category IS NULL OR cat
 $q->execute();
 $senzaCategoria = (int)$q->fetchColumn();
 
-$senzaStato = (int)db()->query("SELECT COUNT(*) FROM projects WHERE stato IS NULL OR stato = ''")->fetchColumn();
 $coda = tag_usati_una_volta();
 
 $colonneArticoli = [];
@@ -121,13 +120,6 @@ avviso_pannello();
         <small><?= $senzaCategoria
           ? $senzaCategoria . ' articoli non hanno categoria: il loro indirizzo pubblico non esiste e non sono raggiungibili.'
           : 'Ogni articolo ha la sua categoria.' ?></small></div>
-    </li>
-    <li class="<?= $senzaStato ? 'ni' : 'si' ?>">
-      <span class="segno"><?= $senzaStato ? '△' : '✓' ?></span>
-      <div><b>Stato dei progetti</b>
-        <small><?= $senzaStato
-          ? $senzaStato . ' progetti non dichiarano lo stato: sulla scheda pubblica non compare l\'etichetta.'
-          : 'Tutti i progetti dichiarano il loro stato.' ?></small></div>
     </li>
     <li class="<?= $coda > 40 ? 'ni' : 'si' ?>">
       <span class="segno"><?= $coda > 40 ? '△' : '✓' ?></span>

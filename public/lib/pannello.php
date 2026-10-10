@@ -220,51 +220,6 @@ function elimina_tag(int $id): void {
     db()->prepare("DELETE FROM tags WHERE id = ?")->execute([$id]);
 }
 
-/* ═══════════════════════════════ Progetti ═══════════════════════════════ */
-
-function admin_progetti(): array {
-    return db()->query("SELECT * FROM projects ORDER BY created_at DESC, id DESC")->fetchAll();
-}
-
-function admin_progetto(int $id): ?array {
-    $q = db()->prepare("SELECT * FROM projects WHERE id = ? LIMIT 1");
-    $q->execute([$id]);
-    return $q->fetch() ?: null;
-}
-
-function salva_progetto(array $d, ?int $id = null): int {
-    $campi = [
-        'name'           => trim((string)$d['name']),
-        'description'    => trim((string)($d['description'] ?? '')),
-        'category'       => trim((string)($d['category'] ?? '')),
-        'stato'          => in_array($d['stato'] ?? '', ['in_corso','pubblicato','open_source','archiviato'], true)
-                            ? $d['stato'] : null,
-        'cover_image'    => trim((string)($d['cover_image'] ?? '')),
-        'button_a_label' => trim((string)($d['button_a_label'] ?? '')),
-        'button_a_url'   => trim((string)($d['button_a_url'] ?? '')),
-        'button_b_label' => trim((string)($d['button_b_label'] ?? '')),
-        'button_b_url'   => trim((string)($d['button_b_url'] ?? '')),
-        'is_visible'     => !empty($d['is_visible']) ? 1 : 0,
-        // sort_order non si scrive più: l'ordine pubblico è per sezione e per
-        // data. La colonna resta, e un progetto nuovo prende il suo default.
-    ];
-
-    if ($id) {
-        $pezzi = implode(', ', array_map(fn($c) => "$c = :$c", array_keys($campi)));
-        db()->prepare("UPDATE projects SET $pezzi WHERE id = :id")->execute($campi + ['id' => $id]);
-        return $id;
-    }
-    $campi['created_at'] = date('Y-m-d H:i:s');
-    $nomi = implode(', ', array_keys($campi));
-    $segni = implode(', ', array_map(fn($c) => ":$c", array_keys($campi)));
-    db()->prepare("INSERT INTO projects ($nomi) VALUES ($segni)")->execute($campi);
-    return (int)db()->lastInsertId();
-}
-
-function elimina_progetto(int $id): void {
-    db()->prepare("DELETE FROM projects WHERE id = ?")->execute([$id]);
-}
-
 /* ═══════════════════════════════ Categorie ══════════════════════════════ */
 
 function admin_categorie(): array {
@@ -530,7 +485,6 @@ function numeri_cruscotto(): array {
     return [
         'pubblicati' => (int)$pubblicati->fetchColumn(),
         'bozze'      => (int)db()->query("SELECT COUNT(*) FROM articles WHERE status <> 'published'")->fetchColumn(),
-        'progetti'   => (int)db()->query("SELECT COUNT(*) FROM projects")->fetchColumn(),
         'tag'        => (int)db()->query("SELECT COUNT(*) FROM tags")->fetchColumn(),
         'visite'     => (int)db()->query("SELECT COUNT(*) FROM article_views")->fetchColumn(),
         'reazioni'   => (int)db()->query("SELECT COUNT(*) FROM article_reactions")->fetchColumn(),

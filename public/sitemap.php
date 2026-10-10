@@ -35,7 +35,6 @@ echo "  </url>" . PHP_EOL;
 
 // 2. PAGINE STATICHE PRINCIPALI
 $staticPages = [
-    ['url' => '/tutti-i-progetti', 'freq' => 'weekly', 'prio' => '0.8'],
     ['url' => '/contatti', 'freq' => 'monthly', 'prio' => '0.5']
 ];
 

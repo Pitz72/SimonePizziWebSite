@@ -100,7 +100,7 @@ avviso_pannello();
 <section class="scheda" style="max-width:720px">
   <h2 class="gro" style="font-size:20px">Backup del sito</h2>
   <p class="aiuto" style="margin-bottom:16px">
-    Un dump compresso di tutto il database: articoli, progetti, iscritti, messaggi e il registro della newsletter.
+    Un dump compresso di tutto il database: articoli, iscritti, messaggi e il registro della newsletter.
     Si conservano le ultime <?= BACKUP_CONSERVA ?> copie. Il ripristino non è in pannello: si fa a mano, da phpMyAdmin.
     <?= $ultimo !== '' ? 'Ultima copia: ' . e(data_breve($ultimo)) . '.' : 'Nessuna copia ancora.' ?>
   </p>

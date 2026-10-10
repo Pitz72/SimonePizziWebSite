@@ -49,13 +49,13 @@ require __DIR__ . '/../partials/head.php';
       <div class="apertura-sotto">
         <p><?= e(SITO_DESCR) ?></p>
         <div class="btn-fila">
-          <a class="btn btn-pieno" href="/tutti-i-progetti">Tutti i progetti</a>
+          <a class="btn btn-pieno" href="https://ecosystem.runtimeradio.com/it/" target="_blank" rel="noopener">Progetti ↗</a>
           <a class="btn" href="/blog-e-riflessioni">Ultimi articoli</a>
         </div>
       </div>
       <div class="contatori">
         <div><b><?= $numeri['articoli'] ?></b><span class="eti">Articoli</span></div>
-        <div><b><?= $numeri['progetti'] ?></b><span class="eti">Progetti</span></div>
+        <div><b><?= $numeri['tag'] ?></b><span class="eti">Tag</span></div>
         <div><b><?= count(categorie_radice()) ?></b><span class="eti">Sezioni</span></div>
         <div><b><?= e(data_breve($numeri['ultimo'])) ?></b><span class="eti">Ultimo</span></div>
       </div>
@@ -81,18 +81,6 @@ require __DIR__ . '/../partials/head.php';
       <?php foreach ($recenti as $a) blocco_riga($a, true, $nomi_categoria[$a['category']] ?? $a['category']); ?>
     </ul>
   </div></section>
-
-  <?php $vetrina = array_slice(progetti(), 0, 2); if ($vetrina): ?>
-    <section class="sezione"><div class="gab">
-      <div class="sezione-cima">
-        <h2>Ultimi progetti</h2>
-        <a class="eti" href="/tutti-i-progetti">Tutti e <?= $numeri['progetti'] ?> →</a>
-      </div>
-      <ul class="banco">
-        <?php foreach ($vetrina as $p) blocco_progetto($p, $nomi_categoria[$p['category']] ?? ''); ?>
-      </ul>
-    </div></section>
-  <?php endif; ?>
 
   <?php blocco_newsletter(); ?>
   <?php blocco_contatto(); ?>

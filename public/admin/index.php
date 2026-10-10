@@ -77,7 +77,7 @@ avviso_pannello();
 <div class="numeri">
   <a href="/admin/articoli.php?stato=published"><div><b><?= $n['pubblicati'] ?></b><span class="eti">Pubblicati</span></div></a>
   <a href="/admin/articoli.php?stato=draft"><div><b><?= $n['bozze'] ?></b><span class="eti">Bozze</span></div></a>
-  <a href="/admin/progetti.php"><div><b><?= $n['progetti'] ?></b><span class="eti">Progetti</span></div></a>
+  <a href="/admin/tag.php"><div><b><?= $n['tag'] ?></b><span class="eti">Tag</span></div></a>
   <a href="/admin/messaggi.php"><div><b><?= $n['messaggi'] ?></b><span class="eti">Da leggere</span></div></a>
   <a href="/admin/newsletter.php"><div><b><?= $n['iscritti'] ?></b><span class="eti">Iscritti</span>
     <?php if ($nuovi > 0): ?><span class="eti" style="color:var(--verde)">+<?= $nuovi ?> in 30 giorni</span><?php endif; ?>
@@ -148,11 +148,11 @@ avviso_pannello();
     </ul>
   </section>
 
-  <!-- ── I pulsanti dei progetti ───────────────────────────────────────── -->
+  <!-- ── I pulsanti degli articoli ──────────────────────────────────────── -->
   <section style="margin-bottom:30px">
     <h2 class="gro" style="font-size:20px;margin-bottom:6px">Quali pulsanti si premono</h2>
-    <p class="aiuto" style="margin-bottom:14px">I clic sui due comandi delle schede
-       progetto: dice quale invito funziona e quale no.</p>
+    <p class="aiuto" style="margin-bottom:14px">I clic sui pulsanti in fondo agli articoli:
+       dice quale invito funziona e quale no.</p>
     <ul class="barre">
       <?php $max = max(1, (int)($clic[0]['quanti'] ?? 1));
       foreach ($clic as $c) barra((string)$c['button_label'], (int)$c['quanti'], $max); ?>

@@ -28,13 +28,6 @@ return [
         'desc'   => 'Videogiochi, racconti, software e radio: i progetti di Simone Pizzi e i devlog che raccontano come sono fatti davvero, dal 2010 a oggi.',
     ],
 
-    'tutti-i-progetti' => [
-        'pagina'  => 'progetti',
-        'briciola' => 'Tutti i progetti',
-        'title'   => 'Tutti i progetti — Simone Pizzi',
-        'desc'    => 'Diciotto lavori fra videogiochi, motori narrativi, software per la radio e libri. Quasi tutti finiti su GitHub, quasi sempre dopo aver provato a venderli.',
-    ],
-
     'contatti' => [
         'pagina'  => 'contatti',
         'briciola' => 'Contatti',

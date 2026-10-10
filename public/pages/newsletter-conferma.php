@@ -12,7 +12,7 @@ require __DIR__ . '/../partials/head.php';
     </header>
     <div class="btn-fila" style="margin-top:28px">
       <a class="btn btn-pieno" href="/">Torna alla home</a>
-      <a class="btn btn-muto" href="/tutti-i-progetti">Guarda i progetti</a>
+      <a class="btn btn-muto" href="https://ecosystem.runtimeradio.com/it/" target="_blank" rel="noopener">Guarda i progetti</a>
     </div>
   </div>
 </main>
