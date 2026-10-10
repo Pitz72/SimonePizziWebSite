@@ -5,8 +5,7 @@
  *
  * Dal 7 settembre 2026 è questo il file che risponde a ogni indirizzo del
  * sito. Il motore che c'era prima — il guscio React con l'HTML per i soli
- * crawler — sta in index-react.php, spento, finché non sarà chiaro che non
- * serve più.
+ * crawler — è stato tolto il 10 ottobre 2026; resta nella storia di git.
  *
  * Le rotte sono nove e non cambiano rispetto a oggi. Non deve cambiare
  * nessuna URL: è la lezione che il repo si porta dietro dal sito di Keyla.

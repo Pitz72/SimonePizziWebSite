@@ -96,7 +96,7 @@
       titolo.textContent = r.titolo;
 
       var sotto = document.createElement('span');
-      sotto.textContent = [r.sezione, r.quando, r.genere === 'progetto' ? 'progetto' : '']
+      sotto.textContent = [r.sezione, r.quando]
         .filter(Boolean).join(' · ');
 
       a.appendChild(titolo);

@@ -1,5 +1,10 @@
 <?php
 /** Esito del doppio consenso: chi arriva qui ha appena cliccato il link nella email. */
+/* I link nelle email vecchie arrivano qui con ?token=: la pagina nuova mostra il pulsante di conferma. */
+if (!empty($_GET['token'])) {
+    require __DIR__ . '/nl-conferma.php';
+    return;
+}
 require __DIR__ . '/../partials/head.php';
 ?>
 <main id="contenuto" class="contenuto">

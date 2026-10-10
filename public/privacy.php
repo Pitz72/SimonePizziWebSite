@@ -185,7 +185,7 @@ $year     = date('Y');
 <div class="hero">
     <div class="badge">⚖️ Documento Legale</div>
     <h1>Privacy Policy</h1>
-    <p>Informativa ai sensi del Regolamento UE 2016/679 (GDPR) &mdash; Ultimo aggiornamento: Aprile <?= $year ?></p>
+    <p>Informativa ai sensi del Regolamento UE 2016/679 (GDPR) &mdash; Ultimo aggiornamento: ottobre 2026 (versione 2026-10)</p>
 </div>
 
 <main class="content">
@@ -220,10 +220,10 @@ $year     = date('Y');
                     </tr>
                     <tr>
                         <td><strong>Newsletter</strong></td>
-                        <td>Email, Nome (facoltativo)</td>
+                        <td>Email, Nome (facoltativo), e la prova del consenso: data e ora, testo accettato, versione dell'informativa, modo in cui è stato dato</td>
                         <td>Invio aggiornamenti sui nuovi contenuti del sito</td>
                         <td>Consenso esplicito (double opt-in)</td>
-                        <td>Fino alla disiscrizione</td>
+                        <td>Fino alla disiscrizione. Chi esce resta nell'elenco solo con lo stato «uscito», per non riceverne più, e si cancella a richiesta</td>
                     </tr>
                     <tr>
                         <td><strong>Analytics interno</strong></td>
@@ -256,12 +256,14 @@ $year     = date('Y');
         <h2><span class="icon">🔄</span> Newsletter: Gestione del Consenso</h2>
         <p>L'iscrizione alla newsletter avviene tramite un processo di <strong>double opt-in</strong>:</p>
         <ul>
-            <li>L'utente inserisce la propria email e invia il modulo</li>
+            <li>L'utente inserisce la propria email e spunta la casella del consenso, che non è mai precompilata</li>
             <li>Viene inviata un'email con un link di conferma univoco</li>
-            <li>L'iscrizione si attiva solo dopo il click sul link di conferma</li>
+            <li>Il link porta a una pagina con un pulsante: l'iscrizione si attiva solo premendolo, non aprendo il link</li>
             <li>Ogni email inviata contiene un link di disiscrizione immediata</li>
         </ul>
-        <p style="margin-top:12px;">Per disiscriversi è sufficiente cliccare il link in fondo a qualsiasi email ricevuta, oppure scrivere dal <a href="<?= $baseUrl ?>/contatti">modulo dei contatti</a>.</p>
+        <p style="margin-top:12px;"><strong>La prova del consenso.</strong> Quando il consenso viene dato, il sito registra la data e l'ora, il testo esatto che l'utente ha letto, la versione di questa informativa in vigore e il modo in cui è stato dato (modulo del sito, conferma dell'iscrizione o riconferma). Se il testo del consenso o questa informativa cambiano, la versione cambia: così si sa sempre quale testo ha accettato ciascun iscritto. La versione in vigore è la <strong>2026-10</strong>.</p>
+        <p>Chi si era iscritto prima di ottobre 2026 non ha una prova di questo tipo: a queste persone non viene inviata la newsletter, ma una sola email in cui si chiede di confermare il consenso con un clic. Chi non risponde non riceve più niente.</p>
+        <p>Per disiscriversi è sufficiente cliccare il link in fondo a qualsiasi email ricevuta (la disiscrizione si completa con un pulsante), oppure scrivere dal <a href="<?= $baseUrl ?>/contatti">modulo dei contatti</a>.</p>
     </div>
 
     <div class="section">
@@ -290,7 +292,7 @@ $year     = date('Y');
     <div class="section">
         <h2><span class="icon">📅</span> Modifiche alla Privacy Policy</h2>
         <p>Il Titolare si riserva il diritto di apportare modifiche alla presente informativa, dandone comunicazione agli utenti su questa pagina. Si raccomanda di consultarla periodicamente.</p>
-        <p><em>Data di ultima revisione: Aprile <?= $year ?></em></p>
+        <p><em>Data di ultima revisione: ottobre 2026 (versione 2026-10)</em></p>
     </div>
 
 </main>
