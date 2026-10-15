@@ -3,10 +3,12 @@
 Benvenuto nel repository della documentazione. In linea con la filosofia di semplificazione del progetto, abbiamo consolidato tutta la conoscenza operativa in un unico punto di riferimento.
 
 ## ⚠️ Prossima sessione: leggere prima questo
-- **[Consegna del 07/09/2026 — migrazione a PHP puro](2026-09-07-consegna-migrazione-php-puro.md)** —
-  perché questo repo non è stato toccato durante l'omologazione degli editor dei tre siti, l'inventario
-  di quello che c'è, e il lavoro deciso da Simone: **prima due o tre proposte di design da mostrare
-  visivamente**, poi la migrazione abbandonando React. Niente codice prima della scelta del design.
+- **[Revisione generale del 16/10/2026](AUDIT-2026-10-16.md)** — il sito in PHP letto per intero
+  sei settimane dopo il taglio: a che punto è rispetto allo standard FDCA, le funzioni del React
+  perse per strada, 0 gravissime, 6 gravi, 16 medie, 16 lievi, e l'ordine in cui chiuderle.
+- [Consegna del 07/09/2026 — migrazione a PHP puro](2026-09-07-consegna-migrazione-php-puro.md) —
+  il piano della migrazione, oggi conclusa. Il racconto di ogni scelta sta in
+  `design/2026-09-proposte/DECISIONI.md`.
 
 ## ✉️ Messaggistica (30/09/2026)
 - **[Messaggistica: niente email in pagina](2026-09-30-messaggistica.md)** — il modulo contatti,
