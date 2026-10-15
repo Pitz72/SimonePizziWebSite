@@ -8,7 +8,22 @@
 </IfModule>
 
 # [v2.0] Forza Apache a eseguire index.php (SEO Engine) prima di index.html
+# (index.html resta in elenco per le cartelle che sono siti a sé, come relitto/)
 DirectoryIndex index.php index.html
+
+# [16/10/2026] Le regole di casa di FDCA (revisione del 16 ottobre, M1).
+#
+# Fino a oggi /lib/, /api/, /pages/, /partials/, /images/ e /assets/ rispondevano
+# con «Index of …» e l'elenco dei file: chiunque vedeva il nome di ogni libreria
+# e di ogni vecchia API. E /partials/head.php o /pages/home.php, chiamati
+# direttamente, si eseguivano e rispondevano 500.
+Options -Indexes
+
+# File che non devono mai uscire, dovunque siano: database, chiavi, copie,
+# dump, log, i backup interrotti a metà.
+<FilesMatch "\.(sqlite|sqlite3|db|bak|key|sql|gz|log|parziale|md)$">
+  Require all denied
+</FilesMatch>
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
@@ -17,6 +32,10 @@ DirectoryIndex index.php index.html
 # [v1.19.0] Forza HTTPS: ogni richiesta in chiaro viene redirezionata (301)
   RewriteCond %{HTTPS} !=on
   RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# [16/10/2026] Le cartelle del codice non sono pagine: si includono, non si
+# chiedono. Da fuori rispondono 404, come in FDCA.
+  RewriteRule ^(lib|pages|partials)(/|$) - [R=404,L]
 
 # [v2.0] SEO Files — SEMPRE serviti da PHP (contenuto dinamico real-time)
 # Questo elimina il bug v1.9.6 del 404 sporadico su robots.txt e garantisce

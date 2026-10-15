@@ -16,6 +16,21 @@ function e(?string $testo): string {
     return htmlspecialchars((string)$testo, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+/**
+ * L'indirizzo di un CSS o di un JS con la sua versione: `?v=` e l'ora
+ * dell'ultima modifica del file.
+ *
+ * DreamHost li manda con trenta giorni di cache. Senza la versione, dopo un
+ * caricamento chi era già passato dal sito teneva il CSS e il JavaScript vecchi
+ * per un mese, accanto a un HTML nuovo (revisione del 16 ottobre, M4). Con la
+ * versione l'indirizzo cambia quando cambia il file, e la cache lunga diventa
+ * un vantaggio invece di un guaio. È asset_v() di FDCA.
+ */
+function asset_v(string $percorso): string {
+    $file = dirname(__DIR__) . $percorso;
+    return $percorso . '?v=' . (is_file($file) ? filemtime($file) : '0');
+}
+
 /** Testo dentro un attributo di un URL. */
 function eu(?string $url): string {
     return e(filter_var((string)$url, FILTER_SANITIZE_URL) ?: '');

@@ -99,6 +99,23 @@ controlla 200 "/api/cerca.php?q=favella"  file
 controlla 200 "/api/cerca.php?q=a"        file
 
 echo
+echo "Quello che ogni pagina deve avere"
+# contiene <percorso> <testo> <che cosa si prova>
+contiene() {
+  if curl -s "$BASE$1" | grep -qF -- "$2"; then
+    passate=$((passate + 1)); printf '  ok  %s\n' "$3"
+  else
+    fallite=$((fallite + 1)); printf '  NO  %s — in %s manca «%s»\n' "$3" "$1" "$2"
+  fi
+}
+# Revisione del 16 ottobre: G4 (i link legali nel piede) e M4 (la versione sui file statici).
+contiene "/"          'href="/privacy"'                  "il piede porta all'informativa"
+contiene "/videogiochi" 'href="/cookie-policy"'          "il piede porta alla cookie policy"
+contiene "/"          '/assets/css/main.css?v='          "il CSS ha la sua versione"
+contiene "/"          '/assets/js/interfaccia.js?v='     "il JavaScript ha la sua versione"
+contiene "/"          '/assets/css/caratteri.css?v='     "i caratteri arrivano con un <link>, non con @import"
+
+echo
 echo "Le pagine di servizio"
 controlla 200 "/assets/css/base.css"     file
 controlla 200 "/assets/css/caratteri.css" file

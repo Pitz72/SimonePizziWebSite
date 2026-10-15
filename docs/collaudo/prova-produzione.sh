@@ -65,7 +65,8 @@ controlla 200 "/narrativa-e-pubblicazioni"
 controlla 200 "/podcast-audio-altro"
 controlla 200 "/blog-e-riflessioni"
 controlla 200 "/web"
-controlla 200 "/tutti-i-progetti"
+# Dal 10 ottobre 2026 i progetti stanno su Ecosystem: il vecchio indirizzo ci porta.
+controlla 301 "/tutti-i-progetti"
 controlla 200 "/contatti"
 # Un articolo qualunque, preso dalla sitemap invece che scritto qui dentro.
 # Scriverlo qui dentro è già costato una prova rossa: l'articolo che c'era
@@ -119,11 +120,60 @@ for atteso in "content-security-policy" "x-content-type-options" "referrer-polic
   if printf '%s' "$INTESTAZIONI" | grep -qi "^$atteso"; then ok "$atteso c'è"
   else no "$atteso" "non arriva"; fi
 done
-if printf '%s' "$INTESTAZIONI" | grep -qi "content-security-policy.*nonce-"; then
-  ok "la CSP ha il nonce (la manda PHP, non l'.htaccess)"
+# La CSP vale qualcosa solo se gli script scritti dentro la pagina non passano.
+# Dal 3 al 16 ottobre 2026 l'.htaccess mandava 'unsafe-inline' (revisione del
+# 16 ottobre, G2): la riga che prima cercava il nonce non se ne accorgeva.
+csp_script="$(printf '%s' "$INTESTAZIONI" | grep -i '^content-security-policy' | grep -o "script-src[^;]*")"
+if [ -n "$csp_script" ] && ! printf '%s' "$csp_script" | grep -q "unsafe-inline"; then
+  ok "la CSP non ammette script in linea ($csp_script)"
 else
-  no "CSP col nonce" "arriva quella senza nonce: l'.htaccess la sta ancora sovrascrivendo"
+  no "CSP" "script-src ammette script in linea: «$csp_script»"
 fi
+if printf '%s' "$INTESTAZIONI" | grep -i '^content-security-policy' | grep -q 'googleapis\|gstatic'; then
+  no "CSP" "ammette ancora i domini di Google Fonts, che il sito non usa"
+else
+  ok "la CSP non nomina Google Fonts"
+fi
+
+echo
+echo "Quello che da fuori non si deve vedere"
+# Revisione del 16 ottobre, M1 e L1.
+for d in /lib/ /api/ /pages/ /partials/ /assets/ /images/; do
+  if prendi "$SITO$d" | grep -q "Index of"; then no "$d" "mostra l'elenco dei file"
+  else ok "$d non mostra l'elenco dei file"; fi
+done
+for f in /partials/head.php /pages/home.php /lib/avvio.php /api/config.php /api/db.php; do
+  stato="$(prendi -o /dev/null -w '%{http_code}' "$SITO$f")"
+  if [ "$stato" = "404" ] || [ "$stato" = "403" ]; then ok "$f è chiuso  [$stato]"
+  else no "$f" "risponde $stato"; fi
+done
+stato="$(prendi -o /dev/null -L --max-redirs 5 -w '%{http_code}' "$SITO/uploads/" 2>/dev/null)"
+if [ "$stato" = "404" ] || [ "$stato" = "403" ]; then ok "/uploads/ non gira in tondo  [$stato]"
+else no "/uploads/" "stato finale $stato (rimbalzi infiniti?)"; fi
+
+echo
+echo "Quello che le pagine devono dire"
+prendi "$SITO/" -o "$CORPO"
+grep -q 'href="/privacy"' "$CORPO" && grep -q 'href="/cookie-policy"' "$CORPO" \
+  && ok "il piede porta a privacy e cookie policy" || no "piede" "mancano i link legali (G4)"
+grep -q '/assets/css/main.css?v=' "$CORPO" \
+  && ok "CSS e JavaScript hanno la loro versione" || no "versione dei file" "main.css senza ?v= (M4)"
+# Il titolo per Google: sui primi dieci articoli della sitemap almeno uno deve
+# averne uno scritto a mano. og:title è il titolo intero dell'articolo; il
+# <title> è o il titolo per Google (diverso da tutti e due i casi qui sotto) o
+# «titolo — Simone Pizzi». Prima della correzione erano identici (G1).
+diversi=0; immagine_relativa=0
+for p in $(grep -o '<loc>[^<]*</loc>' "$SITEMAP" | sed 's/<[^>]*>//g' | sed 's|https\?://[^/]*||' | grep -E '^/[^/]+/[^/]+$' | head -10); do
+  prendi "$SITO$p" -o "$CORPO"
+  t="$(grep -o '<title>[^<]*</title>' "$CORPO" | sed 's/<[^>]*>//g')"
+  o="$(grep -o 'property="og:title" content="[^"]*"' "$CORPO" | sed 's/.*content="//;s/"$//')"
+  [ "$t" != "$o" ] && [ "$t" != "$o — Simone Pizzi" ] && diversi=$((diversi + 1))
+  grep -q '"image":\["/' "$CORPO" && immagine_relativa=$((immagine_relativa + 1))
+done
+if [ "$diversi" -gt 0 ]; then ok "il titolo per Google arriva alla pagina ($diversi articoli su 10)"
+else no "titolo per Google" "nessuno dei primi dieci articoli lo usa"; fi
+if [ "$immagine_relativa" -eq 0 ]; then ok "nei dati strutturati le immagini hanno l'indirizzo completo"
+else no "dati strutturati" "$immagine_relativa articoli con l'immagine relativa (M10)"; fi
 
 echo
 echo "Tutta la sitemap"

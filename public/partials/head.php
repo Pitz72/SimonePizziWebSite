@@ -31,6 +31,10 @@ if (!headers_sent()) {
 
 $titolo    = (string)p('title');
 $descr     = (string)p('desc');
+/* L'anteprima di Telegram o Facebook non è la scheda di Google: lì il titolo
+   intero dell'articolo si legge meglio di quello accorciato per i 60 caratteri
+   di Google. Se la pagina non ne dà uno suo, vale il titolo della scheda. */
+$titoloSocial = (string)(p('titolo_social') ?: $titolo);
 $canonico  = base_url() . (string)p('canonical');
 $immagine  = (string)p('immagine');
 // Telegram e Facebook vogliono l'indirizzo completo dell'immagine: il percorso relativo non lo leggono.
@@ -52,7 +56,7 @@ if ($immagine !== '' && str_starts_with($immagine, '/')) {
 
 <meta property="og:type" content="<?= e((string)p('tipo')) ?>">
 <meta property="og:site_name" content="<?= e(SITO_NOME) ?>">
-<meta property="og:title" content="<?= e($titolo) ?>">
+<meta property="og:title" content="<?= e($titoloSocial) ?>">
 <meta property="og:description" content="<?= e($descr) ?>">
 <meta property="og:url" content="<?= e($canonico) ?>">
 <?php if ($immagine !== ''): ?>
@@ -71,8 +75,9 @@ if ($immagine !== '' && str_starts_with($immagine, '/')) {
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="alternate" type="application/rss+xml" title="<?= e(SITO_NOME) ?>" href="/api/rss.php">
-<link rel="stylesheet" href="/assets/css/base.css">
-<link rel="stylesheet" href="/assets/css/main.css">
+<link rel="stylesheet" href="<?= e(asset_v('/assets/css/caratteri.css')) ?>">
+<link rel="stylesheet" href="<?= e(asset_v('/assets/css/base.css')) ?>">
+<link rel="stylesheet" href="<?= e(asset_v('/assets/css/main.css')) ?>">
 <?php stampa_jsonld(p('jsonld'), jsonld_briciole((array)p('briciole'))); ?>
 </head>
 <body<?= p('corpo_classe') ? ' class="' . e((string)p('corpo_classe')) . '"' : '' ?>>

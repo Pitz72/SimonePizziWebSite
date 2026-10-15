@@ -97,6 +97,10 @@ function salva_articolo(array $d, ?int $id = null): int {
         'is_featured'        => !empty($d['is_featured']) ? 1 : 0,
         'is_category_pinned' => !empty($d['is_category_pinned']) ? 1 : 0,
         'published_at'       => trim((string)($d['published_at'] ?? '')) ?: null,
+        /* Scritta da qui e non lasciata a MySQL: «ON UPDATE CURRENT_TIMESTAMP»
+           usa l'ora del server, che sta a Los Angeles, nove ore indietro. La
+           data di modifica serve ai dati strutturati e alla sitemap. */
+        'updated_at'         => date('Y-m-d H:i:s'),
     ];
 
     if ($id) {

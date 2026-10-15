@@ -46,8 +46,9 @@ function testa_pannello(string $titolo, string $sezione = '', bool $nuda = false
 <link rel="icon" href="/favicon.ico" sizes="32x32">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-<link rel="stylesheet" href="/assets/css/base.css">
-<link rel="stylesheet" href="/assets/css/admin.css">
+<link rel="stylesheet" href="<?= e(asset_v('/assets/css/caratteri.css')) ?>">
+<link rel="stylesheet" href="<?= e(asset_v('/assets/css/base.css')) ?>">
+<link rel="stylesheet" href="<?= e(asset_v('/assets/css/admin.css')) ?>">
 </head>
 <body class="<?= $nuda ? 'pannello-nudo' : 'pannello' ?>">
 <?php if ($nuda) return; ?>
@@ -93,9 +94,9 @@ function piede_pannello(bool $nuda = false, array $script = []): void {
         echo '  </main></div>';
     }
     ?>
-<script nonce="<?= e(nonce()) ?>" src="/assets/js/admin.js" defer></script>
+<script nonce="<?= e(nonce()) ?>" src="<?= e(asset_v('/assets/js/admin.js')) ?>" defer></script>
 <?php foreach ($script as $f): ?>
-<script nonce="<?= e(nonce()) ?>" src="/assets/js/<?= e($f) ?>" defer></script>
+<script nonce="<?= e(nonce()) ?>" src="<?= e(asset_v('/assets/js/' . $f)) ?>" defer></script>
 <?php endforeach; ?>
 </body>
 </html>

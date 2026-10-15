@@ -18,7 +18,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verifica_gettone();
     $chi = trim((string)($_POST['chi'] ?? ''));
 
-    if ($chi !== '') {
+    /* Il freno, prima di tutto il resto. Senza, chiunque poteva premere Invia
+       a ripetizione: ogni volta un'email, il tetto orario della posta pieno in
+       pochi minuti, e notifiche e newsletter in coda dietro a link inutili
+       (revisione del 16 ottobre, G3). Tre richieste per rete ogni quarto d'ora
+       e dieci al giorno in tutto bastano a chi ha perso davvero la password.
+       La risposta resta la stessa anche quando il freno scatta: dire «troppi
+       tentativi» confermerebbe che il nome esiste. */
+    $ammessa = $chi !== ''
+        && freno_passa('recupero-rete', rete_cliente(), 3, 900)
+        && freno_passa('recupero-tutti', 'tutti', 10, 86400);
+
+    if ($ammessa) {
         $link = prepara_recupero($chi);
         if ($link !== null) {
             $mandata = manda_link_recupero(
@@ -40,7 +51,8 @@ testa_pannello('Password dimenticata', '', true);
   <?php if ($fatto): ?>
     <p class="avviso" role="status">
       Se quel nome utente esiste, il link è partito verso l'indirizzo registrato.
-      Controlla anche la posta indesiderata.
+      Controlla anche la posta indesiderata. Se non arriva entro qualche minuto,
+      riprova fra un quarto d'ora.
     </p>
 
     <?php if ($linkSviluppo !== ''): ?>

@@ -116,6 +116,25 @@ stato="$(curl -s -o /dev/null -w '%{http_code}' "$BASE/web/prova-automatica-del-
 if [ "$stato" = "200" ]; then ok "una volta pubblicato, il sito lo mostra"
 else no "pubblicazione" "sul sito risponde $stato invece di 200"; fi
 
+# Il «Titolo per Google» e la «Descrizione per Google» devono arrivare alla
+# pagina. Dal 7 settembre al 16 ottobre 2026 il pannello li salvava e la pagina
+# non li leggeva: nessuna prova lo guardava (revisione del 16 ottobre, G1).
+G="$(gettone "/admin/articolo.php?id=$ID")"
+curl -s -b "$BISCOTTI" -o /dev/null -d "gettone=$G" -d "id=$ID"   -d "title=Prova automatica del collaudo" -d "slug=prova-automatica-del-collaudo"   -d "content=<p>Testo.</p>" -d "category=web" -d "status=published"   -d "seo_title=Titolo scritto per Google" -d "seo_description=Descrizione scritta per Google dalla prova."   -d "cover_image=/uploads/immagini/copertina-di-prova.webp"   "$BASE/admin/articolo.php"
+curl -s -o "$CORPO" "$BASE/web/prova-automatica-del-collaudo"
+if grep -q '<title>Titolo scritto per Google</title>' "$CORPO"; then
+  ok "il titolo per Google è il <title> della pagina"
+else no "titolo per Google" "il <title> è $(grep -o '<title>[^<]*' "$CORPO" | head -1)"; fi
+if grep -q 'name="description" content="Descrizione scritta per Google dalla prova."' "$CORPO"; then
+  ok "la descrizione per Google è la description della pagina"
+else no "descrizione per Google" "la description non è quella del pannello"; fi
+if grep -q 'property="og:title" content="Prova automatica del collaudo"' "$CORPO"; then
+  ok "l'anteprima social tiene il titolo intero"
+else no "og:title" "non è il titolo dell'articolo"; fi
+if grep -q '"image":\["http[^"]*/uploads/immagini/copertina-di-prova.webp"\]' "$CORPO"; then
+  ok "nei dati strutturati l'immagine ha l'indirizzo completo"
+else no "immagine nel JSON-LD" "$(grep -o '"image":[^]]*]' "$CORPO" | head -1)"; fi
+
 # Programmato per l'anno prossimo: «published» ce l'ha già, ma per il pubblico
 # non esiste ancora. È il caso che il 7 settembre 2026 mandava in 404 anche
 # l'amministratore che premeva «Vedi».
@@ -156,6 +175,28 @@ curl -s -b "$BISCOTTI" -o /dev/null \
 stato="$(curl -s -o /dev/null -w '%{http_code}' "$BASE/web/prova-automatica-del-collaudo")"
 if [ "$stato" = "404" ]; then ok "eliminati: il sito torna a dare 404"
 else no "eliminazione" "l'articolo risponde ancora $stato"; fi
+
+echo
+echo "Il freno del recupero password"
+# Senza freno, chiunque poteva far partire un'email a ogni clic e riempire il
+# tetto orario della posta (revisione del 16 ottobre, G3). Tre richieste per
+# rete ogni quarto d'ora; la quarta riceve la stessa risposta ma niente link.
+# I freni di sviluppo stanno in scratch/: si azzerano per partire puliti.
+rm -f scratch/simonepizzi-dati/freni/*.json 2>/dev/null
+FUORI="$(mktemp)"
+link_dati=0
+for i in 1 2 3 4; do
+  : > "$FUORI"
+  G="$(curl -s -c "$FUORI" "$BASE/admin/recupera.php" | grep -o 'name="gettone" value="[a-f0-9]*"' | head -1 | sed 's/.*value="//;s/"//')"
+  curl -s -b "$FUORI" -o "$CORPO" -d "gettone=$G&chi=simone" "$BASE/admin/recupera.php"
+  if grep -q 'reimposta.php?gettone=' "$CORPO"; then link_dati=$((link_dati + 1)); fi
+done
+rm -f "$FUORI"
+if [ "$link_dati" = "3" ]; then ok "tre recuperi passano, il quarto si ferma"
+else no "freno del recupero" "link prodotti: $link_dati su 4 (attesi 3)"; fi
+if grep -q 'Se quel nome utente esiste' "$CORPO"; then ok "chi viene fermato legge la stessa risposta"
+else no "risposta del freno" "la quarta richiesta risponde in un altro modo"; fi
+rm -f scratch/simonepizzi-dati/freni/*.json 2>/dev/null
 
 echo
 echo "Uscire"

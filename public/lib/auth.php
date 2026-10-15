@@ -231,5 +231,8 @@ function manda_link_recupero(string $email, string $link): bool {
            . '<p>Il link vale un\'ora. Se non sei stato tu, non serve fare niente: '
            . 'senza il link non cambia nulla.</p>';
 
-    return manda_posta($email, 'Reimposta la password del pannello', $corpo);
+    /* Priorità alta e niente coda: il link vale un'ora, e se il tetto orario
+       è pieno è meglio dirlo subito che spedirlo quando è già scaduto. */
+    return manda_posta($email, 'Reimposta la password del pannello', $corpo,
+        ['priorita' => 'alta', 'nessuna_coda' => true]);
 }

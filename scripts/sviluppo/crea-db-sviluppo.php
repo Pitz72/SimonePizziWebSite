@@ -71,7 +71,7 @@ $db->exec("CREATE TABLE articles (
     seo_title TEXT NULL, seo_description TEXT NULL,
     cover_image TEXT, category TEXT, is_featured INTEGER DEFAULT 0,
     is_category_pinned INTEGER DEFAULT 0, status TEXT DEFAULT 'published',
-    published_at TEXT, created_at TEXT)");
+    published_at TEXT, created_at TEXT, updated_at TEXT NULL)");
 
 $db->exec("CREATE TABLE tags (id INTEGER PRIMARY KEY, name TEXT NOT NULL, slug TEXT NOT NULL)");
 $db->exec("CREATE TABLE article_tags (article_id INTEGER NOT NULL, tag_id INTEGER NOT NULL)");

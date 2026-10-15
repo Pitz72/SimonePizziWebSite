@@ -38,6 +38,7 @@ $haCategoria = ($categoria['slug'] ?? '') !== '';
 
 pagina([
     'title'     => ($anteprima ? 'Anteprima · ' : '') . titolo_seo($articolo),
+    'titolo_social' => $articolo['title'],
     'desc'      => descrizione_seo($articolo),
     'canonical' => url_articolo($articolo),
     /* Un articolo non ancora uscito non deve finire nell'indice se per caso

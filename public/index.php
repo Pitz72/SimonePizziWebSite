@@ -23,6 +23,14 @@ manutenzione_di_passaggio();
 $percorso = (string)parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH);
 $percorso = trim(rawurldecode($percorso), '/');
 
+/* Una cartella vera arriva qui solo se Apache non la serve da sé (niente
+   indice, elenco dei file spento). Toglierle la barra la rimandava ad Apache,
+   che gliela rimetteva: /uploads/ girava in tondo fino all'errore del browser
+   (revisione del 16 ottobre, L1). Una cartella non è una pagina: 404. */
+if ($percorso !== '' && is_dir(__DIR__ . '/' . $percorso)) {
+    non_trovata();
+}
+
 /* Una barra finale in più non è una pagina diversa: si porta chi arriva
    sull'indirizzo senza, una volta sola e in modo permanente. */
 if ($percorso !== '' && str_ends_with((string)parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH), '/')) {

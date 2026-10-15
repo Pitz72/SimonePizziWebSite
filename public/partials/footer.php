@@ -17,6 +17,13 @@ $con_condivisione = !empty($GLOBALS['FINESTRE_CONDIVISIONE']);
       <a href="/api/rss.php">RSS</a>
       <a href="/contatti">Contatti</a>
       <a href="https://ecosystem.runtimeradio.com/it/" target="_blank" rel="noopener">Progetti</a>
+      <?php /* L'informativa e la cookie policy si raggiungono da ogni pagina, non
+               solo dalle caselle del consenso: chi vuole sapere che cosa il sito
+               fa dei suoi dati non deve iscriversi a niente per scoprirlo. Il piede
+               del sito React li aveva; il taglio del 7 settembre li aveva persi
+               (revisione del 16 ottobre, G4). */ ?>
+      <a href="/privacy">Privacy</a>
+      <a href="/cookie-policy">Cookie</a>
     </nav>
     <span class="eti">Runtime Radio · Italian Podcast Network</span>
   </div>
@@ -24,13 +31,13 @@ $con_condivisione = !empty($GLOBALS['FINESTRE_CONDIVISIONE']);
 
 <?php blocco_finestre($con_condivisione); ?>
 
-<script nonce="<?= e(nonce()) ?>" src="/assets/js/interfaccia.js" defer></script>
-<script nonce="<?= e(nonce()) ?>" src="/assets/js/ricerca.js" defer></script>
-<script nonce="<?= e(nonce()) ?>" src="/assets/js/newsletter.js" defer></script>
+<script nonce="<?= e(nonce()) ?>" src="<?= e(asset_v('/assets/js/interfaccia.js')) ?>" defer></script>
+<script nonce="<?= e(nonce()) ?>" src="<?= e(asset_v('/assets/js/ricerca.js')) ?>" defer></script>
+<script nonce="<?= e(nonce()) ?>" src="<?= e(asset_v('/assets/js/newsletter.js')) ?>" defer></script>
 <?php if ($con_condivisione): ?>
-<script nonce="<?= e(nonce()) ?>" src="/assets/js/sommario.js" defer></script>
-<script nonce="<?= e(nonce()) ?>" src="/assets/js/reazioni.js" defer></script>
-<script nonce="<?= e(nonce()) ?>" src="/assets/js/visite.js" defer></script>
+<script nonce="<?= e(nonce()) ?>" src="<?= e(asset_v('/assets/js/sommario.js')) ?>" defer></script>
+<script nonce="<?= e(nonce()) ?>" src="<?= e(asset_v('/assets/js/reazioni.js')) ?>" defer></script>
+<script nonce="<?= e(nonce()) ?>" src="<?= e(asset_v('/assets/js/visite.js')) ?>" defer></script>
 <?php endif; ?>
 </body>
 </html>

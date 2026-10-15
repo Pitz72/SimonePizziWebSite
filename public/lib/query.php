@@ -26,9 +26,18 @@ const COLONNE_ELENCO = 'id, title, slug, excerpt, cover_image, category, is_feat
 /** Le stesse, con il prefisso della tabella, per le query con una JOIN. */
 const COLONNE_ELENCO_A = 'a.id, a.title, a.slug, a.excerpt, a.cover_image, a.category, a.is_featured, a.published_at, a.created_at';
 
-/** Tutto quello che serve alla pagina di un articolo, corpo compreso. */
-const COLONNE_ARTICOLO = 'id, title, slug, content, excerpt, focus_keyword, cover_image, category,
-                          is_featured, status, published_at, created_at,
+/**
+ * Tutto quello che serve alla pagina di un articolo, corpo compreso.
+ *
+ * `seo_title` e `seo_description` sono il «Titolo per Google» e la
+ * «Descrizione per Google» del pannello. Dal 7 settembre al 16 ottobre 2026
+ * mancavano da questo elenco: titolo_seo() e descrizione_seo() li cercavano,
+ * li trovavano sempre vuoti e ripiegavano su titolo e riassunto, così nessuno
+ * dei testi scritti per Google arrivava a Google (revisione del 16 ottobre, G1).
+ * `updated_at` serve alla data di modifica dei dati strutturati.
+ */
+const COLONNE_ARTICOLO = 'id, title, seo_title, slug, content, excerpt, seo_description, focus_keyword,
+                          cover_image, category, is_featured, status, published_at, created_at, updated_at,
                           button_a_label, button_a_link, button_b_label, button_b_link';
 
 /** Solo quello che il pubblico può vedere: pubblicato e non programmato nel futuro. */

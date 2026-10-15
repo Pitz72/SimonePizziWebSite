@@ -57,6 +57,7 @@ function nonce(): string {
    Sono poche e si caricano tutte: un autoloader qui servirebbe solo a
    nascondere quante sono. */
 require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/freno.php';
 require_once __DIR__ . '/safe_html.php';
 require_once __DIR__ . '/db.php';
 require_once __DIR__ . '/query.php';

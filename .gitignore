@@ -68,3 +68,6 @@ scratch/runtime-cat/
 
 # Le email che il sito di sviluppo "spedisce": file HTML da guardare, non posta
 scratch/posta/
+
+# Chiavi e freni del sito in sviluppo (lib/freno.php): mai in repo
+scratch/simonepizzi-dati/

@@ -44,9 +44,9 @@ function p(string $chiave): mixed {
  * Il titolo della scheda di Google.
  *
  * Regola: se l'articolo ha un «Titolo per Google» scritto a mano si usa
- * quello; altrimenti il titolo vero seguito dal nome del sito. La colonna
- * seo_title non esiste ancora (§9 di DECISIONI.md): finché non c'è, il
- * ripiego lavora da solo e nessuno se ne accorge.
+ * quello, così com'è; altrimenti il titolo vero seguito dal nome del sito.
+ * Perché il primo arrivi qui, la query deve chiedere la colonna: vedi
+ * COLONNE_ARTICOLO in query.php.
  */
 function titolo_seo(array $articolo): string {
     $scritto = trim((string)($articolo['seo_title'] ?? ''));
@@ -65,6 +65,31 @@ function descrizione_seo(array $articolo): string {
 
 /* ─────────────────────────── Dati strutturati ──────────────────────────── */
 
+/**
+ * Un indirizzo assoluto, come lo vogliono Google e le anteprime social.
+ * url_immagine() restituisce il percorso relativo, che in pagina va benissimo;
+ * nei dati strutturati Google lo scarta.
+ */
+function url_assoluta(string $percorso): string {
+    if ($percorso === '' || preg_match('#^https?://#i', $percorso)) return $percorso;
+    return SITO_URL . '/' . ltrim($percorso, '/');
+}
+
+/**
+ * La data di modifica: la più recente fra uscita e ultimo salvataggio.
+ *
+ * Non basta `updated_at`. Un articolo programmato si salva prima di uscire,
+ * quindi il suo ultimo salvataggio viene prima della pubblicazione; e una
+ * modifica non può essere più vecchia dell'uscita.
+ */
+function data_modifica(array $articolo): ?string {
+    $uscita = $articolo['published_at'] ?? $articolo['created_at'] ?? null;
+    $salvato = $articolo['updated_at'] ?? null;
+    if (!$salvato) return $uscita;
+    if (!$uscita) return $salvato;
+    return strtotime($salvato) > strtotime($uscita) ? $salvato : $uscita;
+}
+
 /** Un articolo, come lo capisce Google. */
 function jsonld_articolo(array $articolo, array $categoria): array {
     return [
@@ -72,9 +97,9 @@ function jsonld_articolo(array $articolo, array $categoria): array {
         '@type'    => 'Article',
         'headline' => mb_substr($articolo['title'], 0, 110),
         'description' => descrizione_seo($articolo),
-        'image'    => array_filter([url_immagine($articolo['cover_image'] ?? '')]),
+        'image'    => array_values(array_filter([url_assoluta(url_immagine($articolo['cover_image'] ?? ''))])),
         'datePublished' => data_iso($articolo['published_at'] ?? $articolo['created_at'] ?? null),
-        'dateModified'  => data_iso($articolo['published_at'] ?? $articolo['created_at'] ?? null),
+        'dateModified'  => data_iso(data_modifica($articolo)),
         'author'   => ['@type' => 'Person', 'name' => SITO_NOME, 'url' => SITO_URL],
         'publisher'=> ['@type' => 'Person', 'name' => SITO_NOME, 'url' => SITO_URL],
         'mainEntityOfPage' => ['@type' => 'WebPage', '@id' => SITO_URL . url_articolo($articolo)],
@@ -117,8 +142,10 @@ function jsonld_briciole(array $briciole): ?array {
 function stampa_jsonld(?array ...$blocchi): void {
     foreach ($blocchi as $b) {
         if (!$b) continue;
-        echo '<script type="application/ld+json" nonce="' . e(nonce()) . '">'
-           . json_encode($b, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
+        // JSON_HEX_TAG: un «</script>» dentro un titolo chiuderebbe il blocco
+        // e il resto finirebbe nella pagina come HTML. È la regola di FDCA.
+        echo '<script type="application/ld+json">'
+           . json_encode($b, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP)
            . '</script>' . "\n";
     }
 }

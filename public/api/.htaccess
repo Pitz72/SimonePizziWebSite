@@ -14,6 +14,13 @@
 # Ogni endpoint sotto /api/ è dinamico e dipende dalla sessione: no-store è
 # la semantica corretta per tutti, nessuno escluso.
 
+# [16/10/2026] I file di servizio delle vecchie API si includono e basta: da
+# fuori non devono rispondere nemmeno con una pagina vuota (revisione del 16
+# ottobre, M1). config.php ha le credenziali del database.
+<FilesMatch "^(config|config\.example|db|auth_helper|db_maintenance)\.php$">
+  Require all denied
+</FilesMatch>
+
 <IfModule mod_expires.c>
   # Impedisce a mod_expires di calcolare Expires/max-age per questa directory
   ExpiresActive Off

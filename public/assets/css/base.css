@@ -5,7 +5,9 @@
    Il perché di ogni scelta sta in docs/design/2026-09-proposte/.
    ═══════════════════════════════════════════════════════════════════════ */
 
-@import url('/assets/css/caratteri.css');
+/* I caratteri arrivano con un <link> loro, nel <head>, prima di questo file.
+   Con @import il browser li scopriva solo dopo aver scaricato base.css: due
+   richieste in fila invece che insieme (revisione del 16 ottobre, L9). */
 
 :root{
   /* Il colore. Identico a quello del sito di prima: cambia l'impianto, non la
