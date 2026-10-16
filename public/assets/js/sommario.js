@@ -6,6 +6,27 @@
 (function () {
   'use strict';
 
+  /* La barra in cima: quanta parte del testo hai già letto. Si guarda il
+     corpo dell'articolo, non la pagina intera, così il piede e la lettera in
+     fondo non la falsano. Un aggiornamento per fotogramma, non per evento. */
+  var barra = document.getElementById('avanzamento');
+  var testo = document.querySelector('.corpo');
+  if (barra && testo) {
+    var inAttesa = false;
+    var aggiorna = function () {
+      inAttesa = false;
+      var r = testo.getBoundingClientRect();
+      var percorso = r.height - window.innerHeight;
+      var fatto = percorso > 0 ? Math.min(1, Math.max(0, -r.top / percorso)) : (r.top < 0 ? 1 : 0);
+      barra.style.transform = 'scaleX(' + fatto.toFixed(4) + ')';
+    };
+    window.addEventListener('scroll', function () {
+      if (!inAttesa) { inAttesa = true; window.requestAnimationFrame(aggiorna); }
+    }, { passive: true });
+    window.addEventListener('resize', aggiorna);
+    aggiorna();
+  }
+
   var sommario = document.getElementById('sommario');
   var corpo = document.querySelector('.corpo');
   if (!sommario || !corpo || !('IntersectionObserver' in window)) return;

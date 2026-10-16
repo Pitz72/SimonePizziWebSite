@@ -30,11 +30,16 @@ $con_condivisione = !empty($GLOBALS['FINESTRE_CONDIVISIONE']);
   </div>
 </footer>
 
+<a class="torna-su eti" href="#contenuto">↑ Su</a>
+
 <?php blocco_finestre($con_condivisione); ?>
 
 <script src="<?= e(asset_v('/assets/js/interfaccia.js')) ?>" defer></script>
 <script src="<?= e(asset_v('/assets/js/ricerca.js')) ?>" defer></script>
 <script src="<?= e(asset_v('/assets/js/newsletter.js')) ?>" defer></script>
+<?php if (!empty($GLOBALS['PARTICELLE'])): ?>
+<script src="<?= e(asset_v('/assets/js/particelle.js')) ?>" defer></script>
+<?php endif; ?>
 <?php if ($con_condivisione): ?>
 <script src="<?= e(asset_v('/assets/js/sommario.js')) ?>" defer></script>
 <script src="<?= e(asset_v('/assets/js/reazioni.js')) ?>" defer></script>

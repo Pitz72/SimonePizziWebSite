@@ -52,8 +52,16 @@ button{font:inherit}
    così non sposta niente e si vede anche sui fondi scuri. */
 :focus-visible{outline:2px solid var(--verde);outline-offset:3px;border-radius:2px}
 
+/* Il passaggio da una pagina all'altra: una dissolvenza breve fatta dal browser
+   (View Transitions fra documenti), come nel Festival. Il sito React lo faceva
+   con framer-motion; la migrazione l'aveva tolto (revisione del 16 ottobre, §7).
+   Un browser che non la conosce cambia pagina come sempre. */
+@view-transition{navigation:auto}
+::view-transition-old(root),::view-transition-new(root){animation-duration:.18s}
+
 /* Chi ha chiesto meno movimento non deve vederne. */
 @media (prefers-reduced-motion:reduce){
+  @view-transition{navigation:none}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;
     transition-duration:.01ms!important;scroll-behavior:auto!important}
 }

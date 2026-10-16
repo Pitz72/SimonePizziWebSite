@@ -158,6 +158,13 @@ if grep -qE 'PHPSESSID|cookie_consent' "$TMP_CONTIENE"; then fallite=$((fallite 
 else passate=$((passate + 1)); printf '  ok  la cookie policy nomina solo il cookie che c è\n'; fi
 
 echo
+echo "Il movimento (revisione del 16 ottobre, §7)"
+contiene "/"        '/assets/js/particelle.js?v='     "la home ha le particelle dietro l'apertura"
+contiene "/archivio" 'class="torna-su'                 "ogni pagina ha il torna su"
+contiene "$VIDEO"   'id="avanzamento"'                 "l'articolo ha la barra della lettura"
+contiene "/assets/css/base.css" '@view-transition'    "le pagine si passano il testimone con una dissolvenza"
+
+echo
 echo "Le pagine di servizio"
 controlla 200 "/assets/css/base.css"     file
 controlla 200 "/assets/css/caratteri.css" file

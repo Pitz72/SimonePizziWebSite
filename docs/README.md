@@ -4,8 +4,9 @@ Benvenuto nel repository della documentazione. In linea con la filosofia di semp
 
 ## ⚠️ Prossima sessione: leggere prima questo
 - **[Revisione generale del 16/10/2026](AUDIT-2026-10-16.md)** — il sito in PHP letto per intero
-  sei settimane dopo il taglio: a che punto è rispetto allo standard FDCA, le funzioni del React
-  perse per strada, 0 gravissime, 6 gravi, 16 medie, 16 lievi, e l'ordine in cui chiuderle.
+  sei settimane dopo il taglio: 0 gravissime, 6 gravi, 16 medie, 16 lievi. **Tutte corrette lo
+  stesso giorno** (v1.30.0, [changelog](changelogs/v1.30.0.md)); in fondo alla revisione, che
+  cosa resta a Simone.
 - [Consegna del 07/09/2026 — migrazione a PHP puro](2026-09-07-consegna-migrazione-php-puro.md) —
   il piano della migrazione, oggi conclusa. Il racconto di ogni scelta sta in
   `design/2026-09-proposte/DECISIONI.md`.
@@ -32,4 +33,4 @@ Il documento vivo su cosa è fatto e cosa manca è la **roadmap**:
 - **[Archive (archive/)](archive/)**: Documenti di analisi passate, vecchie roadmap e studi tecnici archiviati.
 
 ---
-*Ultimo aggiornamento: 3 Ottobre 2026 — v1.28.0*
+*Ultimo aggiornamento: 16 ottobre 2026 — v1.30.0 ([changelog](changelogs/v1.30.0.md))*

@@ -71,6 +71,19 @@
     });
   }
 
+  /* ── Torna su ────────────────────────────────────────────────────────────
+     Il link c'è sempre (porta a #contenuto anche senza JavaScript); qui lo si
+     mostra solo dopo un paio di schermate, quando serve davvero. */
+  var tornaSu = document.querySelector('.torna-su');
+  if (tornaSu) {
+    var aggiornaTornaSu = function () {
+      if (window.scrollY > window.innerHeight * 1.5) tornaSu.setAttribute('data-visibile', '');
+      else tornaSu.removeAttribute('data-visibile');
+    };
+    window.addEventListener('scroll', aggiornaTornaSu, { passive: true });
+    aggiornaTornaSu();
+  }
+
   /* ── Finestre ─────────────────────────────────────────────────────────── */
   window.SP = window.SP || {};
 

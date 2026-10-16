@@ -367,3 +367,24 @@ dialog.finestra::backdrop{background:rgba(4,7,10,.82)}
    la regola del browser per [hidden] (revisione del 16 ottobre, M8). */
 .btn[hidden]{display:none}
 .reazioni[hidden]{display:none}
+
+/* ── Il movimento (revisione del 16 ottobre, §7) ───────────────────────────
+   Tre cose che il sito React aveva e la migrazione aveva lasciato fuori. */
+
+/* Le particelle dietro l'apertura della home (assets/js/particelle.js): sotto
+   il testo, mai sopra, e trasparenti al mouse. */
+.apertura{position:relative;overflow:hidden}
+.apertura > .particelle{position:absolute;inset:0;z-index:0;pointer-events:none}
+.apertura > .gab{position:relative;z-index:1}
+
+/* La lettura: una barra di due pixel in cima alla finestra, verde perché è «il
+   punto della lettura in cui sei», uno dei segnali che il verde ammette. */
+.avanzamento{position:fixed;top:0;left:0;right:0;height:2px;z-index:50;pointer-events:none;
+  background:var(--verde);transform-origin:0 50%;transform:scaleX(0)}
+
+/* Torna su: compare solo dopo un bel po' di pagina, in basso a destra. */
+.torna-su{position:fixed;right:18px;bottom:18px;z-index:40;display:none;
+  padding:10px 14px;background:var(--pece);border:1px solid var(--filo);color:var(--spento)}
+.torna-su[data-visibile]{display:inline-block}
+.torna-su:hover,.torna-su:focus-visible{color:var(--verde);border-color:var(--verde)}
+@media print{.avanzamento,.torna-su,.particelle{display:none!important}}

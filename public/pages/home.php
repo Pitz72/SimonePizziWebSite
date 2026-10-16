@@ -37,6 +37,9 @@ pagina([
     ],
 ]);
 
+// Le particelle dietro l'apertura: solo qui (assets/js/particelle.js).
+$GLOBALS['PARTICELLE'] = true;
+
 require __DIR__ . '/../partials/head.php';
 ?>
 

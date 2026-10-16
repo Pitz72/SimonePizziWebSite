@@ -74,6 +74,7 @@ if ($anteprima && !headers_sent()) {
 require __DIR__ . '/../partials/head.php';
 ?>
 
+<div class="avanzamento" id="avanzamento" aria-hidden="true"></div>
 <main id="contenuto" class="contenuto">
 
   <div class="gab">
