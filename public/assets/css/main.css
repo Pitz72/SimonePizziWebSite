@@ -362,3 +362,8 @@ dialog.finestra::backdrop{background:rgba(4,7,10,.82)}
   .contatori{flex-wrap:wrap}
   .contatori div{flex:1 1 45%;border-right:0}
 }
+
+/* Un pulsante nascosto resta nascosto: .btn ha un display suo, che batterebbe
+   la regola del browser per [hidden] (revisione del 16 ottobre, M8). */
+.btn[hidden]{display:none}
+.reazioni[hidden]{display:none}

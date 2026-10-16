@@ -23,6 +23,9 @@ Il documento vivo su cosa è fatto e cosa manca è la **roadmap**:
 > alla v1.11.1 ed è oggi **chiuso e archiviato**. Racconta com'è nato il progetto,
 > non cosa resta da fare: non aggiornarlo, aggiornare la roadmap.
 
+## 🔐 Dati personali
+- **[Registro dei trattamenti](GDPR-REGISTRO-TRATTAMENTI.md)** — che cosa fa il sito dei dati, i fornitori, che cosa resta da verificare (art. 30 GDPR). Il repository è pubblico: niente dati anagrafici.
+
 ## 📂 Struttura Documentale
 - **[Changelogs (changelogs/)](changelogs/)**: Lo storico dettagliato di tutte le versioni rilasciate.
 - **[Nota di Miglioramento SEO](Nota_Miglioramento_SEO.md)**: Analisi dei problemi SEO risolti e delle sfide future.

@@ -603,11 +603,13 @@ function elimina_iscritto(int $id): void {
 /* ════════════════════════════ Statistiche ═══════════════════════════════ */
 
 /** Le visite giorno per giorno, per il grafico del cruscotto. */
-function visite_per_giorno(int $giorni = 30): array {
+function visite_per_giorno(int $giorni = 30, int $articolo = 0): array {
     $da = date('Y-m-d', strtotime("-$giorni days"));
+    // Con un articolo, solo le sue: è il grafico in fondo alla sua scheda (L14).
     $q = db()->prepare("SELECT view_date, COUNT(*) AS quante FROM article_views
-                        WHERE view_date >= ? GROUP BY view_date ORDER BY view_date ASC");
-    $q->execute([$da]);
+                        WHERE view_date >= ?" . ($articolo > 0 ? " AND article_id = ?" : "") . "
+                        GROUP BY view_date ORDER BY view_date ASC");
+    $q->execute($articolo > 0 ? [$da, $articolo] : [$da]);
 
     // I giorni senza visite non tornano dal database: un grafico con i buchi
     // mentirebbe sull'andamento, quindi si riempiono di zeri.

@@ -70,6 +70,7 @@ function manda_csp(): void {
    nascondere quante sono. */
 require_once __DIR__ . '/helpers.php';
 require_once __DIR__ . '/freno.php';
+require_once __DIR__ . '/cache.php';
 require_once __DIR__ . '/safe_html.php';
 require_once __DIR__ . '/video.php';
 require_once __DIR__ . '/db.php';

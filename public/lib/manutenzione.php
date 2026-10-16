@@ -61,7 +61,7 @@ function manutenzione_giro(): array {
     assicura_slug_storici(db());
     if (impostazione('anonimizza_ultimo', '') !== date('Y-m-d')) {
         anonimizza_impronte_vecchie(db());
-        $r_freni = freno_pulisci();
+        $r_freni = freno_pulisci() + cache_pulisci();
         impostazione_scrivi('anonimizza_ultimo', date('Y-m-d'));
     }
     $r = newsletter_giro();

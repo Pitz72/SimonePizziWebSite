@@ -124,6 +124,59 @@ MSYS_NO_PATHCONV=1 php -r '$p=new PDO("sqlite:".$argv[1]); $p->prepare("UPDATE a
 sql "DELETE FROM media WHERE id = $USATA" >/dev/null
 
 echo
+echo "Le GIF animate restano animate (L10)"
+# Due GIF fatte qui: una con due fotogrammi, una con uno. GD ne leggerebbe solo
+# il primo, quindi l'animata deve arrivare in libreria così com'è.
+GIFDIR="$(mktemp -d)"
+php -r '
+  $testa = "GIF89a" . pack("vvCCC", 1, 1, 0x80, 0, 0) . "\0\0\0\xff\xff\xff";
+  $giro = "\x21\xf9\x04\x00\x0a\x00\x00\x00\x2c" . pack("vvvvC", 0, 0, 1, 1, 0) . "\x02\x02\x44\x01\x00";
+  file_put_contents($argv[1] . "/animata.gif", $testa . "\x21\xff\x0bNETSCAPE2.0\x03\x01\x00\x00\x00" . $giro . $giro . ";");
+  file_put_contents($argv[1] . "/ferma.gif", $testa . $giro . ";");
+' "$(cygpath -m "$GIFDIR")"
+for g in animata ferma; do
+  G="$(gettone /admin/media.php)"
+  curl -s -b "$BISCOTTI" -o "$CORPO" -F "gettone=$G" -F "file=@$(cygpath -m "$GIFDIR")/$g.gif;type=image/gif" "$BASE/admin/carica.php"
+  eval "URL_$g=\"$(grep -o '"url":"[^"]*' "$CORPO" | sed 's/"url":"//')\""
+done
+case "$URL_animata" in *.gif) ok "la GIF animata resta GIF";; *) no "GIF animata" "è diventata «$URL_animata»";; esac
+# La conversione in WebP la fa GD: se il PHP che fa girare il server di sviluppo
+# non ce l'ha (quello di Simone non ce l'ha), la prova si salta e lo dice.
+if php -r 'exit(function_exists("imagewebp") ? 0 : 1);'; then
+  case "$URL_ferma" in *.webp) ok "la GIF ferma diventa WebP come le altre immagini";; *) no "GIF ferma" "è «$URL_ferma»";; esac
+else
+  printf '  --  la conversione in WebP non si prova: questo PHP non ha GD\n'
+fi
+# Si tolgono dalla libreria (e dal disco di sviluppo) le due appena caricate.
+for id in $(sql "SELECT id FROM media WHERE filename LIKE '%-animata.gif' OR filename LIKE '%-ferma.webp' OR filename LIKE '%-ferma.gif'"); do
+  G="$(gettone /admin/media.php)"; curl -s -b "$BISCOTTI" -o /dev/null -d "gettone=$G&elimina=$id" "$BASE/admin/media.php"
+done
+rm -rf "$GIFDIR"
+
+echo
+echo "La cache delle letture pubbliche (M3)"
+# Un titolo cambiato di nascosto nel database non si vede finché la cache vale;
+# il primo POST del pannello (qui un'azione in blocco senza niente selezionato) la svuota e il titolo nuovo compare. Prova che la
+# cache lavora davvero, e che lo svuotamento funziona.
+CACHE_ART="$(sql "SELECT id FROM articles WHERE status='published' AND category='web' ORDER BY id LIMIT 1")"
+CACHE_SLUG="$(sql "SELECT slug FROM articles WHERE id = $CACHE_ART")"
+CACHE_TITOLO="$(sql "SELECT title FROM articles WHERE id = $CACHE_ART")"
+curl -s -o /dev/null "$BASE/web/$CACHE_SLUG"
+sql "UPDATE articles SET title = 'Titolo cambiato dalla prova della cache' WHERE id = $CACHE_ART" >/dev/null
+curl -s "$BASE/web/$CACHE_SLUG" > "$CORPO"
+grep -q "Titolo cambiato dalla prova della cache" "$CORPO" \
+  && no "cache" "la pagina ha letto il database invece della cache" || ok "la pagina viene dalla cache, non dal database"
+G="$(gettone /admin/articoli.php)"
+curl -s -b "$BISCOTTI" -o /dev/null -d "gettone=$G&azione=pubblica" "$BASE/admin/articoli.php"
+curl -s "$BASE/web/$CACHE_SLUG" > "$CORPO"
+grep -q "Titolo cambiato dalla prova della cache" "$CORPO" \
+  && ok "un POST del pannello svuota la cache, e la modifica si vede" || no "svuotamento della cache" "il titolo vecchio resta"
+MSYS_NO_PATHCONV=1 php -r '$p=new PDO("sqlite:".$argv[1]); $p->prepare("UPDATE articles SET title = ? WHERE id = ?")->execute([$argv[2], (int)$argv[3]]);' "$(cygpath -m "$DB")" "$CACHE_TITOLO" "$CACHE_ART"
+G="$(gettone /admin/articoli.php)"
+curl -s -b "$BISCOTTI" -o /dev/null -d "gettone=$G&azione=pubblica" "$BASE/admin/articoli.php"
+[ "$(sql "SELECT title FROM articles WHERE id = $CACHE_ART")" = "$CACHE_TITOLO" ] || no "ripristino" "il titolo dell'articolo $CACHE_ART non è tornato"
+
+echo
 echo "Il backup, con le immagini (G6)"
 G="$(gettone /admin/impostazioni.php)"
 curl -s -b "$BISCOTTI" -L -o "$CORPO" -d "gettone=$G&azione=backup_ora" "$BASE/admin/impostazioni.php"

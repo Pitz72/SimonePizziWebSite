@@ -125,7 +125,9 @@ require __DIR__ . '/../partials/head.php';
   </div>
 
   <?php if ($copertina !== ''): ?>
-    <div class="articolo-copertina"><img src="<?= e($copertina) ?>" alt=""></div>
+    <?php /* L'immagine principale della pagina: per Google Immagini e per chi
+             non vede, il suo testo alternativo è il titolo (revisione del 16 ottobre, L8). */ ?>
+    <div class="articolo-copertina"><img src="<?= e($copertina) ?>" alt="<?= e('Copertina: ' . $articolo['title']) ?>"></div>
   <?php endif; ?>
 
   <div class="gab lettura">
@@ -146,7 +148,10 @@ require __DIR__ . '/../partials/head.php';
       <article class="corpo"><?= $corpo ?></article>
       <?php blocco_pulsanti_articolo($articolo, !$anteprima); ?>
 
-      <div class="reazioni" id="reazioni" data-articolo="<?= (int)$articolo['id'] ?>" data-conta="<?= $anteprima ? 0 : (int)$articolo['id'] ?>">
+      <?php /* In anteprima le reazioni non si mostrano: l'API rifiuta già un
+               articolo non pubblicato, e i pulsanti sarebbero morti (revisione
+               del 16 ottobre, L5). data-articolo a zero ferma reazioni.js. */ ?>
+      <div class="reazioni" id="reazioni" data-articolo="<?= $anteprima ? 0 : (int)$articolo['id'] ?>" data-conta="<?= $anteprima ? 0 : (int)$articolo['id'] ?>"<?= $anteprima ? ' hidden' : '' ?>>
         <?php
         /* Le cinque reazioni e i loro nomi sono quelli di oggi (ReactionBar.tsx
            e ALLOWED_REACTIONS in api/reactions.php): cambiarli qui vorrebbe dire

@@ -1,95 +1,63 @@
-# Simone Pizzi - Portfolio Creativo
+# Simone Pizzi — portfolio e blog
 
-![Version](https://img.shields.io/badge/version-1.11.1-green.svg)
-![React](https://img.shields.io/badge/react-v19.2.4-blue.svg)
-![TypeScript](https://img.shields.io/badge/typescript-v5.2.2-blue.svg)
-![Vite](https://img.shields.io/badge/vite-v7.3.1-646cff.svg)
-![Tailwind](https://img.shields.io/badge/tailwindcss-v4.2.1-38bdf8.svg)
+Il sito di Simone Pizzi, **https://simonepizzi.runtimeradio.it**, con il suo
+pannello di gestione. Dal 7 settembre 2026 è **PHP puro, senza React, senza
+build e senza npm**: si modifica un file e si carica quel file. Il sito React
+che c'era prima è nella storia di git (l'ultimo commit che lo contiene è
+`3709693`).
 
-Una Single Page Application (SPA) moderna con Mini-CMS integrato, sviluppata con **React 19** e **Tailwind CSS v4**, con backend **PHP/MySQL**. Il sito funge da portfolio e hub personale, con un'architettura ibrida frontend/backend ottimizzata per SEO e performance estreme.
+La documentazione parte da **[docs/README.md](docs/README.md)**. Le scelte della
+migrazione stanno in `docs/design/2026-09-proposte/DECISIONI.md`, lo stato del
+sito nella revisione più recente, `docs/AUDIT-2026-10-16.md`.
 
-Per la documentazione completa: **[Master Index della Documentazione](docs/README.md)**.
-
----
-
-## Tecnologie Utilizzate
-
-**Frontend:**
-- **React 19.2.4** + TypeScript 5.2.2
-- **Vite 7.3.1** (build tool con HMR istantaneo)
-- **Tailwind CSS v4.2.1** (framework utility-first di nuova generazione)
-- **React Router v7.13.1** (gestione rotte con Data Loaders e Prerendering)
-- **Framer Motion 12** (transizioni fluide tra le pagine e micro-interazioni)
-- **Chart.js** (visualizzazione dati e analytics nel pannello admin)
-- **Tiptap Editor** (editor WYSIWYG professionale personalizzato)
-
-**Backend:**
-- **PHP 8.x** con layer REST API in `/public/api/`
-- **MySQL** su host dedicato per alta disponibilità
-- **SEO server-side:** `public/index.php` gestisce meta tag OpenGraph e TwitterCard dinamici
-- **Prerendering Statico:** Generazione automatica di HTML statico per i crawler motori di ricerca
-
----
-
-## Struttura del Progetto
+## Com'è fatto
 
 ```
-.
-├── src/                      # Codice sorgente React (frontend)
-│   ├── components/           # Componenti UI e logici
-│   ├── pages/admin/          # Moduli del Pannello CMS
-│   ├── loaders.ts            # Caricamento dati via React Router 7
-│   ├── api.ts                # Client API centralizzato
-│   └── App.tsx               # Entry point e Layout pubblici
-├── public/                   # Asset statici + backend PHP
-│   ├── api/                  # Endpoints REST PHP
-│   ├── index.php             # SEO Router & Dispatcher
-│   └── .htaccess             # Direttive Apache per SPA
-├── docs/                     # Documentazione tecnica e Master Plan
-│   ├── changelogs/           # Storico versioni (fino a v1.11.1)
-│   └── archive/              # Versioni archiviate della documentazione
-├── scripts/                  # Script Node/PowerShell di manutenzione
-└── dist/                     # Bundle di produzione ottimizzato
+public/                il docroot: si carica così com'è
+  index.php            front controller: legge l'indirizzo, sceglie la pagina
+  .htaccess            riscritture, CSP, regole di sicurezza
+  lib/                 avvio, database, query, cache, freni, seo, safe_html…
+  partials/  pages/    i pezzi delle pagine pubbliche
+  admin/               il pannello, una pagina PHP per schermata
+  api/                 i pochi endpoint che il JavaScript chiama
+  assets/              css, js (nessuna libreria), caratteri in casa
+  uploads/             le immagini caricate: stanno solo sul server
+docs/                  documentazione, revisioni, collaudi
+scripts/               sviluppo, caricamento, strumenti per il server
 ```
 
----
+In produzione il database è MySQL su DreamHost, chiuso da fuori. In sviluppo è
+un file SQLite costruito dai dati pubblici del sito.
 
-## Funzionalità Principali
+## Sviluppo
 
-**Esperienza Utente:**
-- **Transizioni Fluide:** Navigazione tra le sezioni con effetti fade-in/slide-up morbidi.
-- **Ricerca Globale (Ctrl+K):** Modal di ricerca istantanea in tutto l'archivio.
-- **Filtri Avanzati:** Navigazione gerarchica con supporto a Categorie e Sottocategorie.
-- **SEO Ready:** Prerendering statico e meta tag dinamici per ogni articolo/progetto.
-
-**Mini-CMS Admin:**
-- **Local Draft Recovery:** Salvataggio automatico locale (localStorage) per prevenire la perdita di dati negli editor.
-- **Analytics Visuali:** Dashboard interattiva per il monitoraggio di visualizzazioni e click CTA.
-- **Gestione Newsletter:** Sistema integrato per l'invio massivo e la gestione iscritti.
-- **Media Gallery:** Upload drag&drop con ottimizzazione automatica WebP.
-- **Scheduling:** Possibilità di programmare la data di pubblicazione dei contenuti.
-
----
-
-## Sviluppo Locale
-
-### Installazione
 ```bash
-git clone <repository-url>
-npm install
+bash scripts/sviluppo/scarica-dati.sh          # i dati veri, dalle API pubbliche
+php  scripts/sviluppo/crea-db-sviluppo.php     # → scratch/sviluppo.sqlite
+php  scripts/sviluppo/popola-dati-finti.php    # utenti, iscritti, messaggi finti
+php -S 127.0.0.1:8123 -t public public/dev-router.php
 ```
 
-### Avvio
+Nel pannello di sviluppo si entra con `simone` / `sviluppo-locale`.
+
+## Collaudo
+
 ```bash
-# Avvia il server di sviluppo Vite
-npm run dev
+bash docs/collaudo/prova-rotte.sh        # le pagine, la SEO, la privacy
+bash docs/collaudo/prova-pannello.sh     # il pannello, scrivendo davvero
+bash docs/collaudo/prova-sicurezza.sh    # CSP, sessione, freni, impronte, API
+bash docs/collaudo/prova-dati.sh         # pulsanti, slug, libreria, cache, backup
+php  docs/collaudo/prova-safe-html.php   # la ripulitura dell'HTML
+bash docs/collaudo/prova-messaggi.sh http://127.0.0.1:8124   # vedi il file
+bash docs/collaudo/prova-produzione.sh   # il sito vero, da fuori
 ```
-*Nota: Il backend PHP deve essere configurato parallelamente (es. tramite Apache/MAMP) per puntare alla cartella `/public/api/`.*
 
-### Build
+## Caricamento
+
 ```bash
-npm run build
+python scripts/deploy/carica.py --prova  # che cosa farebbe
+python scripts/deploy/carica.py          # carica, con la copia dei file sostituiti
+python scripts/server-tools/scarica_backup.py   # una copia dei backup fuori da DreamHost
 ```
 
----
-*Progetto curato da Simone Pizzi. v1.11.1 - Chiusura Fase Sviluppo 2026*
+Le credenziali stanno in `.secrets/`, fuori da git.

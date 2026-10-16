@@ -14,6 +14,22 @@
 declare(strict_types=1);
 
 /**
+ * Gli id che la pagina dell'articolo usa già (partials/, pages/articolo.php).
+ * Un titolo «Sommario» diventava id="sommario", come il riquadro del sommario:
+ * due elementi con lo stesso id, e il link del sommario portava a quello
+ * sbagliato (revisione del 16 ottobre, L7). Un titolo così prende un numero,
+ * come due titoli uguali. Gli id degli altri titoli non cambiano: i link già
+ * condivisi verso una sezione restano buoni.
+ */
+const ID_DELLA_PAGINA = [
+    'contenuto', 'sommario', 'titolo-sommario', 'reazioni',
+    'modulo-newsletter', 'email-newsletter', 'consenso-newsletter', 'esito-newsletter',
+    'finestra-cerca', 'titolo-cerca', 'campo-cerca', 'stato-cerca', 'esiti-cerca',
+    'finestra-condividi', 'titolo-condividi', 'indirizzo-pagina', 'copia-indirizzo', 'esito-condividi',
+    'finestra-scrivi', 'titolo-scrivi',
+];
+
+/**
  * @return array{voci: list<array{id:string,testo:string,livello:int}>, corpo: string}
  */
 function sommario_e_corpo(string $html): array {
@@ -32,7 +48,7 @@ function sommario_e_corpo(string $html): array {
     if (!$radice) return ['voci' => [], 'corpo' => $html];
 
     $voci = [];
-    $usati = [];
+    $usati = array_fill_keys(ID_DELLA_PAGINA, 1);
 
     foreach (['h2', 'h3'] as $tag) {
         foreach (iterator_to_array($doc->getElementsByTagName($tag)) as $titolo) {

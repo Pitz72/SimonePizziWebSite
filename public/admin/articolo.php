@@ -324,6 +324,35 @@ avviso_pannello();
   </div>
 </form>
 
+<?php
+/* In fondo, le letture di questo articolo negli ultimi trenta giorni: il
+   pannello React le disegnava, quello nuovo dava solo il totale (revisione
+   del 16 ottobre, L14). Le stesse barre del cruscotto, senza librerie. */
+if ($id):
+    $lettureGiorno = visite_per_giorno(30, $id);
+    $massimoGiorno = max(1, max($lettureGiorno));
+?>
+<section class="scheda" style="margin-top:28px">
+  <h2>Le letture degli ultimi trenta giorni</h2>
+  <?php if (array_sum($lettureGiorno) === 0): ?>
+    <p class="aiuto">Nessuna lettura negli ultimi trenta giorni<?= $visite ? ': le ' . number_format($visite, 0, ',', '.') . ' letture in tutto sono più vecchie' : '' ?>.</p>
+  <?php else: ?>
+    <div class="grafico" role="img"
+         aria-label="Letture al giorno negli ultimi trenta giorni: <?= array_sum($lettureGiorno) ?> in tutto, massimo <?= $massimoGiorno ?> in un giorno.">
+      <?php foreach ($lettureGiorno as $giorno => $quante): ?>
+        <i style="height:<?= max(1, (int)round($quante / $massimoGiorno * 100)) ?>%"
+           title="<?= e(data_breve($giorno)) ?>: <?= $quante ?> letture"></i>
+      <?php endforeach; ?>
+    </div>
+    <div class="grafico-legenda eti">
+      <span><?= e(data_breve(array_key_first($lettureGiorno))) ?></span>
+      <span><?= array_sum($lettureGiorno) ?> letture, massimo <?= $massimoGiorno ?> in un giorno</span>
+      <span>oggi</span>
+    </div>
+  <?php endif; ?>
+</section>
+<?php endif; ?>
+
 <?php finestre_pannello(); ?>
 
 <?php piede_pannello(false, ['libreria.js', 'editor.js', 'seo-check.js']); ?>

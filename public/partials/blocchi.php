@@ -211,9 +211,19 @@ function blocco_finestre(bool $conCondivisione = false): void {
       <div class="finestra-corpo">
         <p class="spento" style="margin-top:0">L'indirizzo di questa pagina:</p>
         <input class="campo-testo" id="indirizzo-pagina" readonly value="">
+        <?php /* Le destinazioni del sito React (revisione del 16 ottobre, M8), più il
+                 pulsante del telefono, che apre la scelta fra tutte le sue app. Sono
+                 link semplici: nessuno di quei servizi sa niente finché non si clicca. */ ?>
         <div class="btn-fila" style="margin-top:16px">
+          <button class="btn btn-pieno" type="button" id="condividi-nativo" hidden>Condividi…</button>
           <button class="btn btn-pieno" type="button" id="copia-indirizzo">Copia il link</button>
+        </div>
+        <div class="btn-fila" style="margin-top:12px">
+          <a class="btn btn-muto" id="condividi-whatsapp" href="#" target="_blank" rel="noopener">WhatsApp</a>
           <a class="btn btn-muto" id="condividi-telegram" href="#" target="_blank" rel="noopener">Telegram</a>
+          <a class="btn btn-muto" id="condividi-facebook" href="#" target="_blank" rel="noopener">Facebook</a>
+          <a class="btn btn-muto" id="condividi-x" href="#" target="_blank" rel="noopener">X</a>
+          <a class="btn btn-muto" id="condividi-linkedin" href="#" target="_blank" rel="noopener">LinkedIn</a>
           <a class="btn btn-muto" id="condividi-email" href="#">Email</a>
         </div>
         <p class="esito" id="esito-condividi" role="status" aria-live="polite"></p>

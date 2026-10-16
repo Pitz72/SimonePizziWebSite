@@ -71,3 +71,9 @@ scratch/posta/
 
 # Chiavi e freni del sito in sviluppo (lib/freno.php): mai in repo
 scratch/simonepizzi-dati/
+
+# scratch/ e tutto quello che sta dentro (dump del database, log del server con
+# gli IP, dati scaricati dalla produzione, chiavi di sviluppo): il repository e
+# pubblico, e un git add distratto li pubblicherebbe. Aggiunto il 16/10/2026.
+# Il solo file di scratch/ gia tracciato (test_logic.php) resta tracciato.
+scratch/

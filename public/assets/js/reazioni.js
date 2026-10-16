@@ -82,10 +82,30 @@
   var campo = document.getElementById('indirizzo-pagina');
   if (campo) campo.value = indirizzo;
 
-  var telegram = document.getElementById('condividi-telegram');
-  if (telegram) {
-    telegram.href = 'https://t.me/share/url?url=' + encodeURIComponent(indirizzo) +
-                    '&text=' + encodeURIComponent(titolo);
+  /* Le destinazioni: link fatti qui, perché l'indirizzo è quello della pagina
+     aperta. Erano cinque nel sito React, poi erano rimasti Telegram ed email
+     (revisione del 16 ottobre, M8). */
+  var u = encodeURIComponent(indirizzo);
+  var t = encodeURIComponent(titolo);
+  var destinazioni = {
+    'condividi-whatsapp': 'https://wa.me/?text=' + t + '%20' + u,
+    'condividi-telegram': 'https://t.me/share/url?url=' + u + '&text=' + t,
+    'condividi-facebook': 'https://www.facebook.com/sharer/sharer.php?u=' + u,
+    'condividi-x':        'https://x.com/intent/post?url=' + u + '&text=' + t,
+    'condividi-linkedin': 'https://www.linkedin.com/sharing/share-offsite/?url=' + u
+  };
+  Object.keys(destinazioni).forEach(function (id) {
+    var a = document.getElementById(id);
+    if (a) a.href = destinazioni[id];
+  });
+
+  /* Sul telefono: la condivisione del sistema, con tutte le app installate. */
+  var nativo = document.getElementById('condividi-nativo');
+  if (nativo && navigator.share) {
+    nativo.hidden = false;
+    nativo.addEventListener('click', function () {
+      navigator.share({ title: titolo, url: indirizzo }).catch(function () { /* annullata: niente da dire */ });
+    });
   }
 
   var posta = document.getElementById('condividi-email');

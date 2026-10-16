@@ -28,6 +28,14 @@ header('Cache-Control: no-store, no-cache, must-revalidate');
 
 assicura_schema(db());
 
+/* Ogni POST del pannello cambia qualcosa che il sito mostra: alla fine della
+   richiesta, dopo il salvataggio, la cache delle letture pubbliche si svuota
+   (lib/cache.php, revisione del 16 ottobre, M3). Alla fine e non all'inizio:
+   così niente di letto durante il salvataggio resta in cache vecchio. */
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    register_shutdown_function('cache_svuota');
+}
+
 // La promessa della privacy: i messaggi si cancellano sei mesi dopo l'ultimo scambio.
 require_once __DIR__ . '/../lib/messaggi_pulizia.php';
 messaggi_pulizia(db());

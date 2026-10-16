@@ -46,20 +46,20 @@ const SOLO_PUBBLICATI = "status = 'published' AND (published_at IS NULL OR publi
 /* ─────────────────────────────── Categorie ─────────────────────────────── */
 
 /** Le sei voci del menu: le categorie senza genitore, nel loro ordine. */
-function categorie_radice(): array {
+function categorie_radice_db(): array {
     static $c = null;
     return $c ??= db()->query(
         "SELECT id, name, slug FROM categories WHERE parent_id IS NULL ORDER BY sort_order ASC"
     )->fetchAll();
 }
 
-function categoria_per_slug(string $slug): ?array {
+function categoria_per_slug_db(string $slug): ?array {
     $q = db()->prepare("SELECT id, name, slug, parent_id FROM categories WHERE slug = ? LIMIT 1");
     $q->execute([$slug]);
     return $q->fetch() ?: null;
 }
 
-function categoria_per_id(int $id): ?array {
+function categoria_per_id_db(int $id): ?array {
     // sort_order serve alla scheda del pannello: senza, il campo dell'ordine
     // si apriva vuoto e ogni salvataggio rimetteva la categoria a zero.
     $q = db()->prepare("SELECT id, name, slug, parent_id, sort_order FROM categories WHERE id = ? LIMIT 1");
@@ -82,7 +82,7 @@ function slug_radice(array $categoria): string {
 }
 
 /** Le figlie dirette di una categoria, che nel sito sono i singoli progetti. */
-function sottocategorie(int $idGenitore): array {
+function sottocategorie_db(int $idGenitore): array {
     $q = db()->prepare("SELECT id, name, slug FROM categories WHERE parent_id = ? ORDER BY sort_order ASC");
     $q->execute([$idGenitore]);
     return $q->fetchAll();
@@ -101,7 +101,7 @@ function sottocategorie(int $idGenitore): array {
  * uguale qui: alla data di oggi «Pizzi e De Paola» non ha un solo articolo, e
  * metterla in un menu significa promettere una pagina che non c'è.
  */
-function sottocategorie_per_sezione(): array {
+function sottocategorie_per_sezione_db(): array {
     static $per = null;
     if ($per !== null) return $per;
 
@@ -141,7 +141,7 @@ function slug_del_ramo(array $categoria): array {
 
 /* ─────────────────────────────── Articoli ──────────────────────────────── */
 
-function articoli_recenti(int $quanti = 6, int $salta = 0): array {
+function articoli_recenti_db(int $quanti = 6, int $salta = 0): array {
     $quanti = max(1, $quanti); $salta = max(0, $salta);
     $q = db()->prepare(
         "SELECT " . COLONNE_ELENCO . " FROM articles WHERE " . SOLO_PUBBLICATI . "
@@ -155,7 +155,7 @@ function articoli_recenti(int $quanti = 6, int $salta = 0): array {
  * Tutti gli articoli pubblicati, dal più recente: l'archivio (pages/archivio.php).
  * Senza corpo: sono le colonne degli elenchi.
  */
-function tutti_gli_articoli(): array {
+function tutti_gli_articoli_db(): array {
     $q = db()->prepare("SELECT " . COLONNE_ELENCO . " FROM articles WHERE " . SOLO_PUBBLICATI . "
                         AND category <> '' ORDER BY published_at DESC, id DESC");
     $q->execute([':adesso' => adesso()]);
@@ -169,7 +169,7 @@ function tutti_gli_articoli(): array {
  * 78 — si prende il più recente: la home non deve avere un buco perché una
  * casella non è mai stata spuntata.
  */
-function articolo_in_apertura(): ?array {
+function articolo_in_apertura_db(): ?array {
     // Qui il corpo si legge: è un articolo solo, e serve per i minuti di
     // lettura e per il riassunto quando l'excerpt manca.
     $q = db()->prepare(
@@ -189,7 +189,7 @@ function articolo_in_apertura(): ?array {
     return $q->fetch() ?: null;
 }
 
-function articolo_per_slug(string $slug): ?array {
+function articolo_per_slug_db(string $slug): ?array {
     $q = db()->prepare(
         "SELECT " . COLONNE_ARTICOLO . "
          FROM articles WHERE slug = :slug AND " . SOLO_PUBBLICATI . " LIMIT 1"
@@ -238,7 +238,7 @@ function articolo_da_slug_storico(string $slug): ?array {
 }
 
 /** Quanti articoli ha una categoria, contando le sue sottocategorie. */
-function conta_articoli_categoria(array $categoria): int {
+function conta_articoli_categoria_db(array $categoria): int {
     $slug = slug_del_ramo($categoria);
     $segni = implode(',', array_fill(0, count($slug), '?'));
     $q = db()->prepare("SELECT COUNT(*) FROM articles
@@ -248,7 +248,7 @@ function conta_articoli_categoria(array $categoria): int {
     return (int)$q->fetchColumn();
 }
 
-function articoli_di_categoria(array $categoria, int $quanti = 12, int $salta = 0): array {
+function articoli_di_categoria_db(array $categoria, int $quanti = 12, int $salta = 0): array {
     $quanti = max(1, $quanti); $salta = max(0, $salta);
     $slug = slug_del_ramo($categoria);
     $segni = implode(',', array_fill(0, count($slug), '?'));
@@ -268,7 +268,7 @@ function articoli_di_categoria(array $categoria, int $quanti = 12, int $salta = 
  * rispettare il pannello (fissa_in_categoria). Qui si legge e basta, ma con il
  * LIMIT 1 per non dipendere da quella promessa.
  */
-function fissato_di_categoria(string $slugCategoria): ?array {
+function fissato_di_categoria_db(string $slugCategoria): ?array {
     $q = db()->prepare("SELECT " . COLONNE_ELENCO . ", content FROM articles
                         WHERE category = :cat AND is_category_pinned = 1
                           AND " . SOLO_PUBBLICATI . " LIMIT 1");
@@ -277,7 +277,7 @@ function fissato_di_categoria(string $slugCategoria): ?array {
 }
 
 /** Gli altri articoli della stessa categoria, per il fondo di un articolo. */
-function articoli_vicini(array $articolo, int $quanti = 3): array {
+function articoli_vicini_db(array $articolo, int $quanti = 3): array {
     $q = db()->prepare("SELECT " . COLONNE_ELENCO . " FROM articles
         WHERE category = :cat AND id <> :id AND " . SOLO_PUBBLICATI . "
         ORDER BY published_at DESC LIMIT " . max(1, $quanti));
@@ -287,20 +287,20 @@ function articoli_vicini(array $articolo, int $quanti = 3): array {
 
 /* ───────────────────────────────── Tag ─────────────────────────────────── */
 
-function tag_per_slug(string $slug): ?array {
+function tag_per_slug_db(string $slug): ?array {
     $q = db()->prepare("SELECT id, name, slug FROM tags WHERE slug = ? LIMIT 1");
     $q->execute([$slug]);
     return $q->fetch() ?: null;
 }
 
-function tag_di_articolo(int $idArticolo): array {
+function tag_di_articolo_db(int $idArticolo): array {
     $q = db()->prepare("SELECT t.name, t.slug FROM article_tags a
         JOIN tags t ON t.id = a.tag_id WHERE a.article_id = ? ORDER BY t.name ASC");
     $q->execute([$idArticolo]);
     return $q->fetchAll();
 }
 
-function conta_articoli_tag(int $idTag): int {
+function conta_articoli_tag_db(int $idTag): int {
     // `status` e `published_at` esistono solo in articles: nessuna ambiguità.
     $q = db()->prepare("SELECT COUNT(*) FROM articles a
         JOIN article_tags x ON x.article_id = a.id
@@ -309,7 +309,7 @@ function conta_articoli_tag(int $idTag): int {
     return (int)$q->fetchColumn();
 }
 
-function articoli_di_tag(int $idTag, int $quanti = 12, int $salta = 0): array {
+function articoli_di_tag_db(int $idTag, int $quanti = 12, int $salta = 0): array {
     $quanti = max(1, $quanti); $salta = max(0, $salta);
     $q = db()->prepare("SELECT " . COLONNE_ELENCO_A . "
         FROM articles a JOIN article_tags x ON x.article_id = a.id
@@ -326,7 +326,7 @@ function articoli_di_tag(int $idTag, int $quanti = 12, int $salta = 0): array {
  * I numeri dell'apertura. Sono quattro query banali, ma vale la pena tenerle
  * insieme: se un giorno pesano, si mette una cache qui e basta.
  */
-function conteggi(): array {
+function conteggi_db(): array {
     static $c = null;
     if ($c !== null) return $c;
 
@@ -340,7 +340,14 @@ function conteggi(): array {
 
     return $c = [
         'articoli' => $articoli,
-        'tag'      => (int)db()->query("SELECT COUNT(*) FROM tags")->fetchColumn(),
+        // Solo i tag con almeno un articolo pubblicato: contava anche gli orfani
+        // (revisione del 16 ottobre, L3).
+        'tag'      => (function (): int {
+            $t = db()->prepare("SELECT COUNT(DISTINCT x.tag_id) FROM article_tags x
+                                JOIN articles a ON a.id = x.article_id WHERE " . SOLO_PUBBLICATI);
+            $t->execute([':adesso' => adesso()]);
+            return (int)$t->fetchColumn();
+        })(),
         'ultimo'   => (string)($ultimo->fetchColumn() ?: ''),
     ];
 }
@@ -362,7 +369,9 @@ function cerca(string $testo, int $limite = 12): array {
     $testo = trim($testo);
     if (mb_strlen($testo) < 2) return [];
 
-    $come = '%' . $testo . '%';
+    // «%» e «_» scritti da chi cerca sono lettere, non jolly del LIKE (revisione
+    // del 16 ottobre, L6). ESCAPE '!' lo capiscono sia MySQL sia SQLite.
+    $come = '%' . strtr($testo, ['!' => '!!', '%' => '!%', '_' => '!_']) . '%';
     $limite = max(1, min(30, $limite));
 
     $q = db()->prepare(
@@ -370,10 +379,10 @@ function cerca(string $testo, int $limite = 12): array {
                 'articolo' AS genere
          FROM articles a
          WHERE " . SOLO_PUBBLICATI . "
-           AND (a.title LIKE :come OR a.excerpt LIKE :come2 OR a.content LIKE :come3
+           AND (a.title LIKE :come ESCAPE '!' OR a.excerpt LIKE :come2 ESCAPE '!' OR a.content LIKE :come3 ESCAPE '!'
                 OR a.id IN (SELECT x.article_id FROM article_tags x
-                            JOIN tags t ON t.id = x.tag_id WHERE t.name LIKE :come4))
-         ORDER BY CASE WHEN a.title LIKE :come5 THEN 0 ELSE 1 END,
+                            JOIN tags t ON t.id = x.tag_id WHERE t.name LIKE :come4 ESCAPE '!'))
+         ORDER BY CASE WHEN a.title LIKE :come5 ESCAPE '!' THEN 0 ELSE 1 END,
                   a.published_at DESC
          LIMIT $limite"
     );
@@ -383,3 +392,29 @@ function cerca(string $testo, int $limite = 12): array {
 
     return $trovati;
 }
+
+/* ────────────────────────────── La cache ──────────────────────────────────
+   Revisione del 16 ottobre 2026, M3. Le letture qui sopra si chiamano
+   <nome>_db; quelle che usano le pagine hanno il nome di sempre e passano da
+   cache_ricorda() (lib/cache.php): cinque minuti, svuotata a ogni POST del
+   pannello. Restano fuori cerca(), che dipende da quello che si scrive, e
+   articolo_per_slug_in_anteprima(), che deve vedere il database com'è. */
+
+function categorie_radice(): array { return cache_ricorda('categorie_radice', fn() => categorie_radice_db()); }
+function categoria_per_slug(string $slug): ?array { return cache_ricorda('categoria_per_slug:' . $slug, fn() => categoria_per_slug_db($slug)); }
+function categoria_per_id(int $id): ?array { return cache_ricorda('categoria_per_id:' . $id, fn() => categoria_per_id_db($id)); }
+function sottocategorie(int $idGenitore): array { return cache_ricorda('sottocategorie:' . $idGenitore, fn() => sottocategorie_db($idGenitore)); }
+function sottocategorie_per_sezione(): array { return cache_ricorda('sottocategorie_per_sezione', fn() => sottocategorie_per_sezione_db()); }
+function articoli_recenti(int $quanti = 6, int $salta = 0): array { return cache_ricorda('articoli_recenti:' . $quanti . ':' . $salta, fn() => articoli_recenti_db($quanti, $salta)); }
+function tutti_gli_articoli(): array { return cache_ricorda('tutti_gli_articoli', fn() => tutti_gli_articoli_db()); }
+function articolo_in_apertura(): ?array { return cache_ricorda('articolo_in_apertura', fn() => articolo_in_apertura_db()); }
+function articolo_per_slug(string $slug): ?array { return cache_ricorda('articolo_per_slug:' . $slug, fn() => articolo_per_slug_db($slug)); }
+function conta_articoli_categoria(array $categoria): int { return cache_ricorda('conta_articoli_categoria:' . $categoria['slug'], fn() => conta_articoli_categoria_db($categoria)); }
+function articoli_di_categoria(array $categoria, int $quanti = 12, int $salta = 0): array { return cache_ricorda('articoli_di_categoria:' . $categoria['slug'] . ':' . $quanti . ':' . $salta, fn() => articoli_di_categoria_db($categoria, $quanti, $salta)); }
+function fissato_di_categoria(string $slugCategoria): ?array { return cache_ricorda('fissato_di_categoria:' . $slugCategoria, fn() => fissato_di_categoria_db($slugCategoria)); }
+function articoli_vicini(array $articolo, int $quanti = 3): array { return cache_ricorda('articoli_vicini:' . $articolo['id'] . ':' . $articolo['category'] . ':' . $quanti, fn() => articoli_vicini_db($articolo, $quanti)); }
+function tag_per_slug(string $slug): ?array { return cache_ricorda('tag_per_slug:' . $slug, fn() => tag_per_slug_db($slug)); }
+function tag_di_articolo(int $idArticolo): array { return cache_ricorda('tag_di_articolo:' . $idArticolo, fn() => tag_di_articolo_db($idArticolo)); }
+function conta_articoli_tag(int $idTag): int { return cache_ricorda('conta_articoli_tag:' . $idTag, fn() => conta_articoli_tag_db($idTag)); }
+function articoli_di_tag(int $idTag, int $quanti = 12, int $salta = 0): array { return cache_ricorda('articoli_di_tag:' . $idTag . ':' . $quanti . ':' . $salta, fn() => articoli_di_tag_db($idTag, $quanti, $salta)); }
+function conteggi(): array { return cache_ricorda('conteggi', fn() => conteggi_db()); }

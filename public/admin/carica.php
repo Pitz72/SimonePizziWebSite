@@ -49,7 +49,16 @@ if (!in_array($estensione, ESTENSIONI, true)) {
     fallisci('Formato non ammesso. Vanno bene: ' . implode(', ', ESTENSIONI) . '.');
 }
 
-$tipoVero = (string)@mime_content_type($file['tmp_name']);
+/* Il tipo vero lo dicono i byte del file, letti da getimagesize(): sta nel
+   cuore di PHP e capisce JPEG, PNG, GIF e WebP. mime_content_type() vuole
+   l'estensione fileinfo, che non c'è dappertutto: nel PHP di sviluppo mancava,
+   e caricare un'immagine in locale finiva in un errore fatale (trovato il 16
+   ottobre 2026 provando le GIF animate). */
+function tipo_immagine(string $percorso): string {
+    $info = @getimagesize($percorso);
+    return is_array($info) ? (string)($info['mime'] ?? '') : '';
+}
+$tipoVero = tipo_immagine($file['tmp_name']);
 if (!in_array($tipoVero, TIPI_VERI, true)) {
     fallisci('Questo file non è un\'immagine, qualunque cosa dica il suo nome.');
 }
@@ -72,7 +81,17 @@ if (!move_uploaded_file($file['tmp_name'], $destinazione)) {
 /* ── Ridimensiona e converti ─────────────────────────────────────────────
    Una foto da 4000px non serve a nessuno su una pagina larga 1300, e pesa
    dieci volte tanto. Il WebP a qualità 82 è quello che il sito usa già. */
-if (extension_loaded('gd') && function_exists('imagewebp')) {
+/* Una GIF animata resta com'è. GD ne legge solo il primo fotogramma, e la
+   conversione la trasformava in un WebP fermo senza dirlo (revisione del 16
+   ottobre, L10). Si riconosce contando i blocchi di controllo dei fotogrammi:
+   più di uno vuol dire animazione. */
+function gif_animata(string $percorso): bool {
+    $dati = (string)@file_get_contents($percorso);
+    return preg_match_all('/\x00\x21\xF9\x04.{4}\x00[\x2C\x21]/s', $dati) > 1;
+}
+$animata = $tipoVero === 'image/gif' && gif_animata($destinazione);
+
+if (!$animata && extension_loaded('gd') && function_exists('imagewebp')) {
     $immagine = match ($tipoVero) {
         'image/jpeg' => @imagecreatefromjpeg($destinazione),
         'image/png'  => @imagecreatefrompng($destinazione),
@@ -111,7 +130,7 @@ $percorsoPubblico = '/uploads/immagini/' . $nomeFile;
 try {
     db()->prepare("INSERT INTO media (filename, file_path, mime_type, size, created_at)
                    VALUES (?, ?, ?, ?, ?)")
-        ->execute([$nomeFile, $percorsoPubblico, (string)@mime_content_type($destinazione),
+        ->execute([$nomeFile, $percorsoPubblico, tipo_immagine($destinazione) ?: $tipoVero,
                    (int)filesize($destinazione), date('Y-m-d H:i:s')]);
 } catch (Throwable $err) {
     // Il file c'è comunque: si segnala, ma non si butta via il caricamento.

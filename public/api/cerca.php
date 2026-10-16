@@ -22,6 +22,15 @@ header('X-Robots-Tag: noindex, nofollow');
 // Le risposte cambiano a ogni articolo pubblicato: non si mettono in cache.
 header('Cache-Control: no-store');
 
+/* Ogni ricerca scorre il testo di tutti gli articoli: un programma che ne
+   manda a raffica arriva dritto sul database. Sessanta al minuto per rete
+   sono più di quante ne scriva una persona (revisione del 16 ottobre, L6). */
+if (!freno_passa('ricerca', rete_cliente(), 60, 60)) {
+    http_response_code(429);
+    echo json_encode(['esiti' => [], 'errore' => 'Troppe ricerche in poco tempo. Riprova fra un minuto.'], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 $testo = trim((string)($_GET['q'] ?? ''));
 
 if (mb_strlen($testo) < 2) {
