@@ -1,96 +1,37 @@
 <?php
-require_once 'db.php';
-require_once 'auth_helper.php';
+/**
+ * Le categorie, in JSON, in sola lettura: GET /api/categories.php
+ *
+ * Come api/articles.php, resta per scripts/sviluppo/scarica-dati.sh, che
+ * costruisce il database di sviluppo. Fino al 16 ottobre 2026 era il file del
+ * sito React, che le creava, rinominava e cancellava con la sessione del
+ * vecchio login (revisione del 16 ottobre, M2). Adesso legge e basta: le
+ * categorie si gestiscono da /admin/categorie.php.
+ */
 
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
-// Contenuto modificabile da admin (rinomina, gerarchie, ordine): niente cache browser
-// così le modifiche si propagano subito senza attendere la scadenza cache.
-header('Cache-Control: no-store, no-cache, must-revalidate');
+declare(strict_types=1);
 
-$pdo = Database::connect();
-$method = $_SERVER['REQUEST_METHOD'];
+require __DIR__ . '/../lib/avvio.php';
 
-try {
-    if ($method === 'GET') {
-        // GET pubblica: lista ordinata per sort_order (incluso parent_id per gerarchia)
-        $stmt = $pdo->query("SELECT id, name, slug, sort_order, parent_id FROM categories ORDER BY sort_order ASC, name ASC");
-        echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
-    }
-    elseif ($method === 'POST') {
-        Auth::check();
-        $data = json_decode(file_get_contents('php://input'), true);
-        $name = trim($data['name'] ?? '');
-        $slug = trim($data['slug'] ?? '');
-        $parent_id = !empty($data['parent_id']) ? (int)$data['parent_id'] : null;
+header('Content-Type: application/json; charset=utf-8');
 
-        if (!$name || !$slug) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Nome e slug obbligatori']);
-            exit;
-        }
-
-        // Slug: solo caratteri validi URL
-        $slug = strtolower(preg_replace('/[^a-z0-9-]+/', '-', $slug));
-        $slug = trim($slug, '-');
-
-        $stmt = $pdo->query("SELECT COALESCE(MAX(sort_order), 0) + 1 FROM categories");
-        $next_order = (int)$stmt->fetchColumn();
-
-        $stmt = $pdo->prepare("INSERT INTO categories (name, slug, sort_order, parent_id) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$name, $slug, $next_order, $parent_id]);
-
-        echo json_encode(['status' => 'success', 'id' => (int)$pdo->lastInsertId()]);
-    }
-    elseif ($method === 'PUT') {
-        Auth::check();
-        $data = json_decode(file_get_contents('php://input'), true);
-        $id = $_GET['id'] ?? ($data['id'] ?? null);
-
-        if (!$id) {
-            http_response_code(400);
-            echo json_encode(['error' => 'ID mancante']);
-            exit;
-        }
-
-        $name = trim($data['name'] ?? '');
-        $slug = trim($data['slug'] ?? '');
-        $sort_order = isset($data['sort_order']) ? (int)$data['sort_order'] : 0;
-        $parent_id = !empty($data['parent_id']) ? (int)$data['parent_id'] : null;
-
-        if (!$name || !$slug) {
-            http_response_code(400);
-            echo json_encode(['error' => 'Nome e slug obbligatori']);
-            exit;
-        }
-
-        $slug = strtolower(preg_replace('/[^a-z0-9-]+/', '-', $slug));
-        $slug = trim($slug, '-');
-
-        $stmt = $pdo->prepare("UPDATE categories SET name=?, slug=?, sort_order=?, parent_id=? WHERE id=?");
-        $stmt->execute([$name, $slug, $sort_order, $parent_id, $id]);
-
-        echo json_encode(['status' => 'success']);
-    }
-    elseif ($method === 'DELETE') {
-        Auth::check();
-        $data = json_decode(file_get_contents('php://input'), true);
-        $id = $_GET['id'] ?? ($data['id'] ?? null);
-
-        if (!$id) {
-            http_response_code(400);
-            echo json_encode(['error' => 'ID mancante']);
-            exit;
-        }
-
-        $stmt = $pdo->prepare("DELETE FROM categories WHERE id=?");
-        $stmt->execute([$id]);
-
-        echo json_encode(['status' => 'success']);
-    }
-} catch (PDOException $e) {
-    http_response_code(500);
-    error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
-    echo json_encode(['error' => 'Errore interno del server.']);
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+    http_response_code(405);
+    echo json_encode(['error' => 'Solo lettura: le categorie si gestiscono dal pannello.']);
+    exit;
 }
-?>
+if (!freno_passa('api-categorie', rete_cliente(), 20, 60)) {
+    http_response_code(429);
+    echo json_encode(['error' => 'Troppe richieste. Riprova fra un minuto.']);
+    exit;
+}
+
+$righe = db()->query("SELECT id, name, slug, sort_order, parent_id FROM categories
+                      ORDER BY sort_order ASC, name ASC")->fetchAll();
+foreach ($righe as &$r) {
+    $r['id'] = (int)$r['id'];
+    $r['sort_order'] = (int)$r['sort_order'];
+    $r['parent_id'] = $r['parent_id'] === null ? null : (int)$r['parent_id'];
+}
+unset($r);
+echo json_encode($righe, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);

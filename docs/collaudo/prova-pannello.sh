@@ -200,7 +200,12 @@ rm -f scratch/simonepizzi-dati/freni/*.json 2>/dev/null
 
 echo
 echo "Uscire"
+# L'uscita è un POST con il gettone (revisione del 16 ottobre, M6): un GET,
+# come quello di un'immagine messa su un altro sito, non deve far uscire.
 curl -s -b "$BISCOTTI" -c "$BISCOTTI" -o /dev/null "$BASE/admin/esci.php"
+apri 200 "/admin/" "un GET su esci.php non fa uscire"
+G="$(gettone /admin/)"
+curl -s -b "$BISCOTTI" -c "$BISCOTTI" -o /dev/null -d "gettone=$G" "$BASE/admin/esci.php"
 apri 302 "/admin/" "dopo l'uscita il pannello è di nuovo chiuso"
 
 echo

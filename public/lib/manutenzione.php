@@ -53,7 +53,18 @@ function manutenzione_di_passaggio(): void {
 function manutenzione_giro(): array {
     require_once __DIR__ . '/db_maintenance.php';
     assicura_newsletter(db());
+    /* Le impronte degli indirizzi (revisione del 16 ottobre, M15): la
+       migrazione una tantum parte da qui, oltre che dal pannello, così non
+       aspetta che qualcuno entri; poi, una volta al giorno, si tolgono quelle
+       che hanno finito il loro lavoro e i file dei freni fermi. */
+    assicura_impronte_anonime(db());
+    if (impostazione('anonimizza_ultimo', '') !== date('Y-m-d')) {
+        anonimizza_impronte_vecchie(db());
+        $r_freni = freno_pulisci();
+        impostazione_scrivi('anonimizza_ultimo', date('Y-m-d'));
+    }
     $r = newsletter_giro();
+    if (isset($r_freni)) $r['freni_tolti'] = $r_freni;
     $r['coda'] = mail_coda_spedisci(20);
     if (backup_dovuto()) {
         $r['backup'] = backup_crea('automatico');

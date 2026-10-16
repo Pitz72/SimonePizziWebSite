@@ -216,27 +216,6 @@ avviso_pannello();
 .scelta{display:flex;align-items:center;justify-content:center;padding:0 18px;cursor:pointer;border-right:1px solid var(--filo)}
 .corpo-riga{display:block;flex:1;min-width:0;text-decoration:none;padding:16px 20px}
 </style>
-<script nonce="<?= e(nonce()) ?>">
-(function () {
-  var modulo = document.getElementById('modulo-massa');
-  var tutti  = document.getElementById('scegli-tutti');
-  var conta  = document.getElementById('conta-scelti');
-  var caselle = function () { return modulo.querySelectorAll('input[name="scelti[]"]'); };
-  function aggiorna() {
-    var n = 0, tot = caselle().length;
-    caselle().forEach(function (c) { if (c.checked) n++; });
-    conta.textContent = n === 0 ? 'Nessuno selezionato' : (n === 1 ? '1 messaggio selezionato' : n + ' messaggi selezionati');
-    tutti.checked = n > 0 && n === tot;
-    tutti.indeterminate = n > 0 && n < tot;
-  }
-  tutti.addEventListener('change', function () {
-    caselle().forEach(function (c) { c.checked = tutti.checked; });
-    aggiorna();
-  });
-  modulo.addEventListener('change', function (e) { if (e.target.name === 'scelti[]') aggiorna(); });
-  aggiorna();
-})();
-</script>
 <?php endif; ?>
 
 <?php piede_pannello(); ?>

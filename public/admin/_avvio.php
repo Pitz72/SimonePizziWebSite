@@ -20,6 +20,8 @@ require_once __DIR__ . '/../lib/pannello.php';
 require_once __DIR__ . '/_layout.php';
 
 header('X-Robots-Tag: noindex, nofollow');
+// La stessa CSP del sito: fino al 16 ottobre 2026 il pannello non ne mandava una sua.
+manda_csp();
 // Una pagina del pannello non deve restare nella cache del browser: chi esce e
 // preme «indietro» non deve rivedere l'elenco degli articoli.
 header('Cache-Control: no-store, no-cache, must-revalidate');

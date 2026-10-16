@@ -12,20 +12,52 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/mailer.php';
 
-const TENTATIVI_MAX      = 8;      // per indirizzo IP
+const TENTATIVI_MAX      = 8;      // per rete, nella finestra qui sotto
 const TENTATIVI_FINESTRA = 900;    // 15 minuti, in secondi
+const TENTATIVI_NOME     = 20;     // per nome utente, da qualunque rete, in un'ora
+
+/* Quanto dura un ingresso. Sono i due valori di FDCA: dodici ore in tutto,
+   due ore senza richieste. Prima del 16 ottobre 2026 non c'era nessuna
+   scadenza scritta, e decideva la pulizia delle sessioni di PHP: di fabbrica
+   ventiquattro minuti, che bastavano a perdere un «Salva» dopo mezz'ora di
+   scrittura (revisione del 16 ottobre, M6). */
+const SESSIONE_MASSIMA  = 43200;
+const SESSIONE_INATTIVA = 7200;
+
+/* Un hash bcrypt vero, con lo stesso costo di quelli che il pannello scrive
+   (PASSWORD_DEFAULT, costo 10), per una password che nessuno ha. Serve a
+   rispondere con lo stesso tempo quando il nome utente non esiste. Quello di
+   prima aveva costo 12 e un corpo non valido: rispondeva più lento proprio per
+   i nomi che non esistono (revisione del 16 ottobre, L15). */
+const HASH_FINTO = '$2y$10$eQZGSMy6Q8zIdJQCrGUF/O5v0eq29YBTQaSwhp6yxUladW8SYiDwG';
 
 function avvia_sessione(): void {
     if (session_status() === PHP_SESSION_ACTIVE) return;
+
+    // Un id di sessione inventato da fuori non si accetta: se ne crea uno nuovo.
+    ini_set('session.use_strict_mode', '1');
+    /* La pulizia di PHP non deve chiudere una sessione prima delle scadenze
+       scritte qui sopra. I file stanno in una cartella privata del sito, non
+       in quella comune del server, dove un cron di sistema li cancellerebbe
+       col suo orologio; e con la cartella nostra la pulizia la fa PHP. */
+    ini_set('session.gc_maxlifetime', (string)SESSIONE_MASSIMA);
+    ini_set('session.gc_probability', '1');
+    ini_set('session.gc_divisor', '100');
+    $cartella = cartella_privata('sessioni');
+    if (is_dir($cartella) && is_writable($cartella)) {
+        session_save_path($cartella);
+    }
 
     session_set_cookie_params([
         'lifetime' => 0,
         'path'     => '/',
         'httponly' => true,                    // JavaScript non deve poterlo leggere
         'secure'   => !IN_SVILUPPO,            // in locale non c'è HTTPS
-        'samesite' => 'Lax',
+        // Strict: un altro sito non può far partire una richiesta che porti
+        // con sé il cookie del pannello. È la scelta di FDCA.
+        'samesite' => 'Strict',
     ]);
-    session_name('sp_admin');
+    session_name(nome_cookie_pannello());
     session_start();
 }
 
@@ -38,6 +70,16 @@ function utente(): ?array {
     static $chi = null;
     if ($chi !== null) return $chi;
 
+    /* Le due scadenze. Una sessione nata prima di queste regole non ha
+       «inizio»: vale come scaduta, e si rientra una volta sola. */
+    $ora    = time();
+    $inizio = (int)($_SESSION['inizio'] ?? 0);
+    $visto  = (int)($_SESSION['visto'] ?? 0);
+    if ($inizio === 0 || $ora - $inizio > SESSIONE_MASSIMA || $ora - $visto > SESSIONE_INATTIVA) {
+        esci();
+        return null;
+    }
+
     $q = db()->prepare("SELECT id, username, email, session_version FROM users WHERE id = ? LIMIT 1");
     $q->execute([$_SESSION['utente_id']]);
     $u = $q->fetch();
@@ -49,10 +91,27 @@ function utente(): ?array {
         esci();
         return null;
     }
+    $_SESSION['visto'] = $ora;
     return $chi = $u;
 }
 
 function dentro(): bool { return utente() !== null; }
+
+/**
+ * Quanti secondi restano prima che la sessione si chiuda, e per quale delle due
+ * scadenze. Lo chiede admin/ping.php.
+ *
+ * @return array{resta:int, motivo:string}
+ */
+function sessione_resta(): array {
+    $ora = time();
+    $perInattivita = SESSIONE_INATTIVA - ($ora - (int)($_SESSION['visto'] ?? $ora));
+    $perDurata     = SESSIONE_MASSIMA - ($ora - (int)($_SESSION['inizio'] ?? $ora));
+    return [
+        'resta'  => max(0, min($perInattivita, $perDurata)),
+        'motivo' => $perInattivita <= $perDurata ? 'inattivita' : 'durata',
+    ];
+}
 
 /** Da chiamare in cima a ogni pagina del pannello. */
 function richiedi_accesso(): array {
@@ -72,23 +131,32 @@ function richiedi_accesso(): array {
 function entra(string $nome, string $password): array {
     avvia_sessione();
 
-    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
-    if (troppi_tentativi($ip)) {
-        return ['ok' => false, 'errore' =>
-            'Troppi tentativi da questo indirizzo. Riprova fra un quarto d\'ora.'];
+    /* Due freni, come in FDCA: uno per rete (otto tentativi ogni quarto
+       d'ora, con l'IPv6 contato a /64) e uno per nome utente, da qualunque
+       rete (venti l'ora), che regge anche contro chi cambia indirizzo a ogni
+       tentativo. Nessun indirizzo finisce nel database: i conti stanno in file
+       fuori dal docroot, sotto un'impronta con chiave (lib/freno.php). Fino al
+       16 ottobre 2026 c'era il solo freno per IP, con l'IP scritto in chiaro
+       in login_attempts (revisione del 16 ottobre, M6 e M14). */
+    $rete = rete_cliente();
+    $chiaveNome = mb_strtolower(trim($nome));
+    if (freno_conta('login-rete', $rete, TENTATIVI_FINESTRA) >= TENTATIVI_MAX
+        || freno_conta('login-nome', $chiaveNome, 3600) >= TENTATIVI_NOME) {
+        return ['ok' => false, 'errore' => 'Troppi tentativi. Riprova fra un quarto d\'ora.'];
     }
 
     $q = db()->prepare("SELECT id, username, password_hash, session_version FROM users WHERE username = ? LIMIT 1");
     $q->execute([$nome]);
     $u = $q->fetch();
 
-    /* Se l'utente non esiste si verifica lo stesso un hash finto: senza, il
+    /* Se l'utente non esiste si verifica lo stesso un hash vero: senza, il
        tempo di risposta direbbe a chi prova quali nomi utente esistono. */
-    $hash = $u['password_hash'] ?? '$2y$12$xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx';
+    $hash = $u['password_hash'] ?? HASH_FINTO;
     $giusta = password_verify($password, $hash);
 
     if (!$u || !$giusta) {
-        annota_tentativo($ip);
+        freno_annota('login-rete', $rete, TENTATIVI_FINESTRA);
+        freno_annota('login-nome', $chiaveNome, 3600);
         // Un solo messaggio per «nome sbagliato» e «password sbagliata»: dire
         // quale dei due è darebbe via mezza informazione.
         return ['ok' => false, 'errore' => 'Nome utente o password non corretti.'];
@@ -98,7 +166,9 @@ function entra(string $nome, string $password): array {
     $_SESSION['utente_id']       = (int)$u['id'];
     $_SESSION['username']        = $u['username'];
     $_SESSION['session_version'] = (int)$u['session_version'];
-    pulisci_tentativi($ip);
+    $_SESSION['inizio']          = time();
+    $_SESSION['visto']           = time();
+    freno_azzera('login-rete', $rete);
 
     return ['ok' => true];
 }
@@ -108,30 +178,16 @@ function esci(): void {
     $_SESSION = [];
     if (ini_get('session.use_cookies')) {
         $p = session_get_cookie_params();
-        setcookie(session_name(), '', time() - 42000, $p['path'], $p['domain'], $p['secure'], $p['httponly']);
+        setcookie(session_name(), '', [
+            'expires'  => time() - 42000,
+            'path'     => $p['path'],
+            'domain'   => $p['domain'],
+            'secure'   => $p['secure'],
+            'httponly' => $p['httponly'],
+            'samesite' => $p['samesite'] ?: 'Strict',
+        ]);
     }
     session_destroy();
-}
-
-/* ── Il freno ai tentativi ───────────────────────────────────────────────── */
-
-/* La colonna si chiama `attempt_time`, non `attempted_at`: è il nome che ha in
-   produzione da sempre, e che avevo sbagliato a copiare nello schema di
-   sviluppo. Il login dava 500 e nessuno poteva entrare nel pannello. */
-function troppi_tentativi(string $ip): bool {
-    $limite = date('Y-m-d H:i:s', time() - TENTATIVI_FINESTRA);
-    $q = db()->prepare("SELECT COUNT(*) FROM login_attempts WHERE ip_address = ? AND attempt_time > ?");
-    $q->execute([$ip, $limite]);
-    return (int)$q->fetchColumn() >= TENTATIVI_MAX;
-}
-
-function annota_tentativo(string $ip): void {
-    db()->prepare("INSERT INTO login_attempts (ip_address, attempt_time) VALUES (?, ?)")
-        ->execute([$ip, date('Y-m-d H:i:s')]);
-}
-
-function pulisci_tentativi(string $ip): void {
-    db()->prepare("DELETE FROM login_attempts WHERE ip_address = ?")->execute([$ip]);
 }
 
 /* ── Il gettone dei moduli ───────────────────────────────────────────────

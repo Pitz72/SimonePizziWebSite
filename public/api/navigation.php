@@ -1,28 +1,5 @@
 <?php
-require_once 'db.php';
-header('Content-Type: application/json');
-// Contenuto modificabile da admin (rinomina categorie, ordine): niente cache browser
-// così le modifiche si propagano subito senza attendere la scadenza cache o un hard refresh.
-header('Cache-Control: no-store, no-cache, must-revalidate');
-$pdo = Database::connect();
-try {
-    $stmt = $pdo->query("SELECT id, name, slug, parent_id FROM categories ORDER BY sort_order ASC, name ASC");
-    $all = $stmt->fetchAll(PDO::FETCH_ASSOC);
-    $menu = [];
-    $by_id = [];
-    foreach ($all as $cat) {
-        $cat['subcategories'] = [];
-        $by_id[$cat['id']] = $cat;
-    }
-    foreach ($by_id as $id => &$cat) {
-        if ($cat['parent_id'] && isset($by_id[$cat['parent_id']])) {
-            $by_id[$cat['parent_id']]['subcategories'][] = &$cat;
-        } elseif (!$cat['parent_id']) {
-            $menu[] = &$cat;
-        }
-    }
-    echo json_encode(array_values($menu));
-} catch (Exception $e) {
-    error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
-    echo json_encode(['error' => 'Errore interno del server.']);
-}
+/* Endpoint del sito React, spento il 16 ottobre 2026 (revisione del 16 ottobre,
+   M2): il sito e il pannello in PHP non lo usano. Il codice di prima sta nella
+   storia di git e in ~/backup-sito/ sul server. */
+require __DIR__ . '/_spento.php';

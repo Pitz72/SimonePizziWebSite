@@ -3,7 +3,7 @@
  * L'avvio: il primo file che ogni richiesta esegue.
  *
  * Mette in piedi le poche cose che valgono per tutte le pagine — fuso orario,
- * segnalazione degli errori, il nonce della CSP, la connessione — e carica le
+ * segnalazione degli errori, la CSP, la connessione — e carica le
  * librerie. Da qui in poi una pagina può limitarsi a chiedere i suoi dati e a
  * stamparli.
  */
@@ -42,15 +42,27 @@ function base_url(): string {
     return SITO_URL;
 }
 
-/* ── Il nonce della CSP ───────────────────────────────────────────────────
-   Ogni richiesta genera un numero usato una volta sola. Gli script scritti
-   dentro la pagina lo dichiarano; tutto ciò che viene iniettato da fuori non
-   lo conosce e il browser lo rifiuta. Va poi ripetuto identico nell'header
-   Content-Security-Policy: se ne occupa partials/head.php. */
-function nonce(): string {
-    static $n = null;
-    if ($n === null) $n = base64_encode(random_bytes(16));
-    return $n;
+/* ── La Content Security Policy ───────────────────────────────────────────
+   Una sola, per il sito e per il pannello. Gli script vengono solo da file
+   del sito: niente 'unsafe-inline', quindi uno <script> o un onerror= finiti
+   in pagina per sbaglio non partono. I dati strutturati (application/ld+json)
+   non sono script che si eseguono, e la CSP non li tocca.
+
+   Il nonce del 7 settembre non c'è più. Non serviva, perché nel sito nessuno
+   script sta dentro la pagina; e non arrivava, perché la configurazione di
+   DreamHost sostituisce l'header mandato da PHP. Per questo in produzione la
+   STESSA riga sta nell'.htaccess, ed è quella che vale; qui serve allo
+   sviluppo (`php -S` non legge l'.htaccess) e come rete se un giorno l'.htaccess
+   smettesse di mandarla. Se si cambia una, si cambia l'altra: la prova di
+   produzione controlla che negli script non ci sia 'unsafe-inline'.
+
+   Storia: dal 3 al 16 ottobre 2026 l'.htaccess mandava 'unsafe-inline' per non
+   rompere tre script in linea del pannello (revisione del 16 ottobre, G2).
+   Quegli script adesso stanno in assets/js/admin.js. */
+const CSP_SITO = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; frame-src https://www.youtube-nocookie.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'";
+
+function manda_csp(): void {
+    if (!headers_sent()) header('Content-Security-Policy: ' . CSP_SITO);
 }
 
 /* ── Le librerie ──────────────────────────────────────────────────────────
@@ -79,13 +91,26 @@ require_once __DIR__ . '/../partials/blocchi.php';
    La sessione si apre SOLO se il browser porta già il cookie del pannello.
    Senza questo freno ogni visita di ogni lettore aprirebbe una sessione PHP e
    ne scriverebbe il file su disco: un costo pagato da tutti per servire uno.
-   Il nome del cookie è quello fissato da session_name() in lib/auth.php. */
+   Il nome del cookie lo decide nome_cookie_pannello() in lib/auth.php. */
 function admin_in_ascolto(): bool {
     static $risposta = null;
     if ($risposta !== null) return $risposta;
 
-    if (!isset($_COOKIE['sp_admin'])) return $risposta = false;
+    // Prima il cookie, poi auth.php: chi legge e basta non paga niente.
+    if (!isset($_COOKIE[nome_cookie_pannello()])) return $risposta = false;
 
     require_once __DIR__ . '/auth.php';
     return $risposta = dentro();
+}
+
+/**
+ * Il nome del cookie del pannello. In produzione porta il prefisso `__Host-`:
+ * il browser lo accetta solo se è Secure, sul percorso / e senza dominio,
+ * quindi nessun sottodominio di runtimeradio.it può scriverne uno al suo posto
+ * (revisione del 16 ottobre, M6). In sviluppo non c'è HTTPS e il prefisso non
+ * si può usare. Sta qui e non in auth.php perché serve anche ad
+ * admin_in_ascolto(), su ogni pagina pubblica.
+ */
+function nome_cookie_pannello(): string {
+    return IN_SVILUPPO ? 'sp_admin' : '__Host-sp_admin';
 }

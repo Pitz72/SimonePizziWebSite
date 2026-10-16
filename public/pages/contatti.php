@@ -87,7 +87,7 @@ require __DIR__ . '/../partials/head.php';
   </div>
 </main>
 
-<style nonce="<?= e(nonce()) ?>">
+<style>
 .modulo-contatti{max-width:640px;margin-top:34px;display:grid;gap:18px}
 .modulo-contatti .campo-testo{margin-top:8px;font:inherit;color:var(--testo)}
 .modulo-contatti .consenso{display:flex;gap:10px;align-items:flex-start;color:var(--spento);font-size:14.5px;line-height:1.5}

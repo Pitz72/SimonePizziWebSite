@@ -1,74 +1,48 @@
 <?php
 /**
- * Download Proxy — v1.6.1
+ * Lo scaricamento di un file della libreria con il suo nome originale:
+ * GET /api/download.php?id=123
  *
- * Serve i file caricati con il nome originale pulito (senza il prefisso uniqid),
- * usando il campo `filename` già salvato nel database dalla prima versione.
+ * Lo usano i pulsanti degli articoli che portano a un file. Non chiede
+ * l'accesso: i file sono pubblici, distribuiti ai lettori. La sola fonte di
+ * verità è il database, e il percorso deve stare dentro uploads/: nessun
+ * modo di uscire dalla cartella.
  *
- * Uso: /api/download.php?id=123
- *
- * NON richiede autenticazione: i file sono pubblici (distribuiti ai visitatori).
- * La sola fonte di verità è il database — nessun path traversal possibile.
+ * Dal 16 ottobre 2026 passa dalle librerie del sito (lib/), come il resto: la
+ * logica è quella della v1.6.1, invariata.
  */
 
-require_once 'db.php';
+declare(strict_types=1);
 
-$id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+require __DIR__ . '/../lib/avvio.php';
 
+$id = (int)($_GET['id'] ?? 0);
 if ($id <= 0) {
     http_response_code(400);
     exit('Parametro id mancante o non valido.');
 }
 
-try {
-    $pdo = Database::connect();
-    $stmt = $pdo->prepare("SELECT filename, file_path, mime_type, size FROM media WHERE id = ?");
-    $stmt->execute([$id]);
-    $media = $stmt->fetch();
-
-    if (!$media) {
-        http_response_code(404);
-        exit('File non trovato nel database.');
-    }
-
-    // Costruisce il percorso fisico dalla file_path (es. /uploads/abc123-nomefile.zip)
-    // [v1.19.0] Difesa in profondità (come media.php): anche se il path arriva dal DB,
-    // accetta solo file realmente dentro /uploads/ — mai path traversal.
-    $filePath = $media['file_path'];
-    if (!str_starts_with($filePath, '/uploads/')) {
-        http_response_code(404);
-        exit('File non trovato.');
-    }
-    $physicalPath = realpath(__DIR__ . '/..' . $filePath);
-    $uploadsBase  = realpath(__DIR__ . '/../uploads');
-
-    if (!$physicalPath || !$uploadsBase || !str_starts_with($physicalPath, $uploadsBase)
-        || !is_file($physicalPath) || !is_readable($physicalPath)) {
-        http_response_code(404);
-        exit('File non trovato sul disco del server.');
-    }
-
-    // Sanifica il nome originale per l'header HTTP (rimuove virgolette e caratteri problematici)
-    $cleanName = str_replace(['"', '\\', "\r", "\n"], '', $media['filename']);
-
-    // Disabilita output buffering se attivo (per file grandi)
-    if (ob_get_level()) {
-        ob_end_clean();
-    }
-
-    // Invia il file col nome originale pulito
-    header('Content-Type: ' . $media['mime_type']);
-    header('Content-Disposition: attachment; filename="' . $cleanName . '"');
-    header('Content-Length: ' . filesize($physicalPath));
-    header('Cache-Control: no-store, no-cache, must-revalidate');
-    header('Pragma: no-cache');
-    header('Expires: 0');
-
-    readfile($physicalPath);
-    exit;
-
-} catch (PDOException $e) {
-    http_response_code(500);
-    exit('Errore interno del server.');
+$q = db()->prepare("SELECT filename, file_path, mime_type FROM media WHERE id = ? LIMIT 1");
+$q->execute([$id]);
+$file = $q->fetch();
+if (!$file) {
+    http_response_code(404);
+    exit('File non trovato.');
 }
-?>
+
+$percorso = (string)$file['file_path'];
+$fisico = str_starts_with($percorso, '/uploads/') ? realpath(__DIR__ . '/..' . $percorso) : false;
+$base   = realpath(__DIR__ . '/../uploads');
+if (!$fisico || !$base || !str_starts_with($fisico, $base . DIRECTORY_SEPARATOR) || !is_file($fisico)) {
+    http_response_code(404);
+    exit('File non trovato.');
+}
+
+$nome = str_replace(['"', '\\', "\r", "\n"], '', (string)$file['filename']);
+while (ob_get_level()) ob_end_clean();
+
+header('Content-Type: ' . ((string)$file['mime_type'] ?: 'application/octet-stream'));
+header('Content-Disposition: attachment; filename="' . $nome . '"');
+header('Content-Length: ' . filesize($fisico));
+header('X-Content-Type-Options: nosniff');
+readfile($fisico);

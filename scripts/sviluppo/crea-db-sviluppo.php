@@ -31,8 +31,9 @@ declare(strict_types=1);
 const DATI = __DIR__ . '/../../scratch/dati-produzione';
 const DESTINAZIONE = __DIR__ . '/../../scratch/sviluppo.sqlite';
 
-function leggi(string $nome): array {
+function leggi(string $nome, bool $serve = true): array {
     $file = DATI . '/' . $nome . '.json';
+    if (!$serve && !is_file($file)) return [];
     if (!is_file($file)) {
         fwrite(STDERR, "Manca $file.\nLancia prima:  bash scripts/sviluppo/scarica-dati.sh\n");
         exit(1);
@@ -48,7 +49,7 @@ function leggi(string $nome): array {
 echo "Leggo i dati da " . realpath(DATI) . " …\n";
 $articoli  = leggi('articles');
 $categorie = leggi('categories');
-$progetti  = leggi('projects');
+$progetti  = leggi('projects', false);   // dal 10/10/2026 non si scaricano più
 printf("  %d articoli, %d categorie, %d progetti\n", count($articoli), count($categorie), count($progetti));
 
 @mkdir(dirname(DESTINAZIONE), 0777, true);
@@ -71,7 +72,9 @@ $db->exec("CREATE TABLE articles (
     seo_title TEXT NULL, seo_description TEXT NULL,
     cover_image TEXT, category TEXT, is_featured INTEGER DEFAULT 0,
     is_category_pinned INTEGER DEFAULT 0, status TEXT DEFAULT 'published',
-    published_at TEXT, created_at TEXT, updated_at TEXT NULL)");
+    published_at TEXT, created_at TEXT, updated_at TEXT NULL,
+    button_a_label TEXT NULL, button_a_link TEXT NULL,
+    button_b_label TEXT NULL, button_b_link TEXT NULL)");
 
 $db->exec("CREATE TABLE tags (id INTEGER PRIMARY KEY, name TEXT NOT NULL, slug TEXT NOT NULL)");
 $db->exec("CREATE TABLE article_tags (article_id INTEGER NOT NULL, tag_id INTEGER NOT NULL)");
@@ -90,10 +93,13 @@ foreach ($categorie as $c) {
     $ins->execute([$c['id'], $c['name'], $c['slug'], $c['sort_order'] ?? 0, $c['parent_id']]);
 }
 
+// Dal 16/10/2026 api/articles.php esporta anche i testi per Google, i pulsanti
+// e la data di modifica: il database di sviluppo è più vicino a quello vero.
 $insArt = $db->prepare("INSERT INTO articles
-    (id,title,slug,content,excerpt,focus_keyword,cover_image,category,
-     is_featured,is_category_pinned,status,published_at,created_at)
-    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)");
+    (id,title,slug,content,excerpt,focus_keyword,seo_title,seo_description,cover_image,category,
+     is_featured,is_category_pinned,status,published_at,created_at,updated_at,
+     button_a_label,button_a_link,button_b_label,button_b_link)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
 $insTag  = $db->prepare("INSERT INTO tags (name,slug) VALUES (?,?)");
 $insLega = $db->prepare("INSERT INTO article_tags (article_id,tag_id) VALUES (?,?)");
 $idTag = [];
@@ -101,9 +107,13 @@ $idTag = [];
 foreach ($articoli as $a) {
     $insArt->execute([
         $a['id'], $a['title'], $a['slug'], $a['content'] ?? '', $a['excerpt'] ?? '',
-        $a['focus_keyword'] ?? null, $a['cover_image'] ?? '', $a['category'] ?? '',
+        $a['focus_keyword'] ?? null, $a['seo_title'] ?? null, $a['seo_description'] ?? null,
+        $a['cover_image'] ?? '', $a['category'] ?? '',
         (int)($a['is_featured'] ?? 0), (int)($a['is_category_pinned'] ?? 0),
         $a['status'] ?? 'published', $a['published_at'] ?? null, $a['created_at'] ?? null,
+        $a['updated_at'] ?? null,
+        $a['button_a_label'] ?? null, $a['button_a_link'] ?? null,
+        $a['button_b_label'] ?? null, $a['button_b_link'] ?? null,
     ]);
 
     // L'API restituisce i tag come due stringhe parallele: "uno, due" e "uno,due".

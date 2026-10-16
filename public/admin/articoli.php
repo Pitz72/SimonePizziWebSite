@@ -14,6 +14,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $azione  = (string)($_POST['azione'] ?? '');
     $singolo = (int)($_POST['id'] ?? 0);
+    /* La stella di una riga porta l'id nel suo valore: niente JavaScript che
+       riempie un campo nascosto prima dell'invio (era un onclick in linea, che
+       una CSP senza 'unsafe-inline' blocca: revisione del 16 ottobre, G2). */
+    if (isset($_POST['fissa'])) {
+        $azione  = 'fissa';
+        $singolo = (int)$_POST['fissa'];
+    }
     $scelti  = array_map('intval', (array)($_POST['scelti'] ?? []));
     if ($singolo) $scelti = [$singolo];
     $dove = '/admin/articoli.php' . (($_POST['ritorno'] ?? '') ? '?' . $_POST['ritorno'] : '');
@@ -24,14 +31,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         case 'pubblica':
             foreach ($scelti as $id) {
                 db()->prepare("UPDATE articles SET status = 'published',
-                               published_at = COALESCE(published_at, ?) WHERE id = ?")
-                    ->execute([date('Y-m-d H:i:s'), $id]);
+                               published_at = COALESCE(published_at, ?), updated_at = ? WHERE id = ?")
+                    ->execute([date('Y-m-d H:i:s'), date('Y-m-d H:i:s'), $id]);
             }
             torna($dove, conta($scelti, 'Un articolo pubblicato', 'articoli pubblicati'));
 
         case 'bozza':
             foreach ($scelti as $id) {
-                db()->prepare("UPDATE articles SET status = 'draft' WHERE id = ?")->execute([$id]);
+                db()->prepare("UPDATE articles SET status = 'draft', updated_at = ? WHERE id = ?")
+                    ->execute([date('Y-m-d H:i:s'), $id]);
             }
             torna($dove, conta($scelti, 'Un articolo rimesso in bozza', 'articoli rimessi in bozza'));
 
@@ -49,10 +57,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
            un secondo toglie il primo, e il messaggio lo dice, perché altrimenti
            sembra che il pulsante non abbia funzionato sull'altro. */
         case 'fissa':
-            $id = (int)($_POST['id'] ?? 0);
-            $era = (bool)($_POST['era'] ?? false);
-            fissa_in_categoria($id, !$era);
+            /* Lo stato di partenza si legge dal database, non dalla pagina: una
+               scheda rimasta aperta da ieri non deve rimettere la stella com'era. */
+            $id = $singolo;
             $a = admin_articolo($id);
+            if (!$a) torna($dove, "Quell'articolo non c'è più.", true);
+            $era = (bool)$a['is_category_pinned'];
+            fissa_in_categoria($id, !$era);
             torna($dove, $era
                 ? '«' . $a['title'] . '» non è più in evidenza in ' . $a['category'] . '.'
                 : '«' . $a['title'] . '» apre la categoria ' . $a['category']
@@ -135,8 +146,6 @@ avviso_pannello();
       data-conferma="Confermi l'azione sugli articoli selezionati?">
   <?= campo_gettone() ?>
   <input type="hidden" name="ritorno" value="<?= e($ritorno) ?>">
-  <input type="hidden" name="id" value="">
-  <input type="hidden" name="era" value="">
 
   <div class="filtri" id="azioni-blocco" style="border:1px solid var(--filo);padding:12px;background:var(--pece)">
     <span class="eti spento" data-quanti>nessuno selezionato</span>
@@ -178,13 +187,12 @@ avviso_pannello();
             <td><?= stato_articolo($a) ?></td>
             <td class="num"><?= e(data_breve($a['published_at'] ?: $a['created_at'])) ?></td>
             <td class="comandi">
-              <button class="mini" type="submit" name="azione" value="fissa"
+              <button class="mini" type="submit" name="fissa" value="<?= (int)$a['id'] ?>"
                       formnovalidate
                       aria-pressed="<?= $a['is_category_pinned'] ? 'true' : 'false' ?>"
                       title="<?= $a['is_category_pinned']
                         ? 'Toglilo dalla cima di ' . e($a['category'])
-                        : 'Mettilo in cima a ' . e($a['category']) ?>"
-                      onclick="this.form.id.value=<?= (int)$a['id'] ?>;this.form.era.value=<?= $a['is_category_pinned'] ? 1 : '' ?>">
+                        : 'Mettilo in cima a ' . e($a['category']) ?>">
                 <?= $a['is_category_pinned'] ? '★' : '☆' ?>
               </button>
               <?= link_al_sito($a, 'mini', true) ?>

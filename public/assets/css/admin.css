@@ -23,6 +23,7 @@
 }
 .pannello-cima-destra{display:flex;align-items:center;gap:16px;color:var(--spento)}
 .pannello-cima-destra a.eti:hover{color:var(--verde)}
+.modulo-esci{display:inline;margin:0}
 
 /* ── Impianto a due colonne ─────────────────────────────────────────────── */
 .pannello-corpo{display:grid;grid-template-columns:212px minmax(0,1fr);min-height:calc(100vh - 56px)}
@@ -341,3 +342,4 @@ a.riga-barra-nome:hover{color:var(--verde)}
 @media (max-width:820px){
   .riga-barra{grid-template-columns:minmax(0,1fr) 60px 54px;gap:8px}
 }
+.avviso[hidden]{display:none}

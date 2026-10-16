@@ -275,8 +275,112 @@ function assicura_newsletter(PDO $db): bool {
 }
 
 /** Tutte insieme, all'ingresso nel pannello: è il primo momento utile. */
+/* ══════════════════════ Le impronte (16 ottobre 2026) ═════════════════════
+   Revisione del 16 ottobre, M15. Il sito teneva quattro specie di impronte
+   degli indirizzi, e nessuna era anonima come diceva l'informativa:
+
+     login_attempts.ip_address   l'IP in chiaro, a ogni tentativo di login;
+     article_reactions.voter_hash  sha256(IP + browser), per sempre;
+     article_views.ip_hash       sha256(IP + data), per sempre;
+     cta_clicks.ip_hash          sha256(IP + minuto), per sempre;
+     messages.ip_hash            sha256(IP), fino alla cancellazione dei messaggi.
+
+   Uno sha256 senza chiave di un IPv4 si ricalcola provando i quattro miliardi
+   di indirizzi. Da oggi le impronte nuove sono HMAC con la chiave segreta del
+   sito (lib/freno.php), e le vecchie si sostituiscono con un segnaposto che
+   non dice niente («storico-» e l'id della riga): i conteggi restano, il
+   legame con chi c'era no. Una impronta serve solo finché serve: quella di una
+   lettura per il giorno in cui conta una lettura sola, quella di un messaggio
+   per l'ora del freno. Dopo, la toglie il giro di manutenzione.
+
+   Diversamente dalle altre ensure*, questa gira anche in sviluppo: è fatta di
+   UPDATE, e l'unica differenza fra i due database è come si attaccano due
+   stringhe. */
+
+/** «storico-» seguito dall'id della riga, nella sintassi del database che c'è. */
+function sql_segnaposto_storico(PDO $db): string {
+    return $db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql'
+        ? "CONCAT('storico-', id)"
+        : "('storico-' || id)";
+}
+
+/** Una migrazione già fatta, letta dal registro. */
+function migrazione_fatta(PDO $db, string $nome): bool {
+    try {
+        $q = $db->prepare("SELECT 1 FROM schema_version WHERE migration = ? LIMIT 1");
+        $q->execute([$nome]);
+        return (bool)$q->fetchColumn();
+    } catch (PDOException $e) {
+        return false;
+    }
+}
+
+/** Come annota_migrazione(), ma in SQL che parlano tutti e due i database. */
+function segna_migrazione(PDO $db, string $nome, string $nota): void {
+    if (migrazione_fatta($db, $nome)) return;
+    try {
+        if ($db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql') registro_migrazioni($db);
+        $db->prepare("INSERT INTO schema_version (migration, note, applied_at) VALUES (?, ?, ?)")
+           ->execute([$nome, $nota, date('Y-m-d H:i:s')]);
+    } catch (PDOException $e) {
+        error_log('db_maintenance [schema_version]: ' . $e->getMessage());
+    }
+}
+
+/**
+ * Toglie le impronte che hanno finito il loro lavoro. La chiama il giro di
+ * manutenzione una volta al giorno, e la migrazione qui sotto la prima volta.
+ * Ogni tabella per conto suo: una che manca non ferma le altre.
+ */
+function anonimizza_impronte_vecchie(PDO $db): void {
+    $s = sql_segnaposto_storico($db);
+    $oggi = date('Y-m-d');
+    $lavori = [
+        // Una lettura conta una volta al giorno: ieri non serve più.
+        ["UPDATE article_views SET ip_hash = $s
+          WHERE view_date < ? AND (ip_hash IS NULL OR ip_hash NOT LIKE 'storico-%')", [$oggi]],
+        // Il freno dei clic guarda l'ultimo minuto.
+        ["UPDATE cta_clicks SET ip_hash = $s
+          WHERE clicked_at < ? AND (ip_hash IS NULL OR ip_hash NOT LIKE 'storico-%')", [$oggi . ' 00:00:00']],
+        // Il freno dei messaggi guarda l'ultima ora.
+        ["UPDATE messages SET ip_hash = NULL WHERE created_at < ? AND ip_hash IS NOT NULL",
+         [date('Y-m-d H:i:s', time() - 3600)]],
+    ];
+    foreach ($lavori as [$sql, $valori]) {
+        try {
+            $db->prepare($sql)->execute($valori);
+        } catch (PDOException $e) {
+            error_log('anonimizza_impronte_vecchie: ' . $e->getMessage());
+        }
+    }
+}
+
+/** La migrazione una tantum: login_attempts vuota, reazioni col segnaposto, il resto come ogni giorno. */
+function assicura_impronte_anonime(PDO $db): bool {
+    static $ok = null;
+    if ($ok !== null) return $ok;
+    $nome = '2026-10-16_impronte_anonime';
+    if (migrazione_fatta($db, $nome)) return $ok = true;
+
+    try {
+        // I freni del login ora stanno in file (lib/freno.php): qui restavano solo IP.
+        try { $db->exec("DELETE FROM login_attempts"); } catch (PDOException $e) { /* tabella assente */ }
+        $s = sql_segnaposto_storico($db);
+        $db->exec("UPDATE article_reactions SET voter_hash = $s WHERE voter_hash NOT LIKE 'storico-%'");
+        anonimizza_impronte_vecchie($db);
+        segna_migrazione($db, $nome, 'Impronte degli indirizzi: HMAC con chiave, le vecchie sostituite da un segnaposto');
+        error_log('db_maintenance: impronte vecchie sostituite (migrazione ' . $nome . ')');
+        return $ok = true;
+    } catch (PDOException $e) {
+        error_log('db_maintenance [impronte]: ' . $e->getMessage());
+        return $ok = false;
+    }
+}
+
+
 function assicura_schema(PDO $db): void {
     assicura_colonne_seo($db);
     assicura_messaggistica($db);
     assicura_newsletter($db);
+    assicura_impronte_anonime($db);
 }

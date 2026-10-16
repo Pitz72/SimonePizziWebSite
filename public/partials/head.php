@@ -5,26 +5,13 @@
  * Gli header vanno mandati prima di qualunque stampa, quindi stanno in cima a
  * questo file e non altrove.
  *
- * NOTA SULLA CSP. Finché il sito vecchio è in produzione la CSP la manda
- * public/.htaccess con `Header always set`, che vince su questa. Al momento del
- * taglio quella riga va tolta dall'.htaccess, perché il nonce può nascere solo
- * qui: cambia a ogni richiesta e un file di configurazione non lo sa fare.
- * È annotato in DECISIONI.md §7.
+ * La CSP è CSP_SITO, in lib/avvio.php: lì c'è scritto perché in produzione
+ * la stessa riga sta anche nell'.htaccess.
  */
 
 if (!headers_sent()) {
     header('Content-Type: text/html; charset=utf-8');
-    header("Content-Security-Policy: "
-        . "default-src 'self'; "
-        . "script-src 'self' 'nonce-" . nonce() . "'; "
-        . "style-src 'self' 'unsafe-inline'; "
-        . "font-src 'self'; "                    // i caratteri sono in casa: niente gstatic
-        . "img-src 'self' data: https:; "        // le copertine possono essere URL assolute
-        . "connect-src 'self'; "
-        . "object-src 'none'; "
-        . "frame-src https://www.youtube-nocookie.com; "
-        . "frame-ancestors 'self'; "
-        . "base-uri 'self'");
+    manda_csp();
     header('Referrer-Policy: strict-origin-when-cross-origin');
     header('X-Content-Type-Options: nosniff');
 }

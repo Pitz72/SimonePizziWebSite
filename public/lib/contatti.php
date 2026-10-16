@@ -247,7 +247,10 @@ function contatti_invia(array $post): array {
     if (!assicura_messaggistica($db)) return [false, 'Non riesco a registrare il messaggio adesso. Riprova fra qualche minuto.'];
     messaggi_pulizia($db);   // sei mesi dall'ultimo scambio, poi si cancella: vedi lib/messaggi_pulizia.php
 
-    $rete = hash('sha256', (string)($_SERVER['REMOTE_ADDR'] ?? 'sconosciuto'));
+    /* L'impronta della rete: HMAC con la chiave del sito sulla rete ridotta a
+       /64 (lib/freno.php). Era sha256 dell'IP intero, che per un IPv4 si
+       ricalcola e per un IPv6 si aggira (revisione del 16 ottobre, M14 e M15). */
+    $rete = impronta(rete_cliente(), 'contatti');
     try {
         $st = $db->prepare('SELECT COUNT(*) FROM messages WHERE ip_hash = ? AND created_at > ?');
         $st->execute([$rete, contatti_adesso(3600)]);

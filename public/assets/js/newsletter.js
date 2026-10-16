@@ -1,7 +1,8 @@
 /* newsletter.js — l'iscrizione senza ricaricare la pagina.
    Il modulo è un <form> vero con action e method: se il JavaScript non parte,
-   o si rompe, l'invio funziona lo stesso per la via normale. Qui si aggiunge
-   solo la comodità di restare dove si è. */
+   o si rompe, l'invio funziona lo stesso per la via normale, e
+   api/subscribers.php risponde con una pagina (dal 16 ottobre 2026: prima
+   rispondeva sempre JSON). Qui si aggiunge solo la comodità di restare dove si è. */
 
 (function () {
   'use strict';

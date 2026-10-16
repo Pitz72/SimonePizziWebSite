@@ -60,7 +60,12 @@ function testa_pannello(string $titolo, string $sezione = '', bool $nuda = false
   <div class="pannello-cima-destra">
     <a class="eti" href="/" target="_blank" rel="noopener">Vedi il sito ↗</a>
     <span class="eti spento"><?= e($_SESSION['username'] ?? '') ?></span>
-    <a class="btn btn-muto" href="/admin/esci.php">Esci</a>
+    <?php /* L'uscita è un POST con il gettone: con un link, un'immagine su un
+             altro sito poteva far uscire dal pannello (revisione del 16 ottobre, M6). */ ?>
+    <form method="post" action="/admin/esci.php" class="modulo-esci">
+      <?= campo_gettone() ?>
+      <button class="btn btn-muto" type="submit">Esci</button>
+    </form>
   </div>
 </header>
 
@@ -94,9 +99,9 @@ function piede_pannello(bool $nuda = false, array $script = []): void {
         echo '  </main></div>';
     }
     ?>
-<script nonce="<?= e(nonce()) ?>" src="<?= e(asset_v('/assets/js/admin.js')) ?>" defer></script>
+<script src="<?= e(asset_v('/assets/js/admin.js')) ?>" defer></script>
 <?php foreach ($script as $f): ?>
-<script nonce="<?= e(nonce()) ?>" src="<?= e(asset_v('/assets/js/' . $f)) ?>" defer></script>
+<script src="<?= e(asset_v('/assets/js/' . $f)) ?>" defer></script>
 <?php endforeach; ?>
 </body>
 </html>

@@ -83,16 +83,13 @@ function newsletter_link_conferma(string $token): string {
 /* ── Limiti sulle iscrizioni ─────────────────────────────────────────────── */
 
 /** Un indirizzo IP fa al massimo tre iscrizioni ogni quindici minuti: niente bombardamenti di conferme. */
-function newsletter_richiesta_ammessa(string $ip): bool {
-    $pdo = db();
-    $chiave = 'nl:' . substr(hash('sha256', $ip), 0, 40);
-    $pdo->prepare("DELETE FROM login_attempts WHERE attempt_time < ?")
-        ->execute([date('Y-m-d H:i:s', time() - 900)]);
-    $q = $pdo->prepare("SELECT COUNT(*) FROM login_attempts WHERE ip_address = ?");
-    $q->execute([$chiave]);
-    if ((int)$q->fetchColumn() >= NEWSLETTER_RICHIESTE_MAX) { return false; }
-    $pdo->prepare("INSERT INTO login_attempts (ip_address) VALUES (?)")->execute([$chiave]);
-    return true;
+function newsletter_richiesta_ammessa(): bool {
+    /* Il freno comune (lib/freno.php): la rete con l'IPv6 ridotto a /64, i
+       conti in un file fuori dal docroot. Prima stava nella tabella dei login
+       e contava l'IPv6 intero, quindi chi aveva una rete IPv6 poteva mandare
+       conferme senza limite a indirizzi scelti da lui (revisione del 16
+       ottobre, M14). */
+    return freno_passa('newsletter', rete_cliente(), NEWSLETTER_RICHIESTE_MAX, 900);
 }
 
 /* ── Iscrizione e conferma ───────────────────────────────────────────────── */
@@ -118,16 +115,29 @@ function newsletter_iscrivi(string $email, string $nome, bool $consenso, string 
     $ora    = nl_now();
     $versione = impostazione('privacy_version', NEWSLETTER_CONSENSO_VERSIONE);
 
-    $q = $pdo->prepare("SELECT id, status, confirm_sent_at, consent_at FROM subscribers WHERE email = ?");
+    $q = $pdo->prepare("SELECT id, status, confirm_token, confirm_sent_at, consent_at FROM subscribers WHERE email = ?");
     $q->execute([$email]);
     $esistente = $q->fetch();
 
     if ($esistente && $esistente['status'] === 'confirmed') {
-        // Già in lista. Se la sua iscrizione veniva da prima del consenso registrato,
-        // questa spunta è il suo consenso: lo si scrive, e non si manda niente.
+        /* Già in lista. Se la sua iscrizione è di prima del consenso registrato,
+           la spunta di chi compila il modulo NON basta: il modulo lo può
+           compilare chiunque conosca l'indirizzo, e il consenso deve darlo la
+           persona a cui l'indirizzo appartiene. Fino al 16 ottobre 2026 lo si
+           scriveva qui, subito, senza chiedere niente alla casella. Adesso parte
+           la stessa richiesta del numero di riconferma, e il consenso si scrive
+           solo al clic (newsletter_conferma). Il token, se c'è già, si riusa: il
+           link di un'email di riconferma partita prima resta buono. */
         if (empty($esistente['consent_at'])) {
-            $pdo->prepare("UPDATE subscribers SET consent_at = ?, consent_text = ?, consent_version = ?, consent_source = ? WHERE id = ?")
-                ->execute([$ora, NEWSLETTER_CONSENSO_TESTO, $versione, $fonte, $esistente['id']]);
+            $appena = $esistente['confirm_sent_at']
+                && (time() - strtotime((string)$esistente['confirm_sent_at'])) < NEWSLETTER_CONFERMA_MAX;
+            if (!$appena) {
+                $token = nl_token_valido((string)$esistente['confirm_token'])
+                    ? (string)$esistente['confirm_token'] : bin2hex(random_bytes(32));
+                $pdo->prepare("UPDATE subscribers SET confirm_token = ?, confirm_sent_at = ? WHERE id = ?")
+                    ->execute([$token, $ora, $esistente['id']]);
+                newsletter_mail_riconsenso($email, $token);
+            }
         }
         return [true, NEWSLETTER_NEUTRO];
     }
@@ -166,6 +176,28 @@ function newsletter_mail_conferma(string $email, string $nome, string $token): b
         . '<p style="font-size:13px;color:#777;">Se non sei stato tu a chiedere l’iscrizione, ignora questa email: senza conferma non succede niente.</p>';
     $html = newsletter_layout('Conferma la tua iscrizione', $corpo, '');
     return manda_posta($email, 'Conferma l’iscrizione alla newsletter — ' . posta_sito_nome(), $html, [
+        'from_name' => posta_sito_nome(),
+        'priorita'  => 'normale',
+    ]);
+}
+
+/**
+ * La richiesta di registrare il consenso, per chi è già iscritto da prima del
+ * consenso registrato e ha usato il modulo del sito. Il consenso lo scrive solo
+ * il clic sul pulsante della pagina di conferma.
+ */
+function newsletter_mail_riconsenso(string $email, string $token): bool {
+    $link = newsletter_link_conferma($token);
+    $corpo = '<p>Ciao,</p>'
+        . '<p>questo indirizzo riceve già la newsletter di <strong>' . e(posta_sito_nome()) . '</strong>, '
+        . 'ma la sua iscrizione è di prima che il sito registrasse il consenso. Dal modulo del sito è '
+        . 'arrivata la richiesta di registrarlo adesso: se l’hai mandata tu, manca un clic.</p>'
+        . newsletter_pulsante($link, 'Confermo il consenso')
+        . '<p style="font-size:13px;color:#777;">Se il pulsante non funziona, copia questo indirizzo nel browser:<br>'
+        . '<span style="word-break:break-all;">' . e($link) . '</span></p>'
+        . '<p style="font-size:13px;color:#777;">Se non sei stato tu, ignora questa email: non cambia niente.</p>';
+    $html = newsletter_layout('Conferma il consenso', $corpo, '');
+    return manda_posta($email, 'Conferma il consenso alla newsletter — ' . posta_sito_nome(), $html, [
         'from_name' => posta_sito_nome(),
         'priorita'  => 'normale',
     ]);

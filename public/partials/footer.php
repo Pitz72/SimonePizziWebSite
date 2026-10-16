@@ -31,13 +31,13 @@ $con_condivisione = !empty($GLOBALS['FINESTRE_CONDIVISIONE']);
 
 <?php blocco_finestre($con_condivisione); ?>
 
-<script nonce="<?= e(nonce()) ?>" src="<?= e(asset_v('/assets/js/interfaccia.js')) ?>" defer></script>
-<script nonce="<?= e(nonce()) ?>" src="<?= e(asset_v('/assets/js/ricerca.js')) ?>" defer></script>
-<script nonce="<?= e(nonce()) ?>" src="<?= e(asset_v('/assets/js/newsletter.js')) ?>" defer></script>
+<script src="<?= e(asset_v('/assets/js/interfaccia.js')) ?>" defer></script>
+<script src="<?= e(asset_v('/assets/js/ricerca.js')) ?>" defer></script>
+<script src="<?= e(asset_v('/assets/js/newsletter.js')) ?>" defer></script>
 <?php if ($con_condivisione): ?>
-<script nonce="<?= e(nonce()) ?>" src="<?= e(asset_v('/assets/js/sommario.js')) ?>" defer></script>
-<script nonce="<?= e(nonce()) ?>" src="<?= e(asset_v('/assets/js/reazioni.js')) ?>" defer></script>
-<script nonce="<?= e(nonce()) ?>" src="<?= e(asset_v('/assets/js/visite.js')) ?>" defer></script>
+<script src="<?= e(asset_v('/assets/js/sommario.js')) ?>" defer></script>
+<script src="<?= e(asset_v('/assets/js/reazioni.js')) ?>" defer></script>
+<script src="<?= e(asset_v('/assets/js/visite.js')) ?>" defer></script>
 <?php endif; ?>
 </body>
 </html>

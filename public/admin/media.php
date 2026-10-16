@@ -54,22 +54,4 @@ avviso_pannello();
 
 <p class="esito" id="esito-copia" role="status" aria-live="polite"></p>
 
-<script nonce="<?= e(nonce()) ?>">
-document.addEventListener('click', function (ev) {
-  var b = ev.target.closest('[data-copia]');
-  if (!b) return;
-  var url = b.getAttribute('data-copia');
-  var esito = document.getElementById('esito-copia');
-  function detto(t, tipo) { esito.textContent = t; esito.setAttribute('data-tipo', tipo); }
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(url).then(
-      function () { detto('Indirizzo copiato: ' + url, 'ok'); },
-      function () { detto('Non sono riuscito a copiare. Eccolo: ' + url, 'no'); }
-    );
-  } else {
-    detto('Eccolo: ' + url, 'no');
-  }
-});
-</script>
-
 <?php piede_pannello(); ?>

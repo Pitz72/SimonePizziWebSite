@@ -118,7 +118,7 @@ require __DIR__ . '/../partials/head.php';
   </div>
 </main>
 
-<style nonce="<?= e(nonce()) ?>">
+<style>
 /* La pagina si apre da un'email, quindi spesso col telefono: prima il filo
    della conversazione, poi il campo per rispondere, in fondo le due note. */
 .testo-msg{font-size:1.1rem;color:var(--spento);line-height:1.7}

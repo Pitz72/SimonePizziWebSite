@@ -314,7 +314,7 @@ $schede = ['iscritti' => 'Iscritti', 'componi' => 'Componi e invia', 'campagne' 
   $introIniziale   = $bozza['intro'];
 ?>
 
-<form method="post" action="/admin/newsletter.php?vista=componi" class="scheda" style="max-width:820px">
+<form method="post" action="/admin/newsletter.php?vista=componi" class="scheda" style="max-width:820px" data-tieni-viva>
   <?= campo_gettone() ?>
   <div class="campo">
     <label class="eti" for="n-oggetto">Oggetto</label>

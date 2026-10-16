@@ -1,181 +1,104 @@
 <?php
 /**
- * API Reazioni Articoli v1.0.0
- * 
- * GET  ?article_id=X  → Restituisce i conteggi di tutte le reazioni per l'articolo
- * POST {article_id, reaction} → Aggiunge o rimuove (toggle) una reazione
- * 
- * Protezione anti-spam:
- * - UNIQUE KEY (article_id, voter_hash, reaction) sul DB impedisce duplicati
- * - voter_hash = SHA256(IP + User-Agent) — anonimo e GDPR-compliant
- * - Rate limiting: max 20 azioni per IP al minuto
+ * Le cinque reazioni in fondo agli articoli.
+ *
+ *   GET  ?article_id=X            i conteggi, e quali reazioni sono «tue»
+ *   POST {article_id, reaction}   aggiunge o toglie (è un interruttore)
+ *
+ * Lo chiama assets/js/reazioni.js. Riscritto il 16 ottobre 2026 sulle
+ * librerie del sito (revisione del 16 ottobre, M14 e M15). Prima:
+ *
+ *  - «tue» voleva dire sha256(IP + User-Agent), senza chiave e conservato per
+ *    sempre: un identificativo stabile e ricalcolabile;
+ *  - il freno contava l'IPv6 intero e scriveva nella tabella dei login.
+ *
+ * Adesso «tue» è un HMAC con la chiave segreta del sito (lib/freno.php) sulla
+ * rete ridotta a /64 più il browser: lo User-Agent resta, perché dietro la
+ * stessa rete di un operatore mobile ci sono molte persone, e senza di lui la
+ * reazione di una sarebbe «tua» anche per le altre. Le impronte vecchie sono
+ * state sostituite con un segnaposto (assicura_impronte_anonime() in
+ * lib/db_maintenance.php): i conteggi restano, il legame con chi le ha date no.
  */
 
-require_once 'db.php';
+declare(strict_types=1);
 
-header('Content-Type: application/json');
-header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+require __DIR__ . '/../lib/avvio.php';
 
-// Reazioni consentite (corrispondono alle chiavi nel frontend)
-const ALLOWED_REACTIONS = ['thumb', 'heart', 'fire', 'think', 'game'];
+header('Content-Type: application/json; charset=utf-8');
 
-$pdo    = Database::connect();
-$method = $_SERVER['REQUEST_METHOD'];
+// I nomi sono quelli dei pulsanti (pages/articolo.php): cambiarli vorrebbe dire
+// perdere i voti già raccolti.
+const REAZIONI = ['thumb', 'heart', 'fire', 'think', 'game'];
 
-// Hash anonimo del visitatore (nessun dato personale memorizzato)
-$voter_hash = hash('sha256',
-    ($_SERVER['REMOTE_ADDR'] ?? 'unknown') .
-    ($_SERVER['HTTP_USER_AGENT'] ?? 'unknown')
-);
-
-// ─── GET: Conteggi reazioni per un articolo ───────────────────────────────────
-if ($method === 'GET') {
-    $article_id = isset($_GET['article_id']) ? (int)$_GET['article_id'] : 0;
-
-    if (!$article_id) {
-        http_response_code(400);
-        echo json_encode(['error' => 'article_id mancante']);
-        exit;
-    }
-
-    // Conteggi per ogni tipo di reazione
-    $stmt = $pdo->prepare(
-        "SELECT reaction, COUNT(*) as count
-         FROM article_reactions
-         WHERE article_id = ?
-         GROUP BY reaction"
-    );
-    $stmt->execute([$article_id]);
-    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    // Struttura risposta con tutti i tipi inizializzati a 0
-    $counts = array_fill_keys(ALLOWED_REACTIONS, 0);
-    foreach ($rows as $row) {
-        if (isset($counts[$row['reaction']])) {
-            $counts[$row['reaction']] = (int)$row['count'];
-        }
-    }
-
-    // Reazioni già date da questo visitatore
-    $stmtOwn = $pdo->prepare(
-        "SELECT reaction FROM article_reactions
-         WHERE article_id = ? AND voter_hash = ?"
-    );
-    $stmtOwn->execute([$article_id, $voter_hash]);
-    $myReactions = $stmtOwn->fetchAll(PDO::FETCH_COLUMN);
-
-    echo json_encode([
-        'counts'       => $counts,
-        'my_reactions' => $myReactions
-    ]);
+function risposta(int $codice, array $dati): never {
+    http_response_code($codice);
+    echo json_encode($dati);
     exit;
 }
 
-// ─── POST: Toggle reazione (aggiungi o rimuovi) ───────────────────────────────
-if ($method === 'POST') {
-    $data       = json_decode(file_get_contents('php://input'), true);
-    $article_id = isset($data['article_id']) ? (int)$data['article_id'] : 0;
-    $reaction   = trim($data['reaction'] ?? '');
+/** I conteggi di un articolo e le reazioni di chi chiede. */
+function stato_reazioni(int $idArticolo, string $chi): array {
+    $conti = array_fill_keys(REAZIONI, 0);
+    $q = db()->prepare("SELECT reaction, COUNT(*) AS quante FROM article_reactions
+                        WHERE article_id = ? GROUP BY reaction");
+    $q->execute([$idArticolo]);
+    foreach ($q->fetchAll() as $r) {
+        if (isset($conti[$r['reaction']])) $conti[$r['reaction']] = (int)$r['quante'];
+    }
+    $m = db()->prepare("SELECT reaction FROM article_reactions WHERE article_id = ? AND voter_hash = ?");
+    $m->execute([$idArticolo, $chi]);
+    return ['counts' => $conti, 'my_reactions' => $m->fetchAll(PDO::FETCH_COLUMN)];
+}
 
-    if (!$article_id || !$reaction) {
-        http_response_code(400);
-        echo json_encode(['error' => 'article_id e reaction sono obbligatori']);
-        exit;
+/** L'articolo esiste ed è visibile al pubblico? Le bozze non si votano. */
+function articolo_votabile(int $id): bool {
+    if ($id <= 0) return false;
+    $q = db()->prepare("SELECT COUNT(*) FROM articles WHERE id = :id AND " . SOLO_PUBBLICATI);
+    $q->execute([':id' => $id, ':adesso' => adesso()]);
+    return (int)$q->fetchColumn() > 0;
+}
+
+$rete = rete_cliente();
+$chi  = impronta($rete . '|' . (string)($_SERVER['HTTP_USER_AGENT'] ?? ''), 'reazione');
+$metodo = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+if ($metodo === 'GET') {
+    $id = (int)($_GET['article_id'] ?? 0);
+    if (!articolo_votabile($id)) risposta(404, ['error' => 'Articolo non trovato']);
+    risposta(200, stato_reazioni($id, $chi));
+}
+
+if ($metodo === 'POST') {
+    // Trenta reazioni al minuto per rete: un lettore vero non ci arriva.
+    if (!freno_passa('reazioni', $rete, 30, 60)) {
+        risposta(429, ['error' => 'Troppe richieste. Attendi un momento.']);
     }
 
-    if (!in_array($reaction, ALLOWED_REACTIONS, true)) {
-        http_response_code(400);
-        echo json_encode(['error' => 'Tipo di reazione non valido']);
-        exit;
-    }
+    $dati = json_decode((string)file_get_contents('php://input'), true);
+    $id = (int)($dati['article_id'] ?? 0);
+    $reazione = trim((string)($dati['reaction'] ?? ''));
 
-    // Rate limiting: max 20 azioni per IP nell'ultimo minuto
-    $ip = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
-    $stmtRate = $pdo->prepare(
-        "SELECT COUNT(*) FROM article_reactions
-         WHERE voter_hash = ? AND created_at >= DATE_SUB(NOW(), INTERVAL 1 MINUTE)"
-    );
-    $stmtRate->execute([$voter_hash]);
-    if ((int)$stmtRate->fetchColumn() >= 20) {
-        http_response_code(429);
-        echo json_encode(['error' => 'Troppe richieste. Attendi un momento.']);
-        exit;
-    }
+    if (!in_array($reazione, REAZIONI, true)) risposta(400, ['error' => 'Tipo di reazione non valido']);
+    if (!articolo_votabile($id)) risposta(404, ['error' => 'Articolo non trovato']);
 
-    // [v1.19.0] Secondo limite basato sul SOLO IP: voter_hash include lo User-Agent,
-    // che è controllato dal client — ruotandolo si aggirerebbe il limite sopra.
-    $rl_key = 'rea:' . substr(hash('sha256', $ip), 0, 40);
-    $pdo->exec("DELETE FROM login_attempts WHERE attempt_time < DATE_SUB(NOW(), INTERVAL 15 MINUTE)");
-    $stmtIpRate = $pdo->prepare(
-        "SELECT COUNT(*) FROM login_attempts
-         WHERE ip_address = ? AND attempt_time >= DATE_SUB(NOW(), INTERVAL 1 MINUTE)"
-    );
-    $stmtIpRate->execute([$rl_key]);
-    if ((int)$stmtIpRate->fetchColumn() >= 30) {
-        http_response_code(429);
-        echo json_encode(['error' => 'Troppe richieste. Attendi un momento.']);
-        exit;
-    }
-    $pdo->prepare("INSERT INTO login_attempts (ip_address) VALUES (?)")->execute([$rl_key]);
+    $c = db()->prepare("SELECT id FROM article_reactions WHERE article_id = ? AND voter_hash = ? AND reaction = ?");
+    $c->execute([$id, $chi, $reazione]);
+    $esistente = $c->fetchColumn();
 
-    // Verifica se la reazione esiste già (per il toggle)
-    $stmtCheck = $pdo->prepare(
-        "SELECT id FROM article_reactions
-         WHERE article_id = ? AND voter_hash = ? AND reaction = ?"
-    );
-    $stmtCheck->execute([$article_id, $voter_hash, $reaction]);
-    $existing = $stmtCheck->fetchColumn();
-
-    if ($existing) {
-        // Rimuovi (toggle off)
-        $stmtDel = $pdo->prepare(
-            "DELETE FROM article_reactions
-             WHERE article_id = ? AND voter_hash = ? AND reaction = ?"
-        );
-        $stmtDel->execute([$article_id, $voter_hash, $reaction]);
-        $action = 'removed';
+    if ($esistente) {
+        db()->prepare("DELETE FROM article_reactions WHERE id = ?")->execute([$esistente]);
+        $azione = 'removed';
     } else {
-        // Aggiungi
-        $stmtIns = $pdo->prepare(
-            "INSERT IGNORE INTO article_reactions (article_id, reaction, voter_hash)
-             VALUES (?, ?, ?)"
-        );
-        $stmtIns->execute([$article_id, $reaction, $voter_hash]);
-        $action = 'added';
+        /* Due clic quasi insieme arrivano qui entrambi: in produzione la
+           tabella ha una chiave unica su (articolo, impronta, reazione), e il
+           secondo inserimento la urta. Non è un errore: la reazione c'è. */
+        try {
+            db()->prepare("INSERT INTO article_reactions (article_id, reaction, voter_hash, created_at) VALUES (?, ?, ?, ?)")
+                ->execute([$id, $reazione, $chi, date('Y-m-d H:i:s')]);
+        } catch (PDOException $doppione) { /* già inserita dal clic gemello */ }
+        $azione = 'added';
     }
-
-    // Restituisce i conteggi aggiornati
-    $stmtCount = $pdo->prepare(
-        "SELECT reaction, COUNT(*) as count
-         FROM article_reactions
-         WHERE article_id = ?
-         GROUP BY reaction"
-    );
-    $stmtCount->execute([$article_id]);
-    $rows = $stmtCount->fetchAll(PDO::FETCH_ASSOC);
-
-    $counts = array_fill_keys(ALLOWED_REACTIONS, 0);
-    foreach ($rows as $row) {
-        if (isset($counts[$row['reaction']])) {
-            $counts[$row['reaction']] = (int)$row['count'];
-        }
-    }
-
-    $stmtOwn = $pdo->prepare(
-        "SELECT reaction FROM article_reactions
-         WHERE article_id = ? AND voter_hash = ?"
-    );
-    $stmtOwn->execute([$article_id, $voter_hash]);
-    $myReactions = $stmtOwn->fetchAll(PDO::FETCH_COLUMN);
-
-    echo json_encode([
-        'action'       => $action,
-        'counts'       => $counts,
-        'my_reactions' => $myReactions
-    ]);
-    exit;
+    risposta(200, ['action' => $azione] + stato_reazioni($id, $chi));
 }
 
-http_response_code(405);
-echo json_encode(['error' => 'Metodo non consentito']);
-?>
+risposta(405, ['error' => 'Metodo non consentito']);

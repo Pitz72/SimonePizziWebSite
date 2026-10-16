@@ -152,6 +152,28 @@ if [ "$stato" = "404" ] || [ "$stato" = "403" ]; then ok "/uploads/ non gira in 
 else no "/uploads/" "stato finale $stato (rimbalzi infiniti?)"; fi
 
 echo
+echo "Le API del sito React e i cookie (revisione del 16 ottobre, M2, M6, M16)"
+for ep in auth search navigation tags settings prerender; do
+  stato="$(prendi -o /dev/null -w '%{http_code}' "$SITO/api/$ep.php")"
+  [ "$stato" = "410" ] && ok "/api/$ep.php risponde 410" || no "/api/$ep.php" "stato $stato"
+done
+stato="$(prendi -o /dev/null -w '%{http_code}' -X POST -d '{}' "$SITO/api/articles.php")"
+[ "$stato" = "405" ] && ok "/api/articles.php non accetta scritture" || no "/api/articles.php" "POST risponde $stato"
+T="$(printf 'a%.0s' $(seq 1 64))"
+dove="$(prendi -o /dev/null -w '%{http_code} %{redirect_url}' "$SITO/api/subscribers.php?action=unsubscribe&token=$T")"
+case "$dove" in 303*"/newsletter/disiscrivi?token=$T") ok "un vecchio link di disiscrizione porta al pulsante, non agisce";;
+  *) no "disiscrizione via GET" "$dove";; esac
+# Un segnale di lettura con un id che non esiste: non conta niente, ma dice se arriva un cookie.
+TESTA_A="$(mktemp)"
+prendi -D "$TESTA_A" -o /dev/null -H 'Content-Type: application/json' -d '{"type":"view","article_id":0}' "$SITO/api/analytics.php"
+grep -qi '^set-cookie' "$TESTA_A" && no "analytics" "dà un cookie a chi legge" || ok "il segnale delle letture non dà cookie"
+prendi -D "$TESTA_A" -o /dev/null "$SITO/admin/entra.php"
+biscotto="$(grep -i '^set-cookie' "$TESTA_A" | tr -d '\r' | head -1)"
+printf '%s' "$biscotto" | grep -q '__Host-sp_admin=' && printf '%s' "$biscotto" | grep -qi 'samesite=strict' \
+  && ok "il cookie del pannello è __Host- e SameSite=Strict" || no "cookie del pannello" "«$biscotto»"
+rm -f "$TESTA_A"
+
+echo
 echo "Quello che le pagine devono dire"
 prendi "$SITO/" -o "$CORPO"
 grep -q 'href="/privacy"' "$CORPO" && grep -q 'href="/cookie-policy"' "$CORPO" \

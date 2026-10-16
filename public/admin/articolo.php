@@ -103,7 +103,7 @@ titolo_pannello(
 avviso_pannello();
 ?>
 
-<form class="scheda" method="post" action="/admin/articolo.php<?= $id ? '?id=' . $id : '' ?>">
+<form class="scheda" method="post" action="/admin/articolo.php<?= $id ? '?id=' . $id : '' ?>" data-tieni-viva>
   <?= campo_gettone() ?>
   <input type="hidden" name="id" value="<?= (int)$id ?>">
 
@@ -279,44 +279,5 @@ avviso_pannello();
 </form>
 
 <?php finestre_pannello(); ?>
-
-<script nonce="<?= e(nonce()) ?>">
-/* Le due cose che riguardano solo questa scheda: la copertina scelta dalla
-   libreria e l'eco dello slug sotto il campo. */
-(function () {
-  var campo = document.getElementById('campo-copertina');
-  var box = document.getElementById('anteprima-copertina');
-  var nome = document.getElementById('nome-copertina');
-
-  function dipingi(url, etichetta) {
-    box.innerHTML = '';
-    if (url) {
-      var img = document.createElement('img');
-      img.src = url; img.alt = '';
-      box.appendChild(img);
-    }
-    nome.textContent = etichetta || 'Nessuna copertina.';
-  }
-
-  document.getElementById('scegli-copertina').addEventListener('click', function () {
-    if (typeof window.spApriLibreria !== 'function') return;
-    window.spApriLibreria(function (m) {
-      campo.value = m.url;
-      dipingi(m.url, m.nome);
-    });
-  });
-
-  document.getElementById('togli-copertina').addEventListener('click', function () {
-    campo.value = '';
-    dipingi('', '');
-  });
-
-  var slug = document.getElementById('campo-slug');
-  var eco = document.getElementById('eco-slug');
-  if (slug && eco) {
-    slug.addEventListener('input', function () { eco.textContent = slug.value || 'indirizzo'; });
-  }
-})();
-</script>
 
 <?php piede_pannello(false, ['libreria.js', 'editor.js', 'seo-check.js']); ?>

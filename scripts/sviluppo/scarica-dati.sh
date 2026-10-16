@@ -26,5 +26,5 @@ prendi() {
 echo "Scarico da $ORIGINE:"
 prendi articles   "/api/articles.php?limit=500"
 prendi categories "/api/categories.php"
-prendi projects   "/api/projects.php"
+# projects.php non c'è più dal 10 ottobre 2026: i progetti stanno su Ecosystem.
 echo "Fatto. Adesso: php scripts/sviluppo/crea-db-sviluppo.php"

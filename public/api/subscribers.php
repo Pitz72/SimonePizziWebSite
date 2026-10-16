@@ -1,152 +1,99 @@
 <?php
 /**
- * API Newsletter Subscribers (v1.7.4)
+ * L'iscrizione alla newsletter: POST /api/subscribers.php
  *
- * GET  ?action=confirm&token=XXX  — Conferma iscrizione (link da email) — pubblico
- * GET  ?action=unsubscribe&token=XXX — Disiscrizione (link da email) — pubblico
- * GET  (admin)                    — Lista iscritti con stats
- * POST (pubblico)                 — Nuova iscrizione con double opt-in
- * DELETE ?id=N (admin)            — Elimina iscritto
+ * Due strade, un risultato solo:
+ *  - con JavaScript (assets/js/newsletter.js) arriva un JSON e si risponde JSON;
+ *  - senza JavaScript arriva il modulo così com'è, e si risponde con una pagina.
+ * Fino al 16 ottobre 2026 c'era solo la prima: senza JavaScript il lettore
+ * vedeva un JSON nudo che diceva «email non valida», perché il modulo non veniva
+ * letto (revisione del 16 ottobre, M13).
+ *
+ * I link delle email vecchie (?action=confirm|unsubscribe&token=…) arrivavano
+ * qui con un GET, e il GET confermava o disiscriveva da solo: lo fanno anche i
+ * programmi di posta che aprono i link per controllarli. Adesso portano alle
+ * pagine nuove, dove si agisce solo premendo il pulsante (revisione del 16
+ * ottobre, M2). L'elenco degli iscritti del pannello React non c'è più.
  */
 
-// ──────────────────────────────────────────────────────────────────────────────
-// POST — iscrizione dal sito. Prima dei require della vecchia API: questo ramo
-// non deve dipendere dalla connessione MySQL di api/db.php.
-// Il consenso è una casella da spuntare, e la prova si scrive nella libreria
-// (lib/newsletter.php). Il GET più sotto resta per i link delle email già inviate.
-// ──────────────────────────────────────────────────────────────────────────────
-if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
-    header('Content-Type: application/json');
-    require_once dirname(__DIR__) . '/lib/avvio.php';
-    require_once dirname(__DIR__) . '/lib/newsletter.php';
+declare(strict_types=1);
 
-    if (!newsletter_richiesta_ammessa($_SERVER['REMOTE_ADDR'] ?? 'sconosciuto')) {
-        http_response_code(429);
-        echo json_encode(['status' => 'error', 'message' => 'Troppe richieste. Riprova tra qualche minuto.']);
+require __DIR__ . '/../lib/avvio.php';
+require_once __DIR__ . '/../lib/newsletter.php';
+
+$metodo = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+
+if ($metodo === 'GET') {
+    $azione = (string)($_GET['action'] ?? '');
+    $token  = (string)($_GET['token'] ?? '');
+    $verso  = ['confirm' => '/newsletter/conferma', 'unsubscribe' => '/newsletter/disiscrivi'][$azione] ?? null;
+    if ($verso !== null && nl_token_valido($token)) {
+        header('Location: ' . $verso . '?token=' . rawurlencode($token), true, 303);
         exit;
     }
-    $data     = json_decode(file_get_contents('php://input'), true) ?? [];
-    $consenso = in_array($data['consent'] ?? null, [true, '1', 1, 'on'], true);
-    [$ok, $messaggio] = newsletter_iscrivi((string)($data['email'] ?? ''), (string)($data['name'] ?? ''), $consenso, 'sito');
-    if (!$ok) {
-        http_response_code(400);
-        echo json_encode(['status' => 'error', 'message' => $messaggio]);
-        exit;
-    }
-    echo json_encode(['status' => 'success', 'message' => $messaggio]);
+    http_response_code(410);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['errore' => 'Questo indirizzo non serve più. Gli iscritti si vedono dal pannello.']);
     exit;
 }
 
-require_once 'db.php';
-require_once 'auth_helper.php';
-require_once dirname(__DIR__) . '/lib/mailer.php';
-
-date_default_timezone_set('Europe/Rome');
-
-$method = $_SERVER['REQUEST_METHOD'];
-
-// ──────────────────────────────────────────────────────────────────────────────
-// GET — conferma, disiscrizione, lista admin
-// ──────────────────────────────────────────────────────────────────────────────
-if ($method === 'GET') {
-    $action = $_GET['action'] ?? '';
-    $token  = trim($_GET['token'] ?? '');
-
-    // Conferma iscrizione via token (link da email di conferma)
-    if ($action === 'confirm') {
-        header('Content-Type: application/json');
-        if (empty($token)) {
-            http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Token mancante.']);
-            exit;
-        }
-        try {
-            $pdo  = Database::connect();
-            $stmt = $pdo->prepare("SELECT id, status FROM subscribers WHERE confirm_token = :token LIMIT 1");
-            $stmt->execute([':token' => $token]);
-            $row  = $stmt->fetch();
-
-            if (!$row) {
-                http_response_code(404);
-                echo json_encode(['status' => 'error', 'message' => 'Token non valido o già utilizzato.']);
-                exit;
-            }
-            if ($row['status'] === 'confirmed') {
-                echo json_encode(['status' => 'already', 'message' => 'Iscrizione già confermata.']);
-                exit;
-            }
-
-            $upd = $pdo->prepare(
-                "UPDATE subscribers SET status='confirmed', confirmed_at=NOW(), confirm_token=NULL WHERE id=:id"
-            );
-            $upd->execute([':id' => $row['id']]);
-            echo json_encode(['status' => 'success', 'message' => 'Iscrizione confermata!']);
-        } catch (Throwable $e) {
-            http_response_code(500);
-            error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
-            echo json_encode(['status' => 'error', 'message' => 'Errore interno del server.']);
-        }
-        exit;
-    }
-
-    // Disiscrizione via token (link in fondo a ogni newsletter)
-    if ($action === 'unsubscribe') {
-        header('Content-Type: application/json');
-        if (empty($token)) {
-            http_response_code(400);
-            echo json_encode(['status' => 'error', 'message' => 'Token mancante.']);
-            exit;
-        }
-        try {
-            $pdo  = Database::connect();
-            $stmt = $pdo->prepare("SELECT id FROM subscribers WHERE unsubscribe_token = :token LIMIT 1");
-            $stmt->execute([':token' => $token]);
-            $row  = $stmt->fetch();
-
-            if (!$row) {
-                http_response_code(404);
-                echo json_encode(['status' => 'error', 'message' => 'Token non valido.']);
-                exit;
-            }
-
-            $upd = $pdo->prepare("UPDATE subscribers SET status='unsubscribed' WHERE id=:id");
-            $upd->execute([':id' => $row['id']]);
-            echo json_encode(['status' => 'success', 'message' => 'Disiscrizione effettuata.']);
-        } catch (Throwable $e) {
-            http_response_code(500);
-            error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
-            echo json_encode(['status' => 'error', 'message' => 'Errore interno del server.']);
-        }
-        exit;
-    }
-
-    // Lista admin
-    header('Content-Type: application/json');
-    Auth::check();
-    try {
-        $pdo = Database::connect();
-
-        $total      = (int)$pdo->query("SELECT COUNT(*) FROM subscribers")->fetchColumn();
-        $confirmed  = (int)$pdo->query("SELECT COUNT(*) FROM subscribers WHERE status='confirmed'")->fetchColumn();
-        $pending    = (int)$pdo->query("SELECT COUNT(*) FROM subscribers WHERE status='pending'")->fetchColumn();
-        $unsub      = (int)$pdo->query("SELECT COUNT(*) FROM subscribers WHERE status='unsubscribed'")->fetchColumn();
-
-        $rows = $pdo->query(
-            "SELECT id, email, name, status, confirmed_at, created_at FROM subscribers ORDER BY created_at DESC"
-        )->fetchAll();
-
-        echo json_encode([
-            'stats' => compact('total', 'confirmed', 'pending', 'unsub'),
-            'subscribers' => $rows,
-        ]);
-    } catch (Throwable $e) {
-        http_response_code(500);
-        error_log(basename(__FILE__, '.php') . ' error: ' . $e->getMessage());
-        echo json_encode(['error' => 'Errore interno del server.']);
-    }
+if ($metodo !== 'POST') {
+    http_response_code(405);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['errore' => 'Metodo non consentito']);
     exit;
 }
 
-// ──────────────────────────────────────────────────────────────────────────────
-// POST — nuova iscrizione (pubblico, double opt-in o admin diretto)
-// ──────────────────────────────────────────────────────────────────────────────
+$tipo = (string)($_SERVER['CONTENT_TYPE'] ?? '');
+$daJavascript = str_contains($tipo, 'application/json');
+
+if ($daJavascript) {
+    $dati = json_decode((string)file_get_contents('php://input'), true);
+    $dati = is_array($dati) ? $dati : [];
+    $email    = (string)($dati['email'] ?? '');
+    $nome     = (string)($dati['name'] ?? '');
+    $consenso = in_array($dati['consent'] ?? null, [true, '1', 1, 'on'], true);
+} else {
+    $email    = (string)($_POST['email'] ?? '');
+    $nome     = (string)($_POST['name'] ?? '');
+    $consenso = in_array((string)($_POST['consenso'] ?? ''), ['1', 'on'], true);
+}
+
+if (!newsletter_richiesta_ammessa()) {
+    [$ok, $messaggio, $codice] = [false, 'Troppe richieste. Riprova tra qualche minuto.', 429];
+} else {
+    [$ok, $messaggio] = newsletter_iscrivi($email, $nome, $consenso, 'sito');
+    $codice = $ok ? 200 : 400;
+}
+
+if ($daJavascript) {
+    http_response_code($codice);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['status' => $ok ? 'success' : 'error', 'message' => $messaggio]);
+    exit;
+}
+
+/* Senza JavaScript: una pagina del sito con l'esito. Nessun redirect, perché
+   non c'è una sessione dove lasciare il messaggio; ricaricarla rimanda il
+   modulo, e il freno e la risposta neutra di newsletter_iscrivi() lo reggono. */
+http_response_code($codice);
+pagina([
+    'title'   => ($ok ? 'Controlla la posta' : 'Iscrizione non riuscita') . ' — ' . SITO_NOME,
+    'desc'    => 'L’esito dell’iscrizione alla newsletter.',
+    'noindex' => true,
+]);
+require __DIR__ . '/../partials/head.php';
+?>
+<main id="contenuto" class="contenuto">
+  <div class="gab-stretta">
+    <header class="testata">
+      <span class="eti" style="color:<?= $ok ? 'var(--verde)' : 'var(--spento)' ?>"><?= $ok ? 'Quasi fatto' : 'Non riuscita' ?></span>
+      <h1 class="gro" style="margin-top:12px"><?= $ok ? 'Controlla la posta' : 'L’iscrizione non è partita' ?></h1>
+      <p><?= e($messaggio) ?></p>
+    </header>
+    <div class="btn-fila" style="margin-top:28px">
+      <a class="btn btn-muto" href="/">Torna alla home</a>
+    </div>
+  </div>
+</main>
+<?php require __DIR__ . '/../partials/footer.php'; ?>

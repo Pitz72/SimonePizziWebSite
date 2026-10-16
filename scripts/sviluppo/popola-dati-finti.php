@@ -99,9 +99,11 @@ $tabelle = [
         id INTEGER PRIMARY KEY, article_id INTEGER NOT NULL, ip_hash TEXT,
         view_date TEXT)",
 
+    // clicked_at, non created_at: è il nome che la colonna ha in produzione
+    // (api/analytics.php lo usava già nel freno dei clic).
     "CREATE TABLE IF NOT EXISTS cta_clicks (
         id INTEGER PRIMARY KEY, article_id INTEGER NOT NULL, button_label TEXT,
-        ip_hash TEXT, created_at TEXT)",
+        ip_hash TEXT, clicked_at TEXT)",
 
     /* La libreria delle immagini. I nomi delle colonne sono quelli veri, cioè
        quelli che scrive api/upload.php: filename e size, non file_name e
@@ -202,7 +204,7 @@ $reazioni = ['thumb', 'heart', 'fire', 'think', 'game'];
 
 $qR = $db->prepare("INSERT INTO article_reactions (article_id,reaction,voter_hash,created_at) VALUES (?,?,?,?)");
 $qV = $db->prepare("INSERT INTO article_views (article_id,ip_hash,view_date) VALUES (?,?,?)");
-$qC = $db->prepare("INSERT INTO cta_clicks (article_id,button_label,ip_hash,created_at) VALUES (?,?,?,?)");
+$qC = $db->prepare("INSERT INTO cta_clicks (article_id,button_label,ip_hash,clicked_at) VALUES (?,?,?,?)");
 
 $totV = $totR = $totC = 0;
 

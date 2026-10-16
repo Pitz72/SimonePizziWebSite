@@ -128,9 +128,24 @@ RedirectMatch 301 ^/libri/?$ /narrativa-e-pubblicazioni
 #
 #  Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self'; object-src 'none'; frame-src https://www.youtube-nocookie.com https://www.youtube.com; frame-ancestors 'self'; base-uri 'self'"
 
-    # Rimozione della vecchia CSP a monte (DreamHost/vhost) e impostazione della policy con frame-src per YouTube
+# [16/10/2026] La CSP vera del sito (revisione del 16 ottobre, G2).
+#
+# La configurazione di DreamHost a monte manda una sua CSP e sostituisce quella
+# che manda PHP: per questo la riga sta qui. Le prime due righe tolgono quella
+# a monte (e, per forza, anche quella di PHP, che è identica: CSP_SITO in
+# lib/avvio.php); la terza mette la nostra. Se si cambia qui, si cambia là.
+#
+# Dal 3 al 16 ottobre qui c'era 'unsafe-inline' negli script, per tre <script>
+# in linea del pannello che adesso stanno in assets/js/admin.js. Senza
+# 'unsafe-inline' uno script finito in pagina per sbaglio non parte.
+#
+# relitto/ e temp/ sono siti a sé, con i loro file e le loro regole: tengono la
+# politica che avevano dal 3 ottobre (relitto carica i caratteri da Google).
+# Non si toccano i loro file: la distinzione si fa qui, per indirizzo.
+    SetEnvIf Request_URI "^/(relitto|temp)/" SITO_OSPITE
     Header always unset Content-Security-Policy
     Header unset Content-Security-Policy
-    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self'; object-src 'none'; frame-src https://www.youtube-nocookie.com https://www.youtube.com; frame-ancestors 'self'; base-uri 'self'"
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; frame-src https://www.youtube-nocookie.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'" env=!SITO_OSPITE
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self'; object-src 'none'; frame-src https://www.youtube-nocookie.com https://www.youtube.com; frame-ancestors 'self'; base-uri 'self'" env=SITO_OSPITE
 
 </IfModule>

@@ -141,8 +141,12 @@ function blocco_newsletter(): void {
                    placeholder="la-tua@email.it" autocomplete="email">
             <button type="submit">Iscriviti</button>
           </form>
+          <?php /* La casella sta fuori dal <form> per non spezzare il campo unito
+                   (email + pulsante), ma ne fa parte grazie all'attributo form:
+                   senza, il suo valore non partiva e il suo required non valeva
+                   (revisione del 16 ottobre, M13). */ ?>
           <label class="consenso-newsletter">
-            <input id="consenso-newsletter" name="consenso" type="checkbox" value="1" required>
+            <input id="consenso-newsletter" name="consenso" type="checkbox" value="1" required form="modulo-newsletter">
             <span><?= e(NEWSLETTER_CONSENSO_TESTO) ?> <a href="/privacy">Leggi l’informativa</a>.</span>
           </label>
           <p class="esito" id="esito-newsletter" role="status" aria-live="polite"></p>
