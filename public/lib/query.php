@@ -152,6 +152,17 @@ function articoli_recenti(int $quanti = 6, int $salta = 0): array {
 }
 
 /**
+ * Tutti gli articoli pubblicati, dal più recente: l'archivio (pages/archivio.php).
+ * Senza corpo: sono le colonne degli elenchi.
+ */
+function tutti_gli_articoli(): array {
+    $q = db()->prepare("SELECT " . COLONNE_ELENCO . " FROM articles WHERE " . SOLO_PUBBLICATI . "
+                        AND category <> '' ORDER BY published_at DESC, id DESC");
+    $q->execute([':adesso' => adesso()]);
+    return $q->fetchAll();
+}
+
+/**
  * L'articolo in apertura della home.
  *
  * Se nessuno è segnato «in vetrina» — e alla data di oggi è così per tutti e

@@ -1,28 +1,26 @@
 <?php
 /**
- * GENERATORE DINAMICO ROBOTS.TXT v2.0
- * 
- * Servito SEMPRE da .htaccess (nessun file fisico necessario).
- * Fornisce le direttive ai motori di ricerca e punta alla sitemap dinamica.
- * 
- * [v2.0] - baseUrl calcolato dinamicamente dal server (non più hardcoded)
+ * robots.txt, generato: /robots.txt (la riscrittura sta nell'.htaccess).
+ *
+ * Attenzione, e vale dal 2026: a /robots.txt risponde un file gestito da
+ * DreamHost prima ancora di Apache, quindi questo in produzione di solito non
+ * esce (vedi la memoria project_seo_robots e la revisione del 16 ottobre). Si
+ * tiene corretto lo stesso: risponde a /robots.TXT, risponde in sviluppo, e il
+ * giorno che l'hosting smette di intercettarlo è già giusto.
+ *
+ * Dal 16 ottobre 2026 l'indirizzo della sitemap viene da SITO_URL e non
+ * dall'header Host, che chiunque può falsificare (revisione del 16 ottobre, M11).
  */
 
-// Invia header solo se richiesto direttamente, non durante il prerendering
-if (!defined('IS_PRERENDERING')) {
-    header("Content-Type: text/plain; charset=utf-8");
-}
+declare(strict_types=1);
 
-// Base URL calcolato dinamicamente
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-$baseUrl  = $protocol . $_SERVER['HTTP_HOST'];
+require __DIR__ . '/lib/avvio.php';
 
-echo "User-agent: *" . PHP_EOL;
-echo "Allow: /" . PHP_EOL;
-echo "Disallow: /admin/" . PHP_EOL;        // Protezione area admin
-echo "Disallow: /api/.data/" . PHP_EOL;    // Protezione dati sensibili legacy
-echo "Disallow: /api/" . PHP_EOL;          // Protezione endpoint API
+header('Content-Type: text/plain; charset=utf-8');
 
-echo PHP_EOL;
-echo "Sitemap: $baseUrl/sitemap.xml" . PHP_EOL;
-?>
+echo "User-agent: *\n";
+echo "Allow: /\n";
+echo "Disallow: /admin/\n";
+echo "Disallow: /api/\n";
+echo "\n";
+echo 'Sitemap: ' . SITO_URL . "/sitemap.xml\n";

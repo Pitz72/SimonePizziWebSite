@@ -35,9 +35,9 @@ apri() {
   nudo="$(sed 's/<[^>]*>//g' "$CORPO")"
 
   if [ "$stato" != "$atteso" ]; then no "$nome" "stato $stato invece di $atteso"; return; fi
-  if printf '%s' "$nudo" | grep -qiE 'Fatal error|Parse error|Uncaught |Warning|Notice'; then
+  if grep -qiE 'Fatal error|Parse error|Uncaught |Warning|Notice' <<< "$nudo"; then
     no "$nome" "errore PHP nella pagina"
-    printf '%s' "$nudo" | grep -oiE '(Fatal error|Uncaught|Warning|Notice)[^\n]{0,120}' | head -1 | sed 's/^/        /'
+    grep -oiE '(Fatal error|Uncaught|Warning|Notice)[^\n]{0,120}' <<< "$nudo" | head -1 | sed 's/^/        /'
     return
   fi
   ok "$nome"
@@ -90,7 +90,7 @@ LUOGO="$(curl -s -b "$BISCOTTI" -o /dev/null -w '%{redirect_url}' \
   -d "content=<p>Testo.</p><h2>Sezione</h2><p>Altro.</p>" \
   -d "category=web" -d "tags=prova, collaudo" -d "status=draft" \
   "$BASE/admin/articolo.php")"
-ID="$(printf '%s' "$LUOGO" | grep -o 'id=[0-9]*' | head -1 | cut -d= -f2)"
+ID="$(grep -o 'id=[0-9]*' <<< "$LUOGO" | head -1 | cut -d= -f2)"
 if [ -n "$ID" ]; then ok "l'articolo è stato creato (id $ID)"; else no "creazione" "nessun id nella risposta"; fi
 
 stato="$(curl -s -o /dev/null -w '%{http_code}' "$BASE/web/prova-automatica-del-collaudo")"
@@ -158,14 +158,14 @@ else no "data dell'anteprima" "la fascia non nomina la data di uscita"; fi
 # In produzione la pagina esce con «max-age=600» appeso da Apache: su un'anteprima
 # quel valore farebbe servire da una cache un articolo non ancora uscito.
 intestazioni="$(curl -s -D- -b "$BISCOTTI" -o /dev/null "$BASE/web/prova-automatica-del-collaudo")"
-if printf '%s' "$intestazioni" | grep -qi 'Cache-Control:.*no-store'; then
+if grep -qi 'Cache-Control:.*no-store' <<< "$intestazioni"; then
   ok "l'anteprima non è memorizzabile in cache"
 else no "cache dell'anteprima" "manca «no-store» fra le intestazioni"; fi
 
 G="$(gettone /admin/articoli.php)"
 LUOGO="$(curl -s -b "$BISCOTTI" -o /dev/null -w '%{redirect_url}' \
         -d "gettone=$G&azione=duplica&id=$ID" "$BASE/admin/articoli.php")"
-COPIA="$(printf '%s' "$LUOGO" | grep -o 'id=[0-9]*' | head -1 | cut -d= -f2)"
+COPIA="$(grep -o 'id=[0-9]*' <<< "$LUOGO" | head -1 | cut -d= -f2)"
 if [ -n "$COPIA" ] && [ "$COPIA" != "$ID" ]; then ok "la copia è stata creata (id $COPIA)"
 else no "duplicazione" "nessuna copia"; fi
 

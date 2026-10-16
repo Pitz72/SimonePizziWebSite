@@ -36,20 +36,20 @@ controlla() {
   # test dava per buona una home piena di warning.
   local nudo
   nudo="$(printf '%s' "$corpo" | sed 's/<[^>]*>//g')"
-  if printf '%s' "$nudo" | grep -qiE 'Fatal error|Parse error|Uncaught |Warning|Deprecated:|Notice:'; then
+  if grep -qiE 'Fatal error|Parse error|Uncaught |Warning|Deprecated:|Notice:' <<< "$nudo"; then
     errore="${errore:+$errore; }errore PHP nel corpo"
   fi
 
   # Una pagina senza <title> è una pagina che si è interrotta prima del <head>.
-  if [ "$tipo" = "html" ] && [ "$atteso" = "200" ] && ! printf '%s' "$corpo" | grep -q '<title>'; then
+  if [ "$tipo" = "html" ] && [ "$atteso" = "200" ] && ! grep -q '<title>' <<< "$corpo"; then
     errore="${errore:+$errore; }manca il <title>"
   fi
 
   if [ -n "$errore" ]; then
     fallite=$((fallite + 1))
     printf '  NO  %-56s %s\n' "$percorso" "$errore"
-    printf '%s' "$nudo" | grep -oiE '(Fatal error|Uncaught|Warning|Notice)[^
-]{0,140}' | head -2 | sed 's/^/        /'
+    grep -oiE '(Fatal error|Uncaught|Warning|Notice)[^
+]{0,140}' <<< "$nudo" | head -2 | sed 's/^/        /'
   else
     passate=$((passate + 1))
     printf '  ok  %-56s %s\n' "$percorso" "$stato"
@@ -101,8 +101,13 @@ controlla 200 "/api/cerca.php?q=a"        file
 echo
 echo "Quello che ogni pagina deve avere"
 # contiene <percorso> <testo> <che cosa si prova>
+TMP_CONTIENE="$(mktemp)"
 contiene() {
-  if curl -s "$BASE$1" | grep -qF -- "$2"; then
+  # Prima su un file, poi la ricerca: con pipefail, grep -q che trova subito
+  # chiude la pipe mentre curl scrive ancora una pagina lunga, e la riga fallisce
+  # per colpa della prova, non del sito.
+  curl -s "$BASE$1" > "$TMP_CONTIENE"
+  if grep -qF -- "$2" "$TMP_CONTIENE"; then
     passate=$((passate + 1)); printf '  ok  %s\n' "$3"
   else
     fallite=$((fallite + 1)); printf '  NO  %s — in %s manca «%s»\n' "$3" "$1" "$2"
@@ -115,6 +120,26 @@ contiene "/"          '/assets/css/main.css?v='          "il CSS ha la sua versi
 contiene "/"          '/assets/js/interfaccia.js?v='     "il JavaScript ha la sua versione"
 contiene "/"          '/assets/css/caratteri.css?v='     "i caratteri arrivano con un <link>, non con @import"
 
+echo
+echo "SEO: archivio, sitemap, feed (revisione del 16 ottobre, M7, M11, L2, L16)"
+contiene "/archivio"   'articoli, dal pi'        "l'archivio elenca tutti gli articoli"
+contiene "/"           'href="/archivio">Archivio completo' "«Archivio completo» porta all'archivio vero"
+contiene "/sitemap.xml" '<loc>https://simonepizzi.runtimeradio.it/archivio</loc>' "l'archivio è nella sitemap"
+curl -s -H "Host: sito-falso.example" "$BASE/sitemap.xml" > "$TMP_CONTIENE"
+if grep -q "sito-falso" "$TMP_CONTIENE"; then
+  fallite=$((fallite + 1)); printf '  NO  la sitemap prende il dominio dall header Host\n'
+else passate=$((passate + 1)); printf '  ok  la sitemap non prende il dominio dall header Host\n'; fi
+curl -s -H "Host: sito-falso.example" "$BASE/api/rss.php" > "$TMP_CONTIENE"
+if grep -q "sito-falso" "$TMP_CONTIENE"; then
+  fallite=$((fallite + 1)); printf '  NO  il feed prende il dominio dall header Host\n'
+else passate=$((passate + 1)); printf '  ok  il feed non prende il dominio dall header Host\n'; fi
+oggi="$(date +%Y-%m-%d)"
+futuri="$(curl -s "$BASE/sitemap.xml" | grep -o '<lastmod>[^<]*' | sed 's/<lastmod>//' | awk -v o="$oggi" '$0 > o' | wc -l)"
+if [ "$futuri" -eq 0 ]; then passate=$((passate + 1)); printf '  ok  nessun lastmod nel futuro\n'
+else fallite=$((fallite + 1)); printf '  NO  %s lastmod nel futuro\n' "$futuri"; fi
+if curl -s "$BASE/api/rss.php" | php -r '$x=@simplexml_load_string(stream_get_contents(STDIN)); if(!$x) exit(1); $n=count($x->channel->item); $g=(string)$x->channel->item[0]->guid; exit($n>0 && $n<=30 && str_starts_with($g,"urn:simonepizzi:article:") ? 0 : 1);'; then
+  passate=$((passate + 1)); printf '  ok  il feed è XML valido, al massimo 30 voci, GUID stabili\n'
+else fallite=$((fallite + 1)); printf '  NO  il feed non è XML valido o ha i GUID cambiati\n'; fi
 echo
 echo "Le pagine di servizio"
 controlla 200 "/assets/css/base.css"     file

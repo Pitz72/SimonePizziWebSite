@@ -1,145 +1,104 @@
 <?php
 /**
- * GENERATORE DINAMICO SITEMAP XML v2.0
- * 
- * Servito SEMPRE da .htaccess (nessun file fisico necessario).
- * Recupera categorie, sottocategorie e articoli dal database MySQL in tempo reale.
- * 
- * [v2.0] - baseUrl calcolato dinamicamente dal server
- *        - lastmod per categorie (basato sull'articolo più recente)
- *        - supporto sottocategorie
- *        - nessuna dipendenza dal prerendering
+ * La sitemap: /sitemap.xml (la riscrittura sta nell'.htaccess).
+ *
+ * Riscritta il 16 ottobre 2026 sulle librerie del sito (revisione del 16
+ * ottobre, M11). Quella di prima era del sito React e girava su api/db.php:
+ *
+ *  - prendeva l'indirizzo del sito da HTTP_HOST, quindi una richiesta con un
+ *    Host falso metteva quel dominio in ogni <loc>;
+ *  - non impostava il fuso orario: «adesso» era l'ora di Los Angeles, nove ore
+ *    indietro, e un articolo uscito nelle ultime nove ore mancava;
+ *  - il lastmod delle categorie contava anche gli articoli programmati nel
+ *    futuro, e non guardava le sottocategorie;
+ *  - il lastmod di un articolo era updated_at, che MySQL scrive con l'ora del
+ *    server e che per un programmato viene prima dell'uscita.
+ *
+ * Adesso: SITO_URL, l'ora italiana di lib/avvio.php, SOLO_PUBBLICATI come in
+ * ogni pagina, e la data di modifica di data_modifica() in lib/seo.php, la
+ * stessa dei dati strutturati. Le regole su che cosa entra sono quelle di
+ * prima: home, contatti, archivio, le sezioni, le sottocategorie con almeno un
+ * articolo, gli articoli, i tag con almeno TAG_MINIMO_PER_INDICE articoli.
  */
-require_once __DIR__ . '/api/db.php';
 
-// Imposta l'header come XML solo se richiesto direttamente, non durante il prerendering
-if (!defined('IS_PRERENDERING')) {
-    header("Content-type: text/xml; charset=utf-8");
+declare(strict_types=1);
+
+require __DIR__ . '/lib/avvio.php';
+
+header('Content-Type: application/xml; charset=utf-8');
+// Si rigenera a ogni richiesta, ma Google non ha bisogno di chiederla più di
+// una volta l'ora. Prima arrivava con i due giorni della configurazione di
+// DreamHost, che per una sitemap dinamica è il contrario di quello che serve.
+header('Cache-Control: public, max-age=3600');
+
+/** Una data per <lastmod>: solo il giorno, che è quello che conta. */
+function giorno(?string $quando): string {
+    $t = $quando ? strtotime($quando) : false;
+    return $t ? date('Y-m-d', $t) : '';
 }
 
-$pdo = Database::connect();
-
-// Base URL calcolato dinamicamente
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
-$baseUrl  = $protocol . $_SERVER['HTTP_HOST'];
-
-echo '<?xml version="1.0" encoding="UTF-8"?>' . PHP_EOL;
-echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . PHP_EOL;
-
-// 1. HOME PAGE
-echo "  <url>" . PHP_EOL;
-echo "    <loc>$baseUrl/</loc>" . PHP_EOL;
-echo "    <changefreq>daily</changefreq>" . PHP_EOL;
-echo "    <priority>1.0</priority>" . PHP_EOL;
-echo "  </url>" . PHP_EOL;
-
-// 2. PAGINE STATICHE PRINCIPALI
-$staticPages = [
-    ['url' => '/contatti', 'freq' => 'monthly', 'prio' => '0.5']
-];
-
-foreach ($staticPages as $page) {
-    echo "  <url>" . PHP_EOL;
-    echo "    <loc>$baseUrl{$page['url']}</loc>" . PHP_EOL;
-    echo "    <changefreq>{$page['freq']}</changefreq>" . PHP_EOL;
-    echo "    <priority>{$page['prio']}</priority>" . PHP_EOL;
-    echo "  </url>" . PHP_EOL;
+/** Un <url> della sitemap. */
+function voce(string $percorso, string $lastmod, string $frequenza, string $priorita): string {
+    return "  <url>\n"
+         . '    <loc>' . htmlspecialchars(SITO_URL . $percorso, ENT_XML1 | ENT_QUOTES, 'UTF-8') . "</loc>\n"
+         . ($lastmod !== '' ? "    <lastmod>$lastmod</lastmod>\n" : '')
+         . "    <changefreq>$frequenza</changefreq>\n"
+         . "    <priority>$priorita</priority>\n"
+         . "  </url>\n";
 }
 
-// 3. CATEGORIE DINAMICHE (con lastmod basato sull'articolo più recente)
-$stmtCat = $pdo->query(
-    "SELECT c.slug, 
-            (SELECT MAX(COALESCE(a.published_at, a.created_at)) 
-             FROM articles a 
-             WHERE a.category = c.slug AND a.status = 'published') as latest_article
-     FROM categories c 
-     WHERE c.parent_id IS NULL
-     ORDER BY c.sort_order ASC"
-);
+$adesso = adesso();
 
-while ($cat = $stmtCat->fetch()) {
-    echo "  <url>" . PHP_EOL;
-    echo "    <loc>$baseUrl/{$cat['slug']}</loc>" . PHP_EOL;
-    if ($cat['latest_article']) {
-        echo "    <lastmod>" . date('Y-m-d', strtotime($cat['latest_article'])) . "</lastmod>" . PHP_EOL;
+// Gli articoli pubblicati, con la loro data vera.
+$q = db()->prepare("SELECT slug, category, published_at, created_at, updated_at FROM articles
+                    WHERE " . SOLO_PUBBLICATI . " ORDER BY published_at DESC, id DESC");
+$q->execute([':adesso' => $adesso]);
+$articoli = $q->fetchAll();
+
+// L'ultima uscita per categoria: serve al lastmod delle sezioni e delle sottocategorie.
+$ultimaPer = [];
+foreach ($articoli as $a) {
+    $d = giorno($a['published_at'] ?: $a['created_at']);
+    if (!isset($ultimaPer[$a['category']]) || $d > $ultimaPer[$a['category']]) $ultimaPer[$a['category']] = $d;
+}
+$ultimaUscita = $articoli ? giorno($articoli[0]['published_at'] ?: $articoli[0]['created_at']) : '';
+
+$fuori = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
+       . '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' . "\n";
+
+$fuori .= voce('/', $ultimaUscita, 'daily', '1.0');
+$fuori .= voce('/archivio', $ultimaUscita, 'weekly', '0.6');
+$fuori .= voce('/contatti', '', 'monthly', '0.5');
+
+// Le sezioni, con l'ultima uscita fra loro e le loro figlie.
+foreach (categorie_radice() as $c) {
+    $date = [];
+    foreach (slug_del_ramo($c) as $s) if (isset($ultimaPer[$s])) $date[] = $ultimaPer[$s];
+    $fuori .= voce('/' . $c['slug'], $date ? max($date) : '', 'weekly', '0.8');
+}
+
+// Le sottocategorie: solo quelle con qualcosa dentro.
+foreach (sottocategorie_per_sezione() as $figlie) {
+    foreach ($figlie as $f) {
+        $fuori .= voce('/' . $f['slug'], $ultimaPer[$f['slug']] ?? '', 'weekly', '0.7');
     }
-    echo "    <changefreq>weekly</changefreq>" . PHP_EOL;
-    echo "    <priority>0.8</priority>" . PHP_EOL;
-    echo "  </url>" . PHP_EOL;
 }
 
-// 4. SOTTOCATEGORIE (solo quelle con almeno un articolo pubblicato)
-$stmtSubCat = $pdo->query(
-    "SELECT c.slug, p.slug as parent_slug,
-            (SELECT MAX(COALESCE(a.published_at, a.created_at)) 
-             FROM articles a 
-             WHERE a.category = c.slug AND a.status = 'published') as latest_article
-     FROM categories c 
-     JOIN categories p ON c.parent_id = p.id
-     ORDER BY c.sort_order ASC"
-);
-
-while ($sub = $stmtSubCat->fetch()) {
-    // Una sottocategoria senza articoli è una pagina vuota: non va proposta ai motori di ricerca.
-    if (!$sub['latest_article']) { continue; }
-    echo "  <url>" . PHP_EOL;
-    echo "    <loc>$baseUrl/{$sub['slug']}</loc>" . PHP_EOL;
-    if ($sub['latest_article']) {
-        echo "    <lastmod>" . date('Y-m-d', strtotime($sub['latest_article'])) . "</lastmod>" . PHP_EOL;
-    }
-    echo "    <changefreq>weekly</changefreq>" . PHP_EOL;
-    echo "    <priority>0.7</priority>" . PHP_EOL;
-    echo "  </url>" . PHP_EOL;
+foreach ($articoli as $a) {
+    if ((string)$a['category'] === '') continue;   // senza categoria non ha un indirizzo
+    $fuori .= voce(url_articolo($a), giorno(data_modifica($a)), 'monthly', '0.7');
 }
 
-// 5. ARTICOLI PUBBLICATI
-$now = date('Y-m-d H:i:s');
-$stmtArt = $pdo->prepare("
-    SELECT slug, category, published_at, updated_at 
-    FROM articles 
-    WHERE status = 'published' AND (published_at IS NULL OR published_at <= ?)
-    ORDER BY published_at DESC
-");
-$stmtArt->execute([$now]);
-
-while ($art = $stmtArt->fetch()) {
-    $lastMod = date('Y-m-d', strtotime($art['updated_at'] ?? $art['published_at'] ?? 'now'));
-    echo "  <url>" . PHP_EOL;
-    echo "    <loc>$baseUrl/{$art['category']}/{$art['slug']}</loc>" . PHP_EOL;
-    echo "    <lastmod>$lastMod</lastmod>" . PHP_EOL;
-    echo "    <changefreq>monthly</changefreq>" . PHP_EOL;
-    echo "    <priority>0.7</priority>" . PHP_EOL;
-    echo "  </url>" . PHP_EOL;
+// I tag che raccolgono davvero qualcosa: la soglia è quella di pages/tag.php.
+$t = db()->prepare("SELECT t.slug, MAX(a.published_at) AS ultima, COUNT(DISTINCT a.id) AS quanti
+                    FROM tags t JOIN article_tags x ON x.tag_id = t.id
+                    JOIN articles a ON a.id = x.article_id
+                    WHERE a.status = 'published' AND (a.published_at IS NULL OR a.published_at <= :adesso)
+                    GROUP BY t.id, t.slug HAVING COUNT(DISTINCT a.id) >= " . TAG_MINIMO_PER_INDICE . "
+                    ORDER BY t.slug ASC");
+$t->execute([':adesso' => $adesso]);
+foreach ($t->fetchAll() as $tag) {
+    $fuori .= voce('/tag/' . rawurlencode((string)$tag['slug']), giorno($tag['ultima']), 'weekly', '0.5');
 }
 
-// 6. [v1.26.0/v1.27.0] PAGINE TAG — solo quelle che raggruppano davvero qualcosa.
-// Serve almeno TAG_INDEX_MIN_ARTICLES articoli pubblicati: sotto quella soglia la
-// pagina esiste ed è navigabile, ma ripete un contenuto già presente altrove, e
-// proporla a Google significa spendere attenzione su pagine povere invece che
-// sugli articoli. index.php marca le stesse pagine come noindex.
-$stmtTags = $pdo->prepare("
-    SELECT t.slug,
-           MAX(COALESCE(a.published_at, a.created_at)) AS latest_article
-    FROM tags t
-    JOIN article_tags atx ON atx.tag_id = t.id
-    JOIN articles a ON a.id = atx.article_id
-    WHERE a.status = 'published' AND (a.published_at IS NULL OR a.published_at <= ?)
-    GROUP BY t.id, t.slug
-    HAVING COUNT(DISTINCT a.id) >= " . (int)TAG_INDEX_MIN_ARTICLES . "
-    ORDER BY t.name ASC
-");
-$stmtTags->execute([$now]);
-
-while ($tag = $stmtTags->fetch()) {
-    echo "  <url>" . PHP_EOL;
-    echo "    <loc>$baseUrl/tag/{$tag['slug']}</loc>" . PHP_EOL;
-    if ($tag['latest_article']) {
-        echo "    <lastmod>" . date('Y-m-d', strtotime($tag['latest_article'])) . "</lastmod>" . PHP_EOL;
-    }
-    echo "    <changefreq>weekly</changefreq>" . PHP_EOL;
-    echo "    <priority>0.5</priority>" . PHP_EOL;
-    echo "  </url>" . PHP_EOL;
-}
-
-echo '</urlset>';
-?>
+echo $fuori . '</urlset>' . "\n";

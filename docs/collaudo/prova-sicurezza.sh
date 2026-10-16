@@ -37,8 +37,8 @@ echo
 echo "La CSP (G2)"
 curl -s -D "$TESTA" -o "$CORPO" "$BASE/"
 csp="$(grep -i '^content-security-policy' "$TESTA" | tr -d '\r')"
-script_src="$(printf '%s' "$csp" | grep -o "script-src[^;]*")"
-if [ -n "$script_src" ] && ! printf '%s' "$script_src" | grep -q "unsafe-inline\|nonce-"; then
+script_src="$(grep -o "script-src[^;]*" <<< "$csp")"
+if [ -n "$script_src" ] && ! grep -q "unsafe-inline\|nonce-" <<< "$script_src"; then
   ok "il sito manda una CSP con script solo da file ($script_src)"
 else no "CSP del sito" "«$script_src»"; fi
 if grep -q '<script>' "$CORPO" || grep -qE '<script [^>]*nonce' "$CORPO"; then
@@ -51,8 +51,8 @@ G="$(gettone /admin/entra.php)"
 curl -s -b "$BISCOTTI" -c "$BISCOTTI" -D "$TESTA" -o /dev/null \
      -d "gettone=$G&nome=simone&password=sviluppo-locale" "$BASE/admin/entra.php"
 biscotto="$(grep -i '^set-cookie: sp_admin' "$TESTA" | tail -1 | tr -d '\r')"
-printf '%s' "$biscotto" | grep -qi 'samesite=strict' && ok "il cookie del pannello è SameSite=Strict" || no "SameSite" "«$biscotto»"
-printf '%s' "$biscotto" | grep -qi 'httponly' && ok "il cookie del pannello è HttpOnly" || no "HttpOnly" "«$biscotto»"
+grep -qi 'samesite=strict' <<< "$biscotto" && ok "il cookie del pannello è SameSite=Strict" || no "SameSite" "«$biscotto»"
+grep -qi 'httponly' <<< "$biscotto" && ok "il cookie del pannello è HttpOnly" || no "HttpOnly" "«$biscotto»"
 
 curl -s -b "$BISCOTTI" -D "$TESTA" -o /dev/null "$BASE/admin/"
 grep -qi '^content-security-policy:.*script-src .self.;' "$TESTA" \

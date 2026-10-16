@@ -50,7 +50,7 @@ require __DIR__ . '/../partials/head.php';
         <p><?= e(SITO_DESCR) ?></p>
         <div class="btn-fila">
           <a class="btn btn-pieno" href="https://ecosystem.runtimeradio.com/it/" target="_blank" rel="noopener">Progetti ↗</a>
-          <a class="btn" href="/blog-e-riflessioni">Ultimi articoli</a>
+          <a class="btn" href="/archivio">Tutti gli articoli</a>
         </div>
       </div>
       <div class="contatori">
@@ -75,7 +75,8 @@ require __DIR__ . '/../partials/head.php';
   <section class="sezione"><div class="gab">
     <div class="sezione-cima">
       <h2>Ultime lavorazioni</h2>
-      <a class="eti" href="/blog-e-riflessioni">Archivio completo →</a>
+      <?php /* Fino al 16 ottobre 2026 portava alla sola sezione Blog: 10 articoli su 86 (M7). */ ?>
+      <a class="eti" href="/archivio">Archivio completo →</a>
     </div>
     <ul class="lavorazioni">
       <?php foreach ($recenti as $a) blocco_riga($a, true, $nomi_categoria[$a['category']] ?? $a['category']); ?>

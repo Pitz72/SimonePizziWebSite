@@ -1,74 +1,100 @@
 <?php
-require_once 'db.php';
+/**
+ * Il feed RSS: /api/rss.php
+ *
+ * Lo leggono i lettori di feed e il bot di Telegram. Riscritto il 16 ottobre
+ * 2026 sulle librerie del sito (revisione del 16 ottobre, M11 e L16). Quello
+ * di prima era del sito React:
+ *
+ *  - prendeva l'indirizzo da HTTP_HOST (un Host falso finiva in ogni <link>);
+ *  - un articolo senza data di pubblicazione prendeva «adesso», quindi cambiava
+ *    data a ogni lettura del feed;
+ *  - dichiarava ogni copertina image/jpeg, anche le WebP, e senza la lunghezza
+ *    che l'elemento <enclosure> pretende;
+ *  - dava solo il riassunto: niente testo, niente data dell'ultimo aggiornamento,
+ *    niente indirizzo di se stesso.
+ *
+ * NON CAMBIA il GUID: «urn:simonepizzi:article:ID», stabile anche se l'articolo
+ * cambia categoria o slug. È quello che il bot di Telegram usa per sapere che
+ * cosa ha già pubblicato: cambiarlo vorrebbe dire ripubblicare tutto.
+ */
+
+declare(strict_types=1);
+
+require __DIR__ . '/../lib/avvio.php';
 
 header('Content-Type: application/rss+xml; charset=utf-8');
 
-$pdo = Database::connect();
+/* Trenta voci, e il testo completo solo per le dieci più recenti: il bot di
+   Telegram scarica il feed un centinaio di volte al giorno, e cinquanta testi
+   interi facevano 557 KB a ogni giro (misurato in sviluppo il 16 ottobre).
+   Chi legge un articolo vecchio lo apre dal link. */
+const RSS_QUANTI = 30;
+const RSS_CON_TESTO = 10;
 
-$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http';
-$host = $_SERVER['HTTP_HOST'];
-$base_url = $protocol . '://' . $host;
-
-// [V1.5.5] Forzatura Fuso Orario Italiano (Bypass orario server Los Angeles per pubblicazione tempestiva)
-date_default_timezone_set('Europe/Rome');
-$ita_now_str = date('Y-m-d H:i:s');
-
-// [v1.5.10] Limite articoli nel feed RSS — valore nominato per facile manutenzione futura
-define('RSS_FEED_LIMIT', 50);
-
-// Assumiamo che il nome del feed venga dai settings, per ora hardcodiamo un title di base
-$site_title = "Simone Pizzi - Blog & Portfolio";
-$site_description = "Le ultime pubblicazioni di Simone Pizzi";
-
-echo '<?xml version="1.0" encoding="UTF-8" ?>' . "\n";
-echo '<rss version="2.0">' . "\n";
-echo '<channel>' . "\n";
-echo '  <title>' . htmlspecialchars($site_title) . '</title>' . "\n";
-echo '  <link>' . htmlspecialchars($base_url) . '</link>' . "\n";
-echo '  <description>' . htmlspecialchars($site_description) . '</description>' . "\n";
-echo '  <language>it-IT</language>' . "\n";
-
-try {
-    // [v1.7.3] Aggiunto id nella query per generare GUID stabile disaccoppiato dalla URL
-    $query = "SELECT id, title, slug, excerpt, content, cover_image, category, published_at
-              FROM articles
-              WHERE status = 'published' AND (published_at IS NULL OR published_at <= :ita_now)
-              ORDER BY published_at DESC
-              LIMIT " . RSS_FEED_LIMIT;
-
-    $stmt = $pdo->prepare($query);
-    $stmt->execute([':ita_now' => $ita_now_str]);
-    $articles = $stmt->fetchAll();
-
-    foreach ($articles as $article) {
-        // Formatta la data secondo rfc822
-        $pubDate = date(DATE_RSS, strtotime($article['published_at'] ?? 'now'));
-
-        $item_url = $base_url . '/' . rawurlencode($article['category']) . '/' . rawurlencode($article['slug']);
-
-        // [v1.7.3] GUID stabile basato sull'ID numerico del DB, non sulla URL.
-        // isPermaLink="false" segnala ai lettori RSS che il GUID non è un URL navigabile.
-        // Questo evita che un cambio di categoria/slug faccia ri-pubblicare l'articolo
-        // come nuovo contenuto su sistemi di integrazione (es. bot Telegram).
-        $stable_guid = 'urn:simonepizzi:article:' . (int)$article['id'];
-
-        echo '  <item>' . "\n";
-        echo '    <title>' . htmlspecialchars($article['title']) . '</title>' . "\n";
-        echo '    <link>' . htmlspecialchars($item_url) . '</link>' . "\n";
-        echo '    <description>' . htmlspecialchars($article['excerpt']) . '</description>' . "\n";
-
-        if (!empty($article['cover_image'])) {
-            $image_url = (str_starts_with($article['cover_image'], 'http')) ? $article['cover_image'] : $base_url . '/' . ltrim($article['cover_image'], '/');
-            echo '    <enclosure url="' . htmlspecialchars($image_url) . '" type="image/jpeg" />' . "\n";
-        }
-
-        echo '    <pubDate>' . $pubDate . '</pubDate>' . "\n";
-        echo '    <guid isPermaLink="false">' . $stable_guid . '</guid>' . "\n";
-        echo '  </item>' . "\n";
-    }
-} catch (Exception $e) {
-    // Fallback silenzioso in caso di errore DB nell'RSS
+/** Testo dentro un elemento XML. */
+function x(?string $testo): string {
+    return htmlspecialchars((string)$testo, ENT_XML1 | ENT_QUOTES, 'UTF-8');
 }
 
-echo '</channel>' . "\n";
-echo '</rss>';
+/** Il corpo dell'articolo per il feed: ripulito, con gli indirizzi completi. */
+function corpo_per_feed(string $html): string {
+    $pulito = safe_html($html);
+    // Un lettore di feed non sa che «/uploads/…» vuol dire questo sito.
+    $pulito = (string)preg_replace('/\s(src|href)="\/(?!\/)/', ' $1="' . SITO_URL . '/', $pulito);
+    // Dentro una sezione CDATA l'unica cosa che non può stare è la sua chiusura.
+    return str_replace(']]>', ']]]]><![CDATA[>', $pulito);
+}
+
+/** Il tipo di un'immagine dal suo nome, e la dimensione se il file è qui. */
+function copertina_per_feed(string $percorso): ?array {
+    if ($percorso === '') return null;
+    $tipi = ['webp' => 'image/webp', 'jpg' => 'image/jpeg', 'jpeg' => 'image/jpeg',
+             'png' => 'image/png', 'gif' => 'image/gif'];
+    $estensione = strtolower(pathinfo((string)parse_url($percorso, PHP_URL_PATH), PATHINFO_EXTENSION));
+    $locale = str_starts_with($percorso, '/') ? __DIR__ . '/..' . $percorso : '';
+    return [
+        'url'  => url_assoluta(url_immagine($percorso)),
+        'tipo' => $tipi[$estensione] ?? 'image/jpeg',
+        'byte' => ($locale !== '' && is_file($locale)) ? (int)filesize($locale) : 0,
+    ];
+}
+
+$q = db()->prepare("SELECT id, title, slug, excerpt, content, cover_image, category, published_at, created_at, updated_at
+                    FROM articles WHERE " . SOLO_PUBBLICATI . " AND category <> ''
+                    ORDER BY published_at DESC, id DESC LIMIT " . RSS_QUANTI);
+$q->execute([':adesso' => adesso()]);
+$articoli = $q->fetchAll();
+
+$ultima = $articoli ? strtotime((string)($articoli[0]['published_at'] ?: $articoli[0]['created_at'])) : time();
+
+echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
+echo '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/">' . "\n";
+echo "<channel>\n";
+echo '  <title>' . x(SITO_NOME) . "</title>\n";
+echo '  <link>' . x(SITO_URL . '/') . "</link>\n";
+echo '  <description>' . x(SITO_DESCR) . "</description>\n";
+echo "  <language>it-IT</language>\n";
+echo '  <lastBuildDate>' . date(DATE_RSS, $ultima) . "</lastBuildDate>\n";
+echo '  <atom:link href="' . x(SITO_URL . '/api/rss.php') . '" rel="self" type="application/rss+xml" />' . "\n";
+
+foreach ($articoli as $posto => $a) {
+    $uscita = strtotime((string)($a['published_at'] ?: $a['created_at']));
+    $link = SITO_URL . url_articolo($a);
+    echo "  <item>\n";
+    echo '    <title>' . x($a['title']) . "</title>\n";
+    echo '    <link>' . x($link) . "</link>\n";
+    echo '    <guid isPermaLink="false">urn:simonepizzi:article:' . (int)$a['id'] . "</guid>\n";
+    echo '    <pubDate>' . date(DATE_RSS, $uscita ?: time()) . "</pubDate>\n";
+    echo '    <description>' . x(estratto($a, 300)) . "</description>\n";
+    if ($posto < RSS_CON_TESTO) {
+        echo '    <content:encoded><![CDATA[' . corpo_per_feed((string)$a['content']) . "]]></content:encoded>\n";
+    }
+    $c = copertina_per_feed((string)$a['cover_image']);
+    if ($c) {
+        echo '    <enclosure url="' . x($c['url']) . '" length="' . $c['byte'] . '" type="' . $c['tipo'] . '" />' . "\n";
+    }
+    echo "  </item>\n";
+}
+
+echo "</channel>\n</rss>\n";

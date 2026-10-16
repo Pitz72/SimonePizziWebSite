@@ -49,7 +49,10 @@ pagina([
     'canonical' => $percorso . ($pagina_num > 1 ? '?pagina=' . $pagina_num : ''),
     // Le pagine dalla seconda in poi ripetono la stessa intestazione con
     // articoli diversi: restano navigabili, ma fuori dall'indice.
-    'noindex'   => $pagina_num > 1,
+    'noindex'   => $pagina_num > 1
+    // Una categoria senza articoli è una pagina che dice «qui non c'è niente»:
+    // resta navigabile, ma non va proposta a Google (revisione del 16 ottobre, L2).
+                   || $totale === 0,
     'briciole'  => [['nome' => 'Home', 'url' => '/'], ['nome' => $categoria['name']]],
     'jsonld'    => jsonld_raccolta($categoria['name'], $descrizione, $percorso),
 ]);

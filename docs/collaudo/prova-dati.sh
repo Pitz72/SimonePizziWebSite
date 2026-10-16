@@ -53,7 +53,7 @@ LUOGO="$(curl -s -b "$BISCOTTI" -o /dev/null -w '%{redirect_url}' -d "gettone=$G
   -d "category=web" -d "status=published" \
   -d "button_a_label=Gioca adesso" -d "button_a_link=www.esempio.it/gioco" \
   -d "button_b_label=Il manuale" -d "button_b_link=/api/download.php?id=1" "$BASE/admin/articolo.php")"
-ID="$(printf '%s' "$LUOGO" | grep -o 'id=[0-9]*' | head -1 | cut -d= -f2)"
+ID="$(grep -o 'id=[0-9]*' <<< "$LUOGO" | head -1 | cut -d= -f2)"
 [ -n "$ID" ] && ok "articolo con pulsanti creato (id $ID)" || { no "creazione" "nessun id"; exit 1; }
 # I tag dei pulsanti vanno a capo: si cerca sul testo tutto su una riga.
 curl -s "$BASE/web/prova-dei-dati" | tr -d '\r\n' > "$CORPO"
@@ -73,7 +73,7 @@ case "$LUOGO" in *errore=*) ok "un link javascript: viene rifiutato";; *) no "ja
 
 G="$(gettone /admin/articoli.php)"
 LUOGO="$(curl -s -b "$BISCOTTI" -o /dev/null -w '%{redirect_url}' -d "gettone=$G&azione=duplica&id=$ID" "$BASE/admin/articoli.php")"
-COPIA="$(printf '%s' "$LUOGO" | grep -o 'id=[0-9]*' | head -1 | cut -d= -f2)"
+COPIA="$(grep -o 'id=[0-9]*' <<< "$LUOGO" | head -1 | cut -d= -f2)"
 [ "$(sql "SELECT button_b_label FROM articles WHERE id = $COPIA")" = "Il manuale" ] \
   && ok "la copia di un articolo tiene i pulsanti" || no "copia" "ha perso i pulsanti"
 

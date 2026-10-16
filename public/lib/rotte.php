@@ -28,6 +28,14 @@ return [
         'desc'   => 'Videogiochi, racconti, software e radio: i progetti di Simone Pizzi e i devlog che raccontano come sono fatti davvero, dal 2010 a oggi.',
     ],
 
+    /* Tutti gli articoli, dal più recente (revisione del 16 ottobre, M7). */
+    'archivio' => [
+        'pagina'   => 'archivio',
+        'briciola' => 'Archivio',
+        'title'    => 'Archivio — Simone Pizzi',
+        'desc'     => 'Tutti gli articoli di Simone Pizzi dal più recente: devlog di videogiochi e software, racconti, podcast, radio e note di lavoro, divisi per anno.',
+    ],
+
     'contatti' => [
         'pagina'  => 'contatti',
         'briciola' => 'Contatti',

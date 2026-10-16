@@ -34,9 +34,9 @@ controlla() {
 
   if [ "$stato" != "$atteso" ]; then no "$percorso" "stato $stato invece di $atteso"; return; fi
 
-  if printf '%s' "$nudo" | grep -qiE 'Fatal error|Parse error|Uncaught |Warning|Notice'; then
+  if grep -qiE 'Fatal error|Parse error|Uncaught |Warning|Notice' <<< "$nudo"; then
     no "$percorso" "errore PHP nella pagina"
-    printf '%s' "$nudo" | grep -oiE '(Fatal error|Uncaught|Warning|Notice)[^\n]{0,110}' | head -1 | sed 's/^/        /'
+    grep -oiE '(Fatal error|Uncaught|Warning|Notice)[^\n]{0,110}' <<< "$nudo" | head -1 | sed 's/^/        /'
     return
   fi
 
@@ -117,19 +117,19 @@ echo
 echo "Gli header"
 INTESTAZIONI="$(prendi -D - -o /dev/null "$SITO/")"
 for atteso in "content-security-policy" "x-content-type-options" "referrer-policy"; do
-  if printf '%s' "$INTESTAZIONI" | grep -qi "^$atteso"; then ok "$atteso c'è"
+  if grep -qi "^$atteso" <<< "$INTESTAZIONI"; then ok "$atteso c'è"
   else no "$atteso" "non arriva"; fi
 done
 # La CSP vale qualcosa solo se gli script scritti dentro la pagina non passano.
 # Dal 3 al 16 ottobre 2026 l'.htaccess mandava 'unsafe-inline' (revisione del
 # 16 ottobre, G2): la riga che prima cercava il nonce non se ne accorgeva.
-csp_script="$(printf '%s' "$INTESTAZIONI" | grep -i '^content-security-policy' | grep -o "script-src[^;]*")"
-if [ -n "$csp_script" ] && ! printf '%s' "$csp_script" | grep -q "unsafe-inline"; then
+csp_script="$(grep -i '^content-security-policy' <<< "$INTESTAZIONI" | grep -o "script-src[^;]*")"
+if [ -n "$csp_script" ] && ! grep -q "unsafe-inline" <<< "$csp_script"; then
   ok "la CSP non ammette script in linea ($csp_script)"
 else
   no "CSP" "script-src ammette script in linea: «$csp_script»"
 fi
-if printf '%s' "$INTESTAZIONI" | grep -i '^content-security-policy' | grep -q 'googleapis\|gstatic'; then
+if grep -i '^content-security-policy' <<< "$INTESTAZIONI" | grep -q 'googleapis\|gstatic'; then
   no "CSP" "ammette ancora i domini di Google Fonts, che il sito non usa"
 else
   ok "la CSP non nomina Google Fonts"
@@ -139,7 +139,9 @@ echo
 echo "Quello che da fuori non si deve vedere"
 # Revisione del 16 ottobre, M1 e L1.
 for d in /lib/ /api/ /pages/ /partials/ /assets/ /images/; do
-  if prendi "$SITO$d" | grep -q "Index of"; then no "$d" "mostra l'elenco dei file"
+  # Su file e non in una pipe: con pipefail, grep -q che trova subito darebbe un falso «ok».
+  prendi "$SITO$d" -o "$CORPO"
+  if grep -q "Index of" "$CORPO"; then no "$d" "mostra l'elenco dei file"
   else ok "$d non mostra l'elenco dei file"; fi
 done
 for f in /partials/head.php /pages/home.php /lib/avvio.php /api/config.php /api/db.php; do
@@ -169,7 +171,7 @@ prendi -D "$TESTA_A" -o /dev/null -H 'Content-Type: application/json' -d '{"type
 grep -qi '^set-cookie' "$TESTA_A" && no "analytics" "dà un cookie a chi legge" || ok "il segnale delle letture non dà cookie"
 prendi -D "$TESTA_A" -o /dev/null "$SITO/admin/entra.php"
 biscotto="$(grep -i '^set-cookie' "$TESTA_A" | tr -d '\r' | head -1)"
-printf '%s' "$biscotto" | grep -q '__Host-sp_admin=' && printf '%s' "$biscotto" | grep -qi 'samesite=strict' \
+grep -q '__Host-sp_admin=' <<< "$biscotto" && grep -qi 'samesite=strict' <<< "$biscotto" \
   && ok "il cookie del pannello è __Host- e SameSite=Strict" || no "cookie del pannello" "«$biscotto»"
 rm -f "$TESTA_A"
 
