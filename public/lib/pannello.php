@@ -81,6 +81,50 @@ function slug_libero(string $desiderato, ?int $esclusoId = null): string {
     }
 }
 
+/**
+ * Il link di un pulsante, ripulito; '' se vuoto; null se non è un link.
+ *
+ * Accetta quello che il sito sa mostrare (pulsante_articolo() in
+ * partials/blocchi.php): un percorso del sito («/contatti»), un indirizzo
+ * http o https, un mailto. Un dominio scritto senza schema («www.esempio.it»)
+ * diventa https. Tutto il resto — «javascript:», «data:», un «//» che porta
+ * fuori — si rifiuta: un pulsante è un link che chiunque può cliccare.
+ */
+function link_pulsante_pulito(string $link): ?string {
+    $link = trim($link);
+    if ($link === '' || $link === '#') return '';
+    if (mb_strlen($link) > 255) return null;
+    if (preg_match('#^(https?://[^\s]+|mailto:[^\s]+|/(?!/)[^\s]*)$#i', $link)) return $link;
+    if (preg_match('#^[a-z0-9.-]+\.[a-z]{2,}(/[^\s]*)?$#i', $link)) return 'https://' . $link;
+    return null;
+}
+
+/**
+ * Annota lo slug vecchio di un articolo, perché il suo indirizzo continui a
+ * portare all'articolo (vedi assicura_slug_storici in db_maintenance.php).
+ * Se lo slug nuovo era a sua volta uno slug vecchio, si toglie dalla tabella:
+ * adesso è di nuovo un indirizzo vero.
+ */
+function registra_slug_vecchio(string $vecchio, string $nuovo, int $id): void {
+    if (!assicura_slug_storici(db())) return;
+    db()->prepare("DELETE FROM slug_storici WHERE slug = ? OR slug = ?")->execute([$vecchio, $nuovo]);
+    if ($vecchio !== '' && $vecchio !== $nuovo) {
+        db()->prepare("INSERT INTO slug_storici (slug, article_id, creato_il) VALUES (?, ?, ?)")
+            ->execute([$vecchio, $id, date('Y-m-d H:i:s')]);
+    }
+}
+
+/** Gli slug vecchi che portano a un articolo, per mostrarli nella scheda. */
+function slug_vecchi_di(int $id): array {
+    try {
+        $q = db()->prepare("SELECT slug FROM slug_storici WHERE article_id = ? ORDER BY creato_il DESC");
+        $q->execute([$id]);
+        return $q->fetchAll(PDO::FETCH_COLUMN);
+    } catch (PDOException $e) {
+        return [];   // la tabella non c'è ancora: si crea alla prima apertura del pannello
+    }
+}
+
 /** Scrive un articolo, nuovo o esistente. Ritorna l'id. */
 function salva_articolo(array $d, ?int $id = null): int {
     $campi = [
@@ -103,10 +147,31 @@ function salva_articolo(array $d, ?int $id = null): int {
         'updated_at'         => date('Y-m-d H:i:s'),
     ];
 
+    /* I due pulsanti in fondo al testo (revisione del 16 ottobre, G5). Si
+       scrivono solo se chi chiama li manda: un salvataggio che non li conosce
+       non deve cancellarli. I link arrivano già controllati da
+       link_pulsante_pulito(); qui si taglia soltanto alla misura delle colonne. */
+    foreach (['button_a_label' => 100, 'button_a_link' => 255, 'button_b_label' => 100, 'button_b_link' => 255] as $colonna => $massimo) {
+        if (array_key_exists($colonna, $d)) {
+            $campi[$colonna] = mb_substr(trim((string)$d[$colonna]), 0, $massimo) ?: null;
+        }
+    }
+
     if ($id) {
+        $prima = db()->prepare("SELECT slug, status FROM articles WHERE id = ? LIMIT 1");
+        $prima->execute([$id]);
+        $vecchio = $prima->fetch() ?: ['slug' => '', 'status' => ''];
+
         $pezzi = implode(', ', array_map(fn($c) => "$c = :$c", array_keys($campi)));
         $q = db()->prepare("UPDATE articles SET $pezzi WHERE id = :id");
         $q->execute($campi + ['id' => $id]);
+
+        /* Lo slug è cambiato su un articolo già uscito: il vecchio indirizzo
+           può essere ovunque, e deve continuare a portare qui. Su una bozza no:
+           il suo indirizzo non l'ha mai visto nessuno. */
+        if ($vecchio['status'] === 'published' && $vecchio['slug'] !== $campi['slug']) {
+            registra_slug_vecchio((string)$vecchio['slug'], $campi['slug'], $id);
+        }
         return $id;
     }
 
@@ -119,6 +184,14 @@ function salva_articolo(array $d, ?int $id = null): int {
 
 function elimina_articolo(int $id): void {
     db()->prepare("DELETE FROM article_tags WHERE article_id = ?")->execute([$id]);
+    /* Le reazioni, le letture e i clic di un articolo che non c'è più non
+       servono a niente: restavano orfani (revisione del 16 ottobre, L4). Anche
+       i suoi indirizzi vecchi, che porterebbero a un 404 dopo un rimando. */
+    foreach (['article_reactions', 'article_views', 'cta_clicks', 'slug_storici'] as $tabella) {
+        try {
+            db()->prepare("DELETE FROM $tabella WHERE article_id = ?")->execute([$id]);
+        } catch (PDOException $e) { /* tabella assente in questo database */ }
+    }
     db()->prepare("DELETE FROM articles WHERE id = ?")->execute([$id]);
 }
 
@@ -143,6 +216,11 @@ function duplica_articolo(int $id): ?int {
         'category'        => $a['category'],
         'status'          => 'draft',
         'published_at'    => null,
+        // I pulsanti si copiano: fino al 16 ottobre 2026 la copia li perdeva (G5).
+        'button_a_label'  => $a['button_a_label'] ?? '',
+        'button_a_link'   => $a['button_a_link'] ?? '',
+        'button_b_label'  => $a['button_b_label'] ?? '',
+        'button_b_link'   => $a['button_b_link'] ?? '',
     ]);
 
     foreach (tag_di_articolo($id) as $t) {
@@ -335,6 +413,77 @@ function admin_media(int $quanti = 60, int $salta = 0): array {
 
 function conta_media(): int {
     return (int)db()->query("SELECT COUNT(*) FROM media")->fetchColumn();
+}
+
+/**
+ * Dove è usata ogni immagine: id del file => elenco dei titoli che la usano.
+ *
+ * Un file è «in uso» se il suo nome compare nella copertina, nel testo o nei
+ * pulsanti di un articolo (bozze comprese), oppure se un pulsante lo scarica con
+ * api/download.php?id=N. I nomi sono unici — hanno davanti un uniqid — quindi
+ * cercare il nome del file basta, qualunque forma abbia l'indirizzo (relativo o
+ * assoluto). Una lettura sola di tutti gli articoli, e il confronto in PHP: con
+ * un centinaio di articoli costa meno di sessanta LIKE.
+ *
+ * @param list<array> $media
+ * @return array<int, list<string>>
+ */
+function media_in_uso(array $media): array {
+    $articoli = db()->query("SELECT title, cover_image, content, button_a_link, button_b_link FROM articles")->fetchAll();
+    $uso = [];
+    foreach ($media as $m) {
+        $nome = basename((string)$m['file_path']);
+        $scarica = 'download.php?id=' . (int)$m['id'];
+        $uso[(int)$m['id']] = [];
+        if ($nome === '') continue;
+        foreach ($articoli as $a) {
+            $pulsanti = (string)$a['button_a_link'] . ' ' . (string)$a['button_b_link'];
+            if (str_contains((string)$a['cover_image'], $nome)
+                || str_contains((string)$a['content'], $nome)
+                || str_contains($pulsanti, $nome)
+                || preg_match('/' . preg_quote($scarica, '/') . '(?!\d)/', $pulsanti)) {
+                $uso[(int)$m['id']][] = (string)$a['title'];
+            }
+        }
+    }
+    return $uso;
+}
+
+/**
+ * Cancella un'immagine della libreria: il file e la riga.
+ *
+ * Il React lo faceva, il pannello in PHP no (revisione del 16 ottobre, M9).
+ * Due guardie: un'immagine in uso non si cancella, perché lascerebbe una
+ * copertina o un'immagine rotta in un articolo; e il file deve stare davvero
+ * dentro uploads/, controllato con realpath, perché il percorso arriva dal
+ * database e non va mai preso per buono.
+ *
+ * @return string '' se fatto, altrimenti il motivo
+ */
+function elimina_media(int $id): string {
+    $q = db()->prepare("SELECT * FROM media WHERE id = ? LIMIT 1");
+    $q->execute([$id]);
+    $m = $q->fetch();
+    if (!$m) return 'Quell\'immagine non c\'è più.';
+
+    $uso = media_in_uso([$m])[$id] ?? [];
+    if ($uso) {
+        return '«' . $m['filename'] . '» è usata in ' . count($uso) . ' articol' . (count($uso) === 1 ? 'o' : 'i')
+             . ' (' . implode(', ', array_slice($uso, 0, 3)) . (count($uso) > 3 ? '…' : '') . '): toglila da lì, poi cancellala.';
+    }
+
+    $percorso = (string)$m['file_path'];
+    if (str_starts_with($percorso, '/uploads/')) {
+        $base   = realpath(__DIR__ . '/../uploads');
+        $fisico = realpath(__DIR__ . '/..' . $percorso);
+        if ($fisico !== false && $base !== false
+            && str_starts_with($fisico, $base . DIRECTORY_SEPARATOR) && is_file($fisico)) {
+            if (!@unlink($fisico)) return 'Non riesco a cancellare il file dal disco.';
+        }
+        // Un file che sul disco non c'è già più (in sviluppo è sempre così): si toglie la riga e basta.
+    }
+    db()->prepare("DELETE FROM media WHERE id = ?")->execute([$id]);
+    return '';
 }
 
 /* ══════════════════════════════ Messaggi ════════════════════════════════ */

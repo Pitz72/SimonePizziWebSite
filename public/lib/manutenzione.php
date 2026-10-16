@@ -58,6 +58,7 @@ function manutenzione_giro(): array {
        aspetta che qualcuno entri; poi, una volta al giorno, si tolgono quelle
        che hanno finito il loro lavoro e i file dei freni fermi. */
     assicura_impronte_anonime(db());
+    assicura_slug_storici(db());
     if (impostazione('anonimizza_ultimo', '') !== date('Y-m-d')) {
         anonimizza_impronte_vecchie(db());
         $r_freni = freno_pulisci();
@@ -138,7 +139,11 @@ function backup_crea(string $origine = 'manuale'): array {
     rename($provvisorio, $file);
     backup_ruota();
     impostazione_scrivi('backup_last_run', date('Y-m-d H:i:s'));
-    return ['ok' => true, 'message' => 'Copia creata.', 'file' => $nome, 'bytes' => (int)filesize($file)];
+    // Con il database, le immagini (revisione del 16 ottobre, G6).
+    $immagini = backup_immagini();
+    if (!$immagini['ok']) error_log('backup immagini: ' . $immagini['message']);
+    return ['ok' => true, 'message' => 'Copia creata. ' . $immagini['message'], 'file' => $nome,
+            'bytes' => (int)filesize($file), 'immagini' => $immagini];
 }
 
 /** Tiene le ultime copie e cancella le altre. */
@@ -160,7 +165,82 @@ function backup_elenco(): array {
 
 /** Il percorso di una copia, se il nome è quello che il sito scrive e il file c'è. */
 function backup_percorso(string $nome): ?string {
-    if (!preg_match('/^sito_\d{8}_\d{6}\.sql\.gz$/', $nome)) { return null; }
+    if ($nome !== IMMAGINI_ARCHIVIO && !preg_match('/^sito_\d{8}_\d{6}\.sql\.gz$/', $nome)) { return null; }
     $f = backup_cartella() . '/' . $nome;
     return is_file($f) ? $f : null;
+}
+
+/* ── Le immagini ──────────────────────────────────────────────────────────
+   Revisione del 16 ottobre, G6. Il backup copiava solo il database: le
+   copertine e le immagini degli articoli esistevano soltanto sul server, e
+   l'esportazione ZIP del pannello React non era stata portata. Adesso accanto
+   ai dump c'è un archivio solo, immagini.zip, con uploads/ e images/.
+
+   Uno e non quattordici: le immagini non cambiano dopo il caricamento (hanno
+   un nome unico), quindi l'archivio si aggiorna invece di rifarsi. A ogni
+   backup si aggiungono le nuove e si tolgono quelle cancellate dalla libreria.
+   Il 16 ottobre 2026 erano 193 file per 34 MB. */
+
+const IMMAGINI_ARCHIVIO = 'immagini.zip';
+const IMMAGINI_CARTELLE = ['uploads', 'images'];
+
+/** @return array{ok: bool, message: string, aggiunte?: int, tolte?: int, bytes?: int} */
+function backup_immagini(): array {
+    if (!class_exists('ZipArchive')) {
+        return ['ok' => false, 'message' => 'Su questo server manca ZipArchive: le immagini non entrano nel backup.'];
+    }
+    $dir = backup_cartella();
+    if (!is_dir($dir) && !@mkdir($dir, 0700, true)) {
+        return ['ok' => false, 'message' => 'Non riesco a creare la cartella dei backup.'];
+    }
+    $docroot = dirname(__DIR__);
+
+    // Quello che c'è sul disco adesso: nome nell'archivio => [percorso, dimensione].
+    $sulDisco = [];
+    foreach (IMMAGINI_CARTELLE as $cartella) {
+        $base = $docroot . '/' . $cartella;
+        if (!is_dir($base)) continue;
+        $giro = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($base, FilesystemIterator::SKIP_DOTS));
+        foreach ($giro as $f) {
+            /** @var SplFileInfo $f */
+            if (!$f->isFile() || $f->getFilename() === '.htaccess') continue;
+            $nome = $cartella . '/' . strtr(substr($f->getPathname(), strlen($base) + 1), DIRECTORY_SEPARATOR, '/');
+            $sulDisco[$nome] = [$f->getPathname(), $f->getSize()];
+        }
+    }
+
+    $zip = new ZipArchive();
+    $file = $dir . '/' . IMMAGINI_ARCHIVIO;
+    if ($zip->open($file, ZipArchive::CREATE) !== true) {
+        return ['ok' => false, 'message' => 'Non riesco ad aprire l\'archivio delle immagini.'];
+    }
+
+    $tolte = 0;
+    for ($i = $zip->numFiles - 1; $i >= 0; $i--) {
+        $voce = $zip->statIndex($i);
+        if ($voce === false) continue;
+        $c = $sulDisco[$voce['name']] ?? null;
+        if ($c === null) { $zip->deleteIndex($i); $tolte++; continue; }
+        if ((int)$voce['size'] === (int)$c[1]) unset($sulDisco[$voce['name']]);   // già dentro, uguale
+    }
+    $aggiunte = 0;
+    foreach ($sulDisco as $nome => [$percorso]) {
+        // Le immagini sono già compresse (WebP, JPEG, PNG): ricomprimerle costa tempo e non rende niente.
+        if ($zip->addFile($percorso, $nome)) {
+            $zip->setCompressionName($nome, ZipArchive::CM_STORE);
+            $aggiunte++;
+        }
+    }
+    if (!$zip->close()) {
+        return ['ok' => false, 'message' => 'L\'archivio delle immagini non si è chiuso bene.'];
+    }
+    @chmod($file, 0600);
+    return ['ok' => true, 'message' => 'Immagini: ' . $aggiunte . ' aggiunte, ' . $tolte . ' tolte.',
+            'aggiunte' => $aggiunte, 'tolte' => $tolte, 'bytes' => (int)@filesize($file)];
+}
+
+/** L'archivio delle immagini, se c'è: per il pannello. */
+function backup_immagini_stato(): ?array {
+    $f = backup_cartella() . '/' . IMMAGINI_ARCHIVIO;
+    return is_file($f) ? ['nome' => IMMAGINI_ARCHIVIO, 'bytes' => (int)filesize($f), 'quando' => (int)filemtime($f)] : null;
 }

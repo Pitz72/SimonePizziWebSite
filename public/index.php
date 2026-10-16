@@ -131,6 +131,13 @@ if (count($parti) === 2) {
         $anteprima = $articolo !== null;
     }
 
+    /* Uno slug cambiato dopo la pubblicazione: il vecchio indirizzo porta al
+       nuovo, in modo permanente (revisione del 16 ottobre, M5). */
+    if (!$articolo && ($nuovo = articolo_da_slug_storico($parti[1]))) {
+        header('Location: ' . url_articolo($nuovo), true, 301);
+        exit;
+    }
+
     if (!$articolo) non_trovata();
 
     /* Lo slug dell'articolo è unico in tutto il sito, quindi l'indirizzo giusto

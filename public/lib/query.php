@@ -205,6 +205,27 @@ function articolo_per_slug_in_anteprima(string $slug): ?array {
     return $q->fetch() ?: null;
 }
 
+/**
+ * L'articolo a cui porta uno slug vecchio, se c'è ed è pubblicato.
+ *
+ * Quando lo slug di un articolo uscito cambia, il pannello annota quello di
+ * prima (slug_storici, revisione del 16 ottobre, M5). Qui lo si cerca prima di
+ * rispondere 404. Se la tabella non esiste ancora — nasce alla prima apertura
+ * del pannello o al primo giro di manutenzione — non c'è niente da cercare.
+ */
+function articolo_da_slug_storico(string $slug): ?array {
+    try {
+        $q = db()->prepare("SELECT a.category, a.slug FROM slug_storici s
+                            JOIN articles a ON a.id = s.article_id
+                            WHERE s.slug = :slug AND a.status = 'published'
+                              AND (a.published_at IS NULL OR a.published_at <= :adesso) LIMIT 1");
+        $q->execute([':slug' => $slug, ':adesso' => adesso()]);
+        return $q->fetch() ?: null;
+    } catch (PDOException $e) {
+        return null;
+    }
+}
+
 /** Quanti articoli ha una categoria, contando le sue sottocategorie. */
 function conta_articoli_categoria(array $categoria): int {
     $slug = slug_del_ramo($categoria);

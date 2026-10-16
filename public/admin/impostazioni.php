@@ -63,6 +63,7 @@ $auto   = impostazione('backup_auto', '0') === '1';
 $freq   = impostazione('backup_frequency', 'weekly');
 $ultimo = impostazione('backup_last_run', '');
 $copie  = backup_elenco();
+$archivioImmagini = backup_immagini_stato();
 $giro   = (int)impostazione('tick_ultimo', '0');
 $chiusura = function_exists('fastcgi_finish_request');
 
@@ -101,7 +102,11 @@ avviso_pannello();
   <h2 class="gro" style="font-size:20px">Backup del sito</h2>
   <p class="aiuto" style="margin-bottom:16px">
     Un dump compresso di tutto il database: articoli, iscritti, messaggi e il registro della newsletter.
-    Si conservano le ultime <?= BACKUP_CONSERVA ?> copie. Il ripristino non è in pannello: si fa a mano, da phpMyAdmin.
+    Si conservano le ultime <?= BACKUP_CONSERVA ?> copie. Con ogni copia si aggiorna anche
+    <b>immagini.zip</b>, l’archivio delle copertine e delle immagini degli articoli.
+    Il ripristino non è in pannello: si fa a mano, da phpMyAdmin per il database e via SFTP per le immagini.
+    Le copie stanno sullo stesso server del sito: ogni tanto scaricane una, o lancia
+    <code>python scripts/server-tools/scarica_backup.py</code> dal computer.
     <?= $ultimo !== '' ? 'Ultima copia: ' . e(data_breve($ultimo)) . '.' : 'Nessuna copia ancora.' ?>
   </p>
 
@@ -135,6 +140,14 @@ avviso_pannello();
             <td class="comandi"><a href="/admin/backup.php?f=<?= e(rawurlencode($c['nome'])) ?>" style="color:var(--verde)">Scarica</a></td>
           </tr>
         <?php endforeach; ?>
+        <?php if ($archivioImmagini): ?>
+          <tr>
+            <td><?= e($archivioImmagini['nome']) ?></td>
+            <td class="num"><?= e(data_breve(date('Y-m-d H:i:s', $archivioImmagini['quando']))) ?></td>
+            <td class="num"><?= e(number_format($archivioImmagini['bytes'] / 1048576, 2, ',', '.')) ?> MB</td>
+            <td class="comandi"><a href="/admin/backup.php?f=<?= e(rawurlencode($archivioImmagini['nome'])) ?>" style="color:var(--verde)">Scarica</a></td>
+          </tr>
+        <?php endif; ?>
       </tbody>
     </table>
   </div>

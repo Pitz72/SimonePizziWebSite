@@ -378,9 +378,39 @@ function assicura_impronte_anonime(PDO $db): bool {
 }
 
 
+/* ═══════════════════ Gli indirizzi vecchi degli articoli ════════════════════
+   Revisione del 16 ottobre, M5. Cambiare lo slug di un articolo pubblicato
+   rompeva il suo indirizzo: i link da Telegram, dai social, da altri articoli
+   e da Google finivano su un 404, e il pannello non diceva niente (il React
+   almeno avvisava). Adesso il salvataggio annota lo slug vecchio qui, e
+   index.php, prima di rispondere 404, guarda in questa tabella e porta il
+   lettore all'indirizzo nuovo con un 301.
+
+   Lo SQL è quello che MySQL e SQLite parlano tutti e due, quindi la tabella
+   nasce anche in sviluppo. */
+function assicura_slug_storici(PDO $db): bool {
+    static $ok = null;
+    if ($ok !== null) return $ok;
+    try {
+        $mysql = $db->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql';
+        $db->exec("CREATE TABLE IF NOT EXISTS slug_storici (
+            slug VARCHAR(190) NOT NULL PRIMARY KEY,
+            article_id INT NOT NULL,
+            creato_il DATETIME NOT NULL
+        )" . ($mysql ? " ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci" : ''));
+        segna_migrazione($db, '2026-10-16_slug_storici', 'Gli slug vecchi degli articoli rimandano al nuovo');
+        return $ok = true;
+    } catch (PDOException $e) {
+        error_log('db_maintenance [slug_storici]: ' . $e->getMessage());
+        return $ok = false;
+    }
+}
+
+
 function assicura_schema(PDO $db): void {
     assicura_colonne_seo($db);
     assicura_messaggistica($db);
     assicura_newsletter($db);
     assicura_impronte_anonime($db);
+    assicura_slug_storici($db);
 }

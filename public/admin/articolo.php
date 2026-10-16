@@ -33,6 +33,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
        il database la vuole con lo spazio. Se si pubblica senza indicarla, vale
        adesso — un articolo pubblicato senza data non comparirebbe da nessuna
        parte, perché tutti gli elenchi ordinano per data. */
+    /* I due pulsanti in fondo al testo (revisione del 16 ottobre, G5): un link
+       che non è un link si rifiuta prima di salvare, e il messaggio dice quale. */
+    $pulsanti = [];
+    foreach (['a' => 'primo', 'b' => 'secondo'] as $lettera => $quale) {
+        $link = link_pulsante_pulito((string)($_POST["button_{$lettera}_link"] ?? ''));
+        if ($link === null) {
+            torna('/admin/articolo.php' . ($id ? '?id=' . $id : ''),
+                  "Il link del $quale pulsante non è un indirizzo che il sito sa aprire: "
+                  . 'usa un percorso del sito (/contatti), un indirizzo https:// o un mailto:. Niente è stato salvato.', true);
+        }
+        $pulsanti["button_{$lettera}_link"]  = $link;
+        $pulsanti["button_{$lettera}_label"] = (string)($_POST["button_{$lettera}_label"] ?? '');
+    }
+
     $quando = trim((string)($_POST['published_at'] ?? ''));
     $quando = $quando !== '' ? str_replace('T', ' ', $quando) . ':00' : '';
     if ($quando === '' && ($_POST['status'] ?? '') === 'published') {
@@ -53,7 +67,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'is_featured'        => !empty($_POST['is_featured']),
         'is_category_pinned' => !empty($_POST['is_category_pinned']),
         'published_at'       => $quando,
-    ], $id);
+    ] + $pulsanti, $id);
 
     imposta_tag_articolo($nuovoId, explode(',', (string)($_POST['tags'] ?? '')));
 
@@ -78,6 +92,7 @@ $a = $a ?: [
     'focus_keyword' => '', 'seo_title' => '', 'seo_description' => '',
     'cover_image' => '', 'category' => '', 'status' => 'draft',
     'is_featured' => 0, 'is_category_pinned' => 0, 'published_at' => '', 'created_at' => '',
+    'button_a_label' => '', 'button_a_link' => '', 'button_b_label' => '', 'button_b_link' => '',
 ];
 
 $tagCorrenti = $id ? implode(', ', array_column(tag_di_articolo($id), 'name')) : '';
@@ -122,7 +137,12 @@ avviso_pannello();
       <label class="eti" for="campo-slug">Indirizzo (slug)</label>
       <input id="campo-slug" name="slug" value="<?= e($a['slug']) ?>" spellcheck="false">
       <p class="aiuto">L'articolo vivrà su <b>/<?= e($a['category'] ?: 'categoria') ?>/<span id="eco-slug"><?= e($a['slug'] ?: 'indirizzo') ?></span></b>.
-         Cambiarlo dopo la pubblicazione rompe i link già in giro: si fa solo se serve davvero.</p>
+         Se lo cambi dopo la pubblicazione, il vecchio indirizzo continua a portare qui:
+         il sito lo annota e rimanda al nuovo.</p>
+      <?php if ($id && ($vecchi = slug_vecchi_di($id))): ?>
+        <p class="aiuto">Portano qui anche:
+          <?php foreach ($vecchi as $i => $v): ?><?= $i ? ', ' : '' ?><code><?= e($v) ?></code><?php endforeach; ?>.</p>
+      <?php endif; ?>
     </div>
 
     <div class="campo">
@@ -211,6 +231,32 @@ avviso_pannello();
         <?= $a['category'] !== '' ? '<b>/' . e($a['category']) . '</b>' : 'la sua sezione' ?>.
         Ce n'è uno solo: spuntando questo, l'altro smette di esserlo.</small></span>
     </label>
+  </section>
+
+  <!-- ── I pulsanti in fondo al testo ─────────────────────────────────── -->
+  <section>
+    <h2>I pulsanti in fondo al testo</h2>
+    <p class="aiuto" style="margin-bottom:16px">
+      Due al massimo, sotto l'articolo: di solito «Gioca», «Scarica», «Vai al sito».
+      Un link a un file (PDF, ZIP, EPUB o /api/download.php) si scarica invece di aprirsi.
+      Lasciali vuoti e non compare niente.
+    </p>
+    <?php foreach (['a' => 'Primo pulsante', 'b' => 'Secondo pulsante'] as $lettera => $nomePulsante): ?>
+      <div class="due-colonne">
+        <div class="campo">
+          <label class="eti" for="campo-p<?= $lettera ?>-testo"><?= $nomePulsante ?>: testo</label>
+          <input id="campo-p<?= $lettera ?>-testo" name="button_<?= $lettera ?>_label" maxlength="100"
+                 value="<?= e((string)($a['button_' . $lettera . '_label'] ?? '')) ?>"
+                 placeholder="<?= $lettera === 'a' ? 'Naviga' : 'File aggiuntivo' ?>">
+        </div>
+        <div class="campo">
+          <label class="eti" for="campo-p<?= $lettera ?>-link"><?= $nomePulsante ?>: link</label>
+          <input id="campo-p<?= $lettera ?>-link" name="button_<?= $lettera ?>_link" maxlength="255" spellcheck="false"
+                 value="<?= e((string)($a['button_' . $lettera . '_link'] ?? '')) ?>"
+                 placeholder="https://… oppure /percorso-del-sito">
+        </div>
+      </div>
+    <?php endforeach; ?>
   </section>
 
   <!-- ── Come esce su Google ───────────────────────────────────────────── -->

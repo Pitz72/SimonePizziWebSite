@@ -343,3 +343,9 @@ a.riga-barra-nome:hover{color:var(--verde)}
   .riga-barra{grid-template-columns:minmax(0,1fr) 60px 54px;gap:8px}
 }
 .avviso[hidden]{display:none}
+/* La libreria: i comandi sotto ogni immagine (revisione del 16 ottobre, M9). */
+.media-comandi{display:flex;align-items:center;justify-content:space-between;gap:8px;
+  padding:6px 10px 9px;border-top:1px solid var(--filo2);min-height:38px}
+.media-comandi .eti{color:var(--spento);font-size:11px;cursor:help}
+.spunta-piccola{display:flex;align-items:center;gap:6px;color:var(--spento);font-size:12px;cursor:pointer}
+.spunta-piccola input{width:18px;height:18px;accent-color:var(--verde)}
