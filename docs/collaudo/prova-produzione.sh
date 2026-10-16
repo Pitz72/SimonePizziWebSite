@@ -200,6 +200,23 @@ if [ "$immagine_relativa" -eq 0 ]; then ok "nei dati strutturati le immagini han
 else no "dati strutturati" "$immagine_relativa articoli con l'immagine relativa (M10)"; fi
 
 echo
+echo "SEO: sitemap, feed, archivio (revisione del 16 ottobre, M7, M11, L16)"
+TESTA_S="$(mktemp)"
+prendi -D "$TESTA_S" -o /dev/null "$SITO/sitemap.xml"
+quante="$(grep -ci '^cache-control' "$TESTA_S")"
+if [ "$quante" = "1" ] && ! grep -qi '^expires' "$TESTA_S"; then ok "la sitemap ha una cache sola, di un'ora"
+else no "cache della sitemap" "$(grep -i '^cache-control\|^expires' "$TESTA_S" | tr -d '\r' | tr '\n' ' ')"; fi
+rm -f "$TESTA_S"
+grep -q '<loc>https://simonepizzi.runtimeradio.it/archivio</loc>' "$SITEMAP" && ok "l'archivio è nella sitemap" || no "sitemap" "manca /archivio"
+host_diversi="$(grep -o '<loc>https\?://[^/]*' "$SITEMAP" | sort -u | wc -l)"
+[ "$host_diversi" = "1" ] && ok "la sitemap usa un dominio solo" || no "sitemap" "$host_diversi domini diversi"
+prendi "$SITO/api/rss.php" -o "$CORPO"
+if grep -q 'atom:link' "$CORPO" && grep -q 'urn:simonepizzi:article:' "$CORPO" && [ "$(grep -c '<item>' "$CORPO")" -le 30 ]; then
+  ok "il feed ha i GUID stabili, atom:link, al massimo 30 voci"
+else no "feed" "manca qualcosa"; fi
+controlla 200 "/archivio" "dal pi"
+
+echo
 echo "Tutta la sitemap"
 prendi "$SITO/sitemap.xml" -o "$SITEMAP"
 indirizzi="$(grep -o '<loc>[^<]*</loc>' "$SITEMAP" | sed 's/<[^>]*>//g' | sed 's|https\?://[^/]*||' | sort -u)"

@@ -67,6 +67,22 @@ Options -Indexes
 #
 # (Aggiungere i redirect specifici sotto questa riga quando necessario)
 
+# [16/10/2026] La sitemap si rigenera a ogni richiesta, ma la configurazione di
+# DreamHost a monte le appendeva «max-age=172800» ed Expires a due giorni,
+# accanto all'ora che manda sitemap.php: due istruzioni contraddittorie
+# (revisione del 16 ottobre, M11). Si toglie quella a monte come in api/.htaccess.
+<Files "sitemap.php">
+  <IfModule mod_expires.c>
+    ExpiresActive Off
+  </IfModule>
+  <IfModule mod_headers.c>
+    Header always unset Cache-Control
+    Header always unset Expires
+    Header unset Expires
+    Header set Cache-Control "public, max-age=3600"
+  </IfModule>
+</Files>
+
 # [v1.23.0] Vecchie categorie della struttura pre-categorie (gen 2026) ancora
 # nell'indice Google come 404. Redirect SOLO esatto (no sotto-path: gli articoli
 # di quella vecchia struttura sono stati rimossi e devono dare 404 reale via index.php).
