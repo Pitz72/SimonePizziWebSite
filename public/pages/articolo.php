@@ -29,7 +29,8 @@ $copertina = url_immagine($articolo['cover_image']);
 
 // Ripulitura prima, sommario dopo: il sommario lavora sull'albero già pulito
 // e mette gli id sui titoli, così le ancore e le voci nascono insieme.
-['voci' => $voci, 'corpo' => $corpo] = sommario_e_corpo(safe_html($articolo['content']));
+// I video di YouTube diventano un riquadro che li carica solo al clic (lib/video.php).
+['voci' => $voci, 'corpo' => $corpo] = sommario_e_corpo(video_al_clic(safe_html($articolo['content'])));
 
 /* In anteprima si arriva anche su una bozza a cui non è stata data ancora una
    categoria: senza questo controllo il percorso mostrerebbe un anello vuoto e

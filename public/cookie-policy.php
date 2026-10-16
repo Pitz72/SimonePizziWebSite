@@ -1,7 +1,7 @@
 <?php
-date_default_timezone_set('Europe/Rome');
-$protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https://' : 'http://';
-$baseUrl  = $protocol . $_SERVER['HTTP_HOST'];
+// Come privacy.php: l'avvio se manca, e l'indirizzo da SITO_URL, non dall'header Host.
+if (!defined('SITO_URL')) require __DIR__ . '/lib/avvio.php';
+$baseUrl  = SITO_URL;
 $year     = date('Y');
 ?>
 <!DOCTYPE html>
@@ -47,7 +47,7 @@ $year     = date('Y');
 <div class="hero">
     <div class="badge">🍪 Cookie Policy</div>
     <h1>Cookie Policy</h1>
-    <p>Informativa sull'uso dei cookie &mdash; Ultimo aggiornamento: Aprile <?= $year ?></p>
+    <p>Informativa sull'uso dei cookie &mdash; Ultimo aggiornamento: 16 ottobre 2026</p>
 </div>
 <main class="content">
     <div class="section">
@@ -61,26 +61,19 @@ $year     = date('Y');
             <thead><tr><th>Nome</th><th>Tipo</th><th>Finalità</th><th>Durata</th><th>Consenso</th></tr></thead>
             <tbody>
                 <tr>
-                    <td><code>PHPSESSID</code></td>
+                    <td><code>__Host-sp_admin</code></td>
                     <td>Tecnico sessione</td>
-                    <td>Sessione autenticata pannello admin. <strong>Non impostato nella navigazione pubblica.</strong></td>
-                    <td>Fine sessione</td>
-                    <td><span class="ok">Non richiesto</span></td>
-                </tr>
-                <tr>
-                    <td><code>cookie_consent</code></td>
-                    <td>Preferenza (localStorage)</td>
-                    <td>Memorizza presa visione banner cookie.</td>
-                    <td>12 mesi</td>
+                    <td>Sessione del pannello di amministrazione. <strong>Non impostato nella lettura del sito:</strong> nasce solo aprendo la pagina d’ingresso del pannello.</td>
+                    <td>Fine sessione (e al massimo due ore senza attività)</td>
                     <td><span class="ok">Non richiesto</span></td>
                 </tr>
             </tbody>
         </table>
-        <div class="highlight">✅ <strong>Nessun cookie di profilazione.</strong> Non utilizziamo Google Analytics, Facebook Pixel, cookie pubblicitari o strumenti di tracciamento di terze parti.</div>
+        <div class="highlight">✅ <strong>Nessun cookie di profilazione.</strong> Non utilizziamo Google Analytics, Facebook Pixel, cookie pubblicitari o strumenti di tracciamento di terze parti. Il sito non salva niente nemmeno nella memoria del browser (localStorage), a parte la bozza degli articoli nel pannello.</div>
     </div>
     <div class="section">
         <h2><span>🚫</span> Cookie di Terze Parti</h2>
-        <p>Questo sito non carica risorse da domini terzi che possano impostare cookie. Sono assenti:</p>
+        <p>Leggendo il sito il tuo browser non si collega a nessun dominio di terzi: caratteri, script e immagini stanno tutti sul sito. L’unica eccezione la scegli tu: negli articoli con un video di YouTube, il video si carica solo se premi «Avvia il video», e da quel momento YouTube (Google) può impostare i suoi cookie, come spiegato nella <a href="<?= $baseUrl ?>/privacy">Privacy Policy</a>. Sono assenti:</p>
         <ul>
             <li>Google Analytics / Google Tag Manager <span class="no">Assente</span></li>
             <li>Facebook Pixel / Meta <span class="no">Assente</span></li>

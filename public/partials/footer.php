@@ -39,6 +39,7 @@ $con_condivisione = !empty($GLOBALS['FINESTRE_CONDIVISIONE']);
 <script src="<?= e(asset_v('/assets/js/sommario.js')) ?>" defer></script>
 <script src="<?= e(asset_v('/assets/js/reazioni.js')) ?>" defer></script>
 <script src="<?= e(asset_v('/assets/js/visite.js')) ?>" defer></script>
+<script src="<?= e(asset_v('/assets/js/video.js')) ?>" defer></script>
 <?php endif; ?>
 </body>
 </html>

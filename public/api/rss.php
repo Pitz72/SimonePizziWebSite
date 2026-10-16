@@ -39,7 +39,8 @@ function x(?string $testo): string {
 
 /** Il corpo dell'articolo per il feed: ripulito, con gli indirizzi completi. */
 function corpo_per_feed(string $html): string {
-    $pulito = safe_html($html);
+    // Al posto dei video, un link: vedi video_come_link() in lib/video.php.
+    $pulito = video_come_link(safe_html($html));
     // Un lettore di feed non sa che «/uploads/…» vuol dire questo sito.
     $pulito = (string)preg_replace('/\s(src|href)="\/(?!\/)/', ' $1="' . SITO_URL . '/', $pulito);
     // Dentro una sezione CDATA l'unica cosa che non può stare è la sua chiusura.

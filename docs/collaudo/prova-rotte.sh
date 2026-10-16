@@ -141,6 +141,23 @@ if curl -s "$BASE/api/rss.php" | php -r '$x=@simplexml_load_string(stream_get_co
   passate=$((passate + 1)); printf '  ok  il feed è XML valido, al massimo 30 voci, GUID stabili\n'
 else fallite=$((fallite + 1)); printf '  NO  il feed non è XML valido o ha i GUID cambiati\n'; fi
 echo
+echo "Privacy (revisione del 16 ottobre, M12, M15 e informativa)"
+VIDEO="/runtime-telegrambot-titan-edition/runtime-telegrambot-titan-edition-il-promo-video-"
+contiene "$VIDEO" 'class="video-attesa"'           "un video di YouTube arriva come riquadro da avviare"
+curl -s "$BASE$VIDEO" > "$TMP_CONTIENE"
+if grep -q '<iframe' "$TMP_CONTIENE"; then fallite=$((fallite + 1)); printf '  NO  la pagina carica un iframe prima del clic\n'
+else passate=$((passate + 1)); printf '  ok  nessun iframe prima del clic\n'; fi
+contiene "$VIDEO" '/assets/js/video.js?v='           "lo script che lo avvia è nella pagina"
+contiene "/privacy" 'Stati Uniti'                    "l'informativa dice dove stanno i server"
+contiene "/privacy" 'Avvia il video'                 "l'informativa spiega i video al clic"
+curl -s -H "Host: sito-falso.example" "$BASE/privacy" > "$TMP_CONTIENE"
+if grep -q "sito-falso" "$TMP_CONTIENE"; then fallite=$((fallite + 1)); printf '  NO  l informativa prende il dominio dall header Host\n'
+else passate=$((passate + 1)); printf '  ok  l informativa non prende il dominio dall header Host\n'; fi
+curl -s "$BASE/cookie-policy" > "$TMP_CONTIENE"
+if grep -qE 'PHPSESSID|cookie_consent' "$TMP_CONTIENE"; then fallite=$((fallite + 1)); printf '  NO  la cookie policy nomina cookie che non ci sono\n'
+else passate=$((passate + 1)); printf '  ok  la cookie policy nomina solo il cookie che c è\n'; fi
+
+echo
 echo "Le pagine di servizio"
 controlla 200 "/assets/css/base.css"     file
 controlla 200 "/assets/css/caratteri.css" file

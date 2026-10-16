@@ -229,6 +229,16 @@
 .corpo figcaption{margin-top:9px;color:var(--spento);font-size:13.5px}
 .corpo figure.video{position:relative;aspect-ratio:16/9}
 .corpo figure.video iframe{position:absolute;inset:0;width:100%;height:100%;border:1px solid var(--filo)}
+/* Il riquadro al posto del video finché il lettore non lo avvia (lib/video.php,
+   revisione del 16 ottobre, M12): occupa lo stesso spazio, così la pagina non
+   salta quando arriva l'iframe. */
+.corpo .video-attesa{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;
+  gap:10px;padding:clamp(16px,4vw,40px);border:1px solid var(--filo);background:var(--pannello)}
+.corpo .video-attesa p{margin:0}
+.corpo .video-titolo{color:var(--bianco);font-family:'Bricolage Grotesque',sans-serif;font-size:clamp(18px,2.4vw,26px);line-height:1.2}
+.corpo .video-nota{color:var(--spento);font-size:14px;line-height:1.5;max-width:52ch}
+.corpo .video-comandi{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin-top:6px}
+.corpo .video-fuori{font-size:14px}
 .corpo iframe{width:100%;aspect-ratio:16/9;border:1px solid var(--filo);margin:1.8em 0}
 
 /* ── Reazioni e condivisione ────────────────────────────────────────────── */

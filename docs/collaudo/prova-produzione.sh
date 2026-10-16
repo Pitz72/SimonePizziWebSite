@@ -220,13 +220,17 @@ echo
 echo "Tutta la sitemap"
 prendi "$SITO/sitemap.xml" -o "$SITEMAP"
 indirizzi="$(grep -o '<loc>[^<]*</loc>' "$SITEMAP" | sed 's/<[^>]*>//g' | sed 's|https\?://[^/]*||' | sort -u)"
-quanti=0; rotti=0
+quanti=0; rotti=0; con_iframe=0
 while IFS= read -r p; do
   [ -z "$p" ] && continue
   quanti=$((quanti + 1))
-  stato="$(prendi -o /dev/null -w '%{http_code}' "$SITO$p")"
+  stato="$(prendi -o "$CORPO" -w '%{http_code}' "$SITO$p")"
+  # Un iframe in pagina è una richiesta a terzi prima di ogni scelta del lettore (M12).
+  if grep -q '<iframe' "$CORPO"; then con_iframe=$((con_iframe + 1)); printf '  NO  %-58s carica un iframe\n' "$p"; fi
   if [ "$stato" != "200" ]; then rotti=$((rotti + 1)); printf '  NO  %-58s %s\n' "$p" "$stato"; fi
 done <<< "$indirizzi"
+if [ "$con_iframe" -eq 0 ]; then ok "nessuna pagina carica un iframe prima del clic del lettore"
+else no "video" "$con_iframe pagine caricano un iframe da sole"; fi
 
 if [ "$rotti" -eq 0 ]; then
   ok "tutti e $quanti gli indirizzi della sitemap rispondono 200"
