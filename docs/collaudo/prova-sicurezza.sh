@@ -103,7 +103,8 @@ echo
 echo "Le API del sito React (M2)"
 for ep in auth search navigation tags media upload backup settings stats optimize_db prerender; do
   stato="$(curl -s -o /dev/null -w '%{http_code}' "$BASE/api/$ep.php")"
-  [ "$stato" = "410" ] && ok "/api/$ep.php risponde 410" || no "/api/$ep.php" "stato $stato"
+  # Spenti il 16 ottobre 2026 (410), cancellati dal server lo stesso giorno con l'ok di Simone (404).
+  [ "$stato" = "404" ] && ok "/api/$ep.php non c'è più" || no "/api/$ep.php" "stato $stato"
 done
 stato="$(curl -s -o /dev/null -w '%{http_code}' -X POST -d '{}' "$BASE/api/articles.php")"
 [ "$stato" = "405" ] && ok "/api/articles.php non accetta scritture" || no "articles POST" "stato $stato"

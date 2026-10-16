@@ -359,7 +359,7 @@ function conteggi_db(): array {
  *
  * Cerca nel titolo, nel riassunto, nel corpo e — cosa che la ricerca di oggi
  * non fa più davvero — nei tag veri, quelli della tabella article_tags.
- * `api/search.php` guarda ancora una colonna `articles.tags` che la v1.26.0 ha
+ * `api/search.php` (tolto il 16 ottobre 2026) guardava una colonna `articles.tags` che la v1.26.0 ha
  * sostituito con la tabella di collegamento.
  *
  * L'ordine mette prima chi ha la parola nel titolo: chi cerca «favella» vuole

@@ -157,7 +157,8 @@ echo
 echo "Le API del sito React e i cookie (revisione del 16 ottobre, M2, M6, M16)"
 for ep in auth search navigation tags settings prerender; do
   stato="$(prendi -o /dev/null -w '%{http_code}' "$SITO/api/$ep.php")"
-  [ "$stato" = "410" ] && ok "/api/$ep.php risponde 410" || no "/api/$ep.php" "stato $stato"
+  # Spenti il 16 ottobre 2026 (410), cancellati dal server lo stesso giorno con l'ok di Simone (404).
+  [ "$stato" = "404" ] && ok "/api/$ep.php non c'è più" || no "/api/$ep.php" "stato $stato"
 done
 stato="$(prendi -o /dev/null -w '%{http_code}' -X POST -d '{}' "$SITO/api/articles.php")"
 [ "$stato" = "405" ] && ok "/api/articles.php non accetta scritture" || no "/api/articles.php" "POST risponde $stato"

@@ -17,7 +17,7 @@
 # [16/10/2026] I file di servizio delle vecchie API si includono e basta: da
 # fuori non devono rispondere nemmeno con una pagina vuota (revisione del 16
 # ottobre, M1). config.php ha le credenziali del database.
-<FilesMatch "^(config|config\.example|db|auth_helper|db_maintenance)\.php$">
+<FilesMatch "^(config|config\.example|db)\.php$">
   Require all denied
 </FilesMatch>
 

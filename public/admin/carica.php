@@ -5,8 +5,8 @@
  * Fa quello che faceva api/upload.php — controlla l'estensione, controlla i
  * byte veri del file, ridimensiona sopra i 1920px, converte in WebP con GD e
  * registra la riga in `media` — ma passando da lib/, quindi funziona anche in
- * sviluppo, dove il database è SQLite. api/upload.php resta finché il vecchio
- * pannello è in piedi.
+ * sviluppo, dove il database è SQLite. api/upload.php, il caricamento del
+ * pannello React, è stato tolto dal server il 16 ottobre 2026.
  *
  * Le tre difese, nell'ordine in cui contano:
  *   1. l'estensione dev'essere in elenco;
