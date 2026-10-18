@@ -94,6 +94,9 @@ def main():
             "excerpt": meta["excerpt"], "content": corpo,
             "seo_title": meta["seo_title"], "seo_description": meta["seo_description"],
             "focus_keyword": meta["focus_keyword"],
+            # Facoltativi: i due pulsanti in fondo all'articolo.
+            **{k: meta[k] for k in ("button_a_label", "button_a_link",
+                                     "button_b_label", "button_b_link") if meta.get(k)},
         },
         "immagini": list(immagini.values()),
         "tag": meta["tag"],

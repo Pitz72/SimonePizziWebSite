@@ -102,7 +102,13 @@ echo "  slug       {$a['slug']}\n";
 echo "  categoria  {$a['category']}\n";
 echo "  stato      draft (nessuna data di pubblicazione)\n";
 echo "  corpo      " . mb_strlen($a['content']) . " caratteri, " . count($D['immagini']) . " immagini\n";
-echo "  tag        " . implode(', ', $D['tag']) . "\n\n";
+echo "  tag        " . implode(', ', $D['tag']) . "\n";
+foreach (['a', 'b'] as $p) {
+    if (!empty($a["button_{$p}_link"])) {
+        echo "  pulsante {$p} " . ($a["button_{$p}_label"] ?? '') . " → " . $a["button_{$p}_link"] . "\n";
+    }
+}
+echo "\n";
 
 /* ── La scrittura ────────────────────────────────────────────────────────── */
 $pdo->beginTransaction();
@@ -135,7 +141,8 @@ try {
         'published_at'       => null,
         'created_at'         => $ora,
     ];
-    foreach (['seo_title', 'seo_description', 'focus_keyword'] as $k) {
+    foreach (['seo_title', 'seo_description', 'focus_keyword',
+              'button_a_label', 'button_a_link', 'button_b_label', 'button_b_link'] as $k) {
         if (isset($a[$k])) $campi[$k] = $a[$k];
     }
     $nomi  = implode(', ', array_keys($campi));

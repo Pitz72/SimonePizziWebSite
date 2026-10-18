@@ -51,6 +51,11 @@ categoria non esiste o se manca un'immagine sul server.
 Usato il 23/09/2026 per la bozza 89, «Il Viaggiatore, da demo di FAVELLA a
 gioco da installare».
 
+Dal 18/10/2026 `meta.json` può avere anche i due pulsanti in fondo
+all'articolo (`button_a_label`, `button_a_link`, `button_b_label`,
+`button_b_link`), facoltativi. Usati per la bozza 98, «PixelDebh:
+Retro-Rescue! è uscito».
+
 ## Verifica periodica
 
 Controllare che nessuno script residuo sia raggiungibile in produzione:
