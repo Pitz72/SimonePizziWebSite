@@ -56,6 +56,19 @@ all'articolo (`button_a_label`, `button_a_link`, `button_b_label`,
 `button_b_link`), facoltativi. Usati per la bozza 98, «PixelDebh:
 Retro-Rescue! è uscito».
 
+## File sul server che il repo non ha
+
+`residui.py elenco` confronta il docroot con `public/` per MD5 e stampa i file
+in più sul server (salta `uploads/`, `relitto/`, `temp/`, `images/`, le
+credenziali e la verifica di Search Console). `scarica` li copia in una
+cartella locale controllando l'MD5; `cancella` toglie un file solo se la copia
+locale è identica a quella del server, poi controlla che l'indirizzo dia 404.
+
+Usato il 19/10/2026 per i sei file del sito «MPA» di aprile
+(`assets/css/custom_mpa.css`, `style.css`, `assets/js/main.js`, `search.js`,
+`pages/article.php`, `category.php`); la copia sta in
+`F:\Backup\SimonePizziWebSite\2026-10-19_residui-server`.
+
 ## Verifica periodica
 
 Controllare che nessuno script residuo sia raggiungibile in produzione:
