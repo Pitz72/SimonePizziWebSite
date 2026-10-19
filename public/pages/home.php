@@ -54,6 +54,7 @@ require __DIR__ . '/../partials/head.php';
         <div class="btn-fila">
           <a class="btn btn-pieno" href="https://ecosystem.runtimeradio.com/it/" target="_blank" rel="noopener">Progetti ↗</a>
           <a class="btn" href="/archivio">Tutti gli articoli</a>
+          <a class="btn" href="/chi-sono">Chi sono</a>
         </div>
       </div>
       <div class="contatori">

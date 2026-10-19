@@ -36,6 +36,15 @@ return [
         'desc'     => 'Tutti gli articoli di Simone Pizzi dal più recente: devlog di videogiochi e software, racconti, podcast, radio e note di lavoro, divisi per anno.',
     ],
 
+    /* Il testo di presentazione del sito React, che lì era una finestra della
+       home: ritrovato nella storia del repository e rimesso il 19 ottobre. */
+    'chi-sono' => [
+        'pagina'   => 'chi-sono',
+        'briciola' => 'Chi sono',
+        'title'    => 'Chi sono — Simone Pizzi',
+        'desc'     => 'Simone Pizzi si presenta: il podcasting dal 2010 con Runtime Radio, la narrativa, il software, i videogiochi e il lavoro con l’intelligenza artificiale.',
+    ],
+
     'contatti' => [
         'pagina'  => 'contatti',
         'briciola' => 'Contatti',

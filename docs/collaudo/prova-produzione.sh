@@ -67,6 +67,7 @@ controlla 200 "/blog-e-riflessioni"
 controlla 200 "/web"
 # Dal 10 ottobre 2026 i progetti stanno su Ecosystem: il vecchio indirizzo ci porta.
 controlla 301 "/tutti-i-progetti"
+controlla 200 "/chi-sono"
 controlla 200 "/contatti"
 # Un articolo qualunque, preso dalla sitemap invece che scritto qui dentro.
 # Scriverlo qui dentro è già costato una prova rossa: l'articolo che c'era

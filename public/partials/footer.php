@@ -14,6 +14,7 @@ $con_condivisione = !empty($GLOBALS['FINESTRE_CONDIVISIONE']);
     <span class="eti">© <?= date('Y') ?> Simone Pizzi</span>
     <span class="eti"><?= $conteggi_piede['articoli'] ?> articoli</span>
     <nav class="eti" aria-label="Collegamenti di servizio">
+      <a href="/chi-sono">Chi sono</a>
       <a href="/archivio">Archivio</a>
       <a href="/api/rss.php">RSS</a>
       <a href="/contatti">Contatti</a>

@@ -60,6 +60,7 @@ echo
 echo "Le rotte fisse"
 controlla 200 "/"
 controlla 301 "/tutti-i-progetti"
+controlla 200 "/chi-sono"
 controlla 200 "/contatti"
 controlla 200 "/newsletter/confermato"
 controlla 200 "/newsletter/disiscritto"

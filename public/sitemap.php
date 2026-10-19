@@ -68,6 +68,7 @@ $fuori = '<?xml version="1.0" encoding="UTF-8"?>' . "\n"
 
 $fuori .= voce('/', $ultimaUscita, 'daily', '1.0');
 $fuori .= voce('/archivio', $ultimaUscita, 'weekly', '0.6');
+$fuori .= voce('/chi-sono', '', 'yearly', '0.5');
 $fuori .= voce('/contatti', '', 'monthly', '0.5');
 
 // Le sezioni, con l'ultima uscita fra loro e le loro figlie.
