@@ -262,7 +262,17 @@ textarea{resize:vertical;min-height:90px}
 .ingresso p.spento{margin:0 0 24px;font-size:14.5px}
 
 @media (max-width:820px){
-  .pannello-corpo{grid-template-columns:1fr}
+  /* minmax(0,…) e non 1fr: una colonna 1fr non scende sotto il contenuto più
+     largo, e il menu in fila (832px) si portava dietro tutta la pagina. Così
+     il menu scorre dentro la sua striscia, come diceva overflow-x. */
+  .pannello-corpo{grid-template-columns:minmax(0,1fr)}
+  /* L'intestazione su 375px non ci stava: «Esci» usciva dallo schermo e
+     «Vedi il sito» andava a capo su quattro righe. Via le due scritte che
+     non servono a fare niente, la parola «pannello» e il nome utente. */
+  .pannello-cima{padding:0 16px;gap:12px}
+  .pannello-cima .marchio .eti,.pannello-cima-destra>span{display:none}
+  .pannello-cima-destra{gap:12px}
+  .pannello-cima-destra a.eti{white-space:nowrap}
   .pannello-lato{border-right:0;border-bottom:1px solid var(--filo);padding:8px 0}
   .pannello-lato ul{display:flex;overflow-x:auto}
   .pannello-lato a{border-left:0;border-bottom:3px solid transparent;white-space:nowrap;padding:10px 14px}
