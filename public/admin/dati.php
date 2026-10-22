@@ -37,6 +37,18 @@ if ($cosa === 'file') {
     exit;
 }
 
+/* I tag con quanti articoli li usano, bozze comprese: è la misura giusta di
+   «quanto lo uso», e la scheda articolo la usa per suggerire il riuso. */
+if ($cosa === 'tag') {
+    $righe = array_map(static fn(array $t): array => [
+        'nome'  => $t['name'],
+        'slug'  => $t['slug'],
+        'usati' => (int)$t['quanti'],
+    ], admin_tag());
+    echo json_encode(['tag' => $righe], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    exit;
+}
+
 if ($cosa === 'articoli') {
     $testo = trim((string)($_GET['q'] ?? ''));
     $trovati = admin_articoli(['testo' => $testo], 1, 15)['righe'];

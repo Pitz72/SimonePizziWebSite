@@ -838,7 +838,9 @@
        quiete. Un refresh o una sessione scaduta non buttano via un articolo. */
     var idField = form.querySelector('input[name="id"]');
     var DRAFT_KEY = 'fdca_news_draft_' + ((idField && idField.value && idField.value !== '0') ? idField.value : 'new');
-    var DRAFT_FIELDS = ['title', 'slug', 'excerpt', 'seo_title', 'seo_description', 'focus_keyword', 'cover_image', 'category', 'status', 'published_at'];
+    // 'tags' dal 22 ottobre 2026: con le etichette di tag.js i tag si scelgono
+    // con più fatica di prima, e perderli con la bozza sarebbe un dispetto.
+    var DRAFT_FIELDS = ['title', 'slug', 'excerpt', 'seo_title', 'seo_description', 'focus_keyword', 'cover_image', 'category', 'status', 'published_at', 'tags'];
     function fieldsSnapshot() {
       var snap = {};
       DRAFT_FIELDS.forEach(function (n) { var f = form.elements[n]; if (f) snap[n] = f.value; });

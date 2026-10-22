@@ -227,6 +227,22 @@ done
 rm -rf "$ALLDIR"
 
 echo
+echo "I tag della scheda articolo, fatti per il riuso (22/10)"
+# Il campo vero resta name="tags" a virgole (senza JavaScript funziona così);
+# tag.js ci mette sopra le etichette e chiede i tag con il loro uso a dati.php.
+curl -s -b "$BISCOTTI" -o "$CORPO" "$BASE/admin/articolo.php?id=1"
+grep -q 'data-scelta-tag' "$CORPO" && grep -q 'id="campo-tag" name="tags"' "$CORPO" \
+  && ok "la scheda ha il campo a virgole, pronto per le etichette" || no "campo dei tag" "manca"
+grep -q 'tag\.js' "$CORPO" && ok "e carica tag.js" || no "tag.js nella scheda" "manca"
+[ "$(stato "$BASE/assets/js/tag.js")" = "200" ] && ok "tag.js risponde" || no "tag.js" "non risponde"
+curl -s -b "$BISCOTTI" -o "$CORPO" "$BASE/admin/dati.php?cosa=tag"
+TAG_TOT="$(sql "SELECT COUNT(*) FROM tags")"
+TAG_JSON="$(grep -o '"slug":' "$CORPO" | wc -l | tr -d ' ')"
+[ "$TAG_JSON" = "$TAG_TOT" ] && grep -q '"usati":[0-9]' "$CORPO" \
+  && ok "dati.php?cosa=tag dà tutti i $TAG_TOT tag, ognuno con il suo uso" || no "dati.php?cosa=tag" "$TAG_JSON su $TAG_TOT"
+[ "$(stato "$BASE/admin/dati.php?cosa=tag")" = "302" ] && ok "e senza accesso non dà niente" || no "dati.php?cosa=tag senza accesso" "risponde"
+
+echo
 echo "La cache delle letture pubbliche (M3)"
 # Un titolo cambiato di nascosto nel database non si vede finché la cache vale;
 # il primo POST del pannello (qui un'azione in blocco senza niente selezionato) la svuota e il titolo nuovo compare. Prova che la

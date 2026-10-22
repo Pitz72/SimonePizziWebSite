@@ -181,7 +181,9 @@ avviso_pannello();
              L'indirizzo pubblico continua a funzionare, ma converrebbe spostarlo.</p>
         <?php endif; ?>
       </div>
-      <div class="campo">
+      <?php /* Senza JavaScript resta il campo a virgole; con, tag.js lo nasconde e
+               ci mette sopra le etichette, che scrivono qui dentro. */ ?>
+      <div class="campo" data-scelta-tag>
         <label class="eti" for="campo-tag">Tag</label>
         <input id="campo-tag" name="tags" value="<?= e($tagCorrenti) ?>"
                placeholder="separati da virgola">
@@ -355,4 +357,4 @@ if ($id):
 
 <?php finestre_pannello(); ?>
 
-<?php piede_pannello(false, ['caricamenti.js', 'libreria.js', 'editor.js', 'seo-check.js']); ?>
+<?php piede_pannello(false, ['caricamenti.js', 'libreria.js', 'editor.js', 'tag.js', 'seo-check.js']); ?>

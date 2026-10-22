@@ -258,6 +258,37 @@ dialog.finestra::backdrop{background:rgba(4,7,10,.82)}
   background:var(--pannello);overflow:hidden;flex:none}
 .copertina-scelta .anteprima img{width:100%;height:100%;object-fit:cover}
 
+/* ── I tag della scheda articolo (tag.js) ───────────────────────────────────
+   Etichette per quelli scelti, una tendina mentre si scrive (con «Forse
+   intendevi» per i refusi), e sotto la fila dei più usati. */
+.tag-scelti{display:flex;flex-wrap:wrap;gap:6px;list-style:none;margin:0;padding:0}
+.tag-scelti[hidden]{display:none}
+.tag-scelti li{display:inline-flex;align-items:center;gap:6px;padding:5px 6px 5px 10px;
+  border:1px solid var(--filo);background:var(--pannello);color:var(--testo);font-size:14px}
+.tag-scelti small{color:var(--spento);font-size:11px;font-variant-numeric:tabular-nums}
+.tag-scelti button{background:none;border:0;color:var(--spento);cursor:pointer;font-size:16px;
+  line-height:1;padding:0 4px}
+.tag-scelti button:hover{color:#e8a0a0}
+.tag-campo{position:relative}
+.tag-tendina{position:absolute;left:0;right:0;top:100%;z-index:25;list-style:none;margin:2px 0 0;padding:4px 0;
+  background:var(--pece);border:1px solid var(--verde);max-height:280px;overflow-y:auto}
+.tag-tendina[hidden]{display:none}
+.tag-tendina li{display:flex;justify-content:space-between;gap:12px;padding:8px 13px;cursor:pointer;font-size:14.5px}
+.tag-tendina li small{color:var(--spento);font-variant-numeric:tabular-nums}
+.tag-tendina li[aria-selected="true"],.tag-tendina li:hover{background:var(--pannello);color:var(--verde)}
+.tag-tendina .tag-nuovo{color:var(--spento);border-top:1px solid var(--filo2)}
+.tag-tendina .tag-testa{cursor:default;padding:10px 13px 4px;color:#e8c07a;
+  font:700 10.5px/1 'Courier Prime',monospace;letter-spacing:.1em;text-transform:uppercase;border-top:1px solid var(--filo2)}
+.tag-tendina .tag-testa:hover{background:none;color:#e8c07a}
+.tag-fila{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:0;font-size:13px}
+.tag-fila[hidden]{display:none}
+.tag-fila .eti{color:var(--spento);margin-right:4px}
+.tag-proposta{background:none;border:1px dashed var(--filo);color:var(--testo);cursor:pointer;
+  padding:4px 9px;font:400 13px/1.3 'DM Sans',sans-serif}
+.tag-proposta small{color:var(--spento)}
+.tag-proposta:hover{border-color:var(--verde);border-style:solid;color:var(--verde)}
+.tag-conto[data-fuori="si"]{color:#e8c07a}
+
 /* ── Caricare immagini ──────────────────────────────────────────────────────
    La zona dove si trascinano i file, e sotto una riga per file con la sua
    barra. Le righe restano dopo la fine: l'esito si legge, non lampeggia. */
