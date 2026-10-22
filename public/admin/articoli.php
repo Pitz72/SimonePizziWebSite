@@ -87,18 +87,26 @@ function conta(array $cose, string $uno, string $tanti): string {
 
 /* ── L'elenco ────────────────────────────────────────────────────────────── */
 
+$data = static fn(string $k): string =>
+    preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)($_GET[$k] ?? '')) ? (string)$_GET[$k] : '';
 $filtri = [
     'stato'     => (string)($_GET['stato'] ?? ''),
     'categoria' => (string)($_GET['categoria'] ?? ''),
     'testo'     => trim((string)($_GET['q'] ?? '')),
+    'nel_testo' => true,
+    'tag'       => trim((string)($_GET['tag'] ?? '')),
+    'dal'       => $data('dal'),
+    'al'        => $data('al'),
 ];
 $pagina = max(1, (int)($_GET['pagina'] ?? 1));
 $esito  = admin_articoli($filtri, $pagina, 20);
 $pagine = max(1, (int)ceil($esito['totale'] / 20));
-$ritorno = http_build_query(array_filter([
-    'stato' => $filtri['stato'], 'categoria' => $filtri['categoria'],
-    'q' => $filtri['testo'], 'pagina' => $pagina > 1 ? $pagina : null,
-]));
+/* I filtri a vista, per i link delle pagine e per tornare qui dopo un'azione. */
+$aVista = array_filter([
+    'stato' => $filtri['stato'], 'categoria' => $filtri['categoria'], 'q' => $filtri['testo'],
+    'tag' => $filtri['tag'], 'dal' => $filtri['dal'], 'al' => $filtri['al'],
+]);
+$ritorno = http_build_query($aVista + array_filter(['pagina' => $pagina > 1 ? $pagina : null]));
 
 testa_pannello('Articoli', 'articoli');
 titolo_pannello('Articoli', $esito['totale'] . ' in tutto',
@@ -115,7 +123,7 @@ avviso_pannello();
 <form class="filtri" method="get" action="/admin/articoli.php">
   <label>
     <span class="eti">Cerca</span>
-    <input type="search" name="q" value="<?= e($filtri['testo']) ?>" placeholder="Titolo o slug" style="min-width:240px">
+    <input type="search" name="q" value="<?= e($filtri['testo']) ?>" placeholder="Titolo, testo o slug" style="min-width:240px">
   </label>
   <label>
     <span class="eti">Stato</span>
@@ -136,8 +144,28 @@ avviso_pannello();
       <?php endforeach; ?>
     </select>
   </label>
+  <?php /* Quasi trecento tag in una tendina non si leggono: un campo con i
+           suggerimenti del browser, i più usati per primi. */ ?>
+  <label>
+    <span class="eti">Tag</span>
+    <input type="search" name="tag" value="<?= e($filtri['tag']) ?>" list="elenco-tag"
+           placeholder="Scrivi e scegli" autocomplete="off" style="min-width:180px">
+    <datalist id="elenco-tag">
+      <?php foreach (admin_tag() as $t): if ((int)$t['quanti'] === 0) continue; ?>
+        <option value="<?= e($t['name']) ?>"><?= (int)$t['quanti'] ?> articol<?= (int)$t['quanti'] === 1 ? 'o' : 'i' ?></option>
+      <?php endforeach; ?>
+    </datalist>
+  </label>
+  <label>
+    <span class="eti">Dal</span>
+    <input type="date" name="dal" value="<?= e($filtri['dal']) ?>">
+  </label>
+  <label>
+    <span class="eti">Al</span>
+    <input type="date" name="al" value="<?= e($filtri['al']) ?>">
+  </label>
   <button class="btn" type="submit">Filtra</button>
-  <?php if ($filtri['testo'] !== '' || $filtri['stato'] !== '' || $filtri['categoria'] !== ''): ?>
+  <?php if ($aVista): ?>
     <a class="btn btn-muto" href="/admin/articoli.php">Azzera</a>
   <?php endif; ?>
 </form>
@@ -209,10 +237,7 @@ avviso_pannello();
   <nav aria-label="Pagine">
     <ol class="pagine">
       <?php for ($i = 1; $i <= $pagine; $i++):
-        $q = http_build_query(array_filter([
-            'stato' => $filtri['stato'], 'categoria' => $filtri['categoria'],
-            'q' => $filtri['testo'], 'pagina' => $i > 1 ? $i : null,
-        ])); ?>
+        $q = http_build_query($aVista + array_filter(['pagina' => $i > 1 ? $i : null])); ?>
         <li><a href="/admin/articoli.php<?= $q ? '?' . e($q) : '' ?>"
                <?= $i === $pagina ? 'aria-current="page"' : '' ?>><?= $i ?></a></li>
       <?php endfor; ?>

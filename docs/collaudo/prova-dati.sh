@@ -267,6 +267,25 @@ sql "DELETE FROM subscribers WHERE email = 'prova-csv@example.test'" >/dev/null
 rm -f "$CORPO.h"
 
 echo
+echo "Filtri dell'elenco articoli: tag, date, testo (22/10)"
+# Il conto «N in tutto» della pagina deve tornare con quello del database.
+in_tutto() { curl -s -b "$BISCOTTI" "$BASE/admin/articoli.php?$1" | grep -o '[0-9]* in tutto' | head -1 | grep -o '^[0-9]*'; }
+TAG_PROVA="$(sql "SELECT t.name FROM tags t JOIN article_tags x ON x.tag_id = t.id GROUP BY t.id ORDER BY COUNT(*) DESC, t.name LIMIT 1")"
+TAG_SLUG="$(sql "SELECT slug FROM tags WHERE name = '$(printf "%s" "$TAG_PROVA" | sed "s/'/''/g")'")"
+ATTESI="$(sql "SELECT COUNT(DISTINCT x.article_id) FROM article_tags x JOIN tags t ON t.id = x.tag_id WHERE t.slug = '$TAG_SLUG'")"
+[ "$(in_tutto "tag=$(php -r 'echo rawurlencode($argv[1]);' "$TAG_PROVA")")" = "$ATTESI" ] \
+  && ok "per tag: «$TAG_PROVA» dà i suoi $ATTESI articoli" || no "filtro tag" "atteso $ATTESI"
+ATTESI="$(sql "SELECT COUNT(*) FROM articles WHERE COALESCE(published_at, created_at) >= '2026-03-01 00:00:00' AND COALESCE(published_at, created_at) <= '2026-03-31 23:59:59'")"
+[ "$(in_tutto "dal=2026-03-01&al=2026-03-31")" = "$ATTESI" ] && ok "per date: marzo 2026, $ATTESI articoli" || no "filtro date" "atteso $ATTESI"
+[ "$(in_tutto "dal=pippo")" = "$(sql "SELECT COUNT(*) FROM articles")" ] && ok "una data storta non filtra niente" || no "data storta" "ha filtrato"
+PAROLA="$(sql "SELECT content FROM articles WHERE id = (SELECT MIN(id) FROM articles)" | grep -oE '[[:alpha:]]{11,}' | head -1)"
+ATTESI="$(sql "SELECT COUNT(*) FROM articles WHERE title LIKE '%$PAROLA%' OR excerpt LIKE '%$PAROLA%' OR slug LIKE '%$PAROLA%' OR content LIKE '%$PAROLA%'")"
+[ -n "$PAROLA" ] && [ "$(in_tutto "q=$PAROLA")" = "$ATTESI" ] && ok "la ricerca guarda anche nel testo («$PAROLA»: $ATTESI)" || no "ricerca nel testo" "«$PAROLA», atteso $ATTESI"
+curl -s -b "$BISCOTTI" -o "$CORPO" "$BASE/admin/articoli.php?tag=x&dal=2026-01-01"
+grep -q 'list="elenco-tag"' "$CORPO" && grep -q 'name="dal" value="2026-01-01"' "$CORPO" && grep -q 'name="ritorno" value="[^"]*tag=x' "$CORPO" \
+  && ok "i filtri restano nel modulo e nel ritorno dopo un'azione" || no "filtri nel modulo" "persi"
+
+echo
 echo "La cache delle letture pubbliche (M3)"
 # Un titolo cambiato di nascosto nel database non si vede finché la cache vale;
 # il primo POST del pannello (qui un'azione in blocco senza niente selezionato) la svuota e il titolo nuovo compare. Prova che la

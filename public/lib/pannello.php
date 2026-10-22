@@ -33,9 +33,32 @@ function admin_articoli(array $filtri = [], int $pagina = 1, int $perPagina = 20
         $val[]  = $filtri['categoria'];
     }
     if (!empty($filtri['testo'])) {
-        $dove[] = '(title LIKE ? OR excerpt LIKE ? OR slug LIKE ?)';
         $come = '%' . $filtri['testo'] . '%';
-        array_push($val, $come, $come, $come);
+        // Nell'elenco degli articoli si cerca anche nel testo, come nel React;
+        // nella finestra del link interno no, o una parola comune trova tutto.
+        if (!empty($filtri['nel_testo'])) {
+            $dove[] = '(title LIKE ? OR excerpt LIKE ? OR slug LIKE ? OR content LIKE ?)';
+            array_push($val, $come, $come, $come, $come);
+        } else {
+            $dove[] = '(title LIKE ? OR excerpt LIKE ? OR slug LIKE ?)';
+            array_push($val, $come, $come, $come);
+        }
+    }
+    /* Per tag e per date (22 ottobre 2026, c'erano nel React). Il tag si
+       riconosce dallo slug, come nel salvataggio; la data è quella che ordina
+       l'elenco: l'uscita, o la creazione per una bozza senza data. */
+    if (!empty($filtri['tag'])) {
+        $dove[] = 'EXISTS (SELECT 1 FROM article_tags x JOIN tags t ON t.id = x.tag_id
+                           WHERE x.article_id = articles.id AND t.slug = ?)';
+        $val[]  = slug((string)$filtri['tag']);
+    }
+    if (!empty($filtri['dal']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$filtri['dal'])) {
+        $dove[] = 'COALESCE(published_at, created_at) >= ?';
+        $val[]  = $filtri['dal'] . ' 00:00:00';
+    }
+    if (!empty($filtri['al']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', (string)$filtri['al'])) {
+        $dove[] = 'COALESCE(published_at, created_at) <= ?';
+        $val[]  = $filtri['al'] . ' 23:59:59';
     }
     $condizione = $dove ? 'WHERE ' . implode(' AND ', $dove) : '';
 
