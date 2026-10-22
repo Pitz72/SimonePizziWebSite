@@ -622,6 +622,50 @@ function admin_iscritti(string $stato = ''): array {
     return db()->query("SELECT * FROM subscribers ORDER BY created_at DESC")->fetchAll();
 }
 
+/**
+ * Gli iscritti in un CSV, da scaricare: c'era nel React (NewsletterAdmin.tsx),
+ * tornato il 22 ottobre 2026. Esce l'elenco che si sta guardando (tutti, o
+ * uno stato solo), con la prova del consenso: serve se la lista va spostata su
+ * un altro servizio, o se qualcuno chiede come è arrivato il suo indirizzo.
+ *
+ * Per l'Excel italiano, come ha scelto Simone: punto e virgola e il segno UTF-8
+ * in testa, senza il quale Excel legge gli accenti come Windows-1252.
+ */
+function esporta_iscritti_csv(string $stato): never {
+    $nomi = ['confirmed' => 'confermato', 'pending' => 'in attesa', 'unsubscribed' => 'uscito'];
+    if (!isset($nomi[$stato])) $stato = '';
+    $file = 'iscritti-' . ($stato !== '' ? str_replace(' ', '-', $nomi[$stato]) . '-' : '') . date('Y-m-d') . '.csv';
+
+    while (ob_get_level()) ob_end_clean();
+    header('Content-Type: text/csv; charset=utf-8');
+    header('Content-Disposition: attachment; filename="' . $file . '"');
+    header('Cache-Control: no-store');
+    header('X-Content-Type-Options: nosniff');
+
+    $uscita = fopen('php://output', 'w');
+    fwrite($uscita, "\xEF\xBB\xBF");
+    $scrivi = static fn(array $celle) => fputcsv($uscita, array_map('cella_csv', $celle), ';', '"', '', "\r\n");
+    $scrivi(['Email', 'Nome', 'Stato', 'Iscritto il', 'Confermato il', 'Uscito il',
+             'Consenso il', 'Consenso da', 'Versione del testo']);
+    foreach (admin_iscritti($stato) as $i) {
+        $scrivi([$i['email'], $i['name'], $nomi[$i['status']] ?? $i['status'], $i['created_at'],
+                 $i['confirmed_at'], $i['unsubscribed_at'], $i['consent_at'], $i['consent_source'],
+                 $i['consent_version']]);
+    }
+    fclose($uscita);
+    exit;
+}
+
+/**
+ * Una cella che Excel non può scambiare per una formula. Un nome che comincia
+ * con =, +, - o @ verrebbe eseguito all'apertura (la «CSV injection»): un
+ * apostrofo davanti lo fa restare testo. Il nome lo scrive chiunque si iscriva.
+ */
+function cella_csv(mixed $valore): string {
+    $v = (string)($valore ?? '');
+    return $v !== '' && strpbrk($v[0], "=+-@\t\r") !== false ? "'" . $v : $v;
+}
+
 function conteggi_iscritti(): array {
     $c = ['confirmed' => 0, 'pending' => 0, 'unsubscribed' => 0];
     foreach (db()->query("SELECT status, COUNT(*) AS quanti FROM subscribers GROUP BY status") as $r) {

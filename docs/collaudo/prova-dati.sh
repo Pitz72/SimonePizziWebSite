@@ -243,6 +243,30 @@ TAG_JSON="$(grep -o '"slug":' "$CORPO" | wc -l | tr -d ' ')"
 [ "$(stato "$BASE/admin/dati.php?cosa=tag")" = "302" ] && ok "e senza accesso non dà niente" || no "dati.php?cosa=tag senza accesso" "risponde"
 
 echo
+echo "Gli iscritti in CSV (22/10)"
+# Per Excel italiano: segno UTF-8, punto e virgola. Esce l'elenco a vista, con
+# la prova del consenso; un nome che comincia con «=» resta testo; senza
+# accesso non esce niente.
+sql "INSERT INTO subscribers (email, name, status, created_at) VALUES ('prova-csv@example.test', '=1+1', 'pending', datetime('now'))" >/dev/null
+TOT="$(sql "SELECT COUNT(*) FROM subscribers")"; ATTESA="$(sql "SELECT COUNT(*) FROM subscribers WHERE status='pending'")"
+curl -s -b "$BISCOTTI" -D "$CORPO.h" -o "$CORPO" "$BASE/admin/newsletter.php?esporta=csv"
+grep -qi '^content-type: text/csv' "$CORPO.h" && grep -qi 'filename="iscritti-[0-9-]*\.csv"' "$CORPO.h" \
+  && ok "scarica un .csv" || no "intestazioni del CSV" "$(grep -i 'content-' "$CORPO.h" | tr -d '\r' | tr '\n' ' ')"
+[ "$(head -c 3 "$CORPO" | od -An -tx1 | tr -d ' ')" = "efbbbf" ] && ok "con il segno UTF-8 in testa" || no "BOM" "manca"
+# fputcsv mette fra virgolette le celle con uno spazio: Excel le legge uguali.
+head -1 "$CORPO" | grep -q 'Email;Nome;Stato;.*"Consenso il";"Consenso da";"Versione del testo"' \
+  && ok "punto e virgola, e le colonne del consenso" || no "intestazione" "$(head -1 "$CORPO")"
+[ "$(($(wc -l < "$CORPO") - 1))" = "$TOT" ] && ok "tutti i $TOT iscritti, senza filtro" || no "righe" "$(($(wc -l < "$CORPO") - 1)) su $TOT"
+grep -q "prova-csv@example.test;'=1+1;\"in attesa\"" "$CORPO" && ok "un nome «=1+1» esce come testo, non come formula" || no "CSV injection" "$(grep prova-csv "$CORPO")"
+curl -s -b "$BISCOTTI" -o "$CORPO" "$BASE/admin/newsletter.php?esporta=csv&stato=pending"
+[ "$(($(wc -l < "$CORPO") - 1))" = "$ATTESA" ] && ok "con il filtro, solo quelli in attesa ($ATTESA)" || no "filtro" "$(($(wc -l < "$CORPO") - 1)) su $ATTESA"
+[ "$(stato "$BASE/admin/newsletter.php?esporta=csv")" = "302" ] && ok "senza accesso non esce niente" || no "CSV senza accesso" "risponde"
+curl -s -b "$BISCOTTI" -o "$CORPO" "$BASE/admin/newsletter.php?vista=iscritti"
+grep -q 'esporta=csv' "$CORPO" && ok "il pulsante sta nella pagina degli iscritti" || no "pulsante CSV" "manca"
+sql "DELETE FROM subscribers WHERE email = 'prova-csv@example.test'" >/dev/null
+rm -f "$CORPO.h"
+
+echo
 echo "La cache delle letture pubbliche (M3)"
 # Un titolo cambiato di nascosto nel database non si vede finché la cache vale;
 # il primo POST del pannello (qui un'azione in blocco senza niente selezionato) la svuota e il titolo nuovo compare. Prova che la

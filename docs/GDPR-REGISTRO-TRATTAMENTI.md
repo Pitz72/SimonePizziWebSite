@@ -43,7 +43,7 @@ codice cambia il modo in cui tratta un dato, si aggiorna questa pagina e poi l'i
 | **Base giuridica** | Consenso, art. 6.1.a, con doppia conferma. Gli iscritti di prima di ottobre 2026 senza prova del consenso non ricevono numeri, solo la richiesta di riconferma |
 | **Conservazione** | Fino all'uscita; chi esce resta solo con lo stato «uscito», per non ricevere più niente. Le iscrizioni non confermate si cancellano dopo 30 giorni |
 | **Destinatari** | DreamHost, Google/Gmail |
-| **Misure** | Conferma e uscita solo con un pulsante (mai con un GET); il consenso di un iscritto storico si registra solo dal clic nella sua casella, non dal modulo del sito (corretto il 16 ottobre 2026); freno di tre iscrizioni per rete ogni quarto d'ora |
+| **Misure** | Conferma e uscita solo con un pulsante (mai con un GET); il consenso di un iscritto storico si registra solo dal clic nella sua casella, non dal modulo del sito (corretto il 16 ottobre 2026); freno di tre iscrizioni per rete ogni quarto d'ora. Dal 22 ottobre 2026 il pannello esporta l'elenco in CSV, con la prova del consenso: il file finisce sul computer del titolare e va trattato come le copie di sicurezza, cioè non si condivide e si cancella quando non serve più |
 
 ## 3. Letture degli articoli
 

@@ -18,6 +18,13 @@ richiedi_accesso();
 
 const VISTE_NEWSLETTER = ['iscritti', 'componi', 'campagne'];
 
+/* L'elenco degli iscritti in CSV: un GET che scarica quello che si sta
+   guardando. L'accesso l'ha già chiesto richiedi_accesso() qui sopra, e una
+   lettura non ha bisogno del gettone: un altro sito non può leggerne la risposta. */
+if (($_GET['esporta'] ?? '') === 'csv') {
+    esporta_iscritti_csv((string)($_GET['stato'] ?? ''));
+}
+
 /* ── Le azioni del modulo ─────────────────────────────────────────────────── */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     verifica_gettone();
@@ -216,12 +223,14 @@ $schede = ['iscritti' => 'Iscritti', 'componi' => 'Componi e invia', 'campagne' 
 </section>
 <?php endif; ?>
 
-<?php if ($stato !== ''): ?>
-  <p class="aiuto" style="margin-bottom:16px">
-    Stai vedendo solo: <b><?= e($nomiStato[$stato] ?? $stato) ?></b>.
-    <a href="/admin/newsletter.php?vista=iscritti" style="color:var(--verde)">Vedili tutti</a>
-  </p>
-<?php endif; ?>
+<div class="btn-fila" style="margin-bottom:16px;align-items:center">
+  <a class="btn btn-muto" href="/admin/newsletter.php?esporta=csv<?= $stato !== '' ? '&amp;stato=' . e($stato) : '' ?>"
+     title="Email, nome, stato, date e prova del consenso, per Excel">Esporta in CSV (<?= count($iscritti) ?>)</a>
+  <?php if ($stato !== ''): ?>
+    <span class="aiuto">Stai vedendo solo: <b><?= e($nomiStato[$stato] ?? $stato) ?></b>.
+      <a href="/admin/newsletter.php?vista=iscritti" style="color:var(--verde)">Vedili tutti</a></span>
+  <?php endif; ?>
+</div>
 
 <div class="avvolgi">
   <table class="tabella-lavoro">
