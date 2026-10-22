@@ -355,4 +355,4 @@ if ($id):
 
 <?php finestre_pannello(); ?>
 
-<?php piede_pannello(false, ['libreria.js', 'editor.js', 'seo-check.js']); ?>
+<?php piede_pannello(false, ['caricamenti.js', 'libreria.js', 'editor.js', 'seo-check.js']); ?>

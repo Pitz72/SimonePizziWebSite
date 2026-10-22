@@ -85,43 +85,22 @@
       });
   }
 
-  /* ── Caricare una nuova immagine ───────────────────────────────────────
-     Il ridimensionamento e la conversione in WebP li fa il server: qui si
-     manda il file e si rimette in cima alla griglia quello che torna, così si
-     può usare subito senza ricaricare la finestra. */
-  var moduloCarica = document.getElementById('modulo-carica');
+  /* ── Caricare immagini nuove ───────────────────────────────────────────
+     La coda, le barre e gli errori li tiene caricamenti.js. Qui si rimette in
+     cima alla griglia ogni immagine che arriva, così si può usare subito senza
+     ricaricare la finestra. */
+  var zonaCarica = finestraMedia ? finestraMedia.querySelector('[data-zona-carica]') : null;
 
-  if (moduloCarica) {
-    moduloCarica.addEventListener('submit', function (ev) {
-      ev.preventDefault();
-      var campo = document.getElementById('file-nuovo');
-      if (!campo.files || !campo.files.length) return;
-
-      var dati = new FormData(moduloCarica);
-      var pulsante = moduloCarica.querySelector('button');
-      pulsante.disabled = true;
-      statoMedia.textContent = 'Carico ' + campo.files[0].name + '…';
-      statoMedia.removeAttribute('data-tipo');
-
-      fetch('/admin/carica.php', { method: 'POST', body: dati })
-        .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, d: d }; }); })
-        .then(function (esito) {
-          if (!esito.ok) {
-            statoMedia.textContent = esito.d.errore || 'Il caricamento non è riuscito.';
-            statoMedia.setAttribute('data-tipo', 'no');
-            return;
-          }
-          moduloCarica.reset();
-          statoMedia.textContent = esito.d.nome + ' caricata (' +
-            Math.round(esito.d.peso / 1024) + ' KB). È la prima della griglia.';
-          statoMedia.setAttribute('data-tipo', 'ok');
-          griglia.insertBefore(scheda(esito.d), griglia.firstChild);
-        })
-        .catch(function () {
-          statoMedia.textContent = 'Il caricamento non è riuscito. Riprova.';
-          statoMedia.setAttribute('data-tipo', 'no');
-        })
-        .then(function () { pulsante.disabled = false; });
+  if (zonaCarica && griglia) {
+    zonaCarica.addEventListener('sp:caricata', function (ev) {
+      griglia.insertBefore(scheda(ev.detail), griglia.firstChild);
+    });
+    zonaCarica.addEventListener('sp:finita', function (ev) {
+      var n = ev.detail.riuscite;
+      if (!n) return;
+      statoMedia.textContent = n === 1 ? 'È la prima della griglia: cliccala per usarla.'
+                                       : 'Sono le prime ' + n + ' della griglia: clicca quella che ti serve.';
+      statoMedia.setAttribute('data-tipo', 'ok');
     });
   }
 

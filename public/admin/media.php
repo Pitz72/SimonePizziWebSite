@@ -7,7 +7,8 @@
  * Qui si guarda che cosa c'è, si copia l'indirizzo e si cancella quello che
  * non serve più: la cancellazione c'era nel pannello React ed era andata
  * persa con la migrazione (revisione del 16 ottobre, M9). Un'immagine usata da
- * un articolo non si cancella: il pannello dice da quale.
+ * un articolo non si cancella: il pannello dice da quale. Dal 22 ottobre 2026
+ * qui si caricano anche, più di una alla volta e con la barra, come nel React.
  */
 require __DIR__ . '/_avvio.php';
 richiedi_accesso();
@@ -48,10 +49,13 @@ titolo_pannello('Immagini', $totale . ' nella libreria');
 avviso_pannello();
 ?>
 
+<?php zona_caricamento('file-libreria', 'ricarica'); ?>
+
 <p class="aiuto" style="margin-bottom:20px">
-  Le immagini si caricano dalla scheda di un articolo, dove servono. Qui si vede
-  che cosa c'è già: cliccane una per copiarne l'indirizzo. Quelle con la scritta
-  «in uso» stanno in un articolo e non si cancellano finché non le togli da lì.
+  Le immagini si caricano qui o dalla scheda di un articolo. Sopra i 1920 pixel di
+  larghezza si rimpiccioliscono, e diventano WebP (le GIF animate restano GIF).
+  Cliccane una per copiarne l'indirizzo. Quelle con la scritta «in uso» stanno in
+  un articolo e non si cancellano finché non le togli da lì.
   <?php if (IN_SVILUPPO): ?>
     <br><b>In sviluppo</b> i file non sono su questo computer: le anteprime
     arrivano dal sito in produzione, e cancellare toglie solo la riga.
@@ -103,4 +107,4 @@ avviso_pannello();
 
 <p class="esito" id="esito-copia" role="status" aria-live="polite"></p>
 
-<?php piede_pannello(); ?>
+<?php piede_pannello(false, ['caricamenti.js']); ?>

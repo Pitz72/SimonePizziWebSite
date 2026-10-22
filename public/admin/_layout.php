@@ -121,13 +121,7 @@ function finestre_pannello(): void {
         <button class="finestra-chiudi" type="button" data-chiudi>Esc</button>
       </div>
       <div class="finestra-corpo">
-        <form id="modulo-carica" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;
-                     border-bottom:1px solid var(--filo);padding-bottom:16px;margin-bottom:16px">
-          <?= campo_gettone() ?>
-          <label class="eti spento" for="file-nuovo">Carica una nuova immagine</label>
-          <input id="file-nuovo" name="file" type="file" accept="image/*" style="flex:1;min-width:200px">
-          <button class="btn" type="submit">Carica</button>
-        </form>
+        <?php zona_caricamento('file-nuovo'); ?>
         <p class="esito" id="stato-libreria" role="status" aria-live="polite"></p>
         <ul class="griglia-media" id="griglia-libreria"></ul>
       </div>
@@ -146,6 +140,52 @@ function finestre_pannello(): void {
       </div>
     </dialog>
     <?php
+}
+
+/**
+ * La zona dove si trascinano o si scelgono le immagini da caricare. La fa
+ * funzionare assets/js/caricamenti.js: una barra per file, uno dopo l'altro.
+ * Nel pannello React c'era (MediaGallery, MediaSelectorModal) ed era andata
+ * persa con la migrazione; tornata il 22 ottobre 2026.
+ *
+ * $dopo = 'ricarica' rilegge la pagina quando la coda è finita senza errori:
+ * serve alla Libreria, dove le schede le disegna il PHP.
+ */
+function zona_caricamento(string $id, string $dopo = ''): void {
+    ?>
+    <div class="zona-carica" data-zona-carica data-massimo="<?= limite_caricamento() ?>"<?= $dopo !== '' ? ' data-dopo="' . e($dopo) . '"' : '' ?>>
+      <?= campo_gettone() ?>
+      <label class="zona-carica-bersaglio" for="<?= e($id) ?>">
+        <input class="solo-lettori-schermo" id="<?= e($id) ?>" type="file" multiple
+               accept="image/jpeg,image/png,image/webp,image/gif">
+        <b>Trascina qui le immagini</b>
+        <span>o fai clic per sceglierle · JPG, PNG, WebP, GIF · anche più di una</span>
+      </label>
+      <?php /* Le righe cambiano a ogni percentuale: lette ad alta voce sarebbero
+               un rumore continuo. Il lettore di schermo sente solo l'esito, qui. */ ?>
+      <p class="solo-lettori-schermo" role="status" data-annuncio></p>
+      <ul class="coda-carica"></ul>
+    </div>
+    <?php
+}
+
+/**
+ * Il file più grande che il server accetta, in byte: il minore fra
+ * upload_max_filesize e post_max_size. Oltre, PHP butta via tutta la richiesta,
+ * gettone compreso, e il pannello risponderebbe «modulo scaduto» invece di
+ * «troppo grande». Meglio dirlo prima di spedire.
+ */
+function limite_caricamento(): int {
+    $byte = function (string $valore): int {
+        $valore = trim($valore);
+        $n = (int)$valore;
+        return match (strtolower(substr($valore, -1))) {
+            'g' => $n << 30, 'm' => $n << 20, 'k' => $n << 10, default => $n,
+        };
+    };
+    $limiti = array_filter([$byte((string)ini_get('upload_max_filesize')),
+                            $byte((string)ini_get('post_max_size'))]);
+    return $limiti ? min($limiti) : 0;
 }
 
 /* ── Pezzi che ricorrono ─────────────────────────────────────────────────── */

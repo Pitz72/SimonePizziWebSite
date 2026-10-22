@@ -154,6 +154,35 @@ done
 rm -rf "$GIFDIR"
 
 echo
+echo "Caricare più immagini, con la barra (22/10)"
+# La zona deve esserci in tutti e due i posti, con il limite del server
+# scritto dentro; e la coda manda i file uno dopo l'altro con lo stesso
+# gettone, quindi due caricamenti di fila devono riuscire tutti e due.
+curl -s -b "$BISCOTTI" -o "$CORPO" "$BASE/admin/media.php"
+grep -q 'data-zona-carica' "$CORPO" && grep -q 'data-dopo="ricarica"' "$CORPO" \
+  && ok "la Libreria ha la zona di caricamento, che a fine coda rilegge la pagina" || no "zona nella Libreria" "manca"
+grep -qE 'data-massimo="[1-9][0-9]*"' "$CORPO" && ok "la zona sa quanto accetta il server" || no "data-massimo" "manca o è zero"
+grep -q 'caricamenti\.js' "$CORPO" && ok "e carica caricamenti.js" || no "caricamenti.js nella Libreria" "manca"
+curl -s -b "$BISCOTTI" -o "$CORPO" "$BASE/admin/articolo.php"
+grep -q 'id="file-nuovo" type="file" multiple' "$CORPO" && ok "la finestra della scheda articolo accetta più file" || no "zona nella scheda" "manca o senza multiple"
+[ "$(stato "$BASE/assets/js/caricamenti.js")" = "200" ] && ok "caricamenti.js risponde" || no "caricamenti.js" "non risponde"
+PNGDIR="$(mktemp -d)"
+# Un PNG di un pixel scritto a mano: getimagesize() lo riconosce anche senza GD.
+php -r '$p = base64_decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=="); file_put_contents($argv[1]."/coda-uno.png", $p); file_put_contents($argv[1]."/coda-due.png", $p);' "$(cygpath -m "$PNGDIR")"
+G="$(gettone /admin/media.php)"
+arrivate=0
+for n in uno due; do
+  curl -s -b "$BISCOTTI" -o "$CORPO" -F "gettone=$G" -F "file=@$(cygpath -m "$PNGDIR")/coda-$n.png;type=image/png" "$BASE/admin/carica.php"
+  grep -q '"url":' "$CORPO" && arrivate=$((arrivate + 1))
+done
+[ "$arrivate" = "2" ] && ok "due file di fila con lo stesso gettone arrivano tutti e due" || no "coda" "ne sono arrivati $arrivate su 2"
+for id in $(sql "SELECT id FROM media WHERE filename LIKE '%-coda-uno.%' OR filename LIKE '%-coda-due.%'"); do
+  G="$(gettone /admin/media.php)"; curl -s -b "$BISCOTTI" -o /dev/null -d "gettone=$G&elimina=$id" "$BASE/admin/media.php"
+done
+[ "$(sql "SELECT COUNT(*) FROM media WHERE filename LIKE '%-coda-uno.%' OR filename LIKE '%-coda-due.%'")" = "0" ] || no "pulizia" "le due prove sono rimaste in libreria"
+rm -rf "$PNGDIR"
+
+echo
 echo "La cache delle letture pubbliche (M3)"
 # Un titolo cambiato di nascosto nel database non si vede finché la cache vale;
 # il primo POST del pannello (qui un'azione in blocco senza niente selezionato) la svuota e il titolo nuovo compare. Prova che la

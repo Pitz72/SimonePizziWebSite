@@ -210,6 +210,44 @@ textarea{resize:vertical;min-height:90px}
   background:var(--pannello);overflow:hidden;flex:none}
 .copertina-scelta .anteprima img{width:100%;height:100%;object-fit:cover}
 
+/* ── Caricare immagini ──────────────────────────────────────────────────────
+   La zona dove si trascinano i file, e sotto una riga per file con la sua
+   barra. Le righe restano dopo la fine: l'esito si legge, non lampeggia. */
+.zona-carica{border-bottom:1px solid var(--filo);padding-bottom:16px;margin-bottom:16px}
+.zona-carica-bersaglio{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:6px;min-height:104px;padding:18px;border:1px dashed var(--filo);background:var(--pece);
+  cursor:pointer;text-align:center;transition:border-color .14s,background .14s}
+.zona-carica-bersaglio b{color:var(--testo);font-weight:600;font-size:15px}
+.zona-carica-bersaglio span{color:var(--spento);font-size:13px;line-height:1.45}
+.zona-carica-bersaglio:hover,.zona-carica[data-sopra] .zona-carica-bersaglio{border-color:var(--verde);border-style:solid}
+.zona-carica[data-sopra] .zona-carica-bersaglio{background:var(--pannello)}
+.zona-carica:focus-within .zona-carica-bersaglio{outline:2px solid var(--verde);outline-offset:2px}
+.coda-carica{list-style:none;margin:0;padding:0}
+.coda-carica li{padding-top:12px}
+.coda-testa{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 12px;font-size:13px;margin-bottom:6px}
+.coda-nome{color:var(--testo);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;max-width:100%}
+.coda-dato{color:var(--spento);font-variant-numeric:tabular-nums}
+.coda-carica li[data-tipo="ok"] .coda-dato{color:var(--verde)}
+.coda-carica li[data-tipo="no"] .coda-dato{color:#e8a0a0}
+.coda-carica progress{appearance:none;-webkit-appearance:none;display:block;width:100%;height:4px;
+  border:0;background:var(--filo);color:var(--verde)}
+.coda-carica progress::-webkit-progress-bar{background:var(--filo)}
+.coda-carica progress::-webkit-progress-value{background:var(--verde);transition:width .15s}
+.coda-carica progress::-moz-progress-bar{background:var(--verde)}
+.coda-carica li[data-tipo="no"] progress::-webkit-progress-value{background:#e8a0a0}
+.coda-carica li[data-tipo="no"] progress::-moz-progress-bar{background:#e8a0a0}
+/* Senza valore: il file è arrivato e il server lo sta convertendo. */
+.coda-carica progress:indeterminate{
+  background:linear-gradient(90deg,var(--filo) 0 35%,var(--verde) 50%,var(--filo) 65% 100%) 0 0/300% 100%;
+  animation:sp-prepara 1.3s linear infinite}
+.coda-carica progress:indeterminate::-webkit-progress-bar{background:transparent}
+.coda-carica progress:indeterminate::-moz-progress-bar{background:transparent}
+@keyframes sp-prepara{from{background-position:100% 0}to{background-position:0 0}}
+@media (prefers-reduced-motion:reduce){
+  .coda-carica progress:indeterminate{animation:none;background:var(--verde);opacity:.55}
+}
+.coda-rileggi{margin-top:14px}
+
 /* ── Grafico ────────────────────────────────────────────────────────────── */
 .grafico{display:flex;align-items:flex-end;gap:2px;height:150px;border-bottom:1px solid var(--filo);
   padding-top:10px}
