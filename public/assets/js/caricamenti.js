@@ -1,4 +1,4 @@
-/* caricamenti.js — le immagini che vanno al server, con la barra.
+/* caricamenti.js — i file che vanno al server (immagini, PDF, archivi), con la barra.
 
    Nel pannello React la percentuale la calcolava il browser
    (xhr.upload.onprogress in api.ts), e così si fa anche qui: fetch() non sa
@@ -22,7 +22,10 @@
   var zone = document.querySelectorAll('[data-zona-carica]');
   if (!zone.length || !window.FormData) return;
 
-  var AMMESSE = ['jpg', 'jpeg', 'png', 'webp', 'gif'];   // come ESTENSIONI in admin/carica.php
+  /* Che cosa accetta la zona lo scrive il PHP (data-ammesse, da ZONA_TIPI in
+     admin/_layout.php); le immagini hanno solo il limite del server, PDF e
+     archivi anche il loro (data-massimo-file). */
+  var IMMAGINI = ['jpg', 'jpeg', 'png', 'webp', 'gif'];   // come ESTENSIONI in admin/carica.php
 
   function peso(byte) {
     if (byte < 1024 * 1024) return Math.max(1, Math.round(byte / 1024)) + ' KB';
@@ -58,9 +61,12 @@
     var annuncio = zona.querySelector('[data-annuncio]');
     var gettone  = zona.querySelector('input[name="gettone"]');
     var massimo  = parseInt(zona.getAttribute('data-massimo') || '0', 10);
+    var massimoFile = parseInt(zona.getAttribute('data-massimo-file') || '0', 10);
+    var ammesse  = (zona.getAttribute('data-ammesse') || IMMAGINI.join(',')).split(',');
     var coda = [];
     var attivo = false;
     var riuscite = 0, fallite = 0;
+    var schede = {};   // in quali schede della Libreria è finito quello che è arrivato
 
     function annuncia(testo) { if (annuncio) annuncio.textContent = testo; }
 
@@ -94,15 +100,19 @@
     });
 
     function accoda(files) {
-      if (!attivo) { riuscite = 0; fallite = 0; }
+      if (!attivo) { riuscite = 0; fallite = 0; schede = {}; }
       Array.prototype.forEach.call(files, function (f) {
         var riga = nuovaRiga(f);
-        if (AMMESSE.indexOf(estensione(f.name)) < 0) {
+        var immagine = IMMAGINI.indexOf(estensione(f.name)) >= 0;
+        if (ammesse.indexOf(estensione(f.name)) < 0) {
           fallite++;
-          chiudiRiga(riga, 'no', 'formato non ammesso: vanno bene ' + AMMESSE.join(', '));
+          chiudiRiga(riga, 'no', 'formato non ammesso qui: vanno bene ' + ammesse.join(', '));
         } else if (massimo > 0 && f.size > massimo) {
           fallite++;
           chiudiRiga(riga, 'no', 'troppo grande: il server accetta fino a ' + peso(massimo));
+        } else if (!immagine && massimoFile > 0 && f.size > massimoFile) {
+          fallite++;
+          chiudiRiga(riga, 'no', 'troppo grande: per PDF e archivi il limite è ' + peso(massimoFile));
         } else {
           coda.push({ file: f, riga: riga });
           inCorso++;
@@ -168,7 +178,8 @@
          Una barra senza valore lo dice meglio di un 100% fermo. */
       xhr.upload.addEventListener('load', function () {
         riga.barra.removeAttribute('value');
-        riga.dato.textContent = 'arrivata · il server la prepara';
+        riga.dato.textContent = IMMAGINI.indexOf(estensione(file.name)) >= 0
+          ? 'arrivata · il server la prepara' : 'arrivato · il server lo registra';
       });
 
       xhr.addEventListener('load', function () {
@@ -176,8 +187,9 @@
         try { d = JSON.parse(xhr.responseText); } catch (e) { d = null; }
         if (xhr.status === 200 && d && d.url) {
           riuscite++;
+          schede[d.tipo || 'immagini'] = true;
           chiudiRiga(riga, 'ok', 'fatto · ' + peso(d.peso) + (/\.webp$/i.test(d.nome || '') ? ' in WebP' : ''));
-          annuncia(file.name + ' caricata.');
+          annuncia(file.name + ': fatto.');
           zona.dispatchEvent(new CustomEvent('sp:caricata', { detail: d }));
         } else {
           fallite++;
@@ -203,10 +215,18 @@
       zona.dispatchEvent(new CustomEvent('sp:finita', { detail: { riuscite: riuscite, fallite: fallite } }));
       if (zona.getAttribute('data-dopo') !== 'ricarica' || riuscite === 0) return;
 
+      /* Si torna alla scheda dove sono finiti i file: se sono tutti dello stesso
+         tipo, quella; se no, quella che si stava guardando. */
+      var dove = Object.keys(schede);
+      var scheda = dove.length === 1 ? dove[0]
+                 : (new URLSearchParams(location.search).get('tipo') || 'immagini');
       if (fallite === 0) {
-        var detto = riuscite === 1 ? 'Un\'immagine caricata: è la prima della libreria.'
-                                   : riuscite + ' immagini caricate: sono le prime della libreria.';
-        location.href = location.pathname + '?fatto=' + encodeURIComponent(detto);
+        var detto = dove.length === 1 && dove[0] === 'immagini'
+          ? (riuscite === 1 ? 'Un\'immagine caricata: è la prima della libreria.'
+                            : riuscite + ' immagini caricate: sono le prime della libreria.')
+          : (riuscite === 1 ? 'Un file caricato: è il primo della sua scheda.'
+                            : riuscite + ' file caricati: sono i primi della loro scheda.');
+        location.href = location.pathname + '?tipo=' + scheda + '&fatto=' + encodeURIComponent(detto);
         return;
       }
       /* Qualcosa è andato storto: le righe rosse restano da leggere, e la
@@ -214,8 +234,8 @@
       if (!zona.querySelector('.coda-rileggi')) {
         var a = document.createElement('a');
         a.className = 'btn btn-muto coda-rileggi';
-        a.href = location.pathname;
-        a.textContent = 'Mostra le nuove nella libreria';
+        a.href = location.pathname + '?tipo=' + scheda;
+        a.textContent = 'Mostra i nuovi nella libreria';
         zona.appendChild(a);
       }
     }

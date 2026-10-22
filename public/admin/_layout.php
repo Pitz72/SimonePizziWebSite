@@ -16,7 +16,7 @@ function voci_pannello(): array {
         'articoli'   => ['Articoli',    '/admin/articoli.php'],
         'categorie'  => ['Categorie',   '/admin/categorie.php'],
         'tag'        => ['Tag',         '/admin/tag.php'],
-        'media'      => ['Immagini',    '/admin/media.php'],
+        'media'      => ['Libreria',    '/admin/media.php'],
         'messaggi'   => ['Messaggi',    '/admin/messaggi.php'],
         'newsletter' => ['Newsletter',  '/admin/newsletter.php'],
         'impostazioni' => ['Impostazioni', '/admin/impostazioni.php'],
@@ -127,6 +127,18 @@ function finestre_pannello(): void {
       </div>
     </dialog>
 
+    <dialog class="finestra" id="finestra-file" aria-labelledby="titolo-file">
+      <div class="finestra-cima">
+        <h2 id="titolo-file">Collega un file</h2>
+        <button class="finestra-chiudi" type="button" data-chiudi>Esc</button>
+      </div>
+      <div class="finestra-corpo">
+        <?php zona_caricamento('file-allegato', '', 'allegati'); ?>
+        <p class="esito" id="stato-file" role="status" aria-live="polite"></p>
+        <ul class="esiti" id="elenco-file"></ul>
+      </div>
+    </dialog>
+
     <dialog class="finestra" id="finestra-link-interno" aria-labelledby="titolo-link-interno">
       <div class="finestra-cima">
         <h2 id="titolo-link-interno">Collega un articolo</h2>
@@ -150,16 +162,38 @@ function finestre_pannello(): void {
  *
  * $dopo = 'ricarica' rilegge la pagina quando la coda è finita senza errori:
  * serve alla Libreria, dove le schede le disegna il PHP.
+ *
+ * $tipi dice che cosa accetta: 'immagini' (la copertina, le figure nel testo),
+ * 'allegati' (PDF e archivi, per «Collega un file») o 'tutti' (la Libreria).
+ * Le estensioni sono quelle di admin/carica.php: il server le ricontrolla
+ * comunque, qui servono a dire di no prima di spedire.
  */
-function zona_caricamento(string $id, string $dopo = ''): void {
+const ZONA_TIPI = [
+    'immagini' => ['ammesse' => 'jpg,jpeg,png,webp,gif',
+                   'accept'  => 'image/jpeg,image/png,image/webp,image/gif',
+                   'titolo'  => 'Trascina qui le immagini',
+                   'sotto'   => 'o fai clic per sceglierle · JPG, PNG, WebP, GIF · anche più di una'],
+    'allegati' => ['ammesse' => 'pdf,zip,rar',
+                   'accept'  => '.pdf,.zip,.rar,application/pdf,application/zip',
+                   'titolo'  => 'Trascina qui PDF e archivi',
+                   'sotto'   => 'o fai clic per sceglierli · PDF, ZIP, RAR fino a %d MB · anche più di uno'],
+    'tutti'    => ['ammesse' => 'jpg,jpeg,png,webp,gif,pdf,zip,rar',
+                   'accept'  => 'image/jpeg,image/png,image/webp,image/gif,.pdf,.zip,.rar,application/pdf,application/zip',
+                   'titolo'  => 'Trascina qui immagini, PDF e archivi',
+                   'sotto'   => 'o fai clic per sceglierli · JPG, PNG, WebP, GIF · PDF, ZIP, RAR fino a %d MB'],
+];
+
+function zona_caricamento(string $id, string $dopo = '', string $tipi = 'immagini'): void {
+    $t = ZONA_TIPI[$tipi] ?? ZONA_TIPI['immagini'];
     ?>
-    <div class="zona-carica" data-zona-carica data-massimo="<?= limite_caricamento() ?>"<?= $dopo !== '' ? ' data-dopo="' . e($dopo) . '"' : '' ?>>
+    <div class="zona-carica" data-zona-carica data-ammesse="<?= e($t['ammesse']) ?>"
+         data-massimo="<?= limite_caricamento() ?>" data-massimo-file="<?= PESO_MASSIMO_FILE ?>"<?= $dopo !== '' ? ' data-dopo="' . e($dopo) . '"' : '' ?>>
       <?= campo_gettone() ?>
       <label class="zona-carica-bersaglio" for="<?= e($id) ?>">
         <input class="solo-lettori-schermo" id="<?= e($id) ?>" type="file" multiple
-               accept="image/jpeg,image/png,image/webp,image/gif">
-        <b>Trascina qui le immagini</b>
-        <span>o fai clic per sceglierle · JPG, PNG, WebP, GIF · anche più di una</span>
+               accept="<?= e($t['accept']) ?>">
+        <b><?= e($t['titolo']) ?></b>
+        <span><?= e(sprintf($t['sotto'], PESO_MASSIMO_FILE >> 20)) ?></span>
       </label>
       <?php /* Le righe cambiano a ogni percentuale: lette ad alta voce sarebbero
                un rumore continuo. Il lettore di schermo sente solo l'esito, qui. */ ?>

@@ -7,12 +7,14 @@
  * e attributi gemella di quella di safe_html() sul server — se le due
  * divergono, l'autore scrive cose che il sito butta via senza dirglielo.
  *
- * Tre differenze rispetto all'originale, tutte di questo sito:
+ * Quattro differenze rispetto all'originale, tutte di questo sito:
  *   - le TABELLE sono ammesse e c'è un comando per inserirle: il conto dice
  *     che dieci articoli ne contengono, con 170 celle;
  *   - c'è il comando «Link interno», che cerca un articolo e ne inserisce
  *     l'indirizzo giusto invece di farlo copiare a mano dalla barra del browser;
- *   - i nomi globali sono spEditor e spApriLibreria.
+ *   - c'è il comando «+ File» (22 ottobre 2026), che collega un PDF o un
+ *     archivio della libreria, con tipo e peso accanto;
+ *   - i nomi globali sono spEditor, spApriLibreria e spApriFile.
  *
  * Se si tocca la lista ALLOWED qui sotto, si tocca anche HTML_AMMESSO in
  * public/lib/safe_html.php. Sono la stessa cosa scritta in due linguaggi.
@@ -484,6 +486,7 @@
     { cmd: 'link', label: 'Link', title: 'Inserisci o togli un link' },
     { cmd: 'interno', label: 'Link interno', title: 'Cerca un articolo del sito e mettine il link' },
     { cmd: 'img', label: '+ Immagine', title: 'Immagine dalla libreria media', cls: 'ed-hot' },
+    { cmd: 'file', label: '+ File', title: 'Collega un PDF o un archivio della libreria' },
     { cmd: 'yt', label: '▶ YouTube', title: 'Incorpora un video YouTube' },
     { cmd: 'tabella', label: 'Tabella', title: 'Inserisci una tabella 3×3 con intestazione' },
     { cmd: 'hr', label: '—', title: 'Riga di separazione' },
@@ -698,6 +701,23 @@
         window.spApriLinkInterno(function (a) {
           var testo = testoScelto || a.titolo;
           insertHtml('<a href="' + esc(a.indirizzo) + '">' + esc(testo) + '</a>');
+        });
+      },
+
+      /* Un PDF o un archivio della libreria: il link porta il nome del file, e
+         accanto si scrivono tipo e peso, perché chi legge sappia che cosa sta
+         per aprire. Con del testo selezionato, il link va su quello e basta. */
+      file: function () {
+        if (!selectionInArea()) { area.focus(); refreshToolbar(); }
+        if (typeof window.spApriFile !== 'function') { alert('La libreria dei file non è disponibile in questa pagina.'); return; }
+        var r = selectionInArea();
+        var testoScelto = r && !r.collapsed ? String(r) : '';
+        window.spApriFile(function (f) {
+          var link = '<a href="' + esc(f.url) + '">' + esc(testoScelto || f.nome) + '</a>';
+          if (testoScelto) { insertHtml(link); return; }
+          var peso = f.peso < 1048576 ? Math.max(1, Math.round(f.peso / 1024)) + ' KB'
+                                      : (f.peso / 1048576).toFixed(1).replace('.', ',') + ' MB';
+          insertHtml(link + ' (' + esc(f.tipo) + ', ' + peso + ')');
         });
       },
 

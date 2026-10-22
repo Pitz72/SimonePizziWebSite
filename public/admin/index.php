@@ -82,7 +82,7 @@ avviso_pannello();
   <a href="/admin/newsletter.php"><div><b><?= $n['iscritti'] ?></b><span class="eti">Iscritti</span>
     <?php if ($nuovi > 0): ?><span class="eti" style="color:var(--verde)">+<?= $nuovi ?> in 30 giorni</span><?php endif; ?>
   </div></a>
-  <a href="/admin/media.php"><div><b><?= conta_media() ?></b><span class="eti">Immagini</span></div></a>
+  <a href="/admin/media.php"><div><b><?= conta_media('immagini') ?></b><span class="eti">Immagini</span></div></a>
 </div>
 
 <!-- ── L'andamento ─────────────────────────────────────────────────────── -->

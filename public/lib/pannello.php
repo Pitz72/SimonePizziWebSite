@@ -405,22 +405,57 @@ function elimina_categoria(int $id): string {
 
 /* ════════════════════════════════ Media ═════════════════════════════════ */
 
-function admin_media(int $quanti = 60, int $salta = 0): array {
-    $quanti = max(1, min(200, $quanti)); $salta = max(0, $salta);
-    return db()->query("SELECT * FROM media ORDER BY created_at DESC
-                        LIMIT $quanti OFFSET $salta")->fetchAll();
+/* Le tre schede della libreria, come nel React (MediaGallery.tsx): immagini,
+   documenti (i PDF) e file (gli archivi, e qualunque altra cosa). Il tipo lo
+   dice mime_type, che scrive admin/carica.php. 'allegati' sono documenti e
+   file insieme: è quello che chiede la finestra «Collega un file». */
+const SCHEDE_MEDIA = ['immagini' => 'Immagini', 'documenti' => 'Documenti', 'file' => 'File'];
+
+/* Il peso massimo di un PDF o di un archivio. Scelto da Simone il 22 ottobre
+   2026: ogni file finisce anche in immagini.zip, il backup di uploads/, e un
+   archivio enorme lo gonfierebbe. Le immagini hanno solo il limite del server. */
+const PESO_MASSIMO_FILE = 100 * 1024 * 1024;
+
+function condizione_media(string $tipo): string {
+    return match ($tipo) {
+        'immagini'  => "mime_type LIKE 'image/%'",
+        'documenti' => "mime_type = 'application/pdf'",
+        'file'      => "(mime_type IS NULL OR (mime_type NOT LIKE 'image/%' AND mime_type <> 'application/pdf'))",
+        'allegati'  => "(mime_type IS NULL OR mime_type NOT LIKE 'image/%')",
+        default     => '1 = 1',
+    };
 }
 
-function conta_media(): int {
-    return (int)db()->query("SELECT COUNT(*) FROM media")->fetchColumn();
+/** Il peso di un file come lo si dice: «77 KB», «1,4 MB». */
+function peso_breve(int $byte): string {
+    if ($byte < 1024 * 1024) return max(1, (int)round($byte / 1024)) . ' KB';
+    return str_replace('.', ',', (string)round($byte / 1048576, 1)) . ' MB';
+}
+
+/** La scheda in cui sta un file della libreria. */
+function scheda_media(array $m): string {
+    $mime = (string)($m['mime_type'] ?? '');
+    if (str_starts_with($mime, 'image/')) return 'immagini';
+    return $mime === 'application/pdf' ? 'documenti' : 'file';
+}
+
+function admin_media(int $quanti = 60, int $salta = 0, string $tipo = ''): array {
+    $quanti = max(1, min(200, $quanti)); $salta = max(0, $salta);
+    return db()->query("SELECT * FROM media WHERE " . condizione_media($tipo) . "
+                        ORDER BY created_at DESC LIMIT $quanti OFFSET $salta")->fetchAll();
+}
+
+function conta_media(string $tipo = ''): int {
+    return (int)db()->query("SELECT COUNT(*) FROM media WHERE " . condizione_media($tipo))->fetchColumn();
 }
 
 /**
  * Dove è usata ogni immagine: id del file => elenco dei titoli che la usano.
  *
  * Un file è «in uso» se il suo nome compare nella copertina, nel testo o nei
- * pulsanti di un articolo (bozze comprese), oppure se un pulsante lo scarica con
- * api/download.php?id=N. I nomi sono unici — hanno davanti un uniqid — quindi
+ * pulsanti di un articolo (bozze comprese), oppure se un pulsante o un link nel
+ * testo lo scarica con api/download.php?id=N (i PDF del React stanno così). I
+ * nomi sono unici — hanno davanti un uniqid — quindi
  * cercare il nome del file basta, qualunque forma abbia l'indirizzo (relativo o
  * assoluto). Una lettura sola di tutti gli articoli, e il confronto in PHP: con
  * un centinaio di articoli costa meno di sessanta LIKE.
@@ -441,7 +476,7 @@ function media_in_uso(array $media): array {
             if (str_contains((string)$a['cover_image'], $nome)
                 || str_contains((string)$a['content'], $nome)
                 || str_contains($pulsanti, $nome)
-                || preg_match('/' . preg_quote($scarica, '/') . '(?!\d)/', $pulsanti)) {
+                || preg_match('/' . preg_quote($scarica, '/') . '(?!\d)/', $pulsanti . ' ' . (string)$a['content'])) {
                 $uso[(int)$m['id']][] = (string)$a['title'];
             }
         }

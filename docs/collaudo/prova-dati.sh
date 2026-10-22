@@ -183,6 +183,50 @@ done
 rm -rf "$PNGDIR"
 
 echo
+echo "PDF e archivi nella libreria (22/10)"
+# Il React li accettava, il pannello PHP no. Si controllano dai primi byte: un
+# testo chiamato .pdf si ferma. Vanno in documenti/ e file/, con il nome pulito
+# in filename (è quello con cui download.php li fa scaricare), e stanno nella
+# loro scheda, non in quella delle immagini né nella finestra della copertina.
+ALLDIR="$(mktemp -d)"
+php -r '
+  file_put_contents($argv[1] . "/prova-documento.pdf", "%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n");
+  file_put_contents($argv[1] . "/prova-archivio.zip", "PK\x05\x06" . str_repeat("\0", 18));
+  file_put_contents($argv[1] . "/finto.pdf", "<?php echo 1;");
+' "$(cygpath -m "$ALLDIR")"
+G="$(gettone /admin/media.php)"
+curl -s -b "$BISCOTTI" -o "$CORPO" -F "gettone=$G" -F "file=@$(cygpath -m "$ALLDIR")/prova-documento.pdf;type=application/pdf" "$BASE/admin/carica.php"
+grep -q '"url":"[^"]*/uploads/documenti/[^"]*-prova-documento\.pdf"' "$CORPO" && grep -q '"tipo":"documenti"' "$CORPO" \
+  && ok "un PDF arriva in uploads/documenti/" || no "PDF" "$(head -c 200 "$CORPO")"
+curl -s -b "$BISCOTTI" -o "$CORPO" -F "gettone=$G" -F "file=@$(cygpath -m "$ALLDIR")/prova-archivio.zip;type=application/zip" "$BASE/admin/carica.php"
+grep -q '"url":"[^"]*/uploads/file/[^"]*-prova-archivio\.zip"' "$CORPO" && ok "uno ZIP arriva in uploads/file/" || no "ZIP" "$(head -c 200 "$CORPO")"
+[ "$(stato -b "$BISCOTTI" -F "gettone=$G" -F "file=@$(cygpath -m "$ALLDIR")/finto.pdf;type=application/pdf" "$BASE/admin/carica.php")" = "400" ] \
+  && ok "un .php travestito da .pdf si ferma (400)" || no "PDF finto" "non è stato fermato"
+[ "$(sql "SELECT filename || '|' || mime_type FROM media WHERE file_path LIKE '%-prova-documento.pdf'")" = "prova-documento.pdf|application/pdf" ] \
+  && ok "in libreria con il nome pulito e il tipo giusto" || no "riga del PDF" "$(sql "SELECT filename, mime_type FROM media WHERE file_path LIKE '%-prova-documento.pdf'")"
+PDF_ID="$(sql "SELECT id FROM media WHERE file_path LIKE '%-prova-documento.pdf'")"
+curl -s -b "$BISCOTTI" -o "$CORPO" "$BASE/admin/media.php?tipo=documenti"
+grep -q "name=\"elimina\" value=\"$PDF_ID\"" "$CORPO" && grep -q 'anteprima-file' "$CORPO" \
+  && ok "sta nella scheda Documenti, senza anteprima finta" || no "scheda Documenti" "il PDF non c'è"
+curl -s -b "$BISCOTTI" -o "$CORPO" "$BASE/admin/media.php?tipo=immagini"
+grep -q "name=\"elimina\" value=\"$PDF_ID\"" "$CORPO" && no "scheda Immagini" "c'è anche il PDF" || ok "e non in quella delle Immagini"
+curl -s -b "$BISCOTTI" -o "$CORPO" "$BASE/admin/dati.php?cosa=media"
+grep -q 'prova-documento' "$CORPO" && no "finestra delle immagini" "mostra il PDF" || ok "la finestra della copertina non lo mostra"
+curl -s -b "$BISCOTTI" -o "$CORPO" "$BASE/admin/dati.php?cosa=file"
+grep -q '"nome":"prova-documento.pdf"' "$CORPO" && grep -q '"tipo":"PDF"' "$CORPO" \
+  && ok "«Collega un file» lo elenca, con il tipo" || no "dati.php?cosa=file" "$(head -c 200 "$CORPO")"
+curl -s -b "$BISCOTTI" -o "$CORPO" "$BASE/admin/articolo.php"
+grep -q 'id="finestra-file"' "$CORPO" && grep -q 'id="file-allegato"' "$CORPO" \
+  && ok "la scheda articolo ha la finestra «Collega un file»" || no "finestra-file" "manca"
+curl -s -D - -o /dev/null "$BASE/api/download.php?id=$PDF_ID" | grep -qi 'filename="prova-documento.pdf"' \
+  && ok "download.php lo fa scaricare con il suo nome" || no "download.php" "nome sbagliato"
+for id in $(sql "SELECT id FROM media WHERE file_path LIKE '%-prova-documento.pdf' OR file_path LIKE '%-prova-archivio.zip'"); do
+  G="$(gettone /admin/media.php)"; curl -s -b "$BISCOTTI" -o /dev/null -d "gettone=$G&elimina=$id" "$BASE/admin/media.php"
+done
+[ "$(sql "SELECT COUNT(*) FROM media WHERE file_path LIKE '%-prova-documento.pdf' OR file_path LIKE '%-prova-archivio.zip'")" = "0" ] || no "pulizia" "PDF e ZIP di prova sono rimasti"
+rm -rf "$ALLDIR"
+
+echo
 echo "La cache delle letture pubbliche (M3)"
 # Un titolo cambiato di nascosto nel database non si vede finché la cache vale;
 # il primo POST del pannello (qui un'azione in blocco senza niente selezionato) la svuota e il titolo nuovo compare. Prova che la

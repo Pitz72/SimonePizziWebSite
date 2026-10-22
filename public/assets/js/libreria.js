@@ -1,5 +1,6 @@
-/* libreria.js — le due finestre che l'editor e la scheda articolo chiedono:
-   la libreria delle immagini e il cercatore di articoli per i link interni.
+/* libreria.js — le finestre che l'editor e la scheda articolo chiedono:
+   la libreria delle immagini, quella dei PDF e degli archivi, e il cercatore
+   di articoli per i link interni.
 
    Sono <dialog>: fuoco, Esc e sfondo li fa il browser. Qui c'è solo quello che
    il browser non sa — che cosa mostrare dentro. */
@@ -101,6 +102,88 @@
       statoMedia.textContent = n === 1 ? 'È la prima della griglia: cliccala per usarla.'
                                        : 'Sono le prime ' + n + ' della griglia: clicca quella che ti serve.';
       statoMedia.setAttribute('data-tipo', 'ok');
+    });
+  }
+
+  /* ── PDF e archivi ─────────────────────────────────────────────────────
+     La finestra di «Collega un file» dell'editor: lo stesso giro della
+     libreria, ma un elenco invece di una griglia, perché di un PDF non c'è
+     niente da guardare. Tornata il 22 ottobre 2026: il React caricava PDF e
+     archivi, il pannello in PHP no. */
+  var finestraFile = document.getElementById('finestra-file');
+  var elencoFile = document.getElementById('elenco-file');
+  var statoFile = document.getElementById('stato-file');
+  var quandoFile = null;
+  var fileCaricati = false;
+
+  function pesoBreve(byte) {
+    if (byte < 1024 * 1024) return Math.max(1, Math.round(byte / 1024)) + ' KB';
+    return (byte / 1024 / 1024).toFixed(1).replace('.', ',') + ' MB';
+  }
+
+  window.spApriFile = function (richiama) {
+    quandoFile = richiama;
+    apri(finestraFile);
+    if (!fileCaricati) caricaFile();
+  };
+
+  function rigaFile(f) {
+    var li = document.createElement('li');
+    var b = document.createElement('button');
+    b.type = 'button';
+    var tipo = document.createElement('span');
+    tipo.className = 'tipo';
+    tipo.textContent = f.tipo;
+    var testo = document.createElement('span');
+    var nome = document.createElement('strong');
+    nome.textContent = f.nome;
+    var peso = document.createElement('span');
+    peso.textContent = pesoBreve(f.peso);
+    testo.appendChild(nome);
+    testo.appendChild(peso);
+    b.appendChild(tipo);
+    b.appendChild(testo);
+    b.addEventListener('click', function () {
+      chiudi(finestraFile);
+      if (quandoFile) quandoFile(f);
+    });
+    li.appendChild(b);
+    return li;
+  }
+
+  function caricaFile() {
+    if (!elencoFile) return;
+    statoFile.textContent = 'Carico…';
+    fetch('/admin/dati.php?cosa=file', { headers: { Accept: 'application/json' } })
+      .then(function (r) { return r.ok ? r.json() : Promise.reject(r.status); })
+      .then(function (d) {
+        elencoFile.innerHTML = '';
+        (d.file || []).forEach(function (f) { elencoFile.appendChild(rigaFile(f)); });
+        statoFile.textContent = (d.file || []).length
+          ? (d.file.length === 1 ? 'Un file.' : d.file.length + ' file.')
+          : 'Ancora nessun PDF o archivio: caricane uno qui sopra.';
+        fileCaricati = true;
+      })
+      .catch(function () {
+        statoFile.textContent = 'Non sono riuscito a leggere la libreria. Ricarica la pagina.';
+      });
+  }
+
+  var zonaFile = finestraFile ? finestraFile.querySelector('[data-zona-carica]') : null;
+  if (zonaFile && elencoFile) {
+    zonaFile.addEventListener('sp:caricata', function (ev) {
+      var d = ev.detail;
+      elencoFile.insertBefore(rigaFile({
+        id: d.id, url: d.url, nome: d.nome, peso: d.peso,
+        tipo: (d.nome.split('.').pop() || '').toUpperCase()
+      }), elencoFile.firstChild);
+    });
+    zonaFile.addEventListener('sp:finita', function (ev) {
+      var n = ev.detail.riuscite;
+      if (!n) return;
+      statoFile.textContent = n === 1 ? 'È il primo dell\'elenco: cliccalo per collegarlo.'
+                                      : 'Sono i primi ' + n + ' dell\'elenco: clicca quello che ti serve.';
+      statoFile.setAttribute('data-tipo', 'ok');
     });
   }
 
