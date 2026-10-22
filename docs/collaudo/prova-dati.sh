@@ -284,6 +284,11 @@ ATTESI="$(sql "SELECT COUNT(*) FROM articles WHERE title LIKE '%$PAROLA%' OR exc
 curl -s -b "$BISCOTTI" -o "$CORPO" "$BASE/admin/articoli.php?tag=x&dal=2026-01-01"
 grep -q 'list="elenco-tag"' "$CORPO" && grep -q 'name="dal" value="2026-01-01"' "$CORPO" && grep -q 'name="ritorno" value="[^"]*tag=x' "$CORPO" \
   && ok "i filtri restano nel modulo e nel ritorno dopo un'azione" || no "filtri nel modulo" "persi"
+grep -q 'data-copia="https://simonepizzi.runtimeradio.it/api/rss.php"' "$CORPO" && grep -q 'id="esito-copia"' "$CORPO" \
+  && ok "«Copia il link del feed» porta l'indirizzo pubblico" || no "copia del feed" "manca"
+# Per nome: i primi tre della tabella devono essere in ordine alfabetico.
+PRIMI="$(curl -s -b "$BISCOTTI" "$BASE/admin/tag.php?ordine=nome" | grep -o 'name="nome" value="[^"]*"' | head -3 | sed 's/.*value="//;s/"$//')"
+[ -n "$PRIMI" ] && [ "$PRIMI" = "$(printf '%s\n' "$PRIMI" | sort -f)" ] && ok "i tag si ordinano per nome" || no "tag per nome" "$(echo $PRIMI)"
 
 echo
 echo "La cache delle letture pubbliche (M3)"

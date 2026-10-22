@@ -46,6 +46,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 $cerca = trim((string)($_GET['q'] ?? ''));
 $tag   = admin_tag($cerca);
+/* Per uso (i più usati in cima, come arrivano) o per nome, come nel React
+   (TagsList.tsx): per nome i doppioni da unire stanno vicini. */
+$ordine = ($_GET['ordine'] ?? '') === 'nome' ? 'nome' : 'uso';
+if ($ordine === 'nome') usort($tag, fn($a, $b) => strnatcasecmp((string)$a['name'], (string)$b['name']));
 $soli  = array_values(array_filter($tag, fn($t) => (int)$t['quanti'] === 1));
 $orfani = array_values(array_filter($tag, fn($t) => (int)$t['quanti'] === 0));
 
@@ -69,8 +73,15 @@ avviso_pannello();
     <span class="eti">Cerca</span>
     <input type="search" name="q" value="<?= e($cerca) ?>" placeholder="Nome del tag" style="min-width:240px">
   </label>
+  <label>
+    <span class="eti">Ordine</span>
+    <select name="ordine">
+      <option value="uso">Per uso</option>
+      <option value="nome"<?= $ordine === 'nome' ? ' selected' : '' ?>>Per nome</option>
+    </select>
+  </label>
   <button class="btn" type="submit">Filtra</button>
-  <?php if ($cerca !== ''): ?><a class="btn btn-muto" href="/admin/tag.php">Azzera</a><?php endif; ?>
+  <?php if ($cerca !== '' || $ordine === 'nome'): ?><a class="btn btn-muto" href="/admin/tag.php">Azzera</a><?php endif; ?>
 </form>
 
 <section style="border:1px solid var(--filo);padding:18px;background:var(--pece);margin-bottom:26px">

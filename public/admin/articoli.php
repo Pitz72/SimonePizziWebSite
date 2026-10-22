@@ -109,8 +109,12 @@ $aVista = array_filter([
 $ritorno = http_build_query($aVista + array_filter(['pagina' => $pagina > 1 ? $pagina : null]));
 
 testa_pannello('Articoli', 'articoli');
+/* «Copia il link del feed», come «Copia RSS» nel React: l'indirizzo pubblico,
+   anche quando il pannello gira in sviluppo. */
 titolo_pannello('Articoli', $esito['totale'] . ' in tutto',
-    '<a class="btn btn-pieno" href="/admin/articolo.php">Scrivi un articolo</a>');
+    '<button class="btn btn-muto" type="button" data-copia="' . e(SITO_URL . '/api/rss.php') . '"'
+    . ' title="Per incollarlo in un lettore di feed o in un servizio di pubblicazione">Copia il link del feed</button>'
+    . '<a class="btn btn-pieno" href="/admin/articolo.php">Scrivi un articolo</a>');
 avviso_pannello();
 ?>
 
@@ -244,5 +248,7 @@ avviso_pannello();
     </ol>
   </nav>
 <?php endif; ?>
+
+<p class="esito" id="esito-copia" role="status" aria-live="polite"></p>
 
 <?php piede_pannello(); ?>
