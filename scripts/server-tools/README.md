@@ -69,6 +69,25 @@ Usato il 19/10/2026 per i sei file del sito «MPA» di aprile
 `pages/article.php`, `category.php`); la copia sta in
 `F:\Backup\SimonePizziWebSite\2026-10-19_residui-server`.
 
+## Che PHP risponde alle pagine
+
+`esegui.py controlla_php.php` stampa la versione, il php.ini, i file ini
+aggiuntivi e le impostazioni che contano (`session.upload_progress.enabled`,
+`memory_limit`, `post_max_size`, …) **del PHP che serve il web**. Da
+terminale non si vede: il `php` della shell è un altro binario (8.2), mentre le
+pagine passano da `/usr/local/dh/cgi-system/php83.cgi`. Non scrive niente.
+
+Usato il 22/10/2026 per PHP2Shell (CVE-2026-109618/109619): PHP 8.3.36, e
+`session.upload_progress.enabled` a 0. DreamHost l'aveva già spenta nella sua
+configurazione; la stessa riga sta anche in `~/.php/8.3/phprc`, sotto la
+sezione gestita da DreamHost, così resta spenta se la riaccendono. La copia
+del phprc di prima sta in `~/backup-config/phprc-8.3.2026-10-22`. Il phprc si
+rilegge solo quando ripartono i processi: `pkill -u $(whoami) -x php83.cgi`.
+
+La barra di avanzamento dei caricamenti non ne ha bisogno: nel React la
+calcolava il browser (`xhr.upload.onprogress`), e lo stesso vale per quella da
+rifare.
+
 ## Verifica periodica
 
 Controllare che nessuno script residuo sia raggiungibile in produzione:
