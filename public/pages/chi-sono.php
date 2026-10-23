@@ -41,7 +41,7 @@ require __DIR__ . '/../partials/head.php';
         <p>Qui trovi il racconto delle mie tantissime idee e dei miei pochissimi talenti.</p>
 
         <h2>Il podcast, dal 2010</h2>
-        <p>Ho premuto REC per la prima volta nel 2010, con Michela De Paola, per <a href="/di-tutto-un-podcast/podcast-tutto-e-nato-da-qui"><em>Di Tutto Un Podcast</em></a>. Nel 2012 è arrivato l’Italian Podcast Network e nel 2017, al suo posto, è nata <a href="/runtime-radio">Runtime Radio</a>, la «radio geek» che va avanti ancora oggi fra tecnologia, cultura, interviste e chiacchiere mie.</p>
+        <p>Ho premuto REC per la prima volta nel 2010, con Michela De Paola, per <a href="/di-tutto-un-podcast/podcast-tutto-e-nato-da-qui"><em>Di Tutto Un Podcast</em></a>. Nel 2012 è arrivato l’Italian Podcast Network e nel 2016, al suo posto, è nata <a href="/runtime-radio">Runtime Radio</a>, la «radio geek» che va avanti ancora oggi fra tecnologia, cultura, interviste e chiacchiere mie.</p>
 
         <h2>Scrivere</h2>
         <p>Alcuni dei miei racconti hanno più di trent’anni. Sono sopravvissuti a floppy, cd-rom e computer che oggi nessuno saprebbe più far partire, e a maggio 2026 sono diventati un libro, <a href="/l-albero-dei-racconti"><em>L’Albero dei Racconti</em></a>: storie ironiche, personali, a volte metafisiche, ritoccate quel tanto che basta per renderle leggibili. A marzo era uscito un manuale, <a href="/react-php-the-thin-stack"><em>React + PHP: The Thin Stack</em></a>, scritto per mettere su carta un metodo che fino ad allora stava solo nella mia memoria.</p>

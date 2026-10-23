@@ -43,7 +43,7 @@ return [
         'pagina'   => 'chi-sono',
         'briciola' => 'Chi sono',
         'title'    => 'Chi sono — Simone Pizzi',
-        'desc'     => 'Simone Pizzi si presenta: podcast dal 2010, Runtime Radio dal 2017, racconti, programmi, videogiochi e il lavoro con l’intelligenza artificiale.',
+        'desc'     => 'Simone Pizzi si presenta: podcast dal 2010, Runtime Radio dal 2016, racconti, programmi, videogiochi e il lavoro con l’intelligenza artificiale.',
     ],
 
     'contatti' => [
