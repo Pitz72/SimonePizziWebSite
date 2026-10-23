@@ -37,12 +37,13 @@ return [
     ],
 
     /* Il testo di presentazione del sito React, che lì era una finestra della
-       home: ritrovato nella storia del repository e rimesso il 19 ottobre. */
+       home: ritrovato nella storia del repository e rimesso il 19 ottobre,
+       rivisto con Simone il 23. */
     'chi-sono' => [
         'pagina'   => 'chi-sono',
         'briciola' => 'Chi sono',
         'title'    => 'Chi sono — Simone Pizzi',
-        'desc'     => 'Simone Pizzi si presenta: il podcasting dal 2010 con Runtime Radio, la narrativa, il software, i videogiochi e il lavoro con l’intelligenza artificiale.',
+        'desc'     => 'Simone Pizzi si presenta: podcast dal 2010, Runtime Radio dal 2017, racconti, programmi, videogiochi e il lavoro con l’intelligenza artificiale.',
     ],
 
     'contatti' => [
