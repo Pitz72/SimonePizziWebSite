@@ -28,6 +28,10 @@ CHE COSA DEVE FARE LO SCRIPT PHP
     niente sul server da recuperare dopo;
   · chiudere con la riga `ESITO: OK`, che è quello che il runner controlla.
 
+La risposta del server si salva in `scratch/<script>_<data>_<ora>_<modo>.txt`,
+un file nuovo a ogni giro: il backup del primo giro, quello con i dati
+originali, non si perde se si rilancia.
+
 Serve `paramiko`. Credenziali da `.secrets/deploy.json`, mai stampate.
 """
 
@@ -40,6 +44,7 @@ import secrets
 import sys
 import urllib.error
 import urllib.request
+from datetime import datetime
 
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
 
@@ -138,11 +143,19 @@ def main():
             print(f"verifica: risposta {e.code} (atteso 404)")
 
     if esito:
-        percorso = os.path.join(
-            RADICE, "scratch",
-            f"{base}_" + ("applicato" if args.applica else "anteprima") + ".txt")
-        os.makedirs(os.path.dirname(percorso), exist_ok=True)
-        io.open(percorso, "w", encoding="utf-8", newline="\n").write(esito)
+        # Un file per giro, con data e ora nel nome. Prima il nome era fisso, e
+        # rilanciare con --applica (per correggere un dettaglio, il 28/10/2026)
+        # sovrascriveva il backup del primo giro: quello con i dati originali.
+        modo = "applicato" if args.applica else "anteprima"
+        quando = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+        cartella = os.path.join(RADICE, "scratch")
+        os.makedirs(cartella, exist_ok=True)
+        percorso = os.path.join(cartella, f"{base}_{quando}_{modo}.txt")
+        n = 2
+        while os.path.exists(percorso):     # due giri nello stesso secondo
+            percorso = os.path.join(cartella, f"{base}_{quando}_{modo}_{n}.txt")
+            n += 1
+        io.open(percorso, "x", encoding="utf-8", newline="\n").write(esito)
         print(f"log e backup salvati in {os.path.relpath(percorso, RADICE)}")
 
     os.remove(locale_tmp)
