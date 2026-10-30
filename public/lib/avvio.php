@@ -31,7 +31,7 @@ setlocale(LC_ALL, 'it_IT.UTF-8', 'it_IT', 'Italian_Italy');
 const SITO_NOME    = 'Simone Pizzi';
 const SITO_URL     = 'https://simonepizzi.runtimeradio.it';
 const SITO_MOTTO   = 'Portfolio e blog · dal 2010';
-const SITO_DESCR   = 'Podcaster dal 2010. Scrittore di storie e racconti. Sviluppatore sperimentale con AI. Fondatore di Runtime Radio e Italian Podcast Network.';
+const SITO_DESCR   = 'Podcaster dal 2010. Scrittore di storie e racconti. Sviluppatore sperimentale con l’IA. Fondatore di Runtime Radio e Italian Podcast Network.';
 
 /** In sviluppo i link assoluti devono puntare al server locale, non al sito vero. */
 function base_url(): string {
