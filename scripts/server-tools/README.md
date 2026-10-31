@@ -56,6 +56,15 @@ all'articolo (`button_a_label`, `button_a_link`, `button_b_label`,
 `button_b_link`), facoltativi. Usati per la bozza 98, «PixelDebh:
 Retro-Rescue! è uscito».
 
+## Una sezione aggiunta a un articolo
+
+`aggiorna_articolo_viaggiatore_inglese.php`, con `esegui.py` (prima in anteprima, poi con `--applica`): aggiunge in
+fondo all'articolo programmato di Il Viaggiatore la sezione «In corso: Il Viaggiatore in inglese» (la 1.40.0 del
+31/10/2026: il testo tradotto, la voce inglese in lavorazione, il gioco solo da scaricare). Cerca da sé l'unico
+articolo programmato col Viaggiatore nel titolo (altrimenti si ferma e li elenca: l'id va in `ID_ARTICOLO`), non tocca
+data di uscita né stato, non raddoppia la sezione se rilanciato, restituisce il corpo di prima e segnala i punti che
+portano ancora alla versione nel browser, senza toccarli. Provato il 31/10/2026 su un SQLite di prova.
+
 ## File sul server che il repo non ha
 
 `residui.py elenco` confronta il docroot con `public/` per MD5 e stampa i file
