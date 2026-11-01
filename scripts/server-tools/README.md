@@ -65,6 +65,20 @@ articolo programmato col Viaggiatore nel titolo (altrimenti si ferma e li elenca
 data di uscita né stato, non raddoppia la sezione se rilanciato, restituisce il corpo di prima e segnala i punti che
 portano ancora alla versione nel browser, senza toccarli. Provato il 31/10/2026 su un SQLite di prova.
 
+## Un articolo non ancora uscito, riscritto
+
+`prepara_bozza.py <cartella> --riscrivi ID` + `riscrivi_articolo.template.php`. Stessa cartella delle bozze
+(`corpo.html`, `meta.json`, `immagini.json`, `img/`); in `meta.json` il campo `tag` è facoltativo e, se manca, i tag
+restano quelli dell'articolo. Carica le immagini nuove via SFTP e genera `riscrivi.php`, da passare a `esegui.py` col
+percorso ASSOLUTO, prima in anteprima e poi con `--applica`. Riscrive i campi del testo (titolo, slug, corpo,
+riassunto, categoria, SEO, pulsanti) come `salva_articolo()`, e non tocca stato, data di uscita, copertina ed evidenza.
+Si ferma se l'articolo è già uscito, se lo slug è di un altro articolo, se la categoria non esiste o se manca
+un'immagine sul server, comprese quelle che il corpo cita già. Restituisce per intero i valori di prima dei campi che
+cambiano. Scrive `updated_at` con l'ora di Roma (lo script non passa da `lib/avvio.php`).
+
+Usato il 01/11/2026 per l'articolo programmato 117, diventato «Il Viaggiatore 1.41: la versione definitiva, in
+italiano e in inglese» (prima «Il Viaggiatore 1.39: una carta di prima della secca»).
+
 ## File sul server che il repo non ha
 
 `residui.py elenco` confronta il docroot con `public/` per MD5 e stampa i file

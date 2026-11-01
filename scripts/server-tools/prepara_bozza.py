@@ -19,6 +19,16 @@ La cartella dell'articolo contiene:
 Serve perché il pannello chiede la password di produzione e MySQL da fuori è
 chiuso: resta lo script one-shot, e questo gli prepara i dati. Le immagini
 vanno su prima, così lo script può controllare che ci siano.
+
+RISCRIVERE un articolo che non è ancora uscito (bozza o programmato), con la
+stessa cartella:
+
+    python scripts/server-tools/prepara_bozza.py scratch/articolo-xyz --riscrivi 117
+    python scripts/server-tools/esegui.py <percorso assoluto>/riscrivi.php
+
+Genera `riscrivi.php` da `riscrivi_articolo.template.php` invece di
+`crea_bozza.php`. In `meta.json` il campo `tag` diventa facoltativo: se manca,
+i tag dell'articolo restano quelli che ha.
 """
 
 import base64
@@ -36,9 +46,14 @@ RADICE = os.path.dirname(os.path.dirname(QUI))
 
 
 def main():
-    if len(sys.argv) != 2:
+    argomenti = sys.argv[1:]
+    riscrivi = None
+    if len(argomenti) == 3 and argomenti[1] == "--riscrivi" and argomenti[2].isdigit():
+        riscrivi = int(argomenti[2])
+        argomenti = argomenti[:1]
+    if len(argomenti) != 1:
         sys.exit(__doc__)
-    cartella = os.path.abspath(sys.argv[1])
+    cartella = os.path.abspath(argomenti[0])
     leggi = lambda n: io.open(os.path.join(cartella, n), encoding="utf-8").read()
 
     corpo = leggi("corpo.html")
@@ -99,12 +114,16 @@ def main():
                                      "button_b_label", "button_b_link") if meta.get(k)},
         },
         "immagini": list(immagini.values()),
-        "tag": meta["tag"],
+        # Nella riscrittura null vuol dire «i tag restano quelli che ha».
+        "tag": meta.get("tag") if riscrivi else meta["tag"],
     }
+    if riscrivi:
+        dati["id"] = riscrivi
     b64 = base64.b64encode(json.dumps(dati, ensure_ascii=False).encode("utf-8")).decode("ascii")
-    php = io.open(os.path.join(QUI, "crea_bozza_articolo.template.php"), encoding="utf-8").read()
+    modello = "riscrivi_articolo.template.php" if riscrivi else "crea_bozza_articolo.template.php"
+    php = io.open(os.path.join(QUI, modello), encoding="utf-8").read()
     php = php.replace("__DATI__", b64)
-    uscita = os.path.join(cartella, "crea_bozza.php")
+    uscita = os.path.join(cartella, "riscrivi.php" if riscrivi else "crea_bozza.php")
     io.open(uscita, "w", encoding="utf-8", newline="\n").write(php)
     print(f"\nscritto {os.path.relpath(uscita, RADICE)}")
     # esegui.py risolve i percorsi relativi dentro server-tools/: gli si passa quello assoluto.
