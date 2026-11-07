@@ -15,11 +15,24 @@
 
   document.addEventListener('click', function (ev) {
     var b = ev.target.closest('[data-conferma-click]');
-    if (b && !window.confirm(b.getAttribute('data-conferma-click'))) {
+    if (!b) return;
+    /* Prima i campi obbligatori, poi la domanda: chiedere «Procedo?» per un
+       modulo che il browser rifiuterà subito dopo è una domanda inutile. */
+    if (b.form && !b.formNoValidate && !b.form.checkValidity()) {
+      ev.preventDefault();
+      b.form.reportValidity();
+      return;
+    }
+    if (!window.confirm(b.getAttribute('data-conferma-click'))) {
       ev.preventDefault();
       ev.stopPropagation();
     }
   });
+
+  /* L'esito di un modulo stampato accanto ai suoi pulsanti (la newsletter): il
+     fuoco ci va da solo, così lo screen reader lo legge e la pagina lo mostra. */
+  var esito = document.getElementById('esito');
+  if (esito) esito.focus();
 
   /* I contatori dei campi che finiscono su Google: si vede mentre si scrive
      se il testo verrà tagliato. */

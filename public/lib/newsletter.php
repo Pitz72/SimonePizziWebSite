@@ -461,6 +461,20 @@ function newsletter_impronta(string $oggetto, string $intro, array $idArticoli):
 }
 
 /**
+ * Lo stesso numero, già partito nelle ultime ventiquattro ore: stesso oggetto,
+ * stesso testo, stessi articoli. È la rete contro il doppio invio (un doppio
+ * clic, un «indietro» e un nuovo invio), e sta nel database, non nella sessione.
+ */
+function newsletter_gia_inviato(string $oggetto, string $intro, array $articoli): ?array {
+    $q = db()->prepare("SELECT id, sent_at, avviata_il, stato FROM newsletter_sends
+                        WHERE tipo = 'news' AND subject = ? AND body = ? AND articoli = ? AND avviata_il >= ?
+                        ORDER BY id DESC LIMIT 1");
+    $q->execute([$oggetto, $intro, json_encode(array_map(fn($a) => (int)$a['id'], $articoli)),
+                 date('Y-m-d H:i:s', time() - 86400)]);
+    return $q->fetch() ?: null;
+}
+
+/**
  * Il testo che arriva dal modulo, ripulito: niente a capo nell'oggetto, niente
  * caratteri di controllo nel corpo (a parte il a capo e la tabulazione).
  *

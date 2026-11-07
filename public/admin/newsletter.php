@@ -3,11 +3,22 @@
  * La newsletter nel pannello: gli iscritti e il loro consenso, la composizione
  * di un numero con gli articoli scelti, e le campagne in invio.
  *
- * Un numero non parte al primo colpo: si compone, si vede l'anteprima, si manda
- * una prova alla propria casella, e solo allora si invia, con la conferma
- * spuntata. L'anteprima vale per un solo invio, e il testo e gli articoli devono
- * essere quelli dell'anteprima. I lotti sono di al massimo sessantaquattro
- * email, a un'ora di distanza, per il tetto orario di DreamHost.
+ * Un numero non parte al primo colpo: si compone, si vede l'anteprima (o si
+ * manda la prova, che la mostra anche lei), e solo allora si invia, con la
+ * conferma spuntata. Il modulo porta con sé l'impronta dell'anteprima che la
+ * pagina sta mostrando: l'invio parte solo se oggetto, testo e articoli sono
+ * ancora quelli. Se sono cambiati, la pagina mostra l'anteprima nuova e chiede
+ * di premere di nuovo; non c'è più un passo nascosto da rifare.
+ *
+ * Fino al 7 novembre 2026 l'anteprima stava nella sessione, e la prova non la
+ * registrava: dopo la prova il pulsante «Invia» c'era, ma rispondeva «Rifai
+ * l'anteprima», in cima a una pagina lunga, lontano dal pulsante. Quel giorno
+ * il numero è partito da uno script. Adesso ogni esito si legge accanto ai
+ * pulsanti (la pagina ci salta da sola), e il doppio invio lo ferma il database:
+ * lo stesso numero già partito nelle ultime ventiquattro ore non riparte.
+ *
+ * I lotti sono di al massimo sessantaquattro email, a un'ora di distanza, per il
+ * tetto orario di DreamHost.
  *
  * «In attesa» vuol dire che l'indirizzo è stato scritto ma il link della
  * conferma non è ancora stato premuto: non riceve niente finché non conferma.
@@ -112,7 +123,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     if ($azione === 'anteprima' || $azione === 'prova' || $azione === 'invia') {
-        avvia_sessione();
         $bozza     = newsletter_bozza_da_modulo($_POST);
         $idArticoli = array_map('intval', (array)($_POST['articoli'] ?? []));
         $articoli  = newsletter_articoli_per_id($idArticoli);
@@ -122,37 +132,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $platea    = newsletter_conteggi();
         $quanti    = $platea['pronti'];
         $impronta  = newsletter_impronta($bozza['oggetto'], $bozza['intro'], $idArticoli);
+        // Quello che la pagina mostrava al momento del clic: l'impronta dell'anteprima
+        // e quanti l'avrebbero ricevuta. Viaggiano nel modulo, non nella sessione.
+        $improntaVista = (string)($_POST['impronta_vista'] ?? '');
+        $quantiVisti   = (int)($_POST['quanti_vista'] ?? -1);
 
         if ($bozza['errore'] !== '') {
             $avviso = [$bozza['errore'], true];
         } elseif (!$articoli) {
             $avviso = ['Scegli almeno un articolo online da mettere nel numero.', true];
         } elseif ($azione === 'anteprima') {
-            $_SESSION['newsletter_bozza'] = ['impronta' => $impronta, 'quanti' => $quanti, 'usata' => false];
-            $avviso = ['Anteprima pronta. Controllala, manda la prova, poi invia.', false];
+            $avviso = ["Anteprima pronta, più in basso. Quando l’hai controllata, spunta la conferma qui sotto e premi «Invia a {$quanti} iscritti».", false];
         } elseif ($azione === 'prova') {
             $avviso = newsletter_prova($bozza['oggetto'], $bozza['intro'], $articoli)
-                ? ['Prova inviata alla casella di Simone. Controllala prima di inviare agli iscritti.', false]
+                ? ["Prova inviata alla casella di Simone, e l’anteprima è più in basso. Se ti convince, spunta la conferma qui sotto e premi «Invia a {$quanti} iscritti»: non serve altro.", false]
                 : ['La casella di prova non è configurata (MAIL_INFO in api/config.php): la prova non è partita.', true];
+        } elseif ($improntaVista === '' || !hash_equals($improntaVista, $impronta)) {
+            $avviso = ['Oggetto, testo o articoli sono cambiati dall’anteprima che avevi davanti. Quella più in basso è nuova: '
+                     . 'controllala, spunta la conferma e premi di nuovo Invia. Non è partito niente.', true];
+        } elseif ($quantiVisti !== $quanti) {
+            $avviso = ["Nel frattempo è cambiato il numero degli iscritti che ricevono: adesso sono {$quanti}. "
+                     . 'Spunta la conferma e premi di nuovo Invia. Non è partito niente.', true];
+        } elseif (($_POST['conferma'] ?? '') !== '1') {
+            $avviso = ['Manca la spunta della conferma, qui sotto: spuntala e premi di nuovo Invia. Non è partito niente.', true];
+        } elseif ($quanti === 0) {
+            $avviso = ['Nessun iscritto con consenso registrato: non c’è nessuno a cui inviare.', true];
+        } elseif ($gia = newsletter_gia_inviato($bozza['oggetto'], $bozza['intro'], $articoli)) {
+            torna($torna . '?vista=campagne&invio=' . (int)$gia['id'], 'Questo numero è già partito alle '
+                . date('H:i', strtotime((string)$gia['avviata_il'])) . ': non lo rimando.', true);
         } else {
-            $d = $_SESSION['newsletter_bozza'] ?? null;
-            if (!$d || $d['usata'] || !hash_equals((string)$d['impronta'], $impronta)) {
-                $avviso = ["Il testo o gli articoli sono cambiati dall’ultima anteprima, o l’anteprima è già stata usata. Rifai l’anteprima.", true];
-            } elseif ((int)$d['quanti'] !== $quanti) {
-                $avviso = ["Il numero degli iscritti che ricevono è cambiato. Rifai l’anteprima.", true];
-            } elseif (($_POST['conferma'] ?? '') !== '1') {
-                $avviso = ['Spunta la conferma prima di inviare.', true];
-            } elseif ($quanti === 0) {
-                $avviso = ['Nessun iscritto con consenso registrato: non c’è nessuno a cui inviare.', true];
-            } else {
-                // Il gettone si consuma prima di spedire: un doppio clic non rimanda due volte.
-                $_SESSION['newsletter_bozza']['usata'] = true;
-                $html = newsletter_html_campagna($bozza['oggetto'], $bozza['intro'], $articoli, 'news');
-                $id = newsletter_crea_invio('news', $bozza['oggetto'], $bozza['intro'], $articoli, $html);
-                $esito = newsletter_lotto($id);
-                torna($torna . '?vista=campagne', "Invio avviato: {$esito['inviate']} email nel primo lotto."
-                    . ($esito['stato'] === 'in_invio' ? ' Il resto parte a lotti di un’ora l’uno.' : ''));
+            $html = newsletter_html_campagna($bozza['oggetto'], $bozza['intro'], $articoli, 'news');
+            $id = newsletter_crea_invio('news', $bozza['oggetto'], $bozza['intro'], $articoli, $html);
+            $esito = newsletter_lotto($id);
+            if ($esito['inviate'] === 0 && $esito['stato'] === 'in_invio') {
+                // Il tetto orario è già pieno (altra posta, una prova): il numero è in archivio e riparte da solo.
+                torna($torna . '?vista=campagne', 'Invio avviato, ma la posta di quest’ora ha già riempito il tetto: '
+                    . 'il primo lotto parte da solo fra dieci minuti. Non serve fare altro.');
             }
+            torna($torna . '?vista=campagne', "Invio avviato: {$esito['inviate']} email nel primo lotto."
+                . ($esito['stato'] === 'in_invio' ? ' Il resto parte a lotti di un’ora l’uno.' : ''));
         }
         if ($bozza['errore'] === '' && $articoli) {
             $anteprima = newsletter_html_campagna($bozza['oggetto'], $bozza['intro'], $articoli, 'news');
@@ -191,7 +209,8 @@ $schede = ['iscritti' => 'Iscritti', 'componi' => 'Componi e invia', 'campagne' 
   <?php endforeach; ?>
 </nav>
 
-<?php if ($avviso): ?>
+<?php /* Nella composizione l'esito sta accanto ai pulsanti, più giù: vedi esito_componi(). */
+if ($avviso && $vista !== 'componi'): ?>
   <p class="avviso<?= $avviso[1] ? ' avviso-no' : '' ?>" role="status"><?= e($avviso[0]) ?></p>
 <?php endif; ?>
 
@@ -215,7 +234,7 @@ $schede = ['iscritti' => 'Iscritti', 'componi' => 'Componi e invia', 'campagne' 
   </p>
   <form method="post" action="/admin/newsletter.php">
     <?= campo_gettone() ?>
-    <label class="spunta" style="margin-bottom:12px"><input type="checkbox" name="conferma" value="1">
+    <label class="spunta" style="margin-bottom:12px"><input type="checkbox" name="conferma" value="1" required>
       <span>Mando la richiesta di riconferma a questi <?= $nonConsenso ?> indirizzi, a lotti di un’ora.</span></label>
     <button class="btn btn-pieno" type="submit" name="azione" value="riconferma"
             data-conferma-click="Mando la richiesta di riconferma a <?= $nonConsenso ?> indirizzi?">Chiedi la riconferma</button>
@@ -321,10 +340,24 @@ $schede = ['iscritti' => 'Iscritti', 'componi' => 'Componi e invia', 'campagne' 
   $scelti = array_flip(array_map('intval', $idArticoli));
   $oggettoIniziale = $bozza['oggetto'];
   $introIniziale   = $bozza['intro'];
+
+  /* L'esito dell'ultimo clic, accanto al pulsante che lo ha prodotto: il modulo
+     manda a #esito, e admin.js ci porta anche il fuoco, così lo legge pure uno
+     screen reader. In cima a una pagina lunga, chi stava premendo «Invia» in
+     fondo non lo vedeva. */
+  $esito_componi = function () use ($avviso): void {
+      if (!$avviso) return; ?>
+    <p id="esito" tabindex="-1" class="avviso<?= $avviso[1] ? ' avviso-no' : '' ?>"
+       role="<?= $avviso[1] ? 'alert' : 'status' ?>" style="margin-bottom:18px"><?= e($avviso[0]) ?></p>
+  <?php };
 ?>
 
-<form method="post" action="/admin/newsletter.php?vista=componi" class="scheda" style="max-width:820px" data-tieni-viva>
+<form method="post" action="/admin/newsletter.php?vista=componi#esito" class="scheda" style="max-width:820px" data-tieni-viva>
   <?= campo_gettone() ?>
+  <?php if ($anteprima !== null): ?>
+    <input type="hidden" name="impronta_vista" value="<?= e($impronta ?? '') ?>">
+    <input type="hidden" name="quanti_vista" value="<?= (int)$conteggi['pronti'] ?>">
+  <?php endif; ?>
   <div class="campo">
     <label class="eti" for="n-oggetto">Oggetto</label>
     <input id="n-oggetto" name="oggetto" type="text" maxlength="<?= NEWSLETTER_OGGETTO_MAX ?>" value="<?= e($oggettoIniziale) ?>" required>
@@ -348,14 +381,27 @@ $schede = ['iscritti' => 'Iscritti', 'componi' => 'Componi e invia', 'campagne' 
     </div>
   </div>
 
+  <?php /* Anteprima e prova non chiedono la spunta (formnovalidate): la chiede solo l'invio. */ ?>
   <div class="btn-fila" style="margin-bottom:24px">
-    <button class="btn btn-muto" type="submit" name="azione" value="anteprima">Anteprima</button>
-    <button class="btn btn-muto" type="submit" name="azione" value="prova"
+    <button class="btn btn-muto" type="submit" name="azione" value="anteprima" formnovalidate>Anteprima</button>
+    <button class="btn btn-muto" type="submit" name="azione" value="prova" formnovalidate
             <?= posta_info() === '' ? 'disabled title="MAIL_INFO non configurata"' : '' ?>>Mandami una prova</button>
   </div>
 
+  <?php $esito_componi(); ?>
+
   <?php if ($anteprima !== null): ?>
-    <section style="border-top:1px solid var(--filo);padding-top:22px;margin-top:8px">
+    <?php if ($conteggi['pronti'] > 0): ?>
+    <section style="border-top:1px solid var(--filo);padding-top:22px;margin-bottom:26px">
+      <label class="spunta" style="margin-bottom:16px">
+        <input type="checkbox" name="conferma" value="1" required>
+        <span>Ho controllato l’anteprima (e la prova, se l’ho mandata). Capisco che l’invio non si può annullare.</span>
+      </label>
+      <button class="btn btn-pieno" type="submit" name="azione" value="invia"
+              data-conferma-click="Avvio l’invio a <?= $conteggi['pronti'] ?> iscritti. Non si può annullare. Procedo?">Invia a <?= $conteggi['pronti'] ?> iscritti</button>
+    </section>
+    <?php endif; ?>
+    <section style="border-top:1px solid var(--filo);padding-top:22px">
       <p class="aiuto" style="margin-bottom:12px">
         Così lo vede chi riceve (il nome è di prova). Riceveranno: <b><?= $conteggi['pronti'] ?></b> iscritti con consenso registrato.
         <?php if ($conteggi['senza_consenso'] > 0): ?>
@@ -366,16 +412,6 @@ $schede = ['iscritti' => 'Iscritti', 'componi' => 'Componi e invia', 'campagne' 
       <iframe sandbox="" title="Anteprima dell'email" srcdoc="<?= e($anteprima) ?>"
               style="width:100%;height:560px;border:1px solid var(--filo);background:#0a0a0a"></iframe>
     </section>
-    <?php if ($conteggi['pronti'] > 0): ?>
-    <section style="border-top:1px solid var(--filo);padding-top:22px;margin-top:26px">
-      <label class="spunta" style="margin-bottom:16px">
-        <input type="checkbox" name="conferma" value="1">
-        <span>Ho letto l’anteprima e ricevuto la prova. Capisco che l’invio non si può annullare.</span>
-      </label>
-      <button class="btn btn-pieno" type="submit" name="azione" value="invia"
-              data-conferma-click="Avvio l’invio a <?= $conteggi['pronti'] ?> iscritti. Non si può annullare. Procedo?">Invia a <?= $conteggi['pronti'] ?> iscritti</button>
-    </section>
-    <?php endif; ?>
   <?php endif; ?>
 </form>
 

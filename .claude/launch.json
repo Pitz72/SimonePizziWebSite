@@ -6,6 +6,12 @@
       "runtimeExecutable": "php",
       "runtimeArgs": ["-S", "127.0.0.1:8123", "-t", "public", "public/dev-router.php"],
       "port": 8123
+    },
+    {
+      "name": "sito-sviluppo-posta",
+      "runtimeExecutable": "php",
+      "runtimeArgs": ["-S", "127.0.0.1:8124", "-t", "public", "scratch/router-posta.php"],
+      "port": 8124
     }
   ]
 }
