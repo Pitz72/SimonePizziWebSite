@@ -58,8 +58,12 @@ function base_url(): string {
 
    Storia: dal 3 al 16 ottobre 2026 l'.htaccess mandava 'unsafe-inline' per non
    rompere tre script in linea del pannello (revisione del 16 ottobre, G2).
-   Quegli script adesso stanno in assets/js/admin.js. */
-const CSP_SITO = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; frame-src https://www.youtube-nocookie.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'";
+   Quegli script adesso stanno in assets/js/admin.js.
+
+   Dal 10 novembre 2026 frame-src ammette anche 'self', per i promo animati
+   di /promo/ (lib/video.php): sono pagine del sito, servite in sandbox con
+   una CSP loro, che sta solo nell'.htaccess. */
+const CSP_SITO = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; frame-src 'self' https://www.youtube-nocookie.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'";
 
 function manda_csp(): void {
     if (!headers_sent()) header('Content-Security-Policy: ' . CSP_SITO);

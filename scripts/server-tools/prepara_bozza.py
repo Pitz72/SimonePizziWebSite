@@ -12,7 +12,9 @@ a `esegui.py`.
 La cartella dell'articolo contiene:
   corpo.html      il corpo, con le immagini scritte come  src="__IMG_chiave__"
   meta.json       title, slug, category, excerpt, seo_title, seo_description,
-                  focus_keyword, tag (elenco di nomi)
+                  focus_keyword, tag (elenco di nomi); facoltativi «copertina»,
+                  il nome di un .webp in img/ che diventa la cover_image, e
+                  «fissato»: true, in cima alla categoria quando esce
   immagini.json   {chiave: nome del file .webp}
   img/            i .webp, già ridimensionati (al massimo 1920 px di larghezza)
 
@@ -65,6 +67,10 @@ def main():
         if corpo.count(segnaposto) != 1:
             sys.exit(f"{segnaposto}: atteso una volta nel corpo, trovato {corpo.count(segnaposto)}")
         corpo = corpo.replace(segnaposto, "/uploads/immagini/" + nome)
+    # La copertina (facoltativa) non sta nel corpo: si carica e si controlla come le altre.
+    da_caricare = list(immagini.values())
+    if meta.get("copertina"):
+        da_caricare.append(meta["copertina"])
     avanzi = re.findall(r"__IMG_\w+__", corpo)
     if avanzi:
         sys.exit(f"segnaposto senza immagine: {avanzi}")
@@ -88,7 +94,7 @@ def main():
     trasporto.connect(username=cfg["username"], password=cfg["password"])
     sftp = paramiko.SFTPClient.from_transport(trasporto)
     try:
-        for nome in immagini.values():
+        for nome in da_caricare:
             locale = os.path.join(cartella, "img", nome)
             dest = posixpath.join(remota, nome)
             try:
@@ -113,10 +119,14 @@ def main():
             **{k: meta[k] for k in ("button_a_label", "button_a_link",
                                      "button_b_label", "button_b_link") if meta.get(k)},
         },
-        "immagini": list(immagini.values()),
+        "immagini": da_caricare,
         # Nella riscrittura null vuol dire «i tag restano quelli che ha».
         "tag": meta.get("tag") if riscrivi else meta["tag"],
     }
+    if meta.get("copertina") and not riscrivi:
+        dati["articolo"]["cover_image"] = "/uploads/immagini/" + meta["copertina"]
+    if meta.get("fissato") and not riscrivi:
+        dati["articolo"]["is_category_pinned"] = True
     if riscrivi:
         dati["id"] = riscrivi
     b64 = base64.b64encode(json.dumps(dati, ensure_ascii=False).encode("utf-8")).decode("ascii")

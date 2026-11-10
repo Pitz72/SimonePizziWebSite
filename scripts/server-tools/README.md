@@ -56,6 +56,22 @@ all'articolo (`button_a_label`, `button_a_link`, `button_b_label`,
 `button_b_link`), facoltativi. Usati per la bozza 98, «PixelDebh:
 Retro-Rescue! è uscito».
 
+Dal 10/11/2026 `meta.json` può avere anche `copertina` (il nome di un .webp in `img/`, che si carica con le altre
+immagini e diventa la `cover_image`) e `fissato: true` (la bozza, quando esce, apre la sua categoria; se nella
+categoria è già fissato un altro articolo, lo script lo dice e la bozza resta normale). Usati per la bozza 122, la
+scheda di «L’Albero dei Racconti».
+
+## I promo animati
+
+`carica_promo.py "<file>.html" <nome>` carica in `/promo/<nome>.html` una pagina HTML chiusa in un file solo (script
+in linea, suoni, caratteri e immagini in `data:`), poi controlla che risponda 200, in sandbox e noindex. La cartella
+`promo/` sta solo sul server, come `relitto/`: `carica.py` la salta, `residui.py` la lascia stare, `.gitignore` la
+tiene fuori dal repo. La CSP dei promo sta nell'`.htaccess` (`SITO_PROMO`). Nell'articolo basta un paragrafo con il
+solo link, `<p><a href="/promo/<nome>.html">Titolo</a></p>`: `promo_al_clic()` in `lib/video.php` lo trasforma in un
+riquadro che carica il promo solo al clic.
+
+Usato il 10/11/2026 per il promo di «L’Albero dei Racconti» (9 MB), nella scheda 122.
+
 ## Una sezione aggiunta a un articolo
 
 `aggiorna_articolo_viaggiatore_inglese.php`, con `esegui.py` (prima in anteprima, poi con `--applica`): aggiunge in

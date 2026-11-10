@@ -239,6 +239,13 @@
 .corpo .video-nota{color:var(--spento);font-size:14px;line-height:1.5;max-width:52ch}
 .corpo .video-comandi{display:flex;flex-wrap:wrap;align-items:center;gap:12px 20px;margin-top:6px}
 .corpo .video-fuori{font-size:14px}
+/* Sul telefono titolo, nota e pulsanti non stanno in un 16:9 largo 340 px: il
+   riquadro torna nel flusso e allunga la figura quanto serve. Quando arriva
+   l'iframe il riquadro se ne va, e la figura torna 16:9 da sola. */
+@media (max-width:600px){
+  .corpo figure.video:has(> .video-attesa){aspect-ratio:auto}
+  .corpo figure.video > .video-attesa{position:relative;min-height:calc((100vw - 36px) * 9 / 16)}
+}
 .corpo iframe{width:100%;aspect-ratio:16/9;border:1px solid var(--filo);margin:1.8em 0}
 
 /* ── Reazioni e condivisione ────────────────────────────────────────────── */
@@ -358,7 +365,10 @@ dialog.finestra::backdrop{background:rgba(4,7,10,.82)}
   .lavorazione{grid-template-columns:1fr;gap:8px;padding:18px 0}
   .lavorazione-figura{display:none}
   .lavorazione-lato{justify-content:flex-start}
-  .lettura{grid-template-columns:1fr;gap:0;padding-block:26px 10px}
+  /* minmax(0,1fr) e non 1fr: con 1fr la colonna si allargava fino alla tabella
+     più larga (min-width 32rem), e tutta la pagina scorreva di lato. Così
+     scorre solo la tabella, nel suo riquadro (base.css, .tabella). */
+  .lettura{grid-template-columns:minmax(0,1fr);gap:0;padding-block:26px 10px}
   /* Sul telefono il sommario non può stare a lato: va in cima, richiudibile. */
   .sommario{position:static;max-width:none;margin-bottom:26px}
   .sommario ol{max-height:none}

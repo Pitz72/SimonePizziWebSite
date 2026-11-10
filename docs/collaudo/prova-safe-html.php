@@ -120,6 +120,39 @@ prova('le lettere accentate non si rovinano',
     '<p>perché è così, però.</p>',
     ['perché è così, però.'], ['Ã']);
 
+echo "\nI promo animati (lib/video.php, promo_al_clic)\n";
+
+require __DIR__ . '/../../public/lib/video.php';
+
+/** Il corpo, passato da safe_html e poi da promo_al_clic, deve contenere (o no) certe cose. */
+function prova_promo(string $nome, string $ingresso, array $deve, array $non_deve): void {
+    global $passate, $fallite;
+    $uscita = promo_al_clic(safe_html($ingresso));
+    $errori = [];
+    foreach ($deve as $pezzo) if (!str_contains($uscita, $pezzo)) $errori[] = "manca «$pezzo»";
+    foreach ($non_deve as $pezzo) if (str_contains($uscita, $pezzo)) $errori[] = "c'è ancora «$pezzo»";
+    if ($errori) { $fallite++; echo "  NO  $nome — " . implode('; ', $errori) . "\n     uscita: $uscita\n"; }
+    else { $passate++; echo "  ok  $nome\n"; }
+}
+
+prova_promo('il link al promo, da solo nel paragrafo, passa safe_html e diventa un riquadro',
+    '<p><a href="/promo/l-albero-dei-racconti.html">Il promo di L’Albero dei Racconti</a></p>',
+    ['<figure class="video">', 'data-promo="/promo/l-albero-dei-racconti.html"', 'promo-avvia',
+     'Il promo di L’Albero dei Racconti', 'href="/promo/l-albero-dei-racconti.html"'],
+    ['<iframe']);
+prova_promo('un link al promo dentro una frase resta un link',
+    '<p>Guarda <a href="/promo/l-albero-dei-racconti.html">il promo</a> prima di comprarlo.</p>',
+    ['Guarda <a href="/promo/l-albero-dei-racconti.html">il promo</a> prima'], ['data-promo']);
+prova_promo('un link fuori da /promo/ resta un link',
+    '<p><a href="/l-albero-dei-racconti">La categoria</a></p>',
+    ['<a href="/l-albero-dei-racconti">La categoria</a>'], ['data-promo']);
+prova_promo('un percorso furbo non diventa un promo',
+    '<p><a href="/promo/../admin/index.html">Furbo</a></p>',
+    ['Furbo'], ['data-promo']);
+prova_promo('i paragrafi intorno restano dove sono',
+    '<p>Prima.</p><p><a href="/promo/l-albero-dei-racconti.html">Promo</a></p><p>Dopo.</p>',
+    ['<p>Prima.</p><figure class="video">', '</figure><p>Dopo.</p>'], []);
+
 echo "\n" . ($fallite === 0
     ? "Tutte e $passate le prove passano.\n\n"
     : "$passate passate, $fallite FALLITE.\n\n");

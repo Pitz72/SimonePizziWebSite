@@ -88,6 +88,20 @@ foreach ($D['immagini'] as $nome) {
 }
 if ($mancanti) exit("Immagini mancanti sul server:\n  " . implode("\n  ", $mancanti) . "\nESITO: INTERROTTO\n");
 
+/* «In cima alla sua categoria» (facoltativo): una bozza fissata non si vede
+   finché non esce, e quando esce apre la categoria. Uno solo per categoria,
+   come vuole fissa_in_categoria() in lib/pannello.php: se un altro c'è già,
+   la bozza resta normale e lo si dice. */
+$fissato = !empty($a['is_category_pinned']);
+if ($fissato) {
+    $q = $pdo->prepare('SELECT id, title FROM articles WHERE BINARY category = ? AND is_category_pinned = 1 LIMIT 1');
+    $q->execute([$a['category']]);
+    if ($c = $q->fetch()) {
+        echo "nota — in «{$a['category']}» è già fissato l'articolo {$c['id']} ({$c['title']}): la bozza non lo sarà\n";
+        $fissato = false;
+    }
+}
+
 $colonne = array_column($pdo->query('SHOW COLUMNS FROM articles')->fetchAll(), 'Field');
 foreach (['seo_title', 'seo_description', 'focus_keyword'] as $facoltativa) {
     if (!in_array($facoltativa, $colonne, true)) {
@@ -103,6 +117,8 @@ echo "  categoria  {$a['category']}\n";
 echo "  stato      draft (nessuna data di pubblicazione)\n";
 echo "  corpo      " . mb_strlen($a['content']) . " caratteri, " . count($D['immagini']) . " immagini\n";
 echo "  tag        " . implode(', ', $D['tag']) . "\n";
+if (!empty($a['cover_image'])) echo "  copertina  {$a['cover_image']}\n";
+if ($fissato) echo "  in cima a   {$a['category']} (quando esce)\n";
 foreach (['a', 'b'] as $p) {
     if (!empty($a["button_{$p}_link"])) {
         echo "  pulsante {$p} " . ($a["button_{$p}_label"] ?? '') . " → " . $a["button_{$p}_link"] . "\n";
@@ -133,11 +149,11 @@ try {
         'slug'               => $a['slug'],
         'content'            => $a['content'],
         'excerpt'            => $a['excerpt'],
-        'cover_image'        => '',
+        'cover_image'        => $a['cover_image'] ?? '',
         'category'           => $a['category'],
         'status'             => 'draft',
         'is_featured'        => 0,
-        'is_category_pinned' => 0,
+        'is_category_pinned' => $fissato ? 1 : 0,
         'published_at'       => null,
         'created_at'         => $ora,
     ];

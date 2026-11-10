@@ -28,9 +28,9 @@ RADICE = Path(__file__).resolve().parents[2]
 PUBLIC = RADICE / "public"
 SITO = "https://simonepizzi.runtimeradio.it"
 
-# Sul server per scelta, mai nel repo: immagini vere, siti a sé, credenziali,
+# Sul server per scelta, mai nel repo: immagini vere, siti a sé, promo animati, credenziali,
 # verifica di Search Console, diagnostica di DreamHost.
-FUORI_DAL_REPO = {"uploads", "relitto", "temp", "images", ".dh-diag",
+FUORI_DAL_REPO = {"uploads", "relitto", "temp", "images", "promo", ".dh-diag",
                   "lib/config.php", "api/config.php", "google5c10103e83dd9067.html"}
 
 

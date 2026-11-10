@@ -56,7 +56,7 @@ MAI = {
     "api/config.php",        # idem, finché non si sposta
     "dev-router.php",        # strumento da banco, non serve al server
 }
-CARTELLE_ESCLUSE = {"uploads"}          # le immagini vere stanno sul server
+CARTELLE_ESCLUSE = {"uploads", "promo"} # immagini vere e promo animati stanno sul server
 ESTENSIONI_ESCLUSE = {".map", ".log", ".sqlite"}
 
 # Per ultimo, e da solo.
@@ -107,7 +107,7 @@ def main() -> int:
             print("   ", f.relative_to(SORGENTE).as_posix())
         if len(elenco) > 20:
             print(f"    … e altri {len(elenco) - 20}")
-        print("\nEsclusi:", ", ".join(sorted(MAI)), "+ uploads/")
+        print("\nEsclusi:", ", ".join(sorted(MAI)), "+ uploads/, promo/")
         return 0
 
     quando = datetime.now().strftime("%Y%m%d-%H%M%S")

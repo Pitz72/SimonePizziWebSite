@@ -158,10 +158,22 @@ RedirectMatch 301 ^/libri/?$ /narrativa-e-pubblicazioni
 # relitto/ e temp/ sono siti a sé, con i loro file e le loro regole: tengono la
 # politica che avevano dal 3 ottobre (relitto carica i caratteri da Google).
 # Non si toccano i loro file: la distinzione si fa qui, per indirizzo.
+#
+# [10/11/2026] promo/ ha i promo animati (lib/video.php, promo_al_clic): pagine
+# HTML chiuse in un file solo, con lo script in linea e suoni, caratteri e
+# immagini in data:. Stanno solo sul server, come relitto/. La loro CSP non
+# ammette niente da fuori, e con «sandbox» le mette in un'origine opaca: lo
+# script gira, ma senza i cookie del sito e senza poter leggere le pagine che
+# le incorniciano. Le popup servono al link del cartello finale. Per
+# incorniciarle, il sito ammette frame-src 'self'. L'ultima riga che vale
+# vince: quella dei promo sta in fondo.
     SetEnvIf Request_URI "^/(relitto|temp)/" SITO_OSPITE
+    SetEnvIf Request_URI "^/promo/" SITO_PROMO
     Header always unset Content-Security-Policy
     Header unset Content-Security-Policy
-    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; frame-src https://www.youtube-nocookie.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'" env=!SITO_OSPITE
+    Header always set Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: https:; connect-src 'self'; object-src 'none'; frame-src 'self' https://www.youtube-nocookie.com; frame-ancestors 'self'; base-uri 'self'; form-action 'self'" env=!SITO_OSPITE
     Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: https: blob:; connect-src 'self'; object-src 'none'; frame-src https://www.youtube-nocookie.com https://www.youtube.com; frame-ancestors 'self'; base-uri 'self'" env=SITO_OSPITE
+    Header always set Content-Security-Policy "default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; font-src data:; img-src data:; media-src data:; connect-src 'none'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors https://simonepizzi.runtimeradio.it; sandbox allow-scripts allow-popups allow-popups-to-escape-sandbox" env=SITO_PROMO
+    Header always set X-Robots-Tag "noindex" env=SITO_PROMO
 
 </IfModule>

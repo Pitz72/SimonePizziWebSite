@@ -135,6 +135,21 @@ if grep -i '^content-security-policy' <<< "$INTESTAZIONI" | grep -q 'googleapis\
 else
   ok "la CSP non nomina Google Fonts"
 fi
+# I promo animati (dal 10/11/2026): il sito li può incorniciare, e loro girano
+# in sandbox, senza la stessa origine (lib/video.php, .htaccess).
+if grep -i '^content-security-policy' <<< "$INTESTAZIONI" | grep -q "frame-src 'self'"; then
+  ok "la CSP del sito ammette i promo di /promo/ (frame-src 'self')"
+else
+  no "CSP" "frame-src non ammette 'self': i promo animati non si vedono"
+fi
+PROMO="$(prendi -D - -o /dev/null "$SITO/promo/l-albero-dei-racconti.html")"
+csp_promo="$(grep -i '^content-security-policy' <<< "$PROMO")"
+if grep -q " 200" <<< "$(head -1 <<< "$PROMO")" && grep -q "sandbox allow-scripts" <<< "$csp_promo" \
+   && ! grep -q "allow-same-origin" <<< "$csp_promo" && grep -qi '^x-robots-tag:.*noindex' <<< "$PROMO"; then
+  ok "il promo di L'Albero dei Racconti risponde 200, in sandbox e noindex"
+else
+  no "/promo/l-albero-dei-racconti.html" "$(head -1 <<< "$PROMO") — CSP: «$csp_promo»"
+fi
 
 echo
 echo "Quello che da fuori non si deve vedere"

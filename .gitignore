@@ -38,6 +38,8 @@ public/api/config.php
 
 # Media caricati dagli utenti (vivono solo sul server) — tranne l'.htaccess di sicurezza
 public/uploads/*
+# I promo animati stanno solo sul server (scripts/server-tools/carica_promo.py).
+public/promo/
 !public/uploads/.htaccess
 
 # Cartella di pre-produzione (asset originali e backup sensibili)
