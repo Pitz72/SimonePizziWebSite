@@ -195,6 +195,15 @@ rm -f "$TESTA_A"
 echo
 echo "Quello che le pagine devono dire"
 prendi "$SITO/" -o "$CORPO"
+# Le schede fissate in cima a una categoria stanno solo lì, non in home (10/11/2026).
+FISSATI="$(prendi "$SITO/api/articles.php?limit=500" | php -r '$d = json_decode(stream_get_contents(STDIN), true);
+  foreach (($d["articles"] ?? $d["data"] ?? $d ?: []) as $a) if ((int)($a["is_category_pinned"] ?? 0) === 1) echo $a["category"], "/", $a["slug"], "\n";')"
+IN_HOME=""
+# L'indirizzo intero, categoria e slug: due schede hanno lo slug uguale alla loro categoria, che sta nel menu.
+for s in $FISSATI; do grep -q "\"/$s\"" "$CORPO" && IN_HOME="$IN_HOME $s"; done
+if [ -z "$FISSATI" ]; then no "schede fissate" "l'API non ne elenca nessuna: il controllo non vale"
+elif [ -z "$IN_HOME" ]; then ok "nessuna delle $(wc -w <<< "$FISSATI") schede fissate compare in home"
+else no "home" "ci sono schede fissate:$IN_HOME"; fi
 grep -q 'href="/privacy"' "$CORPO" && grep -q 'href="/cookie-policy"' "$CORPO" \
   && ok "il piede porta a privacy e cookie policy" || no "piede" "mancano i link legali (G4)"
 grep -q '/assets/css/main.css?v=' "$CORPO" \

@@ -141,10 +141,17 @@ function slug_del_ramo(array $categoria): array {
 
 /* ─────────────────────────────── Articoli ──────────────────────────────── */
 
+/**
+ * Gli ultimi articoli, per la home. Le schede fissate in cima a una categoria
+ * (is_category_pinned) restano fuori: sono pagine di riferimento, vivono solo
+ * in cima alla loro categoria, come nel sito React. Il 10 novembre 2026 la
+ * scheda di L'Albero dei Racconti, appena pubblicata, era finita seconda in
+ * home fra le novità.
+ */
 function articoli_recenti_db(int $quanti = 6, int $salta = 0): array {
     $quanti = max(1, $quanti); $salta = max(0, $salta);
     $q = db()->prepare(
-        "SELECT " . COLONNE_ELENCO . " FROM articles WHERE " . SOLO_PUBBLICATI . "
+        "SELECT " . COLONNE_ELENCO . " FROM articles WHERE " . SOLO_PUBBLICATI . " AND is_category_pinned = 0
          ORDER BY published_at DESC, id DESC LIMIT $quanti OFFSET $salta"
     );
     $q->execute([':adesso' => adesso()]);
@@ -167,7 +174,9 @@ function tutti_gli_articoli_db(): array {
  *
  * Se nessuno è segnato «in vetrina» — e alla data di oggi è così per tutti e
  * 78 — si prende il più recente: la home non deve avere un buco perché una
- * casella non è mai stata spuntata.
+ * casella non è mai stata spuntata. Il più recente, ma non una scheda fissata
+ * in cima alla sua categoria (vedi articoli_recenti_db). «In vetrina» invece
+ * vale sempre: è una scelta fatta apposta.
  */
 function articolo_in_apertura_db(): ?array {
     // Qui il corpo si legge: è un articolo solo, e serve per i minuti di
@@ -182,7 +191,7 @@ function articolo_in_apertura_db(): ?array {
     if ($trovato) return $trovato;
 
     $q = db()->prepare(
-        "SELECT " . COLONNE_ELENCO . ", content FROM articles WHERE " . SOLO_PUBBLICATI . "
+        "SELECT " . COLONNE_ELENCO . ", content FROM articles WHERE " . SOLO_PUBBLICATI . " AND is_category_pinned = 0
          ORDER BY published_at DESC, id DESC LIMIT 1"
     );
     $q->execute([':adesso' => adesso()]);
